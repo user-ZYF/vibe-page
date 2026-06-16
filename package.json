@@ -1,0 +1,38 @@
+{
+  "name": "vibepage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "type:check": "vue-tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "ant-design-vue": "^4.2.6",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.32",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.16.1",
+    "@types/node": "^25.9.3",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.8.0",
+    "@vue/tsconfig": "^0.9.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-vue": "^10.9.2",
+    "less": "^4.6.6",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.8",
+    "vue-tsc": "^3.3.5"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

@@ -1,9 +1,89 @@
+<!-- ? 编辑器主页布局 -->
 <template>
-  <a-button>click</a-button>
+  <a-layout class="editor-layout" has-sider>
+    <a-layout class="editor-left">
+      <EditorHeader
+        :is-preview="isPreview"
+        @toggle-preview="togglePreview"
+        @undo="handleUndo"
+        @redo="handleRedo"
+        @code="handleCode"
+        @full="handleFull"
+        @download="handleDownload"
+        @block="handleBlock"
+      />
+      <a-layout-content class="editor-canvas">
+        画布区域
+      </a-layout-content>
+    </a-layout>
+    <EditorSider :is-preview="isPreview" />
+  </a-layout>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import EditorHeader from './components/Header.vue'
+import EditorSider from './components/Sider.vue'
+
+defineOptions({
+  name: 'EditorHome',
+})
+
+/** 是否处于预览模式 */
+const isPreview = ref(false)
+
+/** 切换预览模式 */
+function togglePreview() {
+  isPreview.value = !isPreview.value
+}
+
+/** 撤销 */
+function handleUndo() {
+  // TODO: 实现撤销逻辑
+}
+
+/** 重做 */
+function handleRedo() {
+  // TODO: 实现重做逻辑
+}
+
+/** 查看代码 */
+function handleCode() {
+  // TODO: 实现查看代码逻辑
+}
+
+/** 全屏 */
+function handleFull() {
+  // TODO: 实现全屏逻辑
+}
+
+/** 下载 */
+function handleDownload() {
+  // TODO: 实现下载逻辑
+}
+
+/** 块级元素 */
+function handleBlock() {
+  // TODO: 实现块级元素逻辑
+}
 </script>
 
 <style scoped lang="less">
+.editor-layout {
+  height: 100%;
+  width: 100%;
+}
+
+.editor-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-canvas {
+  position: relative;
+  transition: background 0.3s ease;
+}
+
 </style>

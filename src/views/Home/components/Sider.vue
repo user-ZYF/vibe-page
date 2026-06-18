@@ -41,7 +41,7 @@
       </a-tooltip>
     </div>
     <div class="editor-sider-panel">
-      <StyleConfig v-if="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
+      <StylePanel v-if="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
       <Layers v-else-if="activePanel === SiderPanelEnum.BLOCKS" class="panel-content"/>
       <Components v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
     </div>
@@ -56,9 +56,9 @@ import {
   BlockOutlined,
 } from '@ant-design/icons-vue'
 import { SiderPanelEnum } from '@/constants/home'
-import Components from './Components.vue';
-import Layers from './Layers.vue';
-import StyleConfig from './StyleConfig.vue';
+import ComponentsPanel from './ComponentsPanel.vue';
+import LayersPanel from './LayersPanel.vue';
+import StylePanel from './StylePanel.vue';
 
 defineOptions({
   name: 'EditorSider',

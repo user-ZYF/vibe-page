@@ -10,6 +10,18 @@ export enum SiderPanelEnum {
   LAYER = 3,
 }
 
+/** 背景类型枚举 */
+export const enum BackgroundTypeEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 图片 */
+  IMAGE = 1,
+  /** 纯色 */
+  COLOR = 2,
+  /** 渐变 */
+  GRADIENT = 3,
+}
+
 /** 样式配置类型枚举 */
 export enum StyleConfigTypeEnum {
   /** 常规 */

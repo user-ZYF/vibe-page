@@ -1,0 +1,181 @@
+.style-config-section {
+  margin-bottom: 12px;
+}
+
+.style-config-label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.65);
+
+  &--margin {
+    margin-top: 4px;
+    margin-bottom: 8px;
+  }
+
+  &--flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.style-config-radio-group {
+  width: 100%;
+
+  :deep(.ant-radio-button-wrapper) {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+.style-config-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.style-config-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.style-config-select {
+  width: 100%;
+}
+
+.style-config-input-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.style-config-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.style-config-input-number {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+
+  :deep(.ant-input-number-input) {
+    padding: 0 4px;
+  }
+}
+
+.style-config-separator {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.style-config-unit {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.style-config-box {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 8px;
+
+  &--shadow {
+    margin-bottom: 8px;
+  }
+}
+
+.style-config-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.style-config-color-picker {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: none;
+  overflow: hidden;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+  }
+}
+
+.style-config-clear {
+  margin-left: 4px;
+  cursor: pointer;
+  opacity: 0.65;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.style-config-add {
+  cursor: pointer;
+  opacity: 0.65;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.style-config-shadow-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.style-config-drag-icon {
+  cursor: move;
+  opacity: 0.5;
+}
+
+.style-config-shadow-icon {
+  margin-left: auto;
+  opacity: 0.65;
+}
+
+.style-config-shadow-close {
+  cursor: pointer;
+  opacity: 0.65;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.style-config-opacity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.style-config-slider {
+  flex: 1;
+}
+
+.style-config-opacity-input {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.style-config-checkbox-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}

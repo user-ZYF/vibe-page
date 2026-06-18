@@ -5,21 +5,13 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font family</div>
-        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select">
-          <a-select-option v-for="opt in FONT_FAMILY_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Font size</div>
         <div class="style-config-input-group">
           <a-input-number v-model:value="model.fontSize" size="small" class="style-config-input-number" />
-          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -28,22 +20,14 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font weight</div>
-        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select">
-          <a-select-option v-for="opt in FONT_WEIGHT_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Letter spacing</div>
         <div class="style-config-input-group">
           <a-input v-model:value="model.letterSpacing" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -63,11 +47,7 @@
       <div class="style-config-input-group style-config-input-group--half">
         <a-input v-model:value="model.lineHeight" size="small" class="style-config-input" />
         <span class="style-config-separator">-</span>
-        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit">
-          <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.value }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
       </div>
     </div>
 
@@ -75,10 +55,10 @@
     <div class="style-config-section">
       <div class="style-config-label">Text align</div>
       <a-radio-group v-model:value="model.textAlign" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button value="left"><AlignLeftOutlined /></a-radio-button>
-        <a-radio-button value="center"><AlignCenterOutlined /></a-radio-button>
-        <a-radio-button value="right"><AlignRightOutlined /></a-radio-button>
-        <a-radio-button value="justify"><MenuOutlined /></a-radio-button>
+        <a-radio-button :value="TextAlignEnum.LEFT"><AlignLeftOutlined /></a-radio-button>
+        <a-radio-button :value="TextAlignEnum.CENTER"><AlignCenterOutlined /></a-radio-button>
+        <a-radio-button :value="TextAlignEnum.RIGHT"><AlignRightOutlined /></a-radio-button>
+        <a-radio-button :value="TextAlignEnum.JUSTIFY"><MenuOutlined /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -87,15 +67,15 @@
       <div class="style-config-label">
         Text decoration
         <CloseCircleOutlined
-          v-if="model.textDecoration !== 'none'"
+          v-if="model.textDecoration !== TextDecorationEnum.NONE"
           class="style-config-clear"
-          @click="model.textDecoration = 'none'"
+          @click="model.textDecoration = TextDecorationEnum.NONE"
         />
       </div>
       <a-radio-group v-model:value="model.textDecoration" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button value="none"><CloseOutlined /></a-radio-button>
-        <a-radio-button value="underline"><UnderlineOutlined /></a-radio-button>
-        <a-radio-button value="line-through"><StrikethroughOutlined /></a-radio-button>
+        <a-radio-button :value="TextDecorationEnum.NONE"><CloseOutlined /></a-radio-button>
+        <a-radio-button :value="TextDecorationEnum.UNDERLINE"><UnderlineOutlined /></a-radio-button>
+        <a-radio-button :value="TextDecorationEnum.LINE_THROUGH"><StrikethroughOutlined /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -122,22 +102,14 @@
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                  {{ opt.value }}
-                </a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                  {{ opt.value }}
-                </a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
         </div>
@@ -146,11 +118,7 @@
           <div class="style-config-label">Blur</div>
           <div class="style-config-input-group style-config-input-group--half">
             <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" />
-            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <!-- Shadow Color -->
@@ -180,7 +148,7 @@ import {
   DragOutlined,
   BoldOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS } from '@/constants/home';
+import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum } from '@/constants/style';
 import type { FontConfig } from '@/views/Home/types';
 
 defineOptions({

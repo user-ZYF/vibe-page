@@ -13,7 +13,7 @@
         @block="handleBlock"
       />
       <a-layout-content class="editor-canvas">
-        画布区域
+        <Canvas />
       </a-layout-content>
     </a-layout>
     <EditorSider :is-preview="isPreview" />
@@ -24,6 +24,7 @@
 import { ref } from 'vue'
 import EditorHeader from './components/Header.vue'
 import EditorSider from './components/Sider.vue'
+import Canvas from './components/Canvas.vue'
 
 defineOptions({
   name: 'EditorHome',

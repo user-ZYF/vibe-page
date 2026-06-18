@@ -8,11 +8,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.width" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.widthUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.widthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
       <div class="style-config-col">
@@ -20,11 +16,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.height" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.heightUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.heightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -36,11 +28,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.maxWidth" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.maxWidthUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.maxWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
       <div class="style-config-col">
@@ -48,11 +36,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.minHeight" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.minHeightUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.minHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -66,22 +50,14 @@
           <div class="style-config-label">Top</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.marginTop" size="small" class="style-config-input-number" />
-            <a-select v-model:value="model.marginTopUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.marginTopUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Right</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.marginRight" size="small" class="style-config-input-number" />
-            <a-select v-model:value="model.marginRightUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.marginRightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
       </div>
@@ -91,22 +67,14 @@
           <div class="style-config-label">Bottom</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.marginBottom" size="small" class="style-config-input-number" />
-            <a-select v-model:value="model.marginBottomUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.marginBottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Left</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.marginLeft" size="small" class="style-config-input-number" />
-            <a-select v-model:value="model.marginLeftUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.marginLeftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
       </div>
@@ -115,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SIZE_UNIT_OPTIONS } from '@/constants/home';
+import { SIZE_UNIT_OPTIONS } from '@/constants/style';
 import type { SizeConfig } from '@/views/Home/types';
 
 defineOptions({

@@ -170,6 +170,22 @@ defineProps({
 
 ## 功能实现规范
 
+### 下拉单选组件规范
+
+- 所有下拉单选（`a-select`）必须通过 `:options` prop 传入选项数组，**禁止**在模板中使用 `<a-select-option>` 自定义选项
+- 选项数组必须统一定义在 `src/constants` 目录下的对应 `.ts` 文件中，不得在组件内部临时定义
+- 选项数组的 `label` 字段必须为字符串类型，`value` 字段使用枚举值
+
+```vue
+<!-- ✅ 正确 -->
+<a-select v-model:value="model.fontFamily" :options="FONT_FAMILY_OPTIONS" />
+
+<!-- ❌ 错误 -->
+<a-select v-model:value="model.fontFamily">
+  <a-select-option value="Arial">Arial</a-select-option>
+</a-select>
+```
+
 ## 其他规范
 
 ### 性能优化

@@ -12,9 +12,11 @@
     "type:check": "vue-tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@vueuse/core": "^14.3.0",
     "ant-design-vue": "^4.2.6",
     "pinia": "^3.0.4",
     "vue": "^3.5.32",
+    "vue-draggable-plus": "^0.6.1",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {

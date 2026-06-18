@@ -49,29 +49,21 @@
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
-              <a-select v-model:value="bg.repeat" size="small" class="style-config-select">
-                <a-select-option v-for="opt in BG_REPEAT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Position</div>
-              <a-select v-model:value="bg.position" size="small" class="style-config-select">
-                <a-select-option v-for="opt in BG_POSITION_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" />
             </div>
           </div>
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Attachment</div>
-              <a-select v-model:value="bg.attachment" size="small" class="style-config-select">
-                <a-select-option v-for="opt in BG_ATTACHMENT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Size</div>
-              <a-select v-model:value="bg.size" size="small" class="style-config-select">
-                <a-select-option v-for="opt in BG_SIZE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" />
             </div>
           </div>
         </template>
@@ -101,20 +93,12 @@
           <div class="style-config-label">Width</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" />
-            <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Style</div>
-          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select">
-            <a-select-option v-for="opt in BORDER_STYLE_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" />
         </div>
       </div>
       <div class="style-config-label">Color</div>
@@ -132,22 +116,14 @@
           <div class="style-config-label">TL</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">TR</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
       </div>
@@ -156,22 +132,14 @@
           <div class="style-config-label">BL</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">BR</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit">
-              <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-                {{ opt.value }}
-              </a-select-option>
-            </a-select>
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
       </div>
@@ -214,18 +182,14 @@
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.value }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.value }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
         </div>
@@ -234,18 +198,14 @@
             <div class="style-config-label">Blur</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" />
-              <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.value }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Spread</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" />
-              <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit">
-                <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.value }}</a-select-option>
-              </a-select>
+              <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
         </div>
@@ -280,7 +240,11 @@ import {
   BG_SIZE_OPTIONS,
   BG_POSITION_OPTIONS,
   BackgroundTypeEnum,
-} from '@/constants/home';
+  BackgroundRepeatEnum,
+  BackgroundPositionEnum,
+  BackgroundAttachmentEnum,
+  BackgroundSizeEnum,
+} from '@/constants/style';
 import type { VisualConfig } from '@/views/Home/types';
 
 defineOptions({
@@ -297,10 +261,10 @@ function handleAddBackground() {
   model.value.backgrounds.push({
     type: BackgroundTypeEnum.IMAGE,
     imageUrl: '',
-    repeat: 'repeat',
-    position: 'left top',
-    attachment: 'scroll',
-    size: 'auto',
+    repeat: BackgroundRepeatEnum.REPEAT,
+    position: BackgroundPositionEnum.TOP_LEFT,
+    attachment: BackgroundAttachmentEnum.SCROLL,
+    size: BackgroundSizeEnum.AUTO,
     color: '#ffffff',
     gradient: 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(0,0,0,1) 100%)',
   });

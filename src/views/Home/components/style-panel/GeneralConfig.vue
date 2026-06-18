@@ -15,19 +15,11 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Display</div>
-        <a-select v-model:value="model.display" size="small" class="style-config-select">
-          <a-select-option v-for="opt in DISPLAY_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.value }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="DISPLAY_OPTIONS" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Position</div>
-        <a-select v-model:value="model.position" size="small" class="style-config-select">
-          <a-select-option v-for="opt in POSITION_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.value }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.position" size="small" class="style-config-select" :options="POSITION_OPTIONS" />
       </div>
     </div>
 
@@ -38,11 +30,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.top" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.topUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
       <div class="style-config-col">
@@ -50,11 +38,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.right" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -66,11 +50,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.left" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
       <div class="style-config-col">
@@ -78,11 +58,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.bottom" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.value }}
-            </a-select-option>
-          </a-select>
+          <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -91,7 +67,7 @@
 
 <script lang="ts" setup>
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
-import { DISPLAY_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/home';
+import { DISPLAY_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
 import type { GeneralConfig } from '@/views/Home/types';
 
 defineOptions({

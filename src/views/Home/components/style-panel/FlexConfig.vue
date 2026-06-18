@@ -5,11 +5,7 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Flex Container</div>
-        <a-select v-model:value="model.flexContainer" size="small" class="style-config-select">
-          <a-select-option v-for="opt in FLEX_CONTAINER_OPTIONS" :key="opt.value" :value="opt.value">
-            {{ opt.label }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="model.flexContainer" size="small" class="style-config-select" :options="FLEX_CONTAINER_OPTIONS" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Flex Parent</div>
@@ -107,9 +103,7 @@
         <div class="style-config-input-group style-config-input-group--basis">
           <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit">
-            <a-select-option v-for="opt in SIZE_UNIT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.value }}</a-select-option>
-          </a-select>
+          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
       </div>
     </div>
@@ -150,7 +144,7 @@ import {
   VerticalAlignBottomOutlined,
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS } from '@/constants/home';
+import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS } from '@/constants/style';
 import type { FlexConfig } from '@/views/Home/types';
 
 defineOptions({

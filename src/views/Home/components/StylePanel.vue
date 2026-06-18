@@ -30,7 +30,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/home';
+import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/style';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
 import SizeConfig from './style-panel/SizeConfig.vue';
 import FontConfig from './style-panel/FontConfig.vue';

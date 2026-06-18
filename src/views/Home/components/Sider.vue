@@ -42,8 +42,8 @@
     </div>
     <div class="editor-sider-panel">
       <StylePanel v-if="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
-      <Layers v-else-if="activePanel === SiderPanelEnum.BLOCKS" class="panel-content"/>
-      <Components v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
+      <LayersPanel v-else-if="activePanel === SiderPanelEnum.BLOCKS" class="panel-content"/>
+      <ComponentsPanel v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
     </div>
   </a-layout-sider>
 </template>
@@ -123,7 +123,7 @@ function handlePanelSwitch(panel: SiderPanelEnum) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   :deep(.ant-btn-text) {

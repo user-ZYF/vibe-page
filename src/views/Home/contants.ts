@@ -7,8 +7,7 @@ import { CanvasElementTypeEnum } from "@/constants/home.ts";
 import Paragraph from "./components/canvas-element/Paragraph.vue";
 
 /** 组件映射 */
-export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component | null> = {
-    [CanvasElementTypeEnum.UNDEFINED]: null,
+export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component> = {
     [CanvasElementTypeEnum.CONTAINER]: Container,
     [CanvasElementTypeEnum.PARAGRAPH]: Paragraph,
     [CanvasElementTypeEnum.LINK]: Link,

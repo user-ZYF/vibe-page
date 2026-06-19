@@ -49,7 +49,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import {
   EditOutlined,
   AppstoreOutlined,
@@ -59,6 +58,8 @@ import { SiderPanelEnum } from '@/constants/home'
 import ComponentsPanel from './ComponentsPanel.vue';
 import LayersPanel from './LayersPanel.vue';
 import StylePanel from './StylePanel.vue';
+import { useCanvasStore } from '@/store/canvas';
+import { storeToRefs } from 'pinia';
 
 defineOptions({
   name: 'EditorSider',
@@ -72,33 +73,15 @@ defineProps({
   },
 })
 
-const emit = defineEmits<{
-  (e: 'edit'): void
-  (e: 'setting'): void
-  (e: 'layer'): void
-  (e: 'blocks'): void
-}>()
-
-/** 当前激活的面板 */
-const activePanel = ref<SiderPanelEnum>(SiderPanelEnum.EDIT)
+const canvasStore = useCanvasStore();
+const { activePanel } = storeToRefs(canvasStore);
 
 /**
  * 切换面板
  * @param panel - 要切换到的面板类型
  */
 function handlePanelSwitch(panel: SiderPanelEnum) {
-  activePanel.value = panel
-  switch (panel) {
-    case SiderPanelEnum.EDIT:
-      emit('edit')
-      break
-    case SiderPanelEnum.BLOCKS:
-      emit('blocks')
-      break
-    case SiderPanelEnum.LAYER:
-      emit('layer')
-      break
-  }
+  canvasStore.switchPanel(panel);
 }
 </script>
 

@@ -1,3 +1,6 @@
+import { StyleConfig } from "@/views/Home/types";
+import { CanvasElementTypeEnum } from "./home";
+
 /** 背景类型枚举 */
 export const enum BackgroundTypeEnum {
   /** 未定义 */
@@ -15,17 +18,17 @@ export enum StyleConfigTypeEnum {
   /** 未定义 */
   UNDEFINED,
   /** 常规 */
-  GENERAL = 1,
+  GENERAL,
   /** 尺寸 */
-  SIZE = 2,
+  SIZE,
   /** 额外的 */
-  EXTRA = 3,
+  EXTRA,
   /** 字体相关 */
-  FONT = 4,
+  FONT,
   /** 视觉 */
-  VISUAL = 5,
+  VISUAL,
   /** 布局 */
-  FLEX = 6,
+  FLEX,
 }
 
 /** 样式配置类型名称 */
@@ -40,20 +43,18 @@ export const STYLE_CONFIG_TYPE_NAME = {
 
 /** 尺寸&位置单位 */
 export enum SizeUnitEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** px */
-  PX,
+  PX = "px",
   /** 百分比 */
-  PERCENT,
+  PERCENT = "%",
   /** rem */
-  REM,
+  REM = "rem",
   /** em */
-  EM,
+  EM = "em",
   /** vw */
-  VW,
+  VW = "vw",
   /** vh */
-  VH,
+  VH = "vh",
 }
 
 /** 尺寸&位置单位选项 */
@@ -68,24 +69,22 @@ export const SIZE_UNIT_OPTIONS = [
 
 /** font-family枚举 */
 export enum FontFamilyEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** Arial */
-  ARIAL,
+  ARIAL = "Arial",
   /** Helvetica */
-  HELVETICA,
+  HELVETICA = "Helvetica",
   /** Georgia */
-  GEORGIA,
+  GEORGIA = "Georgia",
   /** Times New Roman */
-  TIMES_NEW_ROMAN,
+  TIMES_NEW_ROMAN = "Times New Roman",
   /** Courier New */
-  COURIER_NEW,
+  COURIER_NEW = "Courier New",
   /** Verdana */
-  VERDANA,
+  VERDANA = "Verdana",
   /** Tahoma */
-  TAHOMA,
+  TAHOMA = "Tahoma",
   /** Trebuchet MS */
-  TREBUCHET_MS,
+  TREBUCHET_MS = "Trebuchet MS",
 }
 
 /** font-family 选项 */
@@ -102,8 +101,6 @@ export const FONT_FAMILY_OPTIONS = [
 
 /** font-weight枚举 */
 export enum FontWeightEnum {
-  /** 未定义 */
-  UNDEFINED = 0,
   /** Thin */
   THIN = 100,
   /** Extra-Light */
@@ -139,16 +136,14 @@ export const FONT_WEIGHT_OPTIONS = [
 
 /** text-align 枚举 */
 export enum TextAlignEnum {
-  /** 未定义 */
-  UNDEFINED = 0,
   /** 左对齐 */
-  LEFT = 1,
+  LEFT = "left",
   /** 居中 */
-  CENTER = 2,
+  CENTER = "center",
   /** 右对齐 */
-  RIGHT = 3,
+  RIGHT = "right",
   /** 两端对齐 */
-  JUSTIFY = 4,
+  JUSTIFY = "justify",
 }
 
 /** text-align 选项 */
@@ -161,12 +156,10 @@ export const TEXT_ALIGN_OPTIONS = [
 
 /** flex-container 枚举 */
 export enum FlexContainerEnum {
-  /** 未定义 */
-  UNDEFINED = 0,
   /** 禁用 */
-  DISABLE = 1,
+  DISABLE = "disable",
   /** 启用 */
-  ENABLE = 2,
+  ENABLE = "enable",
 }
 
 /** flex-container 选项 */
@@ -178,16 +171,14 @@ export const FLEX_CONTAINER_OPTIONS = [
 
 /** flex-direction 枚举 */
 export enum FlexDirectionEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** row */
-  ROW,
+  ROW = "row",
   /** row-reverse */
-  ROW_REVERSE,
+  ROW_REVERSE = "row-reverse",
   /** column */
-  COLUMN,
+  COLUMN = "column",
   /** column-reverse */
-  COLUMN_REVERSE,
+  COLUMN_REVERSE = "column-reverse",
 }
 
 /** flex-direction 选项 */
@@ -200,18 +191,16 @@ export const FLEX_DIRECTION_OPTIONS = [
 
 /** justify-content 枚举 */
 export enum JustifyContentEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** flex-start */
-  FLEX_START,
+  FLEX_START = "flex-start",
   /** center */
-  CENTER,
+  CENTER = "center",
   /** flex-end */
-  FLEX_END,
+  FLEX_END = "flex-end",
   /** space-between */
-  SPACE_BETWEEN,
+  SPACE_BETWEEN = "space-between",
   /** space-around */
-  SPACE_AROUND,
+  SPACE_AROUND = "space-around",
 }
 
 /** justify-content 选项 */
@@ -225,16 +214,14 @@ export const JUSTIFY_CONTENT_OPTIONS = [
 
 /** align-items 枚举 */
 export enum AlignItemsEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** flex-start */
-  FLEX_START,
+  FLEX_START = "flex-start",
   /** center */
-  CENTER,
+  CENTER = "center",
   /** flex-end */
-  FLEX_END,
+  FLEX_END = "flex-end",
   /** stretch */
-  STRETCH,
+  STRETCH = "stretch",
 }
 
 /** align-items 选项 */
@@ -247,18 +234,16 @@ export const ALIGN_ITEMS_OPTIONS = [
 
 /** align-self枚举 */
 export enum AlignSelfEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 自动 */
-  AUTO,
+  AUTO = "auto",
   /** flex-start */
-  FLEX_START,
+  FLEX_START = "flex-start",
   /** center */
-  CENTER,
+  CENTER = "center",
   /** flex-end */
-  FLEX_END,
+  FLEX_END = "flex-end",
   /** stretch */
-  STRETCH,
+  STRETCH = "stretch",
 }
 
 /** align-self 选项 */
@@ -272,14 +257,12 @@ export const ALIGN_SELF_OPTIONS = [
 
 /** background-attachment枚举 */
 export enum BackgroundAttachmentEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 滚动 */
-  SCROLL,
+  SCROLL = "scroll",
   /** 固定 */
-  FIXED,
+  FIXED = "fixed",
   /** 本地 */
-  LOCAL,
+  LOCAL = "local",
 }
 
 /** background-attachment 选项 */
@@ -293,20 +276,18 @@ export const BG_ATTACHMENT_OPTIONS = [
 
 /** background-repeat枚举 */
 export enum BackgroundRepeatEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 不重复 */
-  NO_REPEAT,
+  NO_REPEAT = "no-repeat",
   /** 重复 */
-  REPEAT,
+  REPEAT = "repeat",
   /** 水平重复 */
-  REPEAT_X,
+  REPEAT_X = "repeat-x",
   /** 垂直重复 */
-  REPEAT_Y,
+  REPEAT_Y = "repeat-y",
   /** 平铺 */
-  SPACE,
+  SPACE = "space",
   /** 调整大小平铺 */
-  ROUND,
+  ROUND = "round",
 }
 
 /** background-repeat 选项 */
@@ -321,14 +302,12 @@ export const BG_REPEAT_OPTIONS = [
 
 /** background-size枚举 */
 export enum BackgroundSizeEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 自动 */
-  AUTO,
+  AUTO = "auto",
   /** 覆盖 */
-  COVER,
+  COVER = "cover",
   /** 包含 */
-  CONTAIN,
+  CONTAIN = "contain",
 }
 
 /** background-size 选项 */
@@ -340,26 +319,24 @@ export const BG_SIZE_OPTIONS = [
 
 /** background-position枚举 */
 export enum BackgroundPositionEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 居中 */
-  CENTER,
+  CENTER = "center",
   /** 顶部 */
-  TOP,
+  TOP = "top",
   /** 底部 */
-  BOTTOM,
+  BOTTOM = "bottom",
   /** 左侧 */
-  LEFT,
+  LEFT = "left",
   /** 右侧 */
-  RIGHT,
+  RIGHT = "right",
   /** 顶部左侧 */
-  TOP_LEFT,
+  TOP_LEFT = "top left",
   /** 顶部右侧 */
-  TOP_RIGHT,
+  TOP_RIGHT = "top right",
   /** 底部左侧 */
-  BOTTOM_LEFT,
+  BOTTOM_LEFT = "bottom left",
   /** 底部右侧 */
-  BOTTOM_RIGHT,
+  BOTTOM_RIGHT = "bottom right",
 }
 
 /** background-position 选项 */
@@ -377,26 +354,24 @@ export const BG_POSITION_OPTIONS = [
 
 /** border-style枚举 */
 export enum BorderStyleEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 无样式 */
-  NONE,
+  NONE = "none",
   /** 实线 */
-  SOLID,
+  SOLID = "solid",
   /** 虚线 */
-  DASHED,
+  DASHED = "dashed",
   /** 点线 */
-  DOTTED,
+  DOTTED = "dotted",
   /** 双线 */
-  DOUBLE,
+  DOUBLE = "double",
   /** 槽线 */
-  GROOVE,
+  GROOVE = "groove",
   /** 脊线 */
-  RIDGE,
+  RIDGE = "ridge",
   /** 内凹 */
-  INSET,
+  INSET = "inset",
   /** 外凸 */
-  OUTSET,
+  OUTSET = "outset",
 }
 
 /** border-style 选项 */
@@ -414,14 +389,12 @@ export const BORDER_STYLE_OPTIONS = [
 
 /** text-decoration 枚举 */
 export enum TextDecorationEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 无样式 */
-  NONE,
+  NONE = "none",
   /** 下划线 */
-  UNDERLINE,
+  UNDERLINE = "underline",
   /** 删除线 */
-  LINE_THROUGH,
+  LINE_THROUGH = "line-through",
 }
 
 /** text-decoration 选项 */
@@ -433,14 +406,12 @@ export const TEXT_DECORATION_OPTIONS = [
 
 /** float枚举 */
 export enum FloatStyleEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 无浮动 */
-  NONE,
+  NONE = "none",
   /** 左浮动 */
-  LEFT,
+  LEFT = "left",
   /** 右浮动 */
-  RIGHT,
+  RIGHT = "right",
 }
 
 /** float选项 */
@@ -452,16 +423,14 @@ export const FLOAT_OPTIONS = [
 
 /** position枚举 */
 export enum PositionStyleEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 静态定位 */
-  STATIC,
+  STATIC = "static",
   /** 相对定位 */
-  RELATIVE,
+  RELATIVE = "relative",
   /** 绝对定位 */
-  ABSOLUTE,
+  ABSOLUTE = "absolute",
   /** 固定定位 */
-  FIXED,
+  FIXED = "fixed",
 }
 
 /** position选项 */
@@ -474,18 +443,16 @@ export const POSITION_OPTIONS = [
 
 /** display枚举 */
 export enum DisplayStyleEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 行内元素 */
-  INLINE,
+  INLINE = "inline",
   /** 块级元素 */
-  BLOCK,
+  BLOCK = "block",
   /** 行内块元素 */
-  INLINE_BLOCK,
+  INLINE_BLOCK = "inline-block",
   /** 弹性盒子 */
-  FLEX,
+  FLEX = "flex",
   /** 隐藏 */
-  NONE,
+  NONE = "none",
 }
 
 /** display选项 */
@@ -496,3 +463,168 @@ export const DISPLAY_OPTIONS = [
   { label: 'flex', value: DisplayStyleEnum.FLEX },
   { label: 'none', value: DisplayStyleEnum.NONE },
 ];
+
+
+/** 通用默认样式配置（浏览器默认值） */
+const defaultStyleConfig: StyleConfig = {
+  general: {
+    float: FloatStyleEnum.NONE,
+    display: DisplayStyleEnum.INLINE,
+    position: PositionStyleEnum.STATIC,
+    top: '',
+    topUnit: SizeUnitEnum.PX,
+    right: '',
+    rightUnit: SizeUnitEnum.PX,
+    left: '',
+    leftUnit: SizeUnitEnum.PX,
+    bottom: '',
+    bottomUnit: SizeUnitEnum.PX,
+  },
+  size: {
+    width: '',
+    widthUnit: SizeUnitEnum.PX,
+    height: '',
+    heightUnit: SizeUnitEnum.PX,
+    maxWidth: '',
+    maxWidthUnit: SizeUnitEnum.PX,
+    minHeight: '',
+    minHeightUnit: SizeUnitEnum.PX,
+    marginTop: 0,
+    marginTopUnit: SizeUnitEnum.PX,
+    marginRight: 0,
+    marginRightUnit: SizeUnitEnum.PX,
+    marginBottom: 0,
+    marginBottomUnit: SizeUnitEnum.PX,
+    marginLeft: 0,
+    marginLeftUnit: SizeUnitEnum.PX,
+    paddingTop: 0,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 0,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 0,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 0,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    fontFamily: '',
+    fontSize: 16,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.NORMAL,
+    letterSpacing: 'normal',
+    letterSpacingUnit: SizeUnitEnum.PX,
+    color: '#000000',
+    lineHeight: 'normal',
+    lineHeightUnit: SizeUnitEnum.PX,
+    textAlign: TextAlignEnum.LEFT,
+    textDecoration: TextDecorationEnum.NONE,
+    textShadows: [],
+  },
+  visual: {
+    backgrounds: [],
+    borderWidth: 0,
+    borderWidthUnit: SizeUnitEnum.PX,
+    borderStyle: BorderStyleEnum.NONE,
+    borderColor: '#000000',
+    borderRadiusTL: 0,
+    borderRadiusTR: 0,
+    borderRadiusBL: 0,
+    borderRadiusBR: 0,
+    borderRadiusUnit: SizeUnitEnum.PX,
+    opacity: 1,
+    boxShadows: [],
+  },
+  flex: {
+    flexContainer: FlexContainerEnum.DISABLE,
+    flexParent: null,
+    flexDirection: FlexDirectionEnum.ROW,
+    justifyContent: JustifyContentEnum.FLEX_START,
+    alignItems: AlignItemsEnum.STRETCH,
+    flexChildren: null,
+    order: null,
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
+    flexBasisUnit: SizeUnitEnum.PX,
+    alignSelf: AlignSelfEnum.AUTO,
+  },
+};
+
+/** 按钮元素默认样式配置 */
+export const DefaultButtonStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
+  general: {
+    ...defaultStyleConfig.general,
+    display: DisplayStyleEnum.INLINE_BLOCK,
+  },
+  font: {
+    ...defaultStyleConfig.font,
+    fontWeight: FontWeightEnum.NORMAL,
+    textAlign: TextAlignEnum.CENTER,
+    textDecoration: TextDecorationEnum.NONE,
+  },
+};
+
+/** 容器元素默认样式配置 */
+export const DefaultContainerStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
+  size: {
+    ...defaultStyleConfig.size,
+    minHeight: '75',
+    minHeightUnit: SizeUnitEnum.PX,
+    paddingTop: 16,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 16,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 16,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 16,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+  general: {
+    ...defaultStyleConfig.general,
+    display: DisplayStyleEnum.BLOCK,
+  },
+};
+
+/** 段落元素默认样式配置 */
+export const DefaultParagraphStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
+  general: {
+    ...defaultStyleConfig.general,
+    display: DisplayStyleEnum.BLOCK,
+  },
+  size: {
+    ...defaultStyleConfig.size,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+};
+
+/** 链接元素默认样式配置 */
+export const DefaultLinkStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
+  font: {
+    ...defaultStyleConfig.font,
+    color: '#0000EE',
+    textDecoration: TextDecorationEnum.UNDERLINE,
+  },
+};
+
+/** 图片元素默认样式配置 */
+export const DefaultImageStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
+  general: {
+    ...defaultStyleConfig.general,
+    display: DisplayStyleEnum.INLINE_BLOCK,
+  },
+};
+
+/** 画布元素默认样式配置映射 */
+export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> = {
+  [CanvasElementTypeEnum.BUTTON]: DefaultButtonStyleConfig,
+  [CanvasElementTypeEnum.CONTAINER]: DefaultContainerStyleConfig,
+  [CanvasElementTypeEnum.PARAGRAPH]: DefaultParagraphStyleConfig,
+  [CanvasElementTypeEnum.LINK]: DefaultLinkStyleConfig,
+  [CanvasElementTypeEnum.IMAGE]: DefaultImageStyleConfig,
+};

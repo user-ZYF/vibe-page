@@ -1,7 +1,5 @@
 /** Sider 面板类型枚举 */
 export enum SiderPanelEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 编辑样式 */
   EDIT,
   /** 层级管理 */
@@ -12,8 +10,6 @@ export enum SiderPanelEnum {
 
 /** 画布元素类型 */
 export enum CanvasElementTypeEnum {
-  /** 未定义 */
-  UNDEFINED,
   /** 容器 */
   CONTAINER,
   /** 超链接 */
@@ -28,7 +24,6 @@ export enum CanvasElementTypeEnum {
 
 /** 画布元素label */
 export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
-  [CanvasElementTypeEnum.UNDEFINED]: "未定义",
   [CanvasElementTypeEnum.CONTAINER]: "容器",
   [CanvasElementTypeEnum.LINK]: "超链接",
   [CanvasElementTypeEnum.IMAGE]: "图片",
@@ -39,9 +34,9 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
 /** 按钮类型 */
 export enum ButtonTypeEnum {
   /** 按钮 */
-  BUTTON,
+  BUTTON = "button",
   /** 重置 */
-  RESET,
+  RESET = "reset",
   /** 提交 */
-  SUBMIT,
+  SUBMIT = "submit",
 }

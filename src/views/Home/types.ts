@@ -19,6 +19,7 @@ import type {
   AlignItemsEnum,
   AlignSelfEnum,
   PositionStyleEnum,
+  SizeUnitEnum,
   TextAlignEnum,
   TextDecorationEnum,
 } from '@/constants/style';
@@ -30,15 +31,15 @@ export interface TextShadowItem {
   /** X 偏移值 */
   x: number;
   /** X 偏移单位 */
-  xUnit: string;
+  xUnit: SizeUnitEnum;
   /** Y 偏移值 */
   y: number;
   /** Y 偏移单位 */
-  yUnit: string;
+  yUnit: SizeUnitEnum;
   /** 模糊半径 */
   blur: number;
   /** 模糊半径单位 */
-  blurUnit: string;
+  blurUnit: SizeUnitEnum;
   /** 阴影颜色 */
   color: string;
 }
@@ -50,19 +51,19 @@ export interface BoxShadowItem {
   /** X 偏移值 */
   x: number;
   /** X 偏移单位 */
-  xUnit: string;
+  xUnit: SizeUnitEnum;
   /** Y 偏移值 */
   y: number;
   /** Y 偏移单位 */
-  yUnit: string;
+  yUnit: SizeUnitEnum;
   /** 模糊半径 */
   blur: number;
   /** 模糊半径单位 */
-  blurUnit: string;
+  blurUnit: SizeUnitEnum;
   /** 扩展半径 */
   spread: number;
   /** 扩展半径单位 */
-  spreadUnit: string;
+  spreadUnit: SizeUnitEnum;
   /** 阴影颜色 */
   color: string;
   /** 是否为内阴影 */
@@ -104,19 +105,19 @@ export interface GeneralConfig {
   /** 顶部偏移值 */
   top: string;
   /** 顶部偏移单位 */
-  topUnit: string;
+  topUnit: SizeUnitEnum;
   /** 右侧偏移值 */
   right: string;
   /** 右侧偏移单位 */
-  rightUnit: string;
+  rightUnit: SizeUnitEnum;
   /** 左侧偏移值 */
   left: string;
   /** 左侧偏移单位 */
-  leftUnit: string;
+  leftUnit: SizeUnitEnum;
   /** 底部偏移值 */
   bottom: string;
   /** 底部偏移单位 */
-  bottomUnit: string;
+  bottomUnit: SizeUnitEnum;
 }
 
 /**
@@ -126,35 +127,51 @@ export interface SizeConfig {
   /** 宽度值 */
   width: string;
   /** 宽度单位 */
-  widthUnit: string;
+  widthUnit: SizeUnitEnum;
   /** 高度值 */
   height: string;
   /** 高度单位 */
-  heightUnit: string;
+  heightUnit: SizeUnitEnum;
   /** 最大宽度值 */
   maxWidth: string;
   /** 最大宽度单位 */
-  maxWidthUnit: string;
+  maxWidthUnit: SizeUnitEnum;
   /** 最小高度值 */
   minHeight: string;
   /** 最小高度单位 */
-  minHeightUnit: string;
+  minHeightUnit: SizeUnitEnum;
   /** 上外边距 */
   marginTop: number;
   /** 上外边距单位 */
-  marginTopUnit: string;
+  marginTopUnit: SizeUnitEnum;
   /** 右外边距 */
   marginRight: number;
   /** 右外边距单位 */
-  marginRightUnit: string;
+  marginRightUnit: SizeUnitEnum;
   /** 下外边距 */
   marginBottom: number;
   /** 下外边距单位 */
-  marginBottomUnit: string;
+  marginBottomUnit: SizeUnitEnum;
   /** 左外边距 */
   marginLeft: number;
   /** 左外边距单位 */
-  marginLeftUnit: string;
+  marginLeftUnit: SizeUnitEnum;
+  /** 上内边距 */
+  paddingTop: number;
+  /** 上内边距单位 */
+  paddingTopUnit: SizeUnitEnum;
+  /** 右内边距 */
+  paddingRight: number;
+  /** 右内边距单位 */
+  paddingRightUnit: SizeUnitEnum;
+  /** 下内边距 */
+  paddingBottom: number;
+  /** 下内边距单位 */
+  paddingBottomUnit: SizeUnitEnum;
+  /** 左内边距 */
+  paddingLeft: number;
+  /** 左内边距单位 */
+  paddingLeftUnit: SizeUnitEnum;
 }
 
 /**
@@ -166,19 +183,19 @@ export interface FontConfig {
   /** 字体大小 */
   fontSize: number;
   /** 字体大小单位 */
-  fontSizeUnit: string;
+  fontSizeUnit: SizeUnitEnum;
   /** 字体粗细 */
   fontWeight: FontWeightEnum;
   /** 字母间距值 */
   letterSpacing: string;
   /** 字母间距单位 */
-  letterSpacingUnit: string;
+  letterSpacingUnit: SizeUnitEnum;
   /** 文字颜色 */
   color: string;
   /** 行高值 */
   lineHeight: string;
   /** 行高单位 */
-  lineHeightUnit: string;
+  lineHeightUnit: SizeUnitEnum;
   /** 文字对齐方式 */
   textAlign: TextAlignEnum;
   /** 文字装饰 */
@@ -196,7 +213,7 @@ export interface VisualConfig {
   /** 边框宽度 */
   borderWidth: number;
   /** 边框宽度单位 */
-  borderWidthUnit: string;
+  borderWidthUnit: SizeUnitEnum;
   /** 边框样式 */
   borderStyle: BorderStyleEnum;
   /** 边框颜色 */
@@ -210,7 +227,7 @@ export interface VisualConfig {
   /** 右下圆角 */
   borderRadiusBR: number;
   /** 圆角单位 */
-  borderRadiusUnit: string;
+  borderRadiusUnit: SizeUnitEnum;
   /** 不透明度 */
   opacity: number;
   /** 盒阴影列表 */
@@ -242,9 +259,23 @@ export interface FlexConfig {
   /** 基准尺寸值 */
   flexBasis: string;
   /** 基准尺寸单位 */
-  flexBasisUnit: string;
+  flexBasisUnit: SizeUnitEnum;
   /** 自身对齐方式 */
   alignSelf: AlignSelfEnum;
+}
+
+/** 画布元素样式配置 */
+export interface StyleConfig {
+  /** 通用样式 */
+  general: GeneralConfig;
+  /** 尺寸样式 */
+  size: SizeConfig;
+  /** 字体样式 */
+  font: FontConfig;
+  /** 视觉样式 */
+  visual: VisualConfig;
+  /** 布局（Flex）样式 */
+  flex: FlexConfig;
 }
 
 /** 画布元素通用属性 */
@@ -253,8 +284,8 @@ export interface CanvasElementBase {
   id: string;
   /** 元素类型 */
   type: CanvasElementTypeEnum;
-  /** 元素样式 */
-  style: Record<string, string>;
+  /** 元素样式配置 */
+  styleConfig: StyleConfig;
   /** 元素类名列表 */
   classes: string[];
 }

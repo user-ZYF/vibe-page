@@ -8,8 +8,8 @@
             class="component-item"
             v-for="comp in basicComponents"
             :key="comp"
-            draggable="true"
-            @dragstart="handleDragStart($event, comp)"
+            :ref="(el) => bindCreateConnector(el as HTMLElement, comp)"
+            :data-element-type="comp"
           >{{ CanvasElementLabelMap[comp] }}</div>
         </div>
       </a-collapse-panel>
@@ -18,8 +18,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { CanvasElementLabelMap, CanvasElementTypeEnum } from '@/constants/home';
+import { dragEngine } from '../drag/DragEngine';
 
 defineOptions({
   name: 'ComponentsPanel',
@@ -29,13 +30,37 @@ defineOptions({
 const activeKeys = ref<string[]>(['basic'])
 
 /** 基础组件元素列表 */
-const basicComponents = ref<CanvasElementTypeEnum[]>([CanvasElementTypeEnum.BUTTON, CanvasElementTypeEnum.CONTAINER, CanvasElementTypeEnum.IMAGE, CanvasElementTypeEnum.LINK, CanvasElementTypeEnum.PARAGRAPH]);
+const basicComponents = ref<CanvasElementTypeEnum[]>([
+  CanvasElementTypeEnum.BUTTON,
+  CanvasElementTypeEnum.CONTAINER,
+  CanvasElementTypeEnum.IMAGE,
+  CanvasElementTypeEnum.LINK,
+  CanvasElementTypeEnum.PARAGRAPH,
+]);
 
-/** 拖拽开始：将元素类型写入 dataTransfer */
-function handleDragStart(event: DragEvent, type: CanvasElementTypeEnum) {
-  event.dataTransfer!.setData('canvas/element-type', String(type));
-  event.dataTransfer!.effectAllowed = 'copy';
+/** 每个组件项的解绑函数映射 */
+const unbindMap = new Map<CanvasElementTypeEnum, () => void>();
+
+/** v-ref 回调：绑定 connectCreate */
+function bindCreateConnector(el: HTMLElement | null, type: CanvasElementTypeEnum) {
+  if (!el) {
+    /** 元素卸载时清理 */
+    unbindMap.get(type)?.();
+    unbindMap.delete(type);
+    return;
+  }
+
+  /** 已绑定则跳过（避免重复绑定） */
+  if (unbindMap.has(type)) return;
+
+  const unbind = dragEngine.connectCreate(el, type);
+  unbindMap.set(type, unbind);
 }
+
+onUnmounted(() => {
+  unbindMap.forEach((unbind) => unbind());
+  unbindMap.clear();
+});
 </script>
 
 <style scoped lang="less">

@@ -12,6 +12,7 @@
         @download="handleDownload"
         @block="handleBlock"
       />
+      <CodePreviewModal v-model:open="codeModalVisible" />
       <a-layout-content class="editor-canvas">
         <Canvas />
       </a-layout-content>
@@ -25,6 +26,7 @@ import { ref } from 'vue'
 import EditorHeader from './components/Header.vue'
 import EditorSider from './components/Sider.vue'
 import Canvas from './components/Canvas.vue'
+import CodePreviewModal from './components/CodePreviewModal.vue'
 
 defineOptions({
   name: 'EditorHome',
@@ -32,6 +34,9 @@ defineOptions({
 
 /** 是否处于预览模式 */
 const isPreview = ref(false)
+
+/** 代码预览弹窗是否开启 */
+const codeModalVisible = ref(false);
 
 /** 切换预览模式 */
 function togglePreview() {
@@ -51,6 +56,7 @@ function handleRedo() {
 /** 查看代码 */
 function handleCode() {
   // TODO: 实现查看代码逻辑
+  codeModalVisible.value = true;
 }
 
 /** 全屏 */

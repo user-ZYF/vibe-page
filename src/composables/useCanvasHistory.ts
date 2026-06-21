@@ -24,10 +24,6 @@ export function useCanvasHistory(elements: Ref<CanvasElement[]>) {
   /** 是否正在执行撤销/重做（防止循环记录） */
   const _isUndoRedoing = ref(false);
 
-  watch([history, historyIndex], ()=>{
-    console.log(history.value, historyIndex.value);
-  });
-
   /** 是否可撤销 */
   const canUndo = computed(() => historyIndex.value > 0);
   /** 是否可重做 */

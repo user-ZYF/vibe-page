@@ -5,7 +5,7 @@ export enum SiderPanelEnum {
   /** 层级管理 */
   LAYER,
   /** 组件库 */
-  BLOCKS,
+  COMPONENTS,
   /** 交互逻辑 */
   LOGIC,
 }
@@ -46,13 +46,13 @@ export enum ButtonTypeEnum {
 /** 交互事件类型 */
 export enum InteractionEventEnum {
   /** 点击 */
-  CLICK = 0,
+  CLICK,
   /** 双击 */
-  DOUBLE_CLICK = 1,
+  DOUBLE_CLICK,
   /** 鼠标移入 */
-  MOUSE_ENTER = 2,
+  MOUSE_ENTER,
   /** 鼠标移出 */
-  MOUSE_LEAVE = 3,
+  MOUSE_LEAVE,
 }
 
 /** 交互事件选项 */

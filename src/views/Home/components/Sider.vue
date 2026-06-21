@@ -23,8 +23,8 @@
         <a-button
           type="text"
           size="small"
-          :class="{ 'is-active': activePanel === SiderPanelEnum.BLOCKS }"
-          @click="handlePanelSwitch(SiderPanelEnum.BLOCKS)"
+          :class="{ 'is-active': activePanel === SiderPanelEnum.LAYER }"
+          @click="handlePanelSwitch(SiderPanelEnum.LAYER)"
         >
           <template #icon><BlockOutlined /></template>
         </a-button>
@@ -33,8 +33,8 @@
         <a-button
           type="text"
           size="small"
-          :class="{ 'is-active': activePanel === SiderPanelEnum.LAYER }"
-          @click="handlePanelSwitch(SiderPanelEnum.LAYER)"
+          :class="{ 'is-active': activePanel === SiderPanelEnum.COMPONENTS }"
+          @click="handlePanelSwitch(SiderPanelEnum.COMPONENTS)"
         >
           <template #icon><AppstoreOutlined /></template>
         </a-button>
@@ -52,8 +52,8 @@
     </div>
     <div class="editor-sider-panel">
       <StylePanel v-if="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
-      <LayersPanel v-else-if="activePanel === SiderPanelEnum.BLOCKS" class="panel-content"/>
-      <ComponentsPanel v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
+      <LayersPanel v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
+      <ComponentsPanel v-else-if="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
       <InteractionPanel v-else-if="activePanel === SiderPanelEnum.LOGIC" class="panel-content"/>
     </div>
   </a-layout-sider>

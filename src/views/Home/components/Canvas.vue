@@ -35,7 +35,6 @@ let unbindDrop: (() => void) | null = null;
 
 /** 防抖记录历史，避免频繁操作（如拖拽滑块、输入文本）产生过多快照 */
 const debouncedRecord = useDebounceFn(() => {
-  console.log('1231231231321');
   recordHistory();
 }, 300);
 

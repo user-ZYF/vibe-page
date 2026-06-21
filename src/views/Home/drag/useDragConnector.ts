@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import type { Ref } from "vue";
 import { nodeRegistry } from "./NodeRegistry";
 import { dragEngine } from "./DragEngine";
@@ -26,7 +26,7 @@ export function useDragConnector(
     /** 3. 子容器不单独绑定 dragover：根画布通过冒泡统一处理，Positioner 用 e.target 找最近 canvas 祖先 */
   });
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     unbindDrag?.();
     nodeRegistry.unregister(id);
   });

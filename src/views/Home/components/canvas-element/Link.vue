@@ -1,14 +1,15 @@
 <!-- ? 画布超链接元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="convertStyleConfig(data.styleConfig)">{{ data.text }}</a>
+    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="convertStyleConfig(data.styleConfig)" @click="canvasStore.selectElement(data.id)">{{ data.text }}</a>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { CanvasLinkElement } from '../../types';
 import { convertStyleConfig } from '@/utils/styleConfig';
 import { useCanvasStore } from '@/store/canvas';
 import { useDragConnector } from '../../drag/useDragConnector';
+import { useInteractionBinder } from '@/composables/useInteractionBinder';
 
 const canvasStore = useCanvasStore();
 
@@ -20,4 +21,5 @@ const data = defineModel<CanvasLinkElement>("data", {
 const linkEl = ref<HTMLElement>();
 
 useDragConnector(linkEl, data.value.id);
+useInteractionBinder(linkEl, computed(() => data.value.interactions));
 </script>

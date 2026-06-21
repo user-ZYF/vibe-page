@@ -3,7 +3,7 @@
   <a-modal
     v-model:open="open"
     title="Code Preview"
-    width="900px"
+    width="1200px"
     :footer="null"
     wrap-class-name="code-preview-modal"
     @cancel="handleClose"
@@ -21,6 +21,12 @@
         </div>
         <pre class="code-preview-panel-body"><code class="language-css" v-html="highlightedCss" /></pre>
       </div>
+      <div class="code-preview-panel">
+        <div class="code-preview-panel-header">
+          <span class="code-preview-panel-title">JS</span>
+        </div>
+        <pre class="code-preview-panel-body"><code class="language-javascript" v-html="highlightedJs" /></pre>
+      </div>
     </div>
   </a-modal>
 </template>
@@ -30,6 +36,7 @@ import { computed } from 'vue'
 import hljs from 'highlight.js/lib/core'
 import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
+import javascript from 'highlight.js/lib/languages/javascript'
 import 'highlight.js/styles/github.css'
 import { useCodeGenerator } from '@/composables/useCodeGenerator'
 
@@ -39,17 +46,24 @@ defineOptions({
 
 hljs.registerLanguage('html', xml)
 hljs.registerLanguage('css', css)
+hljs.registerLanguage('javascript', javascript)
 
 /** 弹窗开关 */
 const open = defineModel<boolean>('open', { required: true })
 
-const { htmlCode, cssCode } = useCodeGenerator()
+const { htmlCode, cssCode, jsCode } = useCodeGenerator()
 
 /** 高亮后的 HTML 代码 */
 const highlightedHtml = computed(() => hljs.highlight(htmlCode.value, { language: 'html' }).value)
 
 /** 高亮后的 CSS 代码 */
 const highlightedCss = computed(() => hljs.highlight(cssCode.value, { language: 'css' }).value)
+
+/** 高亮后的 JS 代码 */
+const highlightedJs = computed(() => {
+  if (!jsCode.value) return '';
+  return hljs.highlight(jsCode.value, { language: 'javascript' }).value;
+})
 
 /** 关闭弹窗 */
 function handleClose() {
@@ -61,7 +75,7 @@ function handleClose() {
 .code-preview-content {
   display: flex;
   gap: 16px;
-  height: 520px;
+  height: 680px;
 }
 
 .code-preview-panel {

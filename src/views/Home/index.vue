@@ -22,11 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import EditorHeader from './components/Header.vue'
 import EditorSider from './components/Sider.vue'
 import Canvas from './components/Canvas.vue'
 import CodePreviewModal from './components/CodePreviewModal.vue'
+import { canvasHistoryApi } from '@/composables/useCanvasHistory'
 
 defineOptions({
   name: 'EditorHome',
@@ -45,13 +46,33 @@ function togglePreview() {
 
 /** 撤销 */
 function handleUndo() {
-  // TODO: 实现撤销逻辑
+  canvasHistoryApi.undo();
 }
 
 /** 重做 */
 function handleRedo() {
-  // TODO: 实现重做逻辑
+  canvasHistoryApi.redo();
 }
+
+/** 键盘快捷键处理 */
+function handleKeydown(e: KeyboardEvent) {
+  const isMod = e.ctrlKey || e.metaKey;
+  if (isMod && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    handleUndo();
+  } else if (isMod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    e.preventDefault();
+    handleRedo();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+});
 
 /** 查看代码 */
 function handleCode() {

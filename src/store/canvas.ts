@@ -44,6 +44,7 @@ export const useCanvasStore = defineStore("canvas", {
         type,
         styleConfig: cloneDeep(DefaultStyleConfigMap[type]),
         classes: [],
+        interactions: [],
       };
       switch(type){
         case CanvasElementTypeEnum.BUTTON:
@@ -222,6 +223,5 @@ export const useCanvasStore = defineStore("canvas", {
         this.selectElement(parentId);
       }
     },
-    /**  */
   }
 });

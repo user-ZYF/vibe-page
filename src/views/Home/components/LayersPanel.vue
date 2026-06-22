@@ -14,7 +14,6 @@
           :depth="0"
           :index="index"
           :parent-id="null"
-          :siblings="elements"
           :ancestor-ids="[]"
         />
       </template>

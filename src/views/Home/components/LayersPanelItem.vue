@@ -25,7 +25,7 @@
       @dragstart.stop="handleDragStart"
       @dragend.stop="handleDragEnd"
       @dragover.stop.prevent="handleDragOver"
-      @dragleave.stop
+      @dragleave.stop="handleDragLeave"
       @drop.stop.prevent
     >
       <!-- 展开/折叠按钮 -->
@@ -75,7 +75,6 @@
         :depth="depth + 1"
         :index="childIndex"
         :parent-id="element.id"
-        :siblings="children"
         :ancestor-ids="[...ancestorIds, element.id]"
       />
     </div>
@@ -83,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, PropType } from 'vue';
+import { computed, inject, PropType, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, CanvasElementLabelMap, DropPositionEnum } from '@/constants/home';
@@ -133,11 +132,6 @@ const props = defineProps({
   parentId: {
     type: [String, null],
     default: null,
-  },
-  /** 兄弟节点列表 */
-  siblings: {
-    type: Array as PropType<CanvasElement[]>,
-    required: true,
   },
   /** 祖先元素 id 列表（用于拖拽时判断是否为自身后代） */
   ancestorIds: {
@@ -217,6 +211,21 @@ function deleteElement(id: string) {
   }
 }
 
+/** 容器展开延迟定时器 */
+let expandTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** 清除展开延迟定时器 */
+function clearExpandTimer() {
+  if (expandTimer !== null) {
+    clearTimeout(expandTimer);
+    expandTimer = null;
+  }
+}
+
+onUnmounted(() => {
+  clearExpandTimer();
+});
+
 /** 拖拽开始 */
 function handleDragStart(e: DragEvent) {
   if (e.dataTransfer) {
@@ -227,7 +236,13 @@ function handleDragStart(e: DragEvent) {
 
 /** 拖拽结束 */
 function handleDragEnd(e: DragEvent) {
+  clearExpandTimer();
   executeMove();
+}
+
+/** 拖拽离开 */
+function handleDragLeave() {
+  clearExpandTimer();
 }
 
 /** 拖拽经过（边缘检测：上边缘=插入前，下边缘=插入后，中间=插入容器内部） */
@@ -249,6 +264,7 @@ function handleDragOver(e: DragEvent) {
 
   /** 上边缘 → 插入到当前元素之前 */
   if (top < EDGE_THRESHOLD) {
+    clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.BEFORE,
       parentId: props.parentId,
@@ -259,6 +275,7 @@ function handleDragOver(e: DragEvent) {
 
   /** 下边缘 → 插入到当前元素之后 */
   if (top > height - EDGE_THRESHOLD) {
+    clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.AFTER,
       parentId: props.parentId,
@@ -269,15 +286,29 @@ function handleDragOver(e: DragEvent) {
 
   /** 中间区域 */
   if (isContainer.value) {
-    /** 容器元素 → 先展开，再设置插入目标 */
-    expandContainer(props.element.id);
-    setDropTarget({
-      position: DropPositionEnum.INSIDE,
-      parentId: props.element.id,
-      index: children.value.length,
-    });
+    /** 容器元素 → 延迟 0.5s 后展开并设置插入目标 */
+    if (!isExpanded.value) {
+      if(!expandTimer){
+        expandTimer = setTimeout(() => {
+          expandContainer(props.element.id);
+          setDropTarget({
+            position: DropPositionEnum.INSIDE,
+            parentId: props.element.id,
+            index: children.value.length,
+          });
+        }, 500);
+      }
+    } else {
+      clearExpandTimer();
+      setDropTarget({
+        position: DropPositionEnum.INSIDE,
+        parentId: props.element.id,
+        index: children.value.length,
+      });
+    }
   } else {
     /** 非容器元素 → 插入到当前元素之后 */
+    clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.AFTER,
       parentId: props.parentId,

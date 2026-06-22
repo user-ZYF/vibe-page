@@ -12,7 +12,7 @@ export const useCanvasStore = defineStore("canvas", {
     /** 画布元素列表 */
     elements: [] as CanvasElement[],
     /** 选中的元素 */
-    selectedElementId: "",
+    selectedElementId: null as String | null,
     /** 当前激活的 Sider 面板 */
     activePanel: SiderPanelEnum.COMPONENTS as SiderPanelEnum,
     /** 是否正在拖拽元素 */
@@ -83,7 +83,7 @@ export const useCanvasStore = defineStore("canvas", {
       }
     },
     /** 选中元素 */
-    selectElement(id: string) {
+    selectElement(id: string | null = null) {
       this.selectedElementId = id;
       if(id && this.activePanel === SiderPanelEnum.COMPONENTS){
         this.activePanel = SiderPanelEnum.EDIT;

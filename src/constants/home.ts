@@ -85,3 +85,13 @@ export const INTERACTION_ACTION_OPTIONS: { label: string; value: InteractionActi
   { label: '切换 CSS 类名', value: InteractionActionEnum.TOGGLE_CLASS },
   { label: '跳转 URL', value: InteractionActionEnum.NAVIGATE },
 ];
+
+/** 拖拽落点 */
+export enum DropPositionEnum {
+  /** 元素之前 */
+  BEFORE,
+  /** 元素之后 */
+  AFTER,
+  /** 元素内部 */
+  INSIDE,
+}

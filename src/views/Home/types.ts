@@ -2,7 +2,7 @@
  * 样式面板各配置项的类型定义
  */
 
-import type { ButtonTypeEnum, CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
+import type { ButtonTypeEnum, CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum, DropPositionEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -342,3 +342,13 @@ export interface CanvasLinkElement extends CanvasElementBase{
 
 /** 画布元素 */
 export type CanvasElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement;
+
+/** Layers拖拽落点目标 */
+export interface LayersDropTarget {
+  /** 拖拽魔表落点 */
+  position: DropPositionEnum;
+  /** 目标父容器 id（null 表示根层级） */
+  parentId: string | null;
+  /** 插入索引 */
+  index: number;
+}

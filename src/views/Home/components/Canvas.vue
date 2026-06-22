@@ -1,7 +1,7 @@
 <!-- ? 画布拖拽区域 -->
 <template>
     <!-- 画布内元素使用浏览器默认样式 -->
-    <div ref="canvasEl" class="canvas-container show-component-area" @click.self="canvasStore.selectElement('')">
+    <div ref="canvasEl" class="canvas-container show-component-area" @click.self="canvasStore.selectElement(null)">
         <component v-for="(element, index) in elements" :key="element.id" :is="CanvasElementComponentMap[element.type]" v-model:data="elements[index]" />
         <SelectedElementIndicator />
         <ElementToolbar />

@@ -7,7 +7,7 @@
         暂无元素，请从组件库添加
       </div>
       <template v-else>
-        <LayerItem
+        <LayersPanelItem
           v-for="(el, index) in elements"
           :key="el.id"
           :element="el"
@@ -15,6 +15,7 @@
           :index="index"
           :parent-id="null"
           :siblings="elements"
+          :ancestor-ids="[]"
         />
       </template>
     </div>
@@ -25,30 +26,72 @@
 import { ref, provide } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
-import LayerItem from './LayersPanelItem.vue';
+import LayersPanelItem from './LayersPanelItem.vue';
+import { DropPositionEnum } from '@/constants/home.ts';
+import { EXPANDED_KEYS, TOGGLE_EXPAND_KEY, EXPAND_CONTAINER_KEY, DRAGGING_ID_KEY, DROP_TARGET_KEY, SET_DRAGGING_ID_KEY, SET_DROP_TARGET_KEY, EXECUTE_MOVE_KEY, HIDDEN_KEYS, TOGGLE_SHOW_KEY } from '../contants.ts';
+import { LayersDropTarget } from '../types.ts';
 
 defineOptions({
-  name: 'LayersPanel',
+  name: 'LayersPanelItem',
 });
 
 const canvasStore = useCanvasStore();
 const { elements } = storeToRefs(canvasStore);
 
-/** 展开状态 */
-const expandedState = ref<Record<string, boolean>>({});
+/** 展开元素id列表 */
+const expandedKeys = ref<string[]>([]);
 
-/** 当前拖拽元素 id */
+/** 隐藏元素id列表 */
+const hiddenKeys = ref<string[]>([]);
+
+/** 当前拖拽元素id */
 const draggingId = ref<string | null>(null);
 
 /** 拖拽落点目标 */
-const dropTarget = ref<DropTarget | null>(null);
+const dropTarget = ref<LayersDropTarget | null>(null);
 
 /** 切换展开/折叠 */
 function toggleExpand(id: string) {
-  expandedState.value = {
-    ...expandedState.value,
-    [id]: !expandedState.value[id],
-  };
+  const found = expandedKeys.value.includes(id);
+  if(found){
+    collapseContainer(id);
+  }else {
+    expandContainer(id);
+  }
+}
+
+/** 折叠容器 */
+function collapseContainer(id: string) {
+  expandedKeys.value = expandedKeys.value.filter((item)=>item !== id);
+}
+
+/** 展开容器 */
+function expandContainer(id: string) {
+  if(!expandedKeys.value.includes(id)){
+    expandedKeys.value.push(id);
+  }
+}
+
+/** 切换显示/隐藏 */
+function toggleShow(id: string){
+  const found = hiddenKeys.value.includes(id);
+  if(found){
+    showElement(id);
+  }else {
+    hideElement(id);
+  }
+}
+
+/** 显示元素 */
+function showElement(id: string) {
+  hiddenKeys.value = hiddenKeys.value.filter((item)=>item !== id);
+}
+
+/** 隐藏元素 */
+function hideElement(id: string) {
+  if(!hiddenKeys.value.includes(id)){
+    hiddenKeys.value.push(id);
+  }
 }
 
 /** 设置拖拽元素 id */
@@ -57,26 +100,21 @@ function setDraggingId(id: string | null) {
 }
 
 /** 设置落点目标 */
-function setDropTarget(target: DropTarget | null) {
+function setDropTarget(target: LayersDropTarget | null) {
   dropTarget.value = target;
 }
 
 /** 执行移动 */
-function commitMove() {
+function executeMove() {
   const id = draggingId.value;
   const target = dropTarget.value;
   if (id && target) {
-    if (target.mode === 'inside' && target.parentId !== null) {
+    if (target.position === DropPositionEnum.INSIDE && target.parentId !== null) {
       /** 插入到目标容器内部 */
       canvasStore.moveElement(id, target.parentId, target.index);
-      /** 自动展开目标容器 */
-      expandedState.value = {
-        ...expandedState.value,
-        [target.parentId]: true,
-      };
     } else {
       /** 插入到目标元素前/后（同级） */
-      const insertIndex = target.mode === 'after' ? target.index + 1 : target.index;
+      const insertIndex = target.position === DropPositionEnum.AFTER ? target.index + 1 : target.index;
       canvasStore.moveElement(id, target.parentId, insertIndex);
     }
   }
@@ -84,35 +122,16 @@ function commitMove() {
   dropTarget.value = null;
 }
 
-provide(EXPANDED_STATE_KEY, expandedState);
+provide(EXPANDED_KEYS, expandedKeys);
 provide(TOGGLE_EXPAND_KEY, toggleExpand);
+provide(EXPAND_CONTAINER_KEY, expandContainer);
 provide(DRAGGING_ID_KEY, draggingId);
 provide(DROP_TARGET_KEY, dropTarget);
 provide(SET_DRAGGING_ID_KEY, setDraggingId);
 provide(SET_DROP_TARGET_KEY, setDropTarget);
-provide(COMMIT_MOVE_KEY, commitMove);
-</script>
-
-<script lang="ts">
-import type { InjectionKey, Ref } from 'vue';
-
-/** 拖拽落点目标 */
-export interface DropTarget {
-  /** 插入模式：before=目标前, after=目标后, inside=容器内部 */
-  mode: 'before' | 'after' | 'inside';
-  /** 目标父容器 id（null 表示根层级） */
-  parentId: string | null;
-  /** 插入索引 */
-  index: number;
-}
-
-export const EXPANDED_STATE_KEY: InjectionKey<Ref<Record<string, boolean>>> = Symbol('expandedState');
-export const TOGGLE_EXPAND_KEY: InjectionKey<(id: string) => void> = Symbol('toggleExpand');
-export const DRAGGING_ID_KEY: InjectionKey<Ref<string | null>> = Symbol('draggingId');
-export const DROP_TARGET_KEY: InjectionKey<Ref<DropTarget | null>> = Symbol('dropTarget');
-export const SET_DRAGGING_ID_KEY: InjectionKey<(id: string | null) => void> = Symbol('setDraggingId');
-export const SET_DROP_TARGET_KEY: InjectionKey<(target: DropTarget | null) => void> = Symbol('setDropTarget');
-export const COMMIT_MOVE_KEY: InjectionKey<() => void> = Symbol('commitMove');
+provide(EXECUTE_MOVE_KEY, executeMove);
+provide(HIDDEN_KEYS, hiddenKeys);
+provide(TOGGLE_SHOW_KEY, toggleShow);
 </script>
 
 <style scoped lang="less">

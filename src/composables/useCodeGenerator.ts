@@ -9,19 +9,19 @@ import { generateHtml, generateCss, generateJs, generateCode } from '@/utils/cod
  */
 export function useCodeGenerator() {
   const canvasStore = useCanvasStore();
-  const { elements } = storeToRefs(canvasStore);
+  const { root } = storeToRefs(canvasStore);
 
   /** 生成的 HTML 代码 */
-  const htmlCode = computed(() => generateHtml(elements.value));
+  const htmlCode = computed(() => generateHtml(root.value));
 
   /** 生成的 CSS 代码 */
-  const cssCode = computed(() => generateCss(elements.value));
+  const cssCode = computed(() => generateCss(root.value));
 
   /** 生成的 JS 代码 */
-  const jsCode = computed(() => generateJs(elements.value));
+  const jsCode = computed(() => generateJs(root.value));
 
   /** 同时获取 HTML、CSS 和 JS */
-  const fullCode = computed(() => generateCode(elements.value));
+  const fullCode = computed(() => generateCode(root.value));
 
   return {
     htmlCode,

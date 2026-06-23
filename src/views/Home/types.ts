@@ -309,7 +309,7 @@ export interface CanvasContainerElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.CONTAINER;
   /** 子元素 */
-  children: CanvasElement[];
+  children: CanvasInnerElement[];
 }
 
 /** 画布按钮元素 */
@@ -352,18 +352,27 @@ export interface CanvasLinkElement extends CanvasElementBase {
 
 /** 画布根元素 */
 export interface CanvasRootElement extends CanvasElementBase {
-
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.ROOT;
+  /** 子元素列表 */
+  children: CanvasInnerElement[];
 }
 
+/** 画布内部元素枚举 */
+export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
+
+/** 画布内部元素 */
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement;
+
 /** 画布元素 */
-export type CanvasElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement;
+export type CanvasElement = CanvasInnerElement | CanvasRootElement;
 
 /** Layers拖拽落点目标 */
 export interface LayersDropTarget {
   /** 拖拽魔表落点 */
   position: DropPositionEnum;
-  /** 目标父容器 id（null 表示根层级） */
-  parentId: string | null;
+  /** 目标父容器 id */
+  parentId: string;
   /** 插入索引 */
   index: number;
 }

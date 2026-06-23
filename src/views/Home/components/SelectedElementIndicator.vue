@@ -79,20 +79,7 @@ const isSelected = computed(() =>
 const elementLabel = computed(() => {
   const id = currentTarget.value?.getAttribute('data-canvas-id');
   if (!id) return '';
-  const el = canvasStore.elements.find((e) => e.id === id)
-    ?? (() => {
-      const findInList = (list: typeof canvasStore.elements): typeof canvasStore.elements[0] | null => {
-        for (const e of list) {
-          if (e.id === id) return e;
-          if ('children' in e) {
-            const found = findInList(e.children);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-      return findInList(canvasStore.elements);
-    })();
+  const el = canvasStore.getElementById(id);
   return el ? CanvasElementLabelMap[el.type] ?? '' : '';
 });
 

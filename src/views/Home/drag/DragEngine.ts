@@ -1,52 +1,55 @@
 import { nodeRegistry } from "./NodeRegistry";
 import { Positioner } from "./Positioner";
-import { createShadow } from "./createShadow";
 import { useDragStore } from "@/store/drag";
 import { useCanvasStore } from "@/store/canvas";
 import type { CanvasElementTypeEnum } from "@/constants/home";
+import { CanvasInnerElementTypeEnum } from "../types";
 
 
 /**
- * DragEngine 事件协调中心（类比 Craft.js DefaultEventHandlers）
- * 管理所有 drag 事件的注册与清理
+ * DragEngine 事件协调中心
+ * 管理所有拖拽事件的注册与清理
  */
 class DragEngine {
+  /** 落点位置计算器 */
   private positioner = new Positioner();
 
-  /** 当前拖拽产生的幽灵元素 */
-  private draggedShadow: HTMLElement | null = null;
-
-  /** 绑定「可拖拽已有元素」的事件，返回解绑函数 */
+  /** 绑定「可拖拽」事件，返回解绑函数 */
   connectDraggable(el: HTMLElement, id: string): () => void {
+    // 设置允许拖拽
     el.setAttribute("draggable", "true");
 
-    const onDragStart = (e: DragEvent) => {
+    const that = this;
+
+    /** 拖拽开始 */
+    function handleDragStart(e: DragEvent) {
       e.stopPropagation();
       const dragStore = useDragStore();
       dragStore.startDrag(id);
-      this.draggedShadow = createShadow(e, el);
-      document.addEventListener("dragover", this.preventDefaultHandler, false);
-    };
+    }
 
-    const onDragEnd = (e: DragEvent) => {
+    /** 拖拽结束 */
+    function handleDragEnd(e: DragEvent) {
       e.stopPropagation();
-      document.removeEventListener("dragover", this.preventDefaultHandler, false);
-      this.dropExisting();
-    };
+      that.dropExisting();
+    }
 
-    el.addEventListener("dragstart", onDragStart);
-    el.addEventListener("dragend", onDragEnd);
+    el.addEventListener("dragstart", handleDragStart);
+    el.addEventListener("dragend", handleDragEnd);
 
     return () => {
       el.removeAttribute("draggable");
-      el.removeEventListener("dragstart", onDragStart);
-      el.removeEventListener("dragend", onDragEnd);
+      el.removeEventListener("dragstart", handleDragStart);
+      el.removeEventListener("dragend", handleDragEnd);
     };
   }
 
-  /** 绑定「可接收放置」容器的事件，返回解绑函数 */
-  connectDroppable(el: HTMLElement, id: string | null): () => void {
-    const onDragOver = (e: DragEvent) => {
+  /** 绑定「可接收」事件，返回解绑函数 */
+  connectDroppable(el: HTMLElement, id: string): () => void {
+    const instance = this;
+
+    /** 拖拽悬停 */
+    function handleDragOver(e: DragEvent) {
       e.preventDefault();
 
       const dragStore = useDragStore();
@@ -58,57 +61,52 @@ class DragEngine {
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
 
-      const indicator = this.positioner.compute(
+      const indicator = instance.positioner.compute(
         dropTargetId,
         e.clientX,
         e.clientY,
-        canvasStore.elements,
+        canvasStore.root,
         nodeRegistry,
         dragStore.draggingId
       );
 
       dragStore.setIndicator(indicator);
-    };
+    }
 
-    const onDragEnter = (e: DragEvent) => {
-      e.preventDefault();
-    };
-
-    el.addEventListener("dragover", onDragOver);
-    el.addEventListener("dragenter", onDragEnter);
+    el.addEventListener("dragover", handleDragOver);
 
     return () => {
-      el.removeEventListener("dragover", onDragOver);
-      el.removeEventListener("dragenter", onDragEnter);
+      el.removeEventListener("dragover", handleDragOver);
     };
   }
 
   /** 绑定「组件面板」新组件的拖出事件，返回解绑函数 */
-  connectCreate(el: HTMLElement, type: CanvasElementTypeEnum): () => void {
+  connectCreate(el: HTMLElement, type: CanvasInnerElementTypeEnum): () => void {
     // 设置允许拖拽
     el.setAttribute("draggable", "true");
 
-    const onDragStart = (e: DragEvent) => {
+    const instance = this;
+
+    /** 拖拽开始 */
+    function handleDragStart(e: DragEvent) {
       e.stopPropagation();
       const dragStore = useDragStore();
       dragStore.startNewDrag(type);
-      this.draggedShadow = createShadow(e, el);
-      document.addEventListener("dragover", this.preventDefaultHandler, false);
     };
 
-    const onDragEnd = (e: DragEvent) => {
+    /** 拖拽结束 */
+    function handleDragEnd(e: DragEvent) {
       e.stopPropagation();
-      document.removeEventListener("dragover", this.preventDefaultHandler, false);
-      this.dropNew();
+      instance.dropNew();
     };
 
-    el.addEventListener("dragstart", onDragStart);
-    el.addEventListener("dragend", onDragEnd);
+    el.addEventListener("dragstart", handleDragStart);
+    el.addEventListener("dragend", handleDragEnd);
 
     return () => {
       el.removeAttribute("draggable");
-      el.removeEventListener("dragstart", onDragStart);
-      el.removeEventListener("dragend", onDragEnd);
+      el.removeEventListener("dragstart", handleDragStart);
+      el.removeEventListener("dragend", handleDragEnd);
     };
   }
 
@@ -128,7 +126,7 @@ class DragEngine {
   }
 
   /** 执行新组件落点逻辑 */
-  private dropNew(): void {
+  private dropNew() {
     const dragStore = useDragStore();
     const canvasStore = useCanvasStore();
     const { indicator, dragNewType } = dragStore;
@@ -136,33 +134,18 @@ class DragEngine {
     if (indicator && !indicator.error && dragNewType !== null) {
       const insertIndex =
         indicator.index + (indicator.where === "after" ? 1 : 0);
-
-      if (indicator.parentId === null) {
-        canvasStore.addElementAt(dragNewType, insertIndex);
-      } else {
         canvasStore.addElementToContainerAt(dragNewType, indicator.parentId, insertIndex);
-      }
     }
 
     this.cleanup();
   }
 
   /** 清理拖拽状态 */
-  private cleanup(): void {
+  private cleanup() {
     const dragStore = useDragStore();
-
-    if (this.draggedShadow) {
-      this.draggedShadow.parentNode?.removeChild(this.draggedShadow);
-      this.draggedShadow = null;
-    }
 
     dragStore.endDrag();
   }
-
-  /** 阻止默认行为，使 dragend 能立即触发 */
-  private preventDefaultHandler = (e: DragEvent) => {
-    e.preventDefault();
-  };
 }
 
 /** 全局单例 */

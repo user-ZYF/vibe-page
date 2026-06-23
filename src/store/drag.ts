@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import type { CanvasElementTypeEnum } from "@/constants/home";
 import type { DropIndicator } from "@/views/Home/drag/types";
+import { CanvasInnerElementTypeEnum } from "@/views/Home/types";
 
 /** 拖拽 store */
 export const useDragStore = defineStore("drag", {
@@ -10,7 +11,7 @@ export const useDragStore = defineStore("drag", {
     /** 当前拖拽来源类型 */
     dragSourceType: null as "existing" | "new" | null,
     /** 新组件类型（来自面板时） */
-    dragNewType: null as CanvasElementTypeEnum | null,
+    dragNewType: null as CanvasInnerElementTypeEnum | null,
     /** 当前计算出的落点 Indicator */
     indicator: null as DropIndicator | null,
   }),
@@ -26,7 +27,7 @@ export const useDragStore = defineStore("drag", {
       this.dragNewType = null;
     },
     /** 从面板拖入新组件 */
-    startNewDrag(newType: CanvasElementTypeEnum) {
+    startNewDrag(newType: CanvasInnerElementTypeEnum) {
       this.draggingId = null;
       this.dragSourceType = "new";
       this.dragNewType = newType;

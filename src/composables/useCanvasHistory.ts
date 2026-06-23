@@ -1,6 +1,6 @@
 import { ref, computed, watch, type Ref } from 'vue';
 import { cloneDeep } from 'lodash';
-import type { CanvasElement } from '@/views/Home/types';
+import type { CanvasInnerElement, CanvasRootElement } from '@/views/Home/types';
 
 /** 历史记录最大长度 */
 const MAX_HISTORY_LENGTH = 50;
@@ -16,9 +16,9 @@ export const canvasHistoryApi = {
  * 画布撤销/重做功能
  * 通过深克隆 elements 数组实现历史快照管理
  */
-export function useCanvasHistory(elements: Ref<CanvasElement[]>) {
+export function useCanvasHistory(root: Ref<CanvasRootElement>) {
   /** 历史记录快照列表 */
-  const history = ref<CanvasElement[][]>([]);
+  const history = ref<CanvasRootElement[]>([]);
   /** 当前历史位置 */
   const historyIndex = ref(-1);
   /** 是否正在执行撤销/重做（防止循环记录） */
@@ -36,7 +36,7 @@ export function useCanvasHistory(elements: Ref<CanvasElement[]>) {
       return;
     }
     history.value = history.value.slice(0, historyIndex.value + 1);
-    history.value.push(cloneDeep(elements.value));
+    history.value.push(cloneDeep(root.value));
     if (history.value.length > MAX_HISTORY_LENGTH) {
       history.value.shift();
     } else {
@@ -49,7 +49,7 @@ export function useCanvasHistory(elements: Ref<CanvasElement[]>) {
     if (!canUndo.value) return;
     _isUndoRedoing.value = true;
     historyIndex.value--;
-    elements.value = cloneDeep(history.value[historyIndex.value]);
+    root.value = cloneDeep(history.value[historyIndex.value]);
   }
 
   /** 重做 */
@@ -57,7 +57,7 @@ export function useCanvasHistory(elements: Ref<CanvasElement[]>) {
     if (!canRedo.value) return;
     _isUndoRedoing.value = true;
     historyIndex.value++;
-    elements.value = cloneDeep(history.value[historyIndex.value]);
+    root.value = cloneDeep(history.value[historyIndex.value]);
   }
 
   /** 同步到模块级 API，供其他组件调用 */

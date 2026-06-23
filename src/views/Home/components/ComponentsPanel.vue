@@ -21,6 +21,7 @@
 import { ref, onUnmounted } from 'vue'
 import { CanvasElementLabelMap, CanvasElementTypeEnum } from '@/constants/home';
 import { dragEngine } from '../drag/DragEngine';
+import { CanvasInnerElementTypeEnum } from '../types';
 
 defineOptions({
   name: 'ComponentsPanel',
@@ -30,7 +31,7 @@ defineOptions({
 const activeKeys = ref<string[]>(['basic'])
 
 /** 基础组件元素列表 */
-const basicComponents = ref<CanvasElementTypeEnum[]>([
+const basicComponents = ref<CanvasInnerElementTypeEnum[]>([
   CanvasElementTypeEnum.BUTTON,
   CanvasElementTypeEnum.CONTAINER,
   CanvasElementTypeEnum.IMAGE,
@@ -42,7 +43,7 @@ const basicComponents = ref<CanvasElementTypeEnum[]>([
 const unbindMap = new Map<CanvasElementTypeEnum, () => void>();
 
 /** v-ref 回调：绑定 connectCreate */
-function bindCreateConnector(el: HTMLElement | null, type: CanvasElementTypeEnum) {
+function bindCreateConnector(el: HTMLElement | null, type: CanvasInnerElementTypeEnum) {
   if (!el) {
     /** 元素卸载时清理 */
     unbindMap.get(type)?.();

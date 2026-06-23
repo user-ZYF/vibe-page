@@ -3,20 +3,13 @@
   <div class="comp-layers-panel">
     <div class="comp-layers-panel-header">层级管理</div>
     <div class="comp-layers-panel-body">
-      <div v-if="!elements.length" class="comp-layers-panel-empty">
-        暂无元素，请从组件库添加
-      </div>
-      <template v-else>
         <LayersPanelItem
-          v-for="(el, index) in elements"
-          :key="el.id"
-          :element="el"
+          :element="root"
           :depth="0"
-          :index="index"
-          :parent-id="null"
+          :index="0"
           :ancestor-ids="[]"
+          is-root
         />
-      </template>
     </div>
   </div>
 </template>
@@ -31,11 +24,11 @@ import { EXPANDED_KEYS, TOGGLE_EXPAND_KEY, EXPAND_CONTAINER_KEY, DRAGGING_ID_KEY
 import { LayersDropTarget } from '../types.ts';
 
 defineOptions({
-  name: 'LayersPanelItem',
+  name: 'LayersPanel',
 });
 
 const canvasStore = useCanvasStore();
-const { elements } = storeToRefs(canvasStore);
+const { root } = storeToRefs(canvasStore);
 
 /** 展开元素id列表 */
 const expandedKeys = ref<string[]>([]);

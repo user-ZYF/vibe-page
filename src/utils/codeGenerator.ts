@@ -1,11 +1,13 @@
 import {
-  CanvasElement,
+  CanvasInnerElement,
   CanvasContainerElement,
   CanvasButtonElement,
   CanvasParagraphElement,
   CanvasImageElement,
   CanvasLinkElement,
   InteractionRule,
+  CanvasRootElement,
+  CanvasElement,
 } from '@/views/Home/types';
 import { CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
@@ -17,6 +19,7 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.PARAGRAPH]: 'p',
   [CanvasElementTypeEnum.IMAGE]: 'img',
   [CanvasElementTypeEnum.LINK]: 'a',
+  [CanvasElementTypeEnum.ROOT]: 'body',
 };
 
 /** 自闭合标签集合 */
@@ -132,9 +135,9 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
     return `${pad}<${tag}${attrs} />`;
   }
 
-  /** 容器元素：递归生成子元素 */
-  if (element.type === CanvasElementTypeEnum.CONTAINER) {
-    const container = element as CanvasContainerElement;
+  /** 容器元素或根元素：递归生成子元素 */
+  if (element.type === CanvasElementTypeEnum.CONTAINER || element.type === CanvasElementTypeEnum.ROOT) {
+    const container = element as CanvasContainerElement | CanvasRootElement;
     if (container.children.length === 0) {
       return `${pad}<${tag}${attrs}></${tag}>`;
     }
@@ -151,10 +154,10 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
  * 递归收集所有元素的样式，生成 CSS 规则字符串
  * 每个元素通过 #id 选择器关联其内联样式
  */
-function collectCssRules(elements: CanvasElement[]): string[] {
+function collectCssRules(root: CanvasRootElement): string {
   const rules: string[] = [`* {\n  box-sizing: border-box;\n}`];
 
-  function collect(el: CanvasElement) {
+  function collect(el: CanvasInnerElement) {
     const styleObj = convertStyleConfig(el.styleConfig);
     const styleStr = styleObjectToCss(styleObj);
     if (styleStr) {
@@ -166,18 +169,17 @@ function collectCssRules(elements: CanvasElement[]): string[] {
     }
   }
 
-  elements.forEach(collect);
-  return rules;
+  root.children.forEach(collect);
+  return rules.join('\n\n');
 }
 
 /**
  * 从画布元素列表生成完整的 HTML 字符串
- * @param elements 画布根层级元素列表
+ * @param root 画布根元素
  * @returns 格式化后的 HTML 字符串
  */
-export function generateHtml(elements: CanvasElement[]): string {
-  if (elements.length === 0) return '';
-  return elements.map((el) => elementToHtml(el)).join('\n');
+export function generateHtml(root: CanvasRootElement): string {
+  return elementToHtml(root);
 }
 
 /**
@@ -185,9 +187,8 @@ export function generateHtml(elements: CanvasElement[]): string {
  * @param elements 画布根层级元素列表
  * @returns CSS 规则字符串
  */
-export function generateCss(elements: CanvasElement[]): string {
-  const rules = collectCssRules(elements);
-  return rules.join('\n\n');
+export function generateCss(root: CanvasRootElement): string {
+  return collectCssRules(root);
 }
 
 /** 事件枚举到 DOM 事件名的映射 */
@@ -231,13 +232,13 @@ function interactionRuleToJs(rule: InteractionRule): string {
 
 /**
  * 从画布元素列表生成交互 JS 代码
- * @param elements 画布根层级元素列表
+ * @param root 画布根元素
  * @returns JS 代码字符串
  */
-export function generateJs(elements: CanvasElement[]): string {
+export function generateJs(root: CanvasRootElement): string {
   const blocks: string[] = [];
 
-  function collect(el: CanvasElement) {
+  function collect(el: CanvasInnerElement) {
     if (el.interactions && el.interactions.length > 0) {
       const rules = el.interactions
         .map((rule) => `  ${interactionRuleToJs(rule)}`)
@@ -249,19 +250,19 @@ export function generateJs(elements: CanvasElement[]): string {
     }
   }
 
-  elements.forEach(collect);
+  root.children.forEach(collect);
   return blocks.join('\n\n');
 }
 
 /**
  * 从画布元素列表同时生成 HTML、CSS 和 JS
- * @param elements 画布根层级元素列表
+ * @param root 画布根元素
  * @returns { html: string, css: string, js: string }
  */
-export function generateCode(elements: CanvasElement[]): { html: string; css: string; js: string } {
+export function generateCode(root: CanvasRootElement): { html: string; css: string; js: string } {
   return {
-    html: generateHtml(elements),
-    css: generateCss(elements),
-    js: generateJs(elements),
+    html: generateHtml(root),
+    css: generateCss(root),
+    js: generateJs(root),
   };
 }

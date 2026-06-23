@@ -20,7 +20,7 @@
         'is-drop-inside': isDropInside,
       }"
       :style="{ paddingLeft: 10 + depth * 16 + 'px' }"
-      draggable="true"
+      :draggable="!isRoot"
       @click.stop="selectElement(element.id)"
       @dragstart.stop="handleDragStart"
       @dragend.stop="handleDragEnd"
@@ -49,7 +49,8 @@
       </span>
 
       <!-- 元素名称 -->
-      <span class="comp-layer-item-label">{{ CanvasElementLabelMap[element.type] }}</span>
+      <!-- <span class="comp-layer-item-label">{{ element.alias }}</span> -->
+      <span class="comp-layer-item-label">{{ element.id }}</span>
 
       <!-- 删除按钮 -->
       <DeleteOutlined 
@@ -85,8 +86,8 @@
 import { computed, inject, PropType, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
-import { CanvasElementTypeEnum, CanvasElementLabelMap, DropPositionEnum } from '@/constants/home';
-import type { CanvasElement, CanvasContainerElement } from '@/views/Home/types';
+import { CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
+import type { CanvasInnerElement, CanvasContainerElement, CanvasElement, CanvasRootElement } from '@/views/Home/types';
 import {
   TOGGLE_EXPAND_KEY,
   EXPAND_CONTAINER_KEY,
@@ -128,16 +129,16 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  /** 父容器 id（null 表示根层级） */
-  parentId: {
-    type: [String, null],
-    default: null,
-  },
   /** 祖先元素 id 列表（用于拖拽时判断是否为自身后代） */
   ancestorIds: {
     type: Array as PropType<string[]>,
     default: () => [],
   },
+  /** 是否为根 */
+  isRoot: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const canvasStore = useCanvasStore();
@@ -159,7 +160,9 @@ const toggleShow = inject(TOGGLE_SHOW_KEY)!;
 const isSelected = computed(() => selectedElementId.value === props.element.id);
 
 /** 是否为容器元素 */
-const isContainer = computed(() => props.element.type === CanvasElementTypeEnum.CONTAINER);
+const isContainer = computed(() => {
+  return props.element.type === CanvasElementTypeEnum.CONTAINER || props.element.type === CanvasElementTypeEnum.ROOT;
+});
 
 /** 是否隐藏 */
 const isHidden = computed(() => hiddenKeys.value.includes(props.element.id));
@@ -167,10 +170,13 @@ const isHidden = computed(() => hiddenKeys.value.includes(props.element.id));
 /** 是否展开 */
 const isExpanded = computed(() => expandedKeys.value.includes(props.element.id));
 
+/** 父元素id */
+const parentId = computed(() => props.ancestorIds[props.ancestorIds.length - 1]!);
+
 /** 子元素列表 */
-const children = computed<CanvasElement[]>(() => {
+const children = computed<CanvasInnerElement[]>(() => {
   if (isContainer.value) {
-    return (props.element as CanvasContainerElement).children;
+    return (props.element as CanvasContainerElement | CanvasRootElement).children;
   }
   return [];
 });
@@ -185,9 +191,9 @@ const isDropInside = computed(() => {
 /** 插入位置指示条显示模式 */
 const showDropIndicator = computed<DropPositionEnum | null>(() => {
   const target = dropTarget.value;
-  if (!target || !draggingId.value) return null;
+  if (!target || !draggingId.value || props.isRoot) return null;
   if (target.position === DropPositionEnum.INSIDE) return null;
-  if (target.parentId === props.parentId && target.index === props.index) {
+  if (target.parentId === parentId.value && target.index === props.index) {
     return target.position;
   }
   return null;
@@ -263,22 +269,22 @@ function handleDragOver(e: DragEvent) {
   const height = rect.height;
 
   /** 上边缘 → 插入到当前元素之前 */
-  if (top < EDGE_THRESHOLD) {
+  if (top < EDGE_THRESHOLD && !props.isRoot) {
     clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.BEFORE,
-      parentId: props.parentId,
+      parentId: parentId.value,
       index: props.index,
     });
     return;
   }
 
   /** 下边缘 → 插入到当前元素之后 */
-  if (top > height - EDGE_THRESHOLD) {
+  if (top > height - EDGE_THRESHOLD && !props.isRoot) {
     clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.AFTER,
-      parentId: props.parentId,
+      parentId: parentId.value,
       index: props.index,
     });
     return;
@@ -306,12 +312,12 @@ function handleDragOver(e: DragEvent) {
         index: children.value.length,
       });
     }
-  } else {
+  } else if(!props.isRoot){
     /** 非容器元素 → 插入到当前元素之后 */
     clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.AFTER,
-      parentId: props.parentId,
+      parentId: parentId.value,
       index: props.index,
     });
   }

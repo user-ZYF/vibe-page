@@ -1,4 +1,4 @@
-import type { CanvasElement } from "@/views/Home/types";
+import type { CanvasInnerElement, CanvasRootElement } from "@/views/Home/types";
 import { CanvasElementTypeEnum } from "@/constants/home";
 import type { CanvasContainerElement } from "@/views/Home/types";
 import type { NodeInfo, DropIndicator } from "./types";
@@ -70,7 +70,7 @@ export class Positioner {
 
   /**
    * 计算落点 Indicator
-   * @param dropTargetId 当前 dragover 的目标元素 id（null = 根画布）
+   * @param dropTargetId 当前 dragover 的目标元素 id
    * @param x 鼠标 clientX
    * @param y 鼠标 clientY
    * @param elements 全量 CanvasElement 树
@@ -78,37 +78,30 @@ export class Positioner {
    * @param draggingId 当前被拖拽的元素 id（null = 新组件）
    */
   compute(
-    dropTargetId: string | null,
+    dropTargetId: string,
     x: number,
     y: number,
-    elements: CanvasElement[],
+    root: CanvasRootElement,
     registry: NodeRegistry,
     draggingId: string | null
   ): DropIndicator | null {
-    /** 找到最近的 isCanvas 祖先（包括自身） */
-    let parentId = this.getCanvasAncestor(dropTargetId, elements, registry);
-
-    if (parentId === undefined) {
-      /** dropTargetId 为 null 意味着根画布本身 */
-      parentId = null;
-    }
+    /** 找到最近的 isCanvas 祖先 */
+    let parentId = this.getCanvasAncestor(dropTargetId, root, registry)!;
 
     /** 获取 parentId 对应的 DOM 元素 */
-    const parentEl = parentId === null
-      ? this.getRootCanvasEl(registry)
-      : registry.get(parentId)?.el;
+    const parentEl = registry.get(parentId)?.el;
+    
+    if(!parentEl) {
+      return null;
+    }
 
-    if (!parentEl) return null;
-
-    /** 如果鼠标接近容器边框，尝试上升到父级 */
-    if (parentId !== null && this.isNearBorder(parentEl, x, y)) {
-      const grandParentId = this.findParentId(parentId, elements);
-      /** undefined 表示 parentId 已在根层级，上升到根画布（null） */
-      parentId = grandParentId ?? null;
+    /** 如果鼠标接近画布内部容器元素的边框，则上升到父级 */
+    if (parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
+      parentId = this.findParentId(parentId, root)!;
     }
 
     /** 获取父级内所有直接子元素的维度 */
-    const childInfos = this.getChildNodeInfos(parentId, elements, registry);
+    const childInfos = this.getChildNodeInfos(parentId, root, registry);
 
     /** 过滤掉正在被拖拽的元素自身 */
     const filteredInfos = draggingId
@@ -118,7 +111,7 @@ export class Positioner {
     const { index, where } = findDropPosition(filteredInfos, x, y);
 
     /** 是否为非法落点（不能拖入自身或其后代） */
-    const error = draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, elements);
+    const error = draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root);
 
     /** 计算占位线 rect */
     const rect = this.computeRect(filteredInfos, index, where, parentEl);
@@ -132,33 +125,24 @@ export class Positioner {
     };
   }
 
-  /** 获取根画布 el（第一个 isCanvas 且 id 为空的注册，或直接找 canvas-container） */
-  private getRootCanvasEl(registry: NodeRegistry): HTMLElement | null {
-    const root = registry.get("__root__");
-    return root?.el ?? null;
-  }
-
-  /** 找最近的 isCanvas 祖先（包含自身），返回 null 表示根，undefined 表示找不到 */
+  /** 找最近的 isCanvas 祖先（包含自身） */
   private getCanvasAncestor(
-    id: string | null,
-    elements: CanvasElement[],
+    id: string,
+    root: CanvasRootElement,
     registry: NodeRegistry
-  ): string | null | undefined {
-    if (id === null) return null;
-
+  ): string | null {
     const reg = registry.get(id);
     if (!reg) return null;
     if (reg.isCanvas) return id;
 
-    const parentId = this.findParentId(id, elements);
-    /** findParentId 返回 undefined 表示 id 在根层级，根画布可接受放置，返回 null */
-    if (parentId === undefined) return null;
-    return this.getCanvasAncestor(parentId, elements, registry);
+    const parentId = this.findParentId(id, root);
+    if (!parentId) return null;
+    return this.getCanvasAncestor(parentId, root, registry);
   }
 
-  /** 在元素树中查找父节点 id（undefined = 根层级） */
-  private findParentId(childId: string, elements: CanvasElement[]): string | undefined {
-    const find = (list: CanvasElement[], parentId: string | undefined): string | undefined => {
+  /** 在元素树中查找父节点 id */
+  private findParentId(childId: string, root: CanvasRootElement): string | null {
+    const find = (list: CanvasInnerElement[], parentId: string): string | null => {
       for (const el of list) {
         if (el.id === childId) return parentId;
         if (el.type === CanvasElementTypeEnum.CONTAINER) {
@@ -166,10 +150,10 @@ export class Positioner {
           if (found !== undefined) return found;
         }
       }
-      return undefined;
+      return null;
     };
 
-    return find(elements, undefined);
+    return find(root.children, root.id);
   }
 
   /** 鼠标是否在元素边框附近 */
@@ -186,11 +170,11 @@ export class Positioner {
 
   /** 获取父容器内直接子元素的 NodeInfo 列表 */
   private getChildNodeInfos(
-    parentId: string | null,
-    elements: CanvasElement[],
+    parentId: string,
+    root: CanvasRootElement,
     registry: NodeRegistry
   ): NodeInfo[] {
-    const children = this.getDirectChildren(parentId, elements);
+    const children = this.getDirectChildren(parentId, root);
     const result: NodeInfo[] = [];
 
     for (const child of children) {
@@ -255,10 +239,11 @@ export class Positioner {
   }
 
   /** 获取指定父级的直接子元素列表 */
-  private getDirectChildren(parentId: string | null, elements: CanvasElement[]): CanvasElement[] {
-    if (parentId === null) return elements;
-
-    const findContainer = (list: CanvasElement[]): CanvasContainerElement | null => {
+  private getDirectChildren(parentId: string, root: CanvasRootElement): CanvasInnerElement[] {
+    if(parentId === root.id){
+      return root.children;
+    }
+    const findContainer = (list: CanvasInnerElement[]): CanvasContainerElement | null => {
       for (const el of list) {
         if (el.id === parentId) return el as CanvasContainerElement;
         if (el.type === CanvasElementTypeEnum.CONTAINER) {
@@ -269,20 +254,19 @@ export class Positioner {
       return null;
     };
 
-    const container = findContainer(elements);
+    const container = findContainer(root.children);
     return container?.children ?? [];
   }
 
-  /** 判断 targetId 是否是 sourceId 的后代或本身（防止拖入自身） */
+  /** 判断 targetId 是否是 sourceId 的后代或本身 */
   private isDescendantOrSelf(
     sourceId: string,
-    targetId: string | null,
-    elements: CanvasElement[]
+    targetId: string,
+    root: CanvasRootElement
   ): boolean {
-    if (targetId === null) return false;
     if (sourceId === targetId) return true;
 
-    const findEl = (list: CanvasElement[], id: string): CanvasElement | null => {
+    const findEl = (list: CanvasInnerElement[], id: string): CanvasInnerElement | null => {
       for (const el of list) {
         if (el.id === id) return el;
         if (el.type === CanvasElementTypeEnum.CONTAINER) {
@@ -293,10 +277,10 @@ export class Positioner {
       return null;
     };
 
-    const sourceEl = findEl(elements, sourceId);
+    const sourceEl = findEl(root.children, sourceId);
     if (!sourceEl || sourceEl.type !== CanvasElementTypeEnum.CONTAINER) return false;
 
-    const isInside = (list: CanvasElement[], targetId: string): boolean => {
+    const isInside = (list: CanvasInnerElement[], targetId: string): boolean => {
       for (const el of list) {
         if (el.id === targetId) return true;
         if (el.type === CanvasElementTypeEnum.CONTAINER) {

@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/style';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
 import SizeConfig from './style-panel/SizeConfig.vue';
@@ -41,6 +41,7 @@ import VisualConfig from './style-panel/VisualConfig.vue';
 import FlexConfig from './style-panel/FlexConfig.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
+import { CanvasElement } from '../types.ts';
 
 defineOptions({
   name: 'StyleConfig',
@@ -50,7 +51,15 @@ defineOptions({
 const activeKey = ref([StyleConfigTypeEnum.GENERAL, StyleConfigTypeEnum.SIZE, StyleConfigTypeEnum.FONT, StyleConfigTypeEnum.VISUAL, StyleConfigTypeEnum.FLEX]);
 
 const canvasStore = useCanvasStore();
-const { selectedElementId, selectedElement } = storeToRefs(canvasStore);
+const { selectedElementId } = storeToRefs(canvasStore);
+
+/** 选中的元素对象 */
+const selectedElement = computed(()=>{
+  if(!selectedElementId.value){
+    return null;
+  }
+  return canvasStore.getElementById(selectedElementId.value);
+});
 </script>
 
 <style scoped lang="less">

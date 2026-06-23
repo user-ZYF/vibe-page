@@ -104,32 +104,39 @@ import {
   INTERACTION_EVENT_OPTIONS,
   INTERACTION_ACTION_OPTIONS,
 } from '@/constants/home';
-import type { InteractionRule } from '../types';
+import type { CanvasContainerElement, CanvasInnerElement, InteractionRule } from '../types';
 
 defineOptions({
   name: 'InteractionPanel',
 });
 
 const canvasStore = useCanvasStore();
-const { selectedElementId, selectedElement } = storeToRefs(canvasStore);
+const { selectedElementId, root } = storeToRefs(canvasStore);
+
+const selectedElement = computed(()=>{
+  if(!selectedElementId.value){
+    return null;
+  }
+  return canvasStore.getElementById(selectedElementId.value);
+});
 
 /** 目标元素选项（自身 + 其他所有元素） */
 const targetOptions = computed(() => {
   const options: { label: string; value: string }[] = [
     { label: '当前元素', value: '__self__' },
   ];
-  const collectIds = (list: typeof canvasStore.elements) => {
-    list.forEach((el) => {
+  const collectIds = (elements: CanvasInnerElement[]) => {
+    elements.forEach((el) => {
       if (el.id !== selectedElementId.value) {
-        const typeLabel = el.type;
+        const typeLabel = el.alias;
         options.push({ label: `${typeLabel} (${el.id.slice(0, 6)})`, value: el.id });
       }
       if ('children' in el) {
-        collectIds((el as any).children);
+        collectIds((el as CanvasContainerElement).children);
       }
     });
   };
-  collectIds(canvasStore.elements);
+  collectIds(root.value.children);
   return options;
 });
 

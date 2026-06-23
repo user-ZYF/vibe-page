@@ -42,8 +42,8 @@ export interface NodeRegistration {
 
 /** 占位线 Indicator */
 export interface DropIndicator {
-  /** 目标父容器 id（null = 根画布） */
-  parentId: string | null;
+  /** 目标父容器 id */
+  parentId: string;
   /** 插入位置 index */
   index: number;
   /** before / after */

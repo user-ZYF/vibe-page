@@ -22,15 +22,18 @@ export enum CanvasElementTypeEnum {
   BUTTON,
   /** 段落 */
   PARAGRAPH,
+  /** 根元素 */
+  ROOT
 }
 
 /** 画布元素label */
 export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
-  [CanvasElementTypeEnum.CONTAINER]: "容器",
-  [CanvasElementTypeEnum.LINK]: "超链接",
-  [CanvasElementTypeEnum.IMAGE]: "图片",
-  [CanvasElementTypeEnum.BUTTON]: "按钮",
-  [CanvasElementTypeEnum.PARAGRAPH]: "段落",
+  [CanvasElementTypeEnum.CONTAINER]: "container",
+  [CanvasElementTypeEnum.LINK]: "link",
+  [CanvasElementTypeEnum.IMAGE]: "image",
+  [CanvasElementTypeEnum.BUTTON]: "button",
+  [CanvasElementTypeEnum.PARAGRAPH]: "paragaph",
+  [CanvasElementTypeEnum.ROOT]: "root",
 }
 
 /** 按钮类型 */

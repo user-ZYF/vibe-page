@@ -5,6 +5,7 @@ import Image from "./components/canvas-element/Image.vue";
 import Button from "./components/canvas-element/Button.vue";
 import { CanvasElementTypeEnum } from "@/constants/home.ts";
 import Paragraph from "./components/canvas-element/Paragraph.vue";
+import Root from "./components/canvas-element/Root.vue";
 import type { InjectionKey, Ref } from 'vue';
 import { LayersDropTarget } from "./types.ts";
 
@@ -14,7 +15,8 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.PARAGRAPH]: Paragraph,
     [CanvasElementTypeEnum.LINK]: Link,
     [CanvasElementTypeEnum.IMAGE]: Image,
-    [CanvasElementTypeEnum.BUTTON]: Button
+    [CanvasElementTypeEnum.BUTTON]: Button,
+    [CanvasElementTypeEnum.ROOT]: Root
 };
 
 /** 展开的元素id列表 */

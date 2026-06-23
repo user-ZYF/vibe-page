@@ -1,5 +1,5 @@
-import { CanvasButtonElement, CanvasContainerElement, CanvasElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement } from "@/views/Home/types";
-import { ButtonTypeEnum, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
+import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum } from "@/views/Home/types";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
 import { DefaultStyleConfigMap } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
@@ -10,7 +10,15 @@ import { Positioner } from "@/views/Home/drag/Positioner";
 export const useCanvasStore = defineStore("canvas", {
   state: () => ({
     /** 画布元素列表 */
-    elements: [] as CanvasElement[],
+    root: { 
+      id: nanoid(),
+      type: CanvasElementTypeEnum.ROOT,
+      styleConfig: cloneDeep(DefaultStyleConfigMap[CanvasElementTypeEnum.ROOT]),
+      classes: [],
+      interactions: [],
+      children: [],
+      alias: CanvasElementLabelMap[CanvasElementTypeEnum.ROOT],
+    } as CanvasRootElement,
     /** 选中的元素 */
     selectedElementId: null as string | null,
     /** 当前激活的 Sider 面板 */
@@ -20,12 +28,15 @@ export const useCanvasStore = defineStore("canvas", {
     /** 插入位置 */
     positioner: new Positioner(),
   }),
-  getters: {
-    /** 当前选中的元素（递归查找多层级） */
-    selectedElement: (state): CanvasElement | null => {
-      const findInList = (list: CanvasElement[]): CanvasElement | null => {
+  actions: {
+    /** 获取指定id的元素 */
+    getElementById (id: string): CanvasElement | null {
+      if(id === this.root.id){
+        return this.root;
+      }
+      const findInList = (list: CanvasInnerElement[]): CanvasInnerElement | null => {
         for (const el of list) {
-          if (el.id === state.selectedElementId) return el;
+          if (el.id === id) return el;
           if (el.type === CanvasElementTypeEnum.CONTAINER) {
             const found = findInList((el as CanvasContainerElement).children);
             if (found) return found;
@@ -33,41 +44,35 @@ export const useCanvasStore = defineStore("canvas", {
         }
         return null;
       };
-      return findInList(state.elements);
+      return findInList(this.root.children);
     },
-  },
-  actions: {
     /** 生成一个元素 */
-    generateElement(type: CanvasElementTypeEnum): CanvasElement {
-      const base = { 
-        id: nanoid(), 
+    generateElement(type: CanvasInnerElementTypeEnum): CanvasInnerElement {
+      const elBase = { 
+        id: nanoid(),
         type,
-        styleConfig: cloneDeep(DefaultStyleConfigMap[type]),
+        styleConfig: cloneDeep(DefaultStyleConfigMap[type as CanvasElementTypeEnum]),
         classes: [],
         interactions: [],
+        alias: CanvasElementLabelMap[type as CanvasElementTypeEnum],
       };
       switch(type){
         case CanvasElementTypeEnum.BUTTON:
-          return { ...base, text: '按钮', buttonType: ButtonTypeEnum.BUTTON } as CanvasButtonElement;
+          return { ...elBase, text: '按钮', buttonType: ButtonTypeEnum.BUTTON } as CanvasButtonElement;
         case CanvasElementTypeEnum.PARAGRAPH:
-          return { ...base, text: '段落' } as CanvasParagraphElement;
+          return { ...elBase, text: '段落' } as CanvasParagraphElement;
         case CanvasElementTypeEnum.IMAGE:
-          return { ...base, src: '', title: '图片' }  as CanvasImageElement;
+          return { ...elBase, src: '', title: '图片' }  as CanvasImageElement;
         case CanvasElementTypeEnum.LINK:
-          return { ...base, text: '链接', href: '' } as CanvasLinkElement;
+          return { ...elBase, text: '链接', href: '' } as CanvasLinkElement;
         case CanvasElementTypeEnum.CONTAINER:
-          return { ...base, children: [] }  as CanvasContainerElement;
+          return { ...elBase, children: [] }  as CanvasContainerElement;
       }
     },
-    /** 添加元素 */
-    addElement(type: CanvasElementTypeEnum) {
-      const element = this.generateElement(type);
-      this.elements.push(element);
-    },
     /** 添加元素到指定容器 */
-    addElementToContainer(type: CanvasElementTypeEnum, containerId: string) {
+    addElementToContainer(type: CanvasInnerElementTypeEnum, containerId: string) {
       const element = this.generateElement(type);
-      const findInList = (list: CanvasElement[]): CanvasElement | null => {
+      const findInList = (list: CanvasInnerElement[]): CanvasInnerElement | null => {
         for (const el of list) {
           if (el.id === containerId) return el;
           if (el.type === CanvasElementTypeEnum.CONTAINER) {
@@ -77,7 +82,7 @@ export const useCanvasStore = defineStore("canvas", {
         }
         return null;
       };
-      const container = findInList(this.elements);
+      const container = findInList(this.root.children);
       if (container && container.type === CanvasElementTypeEnum.CONTAINER) {
         (container as CanvasContainerElement).children.push(element);
       }
@@ -99,7 +104,7 @@ export const useCanvasStore = defineStore("canvas", {
     },
     /** 删除元素（递归支持多层级） */
     removeElement(id: string) {
-      const removeFromList = (list: CanvasElement[]): CanvasElement[] => {
+      const removeFromList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
         return list
           .filter((el) => el.id !== id)
           .map((el) => {
@@ -109,62 +114,59 @@ export const useCanvasStore = defineStore("canvas", {
             return el;
           });
       }
-      this.elements = removeFromList(this.elements);
+      this.root.children = removeFromList(this.root.children);
     },
     /** 复制元素（递归支持多层级，插入到原元素后面） */
     duplicateElement(id: string) {
-      const duplicateInList = (list: CanvasElement[]): CanvasElement[] => {
-        const result: CanvasElement[] = [];
+      /** 递归为元素及其所有后代重新生成 id */
+      const renewIds = (el: CanvasInnerElement): CanvasInnerElement => {
+        const next = { ...el, id: nanoid() };
+        if (next.type === CanvasElementTypeEnum.CONTAINER) {
+          (next as CanvasContainerElement).children = (el as CanvasContainerElement).children.map(renewIds);
+        }
+        return next;
+      };
+      const duplicateInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
+        const result: CanvasInnerElement[] = [];
         for (const el of list) {
           result.push(el);
           if (el.id === id) {
-            const copy = cloneDeep(el);
-            copy.id = nanoid();
-            result.push(copy);
+            result.push(renewIds(cloneDeep(el)));
           } else if (el.type === CanvasElementTypeEnum.CONTAINER) {
             result[result.length - 1] = { ...el, children: duplicateInList((el as CanvasContainerElement).children) };
           }
         }
         return result;
       };
-      this.elements = duplicateInList(this.elements);
+      this.root.children = duplicateInList(this.root.children);
     },
-    /** 移动已有元素（支持跨容器），targetParentId = null 表示根层级 */
-    moveElement(id: string, targetParentId: string | null, index: number) {
-      /** 先找到并深克隆要移动的元素 */
-      const findEl = (list: CanvasElement[]): CanvasElement | null => {
-        for (const el of list) {
-          if (el.id === id) return el;
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            const found = findEl((el as CanvasContainerElement).children);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const target = findEl(this.elements);
+    /** 移动已有元素（支持跨容器） */
+    moveElement(id: string, targetParentId: string, index: number) {
+      const target = this.getElementById(id) as CanvasInnerElement | null;
       if (!target) return;
-
-      /** 从原位置移除 */
-      const removeFromList = (list: CanvasElement[]): CanvasElement[] => {
-        return list
-          .filter((el) => el.id !== id)
-          .map((el) => {
-            if (el.type === CanvasElementTypeEnum.CONTAINER) {
-              return { ...el, children: removeFromList((el as CanvasContainerElement).children) };
-            }
-            return el;
-          });
+      /** 使用临时 id 标记原始元素，避免修改响应式对象，通过 cloneDeep 后的副本持有临时 id */
+      const tempId = nanoid();
+      const tempTarget = cloneDeep(target);
+      tempTarget.id = tempId;
+      /** 用临时副本替换原始响应式元素，保留原始元素不变直到删除步骤 */
+      const replaceWithTemp = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
+        return list.map((el) => {
+          if (el.id === id) return tempTarget;
+          if (el.type === CanvasElementTypeEnum.CONTAINER) {
+            return { ...el, children: replaceWithTemp((el as CanvasContainerElement).children) };
+          }
+          return el;
+        });
       };
-      this.elements = removeFromList(this.elements);
+      this.root.children = replaceWithTemp(this.root.children);
 
-      /** 插入到目标位置 */
-      if (targetParentId === null) {
-        const clampedIndex = Math.min(index, this.elements.length);
-        this.elements.splice(clampedIndex, 0, target);
-      } else {
-        const insertInList = (list: CanvasElement[]): CanvasElement[] => {
+      // 先插入再删除，避免删除先前兄弟元素导致插入的相对位置发生改变
+      if(targetParentId === this.root.id) {
+        const clampedIndex = Math.min(index, this.root.children.length);
+        this.root.children.splice(clampedIndex, 0, target);
+      }else {
+        /** 插入到目标位置 */
+        const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
           return list.map((el) => {
             if (el.id === targetParentId && el.type === CanvasElementTypeEnum.CONTAINER) {
               const children = [...(el as CanvasContainerElement).children];
@@ -178,19 +180,31 @@ export const useCanvasStore = defineStore("canvas", {
             return el;
           });
         };
-        this.elements = insertInList(this.elements);
+        this.root.children = insertInList(this.root.children);
       }
-    },
-    /** 在根层级指定 index 位置添加元素 */
-    addElementAt(type: CanvasElementTypeEnum, index: number) {
-      const element = this.generateElement(type);
-      const clampedIndex = Math.min(index, this.elements.length);
-      this.elements.splice(clampedIndex, 0, element);
+      /** 从原位置移除临时标记元素 */
+      const removeFromList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
+        return list
+          .filter((el) => el.id !== tempId)
+          .map((el) => {
+            if (el.type === CanvasElementTypeEnum.CONTAINER) {
+              return { ...el, children: removeFromList((el as CanvasContainerElement).children) };
+            }
+            return el;
+          });
+      };
+      this.root.children = removeFromList(this.root.children);
+     
     },
     /** 在指定容器的 index 位置添加元素 */
-    addElementToContainerAt(type: CanvasElementTypeEnum, containerId: string, index: number) {
+    addElementToContainerAt(type: CanvasInnerElementTypeEnum, containerId: string, index: number) {
       const element = this.generateElement(type);
-      const insertInList = (list: CanvasElement[]): CanvasElement[] => {
+      if(containerId === this.root.id){
+        const clampedIndex = Math.min(index, this.root.children.length);
+        this.root.children.splice(clampedIndex, 0, element);
+        return;
+      }
+      const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
         return list.map((el) => {
           if (el.id === containerId && el.type === CanvasElementTypeEnum.CONTAINER) {
             const children = [...(el as CanvasContainerElement).children];
@@ -204,11 +218,11 @@ export const useCanvasStore = defineStore("canvas", {
           return el;
         });
       };
-      this.elements = insertInList(this.elements);
+      this.root.children = insertInList(this.root.children);
     },
     /** 选中元素的父节点 */
     selectParentElement(id: string | null) {
-      const findParentId = (list: CanvasElement[], parentId: string | null): { found: boolean; parentId: string | null } => {
+      const findParentId = (list: CanvasInnerElement[], parentId: string | null): { found: boolean; parentId: string | null } => {
         for (const el of list) {
           if (el.id === id) return { found: true, parentId };
           if (el.type === CanvasElementTypeEnum.CONTAINER) {
@@ -218,8 +232,8 @@ export const useCanvasStore = defineStore("canvas", {
         }
         return { found: false, parentId: null };
       };
-      const { found, parentId } = findParentId(this.elements, null);
-      if (found && parentId) {
+      const { found, parentId } = findParentId(this.root.children, this.root.id);
+      if (found) {
         this.selectElement(parentId);
       }
     },

@@ -1,5 +1,5 @@
 import type { NodeRegistration } from "./types";
-import type { CanvasElement } from "@/views/Home/types";
+import type { CanvasInnerElement } from "@/views/Home/types";
 import { CanvasElementTypeEnum } from "@/constants/home";
 import type { CanvasContainerElement } from "@/views/Home/types";
 
@@ -43,14 +43,14 @@ export class NodeRegistry {
   }
 
   /** 获取最近的 isCanvas 祖先节点 id（包括自身） */
-  getCanvasAncestor(id: string, elements: CanvasElement[]): string | null {
+  getCanvasAncestor(id: string, elements: CanvasInnerElement[]): string | null {
     const reg = this.map.get(id);
     if (!reg) return null;
 
     if (reg.isCanvas) return id;
 
     /** 在元素树中查找父节点 id */
-    const findParentId = (list: CanvasElement[], childId: string): string | null => {
+    const findParentId = (list: CanvasInnerElement[], childId: string): string | null => {
       for (const el of list) {
         if (el.type === CanvasElementTypeEnum.CONTAINER) {
           const container = el as CanvasContainerElement;

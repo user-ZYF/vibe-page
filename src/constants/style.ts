@@ -469,7 +469,7 @@ export const DISPLAY_OPTIONS = [
 const defaultStyleConfig: StyleConfig = {
   general: {
     float: FloatStyleEnum.NONE,
-    display: DisplayStyleEnum.INLINE,
+    display: DisplayStyleEnum.BLOCK,
     position: PositionStyleEnum.STATIC,
     top: '',
     topUnit: SizeUnitEnum.PX,
@@ -571,29 +571,16 @@ export const DefaultContainerStyleConfig: StyleConfig = {
   size: {
     ...defaultStyleConfig.size,
     minHeight: '75',
-    minHeightUnit: SizeUnitEnum.PX,
     paddingTop: 16,
-    paddingTopUnit: SizeUnitEnum.PX,
     paddingRight: 16,
-    paddingRightUnit: SizeUnitEnum.PX,
     paddingBottom: 16,
-    paddingBottomUnit: SizeUnitEnum.PX,
     paddingLeft: 16,
-    paddingLeftUnit: SizeUnitEnum.PX,
-  },
-  general: {
-    ...defaultStyleConfig.general,
-    display: DisplayStyleEnum.BLOCK,
   },
 };
 
 /** 段落元素默认样式配置 */
 export const DefaultParagraphStyleConfig: StyleConfig = {
   ...defaultStyleConfig,
-  general: {
-    ...defaultStyleConfig.general,
-    display: DisplayStyleEnum.BLOCK,
-  },
   size: {
     ...defaultStyleConfig.size,
     marginTop: 16,
@@ -604,6 +591,10 @@ export const DefaultParagraphStyleConfig: StyleConfig = {
 /** 链接元素默认样式配置 */
 export const DefaultLinkStyleConfig: StyleConfig = {
   ...defaultStyleConfig,
+  general: {
+    ...defaultStyleConfig.general,
+    display: DisplayStyleEnum.INLINE,
+  },
   font: {
     ...defaultStyleConfig.font,
     color: '#0000EE',
@@ -614,10 +605,11 @@ export const DefaultLinkStyleConfig: StyleConfig = {
 /** 图片元素默认样式配置 */
 export const DefaultImageStyleConfig: StyleConfig = {
   ...defaultStyleConfig,
-  general: {
-    ...defaultStyleConfig.general,
-    display: DisplayStyleEnum.INLINE_BLOCK,
-  },
+};
+
+/** 根元素默认样式配置 */
+export const DefaultRootStyleConfig: StyleConfig = {
+  ...defaultStyleConfig,
 };
 
 /** 画布元素默认样式配置映射 */
@@ -627,4 +619,5 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.PARAGRAPH]: DefaultParagraphStyleConfig,
   [CanvasElementTypeEnum.LINK]: DefaultLinkStyleConfig,
   [CanvasElementTypeEnum.IMAGE]: DefaultImageStyleConfig,
+  [CanvasElementTypeEnum.ROOT]: DefaultRootStyleConfig
 };

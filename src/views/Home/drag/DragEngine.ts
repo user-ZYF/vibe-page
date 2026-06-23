@@ -2,7 +2,6 @@ import { nodeRegistry } from "./NodeRegistry";
 import { Positioner } from "./Positioner";
 import { useDragStore } from "@/store/drag";
 import { useCanvasStore } from "@/store/canvas";
-import type { CanvasElementTypeEnum } from "@/constants/home";
 import { CanvasInnerElementTypeEnum } from "../types";
 
 
@@ -57,9 +56,19 @@ class DragEngine {
 
       if (!dragStore.isDragging) return;
 
+      
       /** 用事件实际目标找最近的注册节点，让 Positioner 从真实 hover 节点开始向上找 canvas 祖先 */
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
+
+      // /** 落点为自身或后代时，不做任何操作 */
+      // if (
+      //   dragStore.draggingId !== null &&
+      //   instance.positioner.isDescendantOrSelf(dragStore.draggingId, dropTargetId, canvasStore.root)
+      // ) {
+      //   dragStore.setIndicator(null);
+      //   return;
+      // }
 
       const indicator = instance.positioner.compute(
         dropTargetId,

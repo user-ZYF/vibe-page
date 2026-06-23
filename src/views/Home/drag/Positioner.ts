@@ -95,7 +95,7 @@ export class Positioner {
       return null;
     }
 
-    /** 如果鼠标接近画布内部容器元素的边框，则上升到父级 */
+    /** 如果鼠标接近元素的边框，则上升到父级 */
     if (parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
       parentId = this.findParentId(parentId, root)!;
     }
@@ -147,7 +147,7 @@ export class Positioner {
         if (el.id === childId) return parentId;
         if (el.type === CanvasElementTypeEnum.CONTAINER) {
           const found = find((el as CanvasContainerElement).children, el.id);
-          if (found !== undefined) return found;
+          if (found) return found;
         }
       }
       return null;
@@ -259,7 +259,7 @@ export class Positioner {
   }
 
   /** 判断 targetId 是否是 sourceId 的后代或本身 */
-  private isDescendantOrSelf(
+  public isDescendantOrSelf(
     sourceId: string,
     targetId: string,
     root: CanvasRootElement

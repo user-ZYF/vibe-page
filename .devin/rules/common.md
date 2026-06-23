@@ -41,6 +41,8 @@ Key Conventions
 - 不要随意删除无关本次命令的注释掉的代码
 - vue 单文件组件的顺序标签是 `template`、`script`、`style`
 - **禁止**随意将中文文本标点符号转换为英文标点
+- 非自闭合标签，即使内部没有内容，也不能自闭合结束，必须显式书写闭合标签（如 `<div></div>`，而非 `<div />`）
+- **禁止**自行生成图标 SVG，所有图标必须使用 `ant-design-vue` 提供的图标组件
 
 # 前端开发通用规则
 
@@ -59,6 +61,7 @@ Key Conventions
 - 接口定义文件：采用 `camelCase` 形式命名，如 `list.ts` 和 `listModel.ts`
 - Store/util/资源/样式文件：采用 `kebab-case` 形式命名
 - 类型定义文件：`types` 目录首层子级采用 `.d` 形式命名，其余不采用 `.d` 形式命名
+- 页面级类型定义：固定书写到对应页面文件夹下的 `types.ts` 文件中，不得分散到其他位置
 - 其他文件：采用 `camelCase` 形式命名
 
 ### 类、interface、type、enum 命名规范
@@ -205,6 +208,22 @@ defineProps({
 - 单元测试：`*.spec.ts`
 - 测试文件存放在项目 `tests` 目录
 - 工具函数、Hook 必须编写单元测试
+
+### Less 样式规范
+
+- less 代码中，若多个选择器拥有相同类名前缀，必须使用嵌套写法，**禁止**将其拆开独立书写：
+
+```less
+/* ✅ 正确 */
+.comp-layer-item {
+  &-header { ... }
+  &-children { ... }
+}
+
+/* ❌ 错误 */
+.comp-layer-item-header { ... }
+.comp-layer-item-children { ... }
+```
 
 ### 代码审查要点
 

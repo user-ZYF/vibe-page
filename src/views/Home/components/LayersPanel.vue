@@ -1,7 +1,6 @@
 <!-- ? 组件层级面板 -->
 <template>
   <div class="comp-layers-panel">
-    <div class="comp-layers-panel-header">层级管理</div>
     <div class="comp-layers-panel-body">
         <LayersPanelItem
           :element="root"
@@ -131,15 +130,6 @@ provide(TOGGLE_SHOW_KEY, toggleShow);
   height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.comp-layers-panel-header {
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  flex-shrink: 0;
 }
 
 .comp-layers-panel-body {

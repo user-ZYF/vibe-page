@@ -54,6 +54,7 @@
 
       <!-- 删除按钮 -->
       <DeleteOutlined 
+        v-if="!isRoot"
         class="comp-layer-item-delete"
         @click.stop="deleteElement(element.id)"
       />
@@ -67,7 +68,11 @@
 
     <!-- 子元素列表 -->
     <div
-      v-if="isContainer && isExpanded && children.length > 0"
+      v-if="isContainer && children.length > 0"
+      class="comp-layer-item-children"
+      :class="{
+        'is-expanded': isExpanded
+      }"
     >
       <LayerItem
         v-for="(child, childIndex) in children"
@@ -83,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, PropType, onUnmounted } from 'vue';
+import { computed, inject, PropType, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
@@ -228,10 +233,6 @@ function clearExpandTimer() {
   }
 }
 
-onUnmounted(() => {
-  clearExpandTimer();
-});
-
 /** 拖拽开始 */
 function handleDragStart(e: DragEvent) {
   if (e.dataTransfer) {
@@ -322,6 +323,20 @@ function handleDragOver(e: DragEvent) {
     });
   }
 }
+
+watch(selectedElementId, (newVal)=>{
+  if(newVal && newVal === props.element.id && parentId.value){
+    // 选中当前元素时，依次将选中原始显示到layer面板中（如果折叠态则需要展开）
+    const index = props.ancestorIds.indexOf(parentId.value);
+    for(let i = index; i >= 0; i--){
+      expandContainer(props.ancestorIds[i]);
+    }
+  }
+});
+
+onUnmounted(() => {
+  clearExpandTimer();
+});
 </script>
 
 <style scoped lang="less">
@@ -341,6 +356,17 @@ function handleDragOver(e: DragEvent) {
   background: #52c41a;
   z-index: 10;
   pointer-events: none;
+}
+
+.comp-layer-item-children {
+  height: 0;
+  overflow: hidden;
+  padding-bottom: 2px;
+  margin-bottom: -2px;
+
+  &.is-expanded {
+    height: auto;
+  }
 }
 
 .comp-layer-item-header {

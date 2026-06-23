@@ -244,6 +244,7 @@ import {
   BackgroundPositionEnum,
   BackgroundAttachmentEnum,
   BackgroundSizeEnum,
+  SizeUnitEnum,
 } from '@/constants/style';
 import type { VisualConfig } from '@/views/Home/types';
 
@@ -275,10 +276,10 @@ function handleAddBackground() {
  */
 function handleAddBoxShadow() {
   model.value.boxShadows.push({
-    x: 0, xUnit: 'px',
-    y: 0, yUnit: 'px',
-    blur: 0, blurUnit: 'px',
-    spread: 0, spreadUnit: 'px',
+    x: 0, xUnit: SizeUnitEnum.PX,
+    y: 0, yUnit: SizeUnitEnum.PX,
+    blur: 0, blurUnit: SizeUnitEnum.PX,
+    spread: 0, spreadUnit: SizeUnitEnum.PX,
     color: '#000000',
     inset: false,
   });

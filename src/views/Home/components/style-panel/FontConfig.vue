@@ -148,7 +148,7 @@ import {
   DragOutlined,
   BoldOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum } from '@/constants/style';
+import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
 import type { FontConfig } from '@/views/Home/types';
 
 defineOptions({
@@ -163,9 +163,9 @@ const model = defineModel<FontConfig>({ required: true });
  */
 function handleAddTextShadow() {
   model.value.textShadows.push({
-    x: 0, xUnit: 'px',
-    y: 0, yUnit: 'px',
-    blur: 0, blurUnit: 'px',
+    x: 0, xUnit: SizeUnitEnum.PX,
+    y: 0, yUnit: SizeUnitEnum.PX,
+    blur: 0, blurUnit: SizeUnitEnum.PX,
     color: '#000000',
   });
 }

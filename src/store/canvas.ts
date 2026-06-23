@@ -1,4 +1,4 @@
-import { CanvasContainerElement, CanvasElement } from "@/views/Home/types";
+import { CanvasButtonElement, CanvasContainerElement, CanvasElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement } from "@/views/Home/types";
 import { ButtonTypeEnum, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
 import { DefaultStyleConfigMap } from "@/constants/style";
 import { defineStore } from "pinia";
@@ -12,7 +12,7 @@ export const useCanvasStore = defineStore("canvas", {
     /** 画布元素列表 */
     elements: [] as CanvasElement[],
     /** 选中的元素 */
-    selectedElementId: null as String | null,
+    selectedElementId: null as string | null,
     /** 当前激活的 Sider 面板 */
     activePanel: SiderPanelEnum.COMPONENTS as SiderPanelEnum,
     /** 是否正在拖拽元素 */
@@ -38,7 +38,7 @@ export const useCanvasStore = defineStore("canvas", {
   },
   actions: {
     /** 生成一个元素 */
-    generateElement(type: CanvasElementTypeEnum) {
+    generateElement(type: CanvasElementTypeEnum): CanvasElement {
       const base = { 
         id: nanoid(), 
         type,
@@ -48,15 +48,15 @@ export const useCanvasStore = defineStore("canvas", {
       };
       switch(type){
         case CanvasElementTypeEnum.BUTTON:
-          return { ...base, text: '按钮', buttonType: ButtonTypeEnum.BUTTON };
+          return { ...base, text: '按钮', buttonType: ButtonTypeEnum.BUTTON } as CanvasButtonElement;
         case CanvasElementTypeEnum.PARAGRAPH:
-          return { ...base, text: '段落' };
+          return { ...base, text: '段落' } as CanvasParagraphElement;
         case CanvasElementTypeEnum.IMAGE:
-          return { ...base, src: '', title: '图片' };
+          return { ...base, src: '', title: '图片' }  as CanvasImageElement;
         case CanvasElementTypeEnum.LINK:
-          return { ...base, text: '链接' };
+          return { ...base, text: '链接', href: '' } as CanvasLinkElement;
         case CanvasElementTypeEnum.CONTAINER:
-          return { ...base, children: [] };
+          return { ...base, children: [] }  as CanvasContainerElement;
       }
     },
     /** 添加元素 */
@@ -207,7 +207,7 @@ export const useCanvasStore = defineStore("canvas", {
       this.elements = insertInList(this.elements);
     },
     /** 选中元素的父节点 */
-    selectParentElement(id: string) {
+    selectParentElement(id: string | null) {
       const findParentId = (list: CanvasElement[], parentId: string | null): { found: boolean; parentId: string | null } => {
         for (const el of list) {
           if (el.id === id) return { found: true, parentId };

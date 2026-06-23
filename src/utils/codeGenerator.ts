@@ -64,7 +64,6 @@ function escapeAttrValue(value: string): string {
  */
 function buildAttributes(element: CanvasElement): string {
   const attrs: string[] = [];
-  const tag = TAG_MAP[element.type];
 
   /** id */
   attrs.push(`id="${escapeAttrValue(element.id)}"`);
@@ -153,7 +152,7 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
  * 每个元素通过 #id 选择器关联其内联样式
  */
 function collectCssRules(elements: CanvasElement[]): string[] {
-  const rules: string[] = [];
+  const rules: string[] = [`* {\n  box-sizing: border-box;\n}`];
 
   function collect(el: CanvasElement) {
     const styleObj = convertStyleConfig(el.styleConfig);

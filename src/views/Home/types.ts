@@ -294,24 +294,28 @@ export interface InteractionRule {
 export interface CanvasElementBase {
   /** 元素id */
   id: string;
-  /** 元素类型 */
-  type: CanvasElementTypeEnum;
   /** 元素样式配置 */
   styleConfig: StyleConfig;
   /** 元素类名列表 */
   classes: string[];
   /** 交互规则列表 */
   interactions: InteractionRule[];
+  /** 元素别名 */
+  alias?: string;
 }
 
 /** 画布容器元素 */
 export interface CanvasContainerElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.CONTAINER;
   /** 子元素 */
   children: CanvasElement[];
 }
 
 /** 画布按钮元素 */
 export interface CanvasButtonElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.BUTTON;
   /** 按钮文本 */
   text: string;
   /** 按钮类型 */
@@ -320,12 +324,16 @@ export interface CanvasButtonElement extends CanvasElementBase {
 
 /** 画布段落元素 */
 export interface CanvasParagraphElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.PARAGRAPH;
   /** 段落文本 */
   text: string;
 }
 
 /** 画布图片元素 */
 export interface CanvasImageElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.IMAGE;
   /** 图片地址 */
   src: string;
   /** 图片标题 */
@@ -333,11 +341,18 @@ export interface CanvasImageElement extends CanvasElementBase {
 }
 
 /** 画布超链接元素 */
-export interface CanvasLinkElement extends CanvasElementBase{
+export interface CanvasLinkElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.LINK;
   /** 连接地址 */
   href: string;
   /** 链接文本 */
   text: string;
+}
+
+/** 画布根元素 */
+export interface CanvasRootElement extends CanvasElementBase {
+
 }
 
 /** 画布元素 */

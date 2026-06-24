@@ -114,9 +114,7 @@ export class Positioner {
     let error = "";
 
     /** 是否为非法落点（不能拖入自身或其后代） */
-    if(draggingId === null) {
-      error = "拖拽源为空";
-    }else if(this.isDescendantOrSelf(draggingId, parentId, root)){
+    if(draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root)){
       error = "不允许插入到自身";
     }
 

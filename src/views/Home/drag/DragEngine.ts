@@ -62,15 +62,6 @@ class DragEngine {
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
 
-      // /** 落点为自身或后代时，不做任何操作 */
-      // if (
-      //   dragStore.draggingId !== null &&
-      //   instance.positioner.isDescendantOrSelf(dragStore.draggingId, dropTargetId, canvasStore.root)
-      // ) {
-      //   dragStore.setIndicator(null);
-      //   return;
-      // }
-
       const indicator = instance.positioner.compute(
         dropTargetId,
         e.clientX,

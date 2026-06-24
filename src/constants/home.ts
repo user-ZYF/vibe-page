@@ -98,3 +98,11 @@ export enum DropPositionEnum {
   /** 元素内部 */
   INSIDE,
 }
+
+/** 拖拽来源枚举 */
+export enum DrapSourceTypeEnum {
+  /** 画布内已有元素 */
+  EXISTING,
+  /** 新元素 */
+  NEW,
+}

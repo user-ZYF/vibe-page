@@ -3,6 +3,7 @@ import { Positioner } from "./Positioner";
 import { useDragStore } from "@/store/drag";
 import { useCanvasStore } from "@/store/canvas";
 import { CanvasInnerElementTypeEnum } from "../types";
+import { DropPositionEnum } from "@/constants/home";
 
 
 /**
@@ -127,7 +128,7 @@ class DragEngine {
 
     if (indicator && !indicator.error && draggingId) {
       const insertIndex =
-        indicator.index + (indicator.where === "after" ? 1 : 0);
+        indicator.index + (indicator.where === DropPositionEnum.AFTER ? 1 : 0);
       canvasStore.moveElement(draggingId, indicator.parentId, insertIndex);
     }
 
@@ -142,7 +143,7 @@ class DragEngine {
 
     if (indicator && !indicator.error && dragNewType !== null) {
       const insertIndex =
-        indicator.index + (indicator.where === "after" ? 1 : 0);
+        indicator.index + (indicator.where === DropPositionEnum.AFTER ? 1 : 0);
         canvasStore.addElementToContainerAt(dragNewType, indicator.parentId, insertIndex);
     }
 

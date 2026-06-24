@@ -2,6 +2,8 @@
  * 拖拽引擎类型定义
  */
 
+import { DropPositionEnum } from "@/constants/home";
+
 /** 单个子元素的几何维度（复用于 findDropPosition） */
 export interface NodeInfo {
   /** 元素 id */
@@ -40,16 +42,28 @@ export interface NodeRegistration {
   isCanvas: boolean;
 }
 
-/** 占位线 Indicator */
+/** 占位线 */
+export interface PlaceholderLine {
+  /** 距离视口顶部 */
+  top: number;
+  /** 距离视口底部 */
+  left: number;
+  /** 宽度 */
+  width: number;
+  /** 高度 */
+  height: number;
+}
+
+/** 落点指示器 */
 export interface DropIndicator {
   /** 目标父容器 id */
   parentId: string;
-  /** 插入位置 index */
+  /** 插入位置索引 */
   index: number;
-  /** before / after */
-  where: "before" | "after";
-  /** 占位线几何信息（供 CSS 定位，使用视口坐标） */
-  rect: { top: number; left: number; width: number; height: number };
-  /** 是否为非法落点 */
-  error: boolean;
+  /** 具体插入位置 */
+  where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER;
+  /** 占位线 */
+  rect: PlaceholderLine;
+  /** 错误信息 */
+  error: string;
 }

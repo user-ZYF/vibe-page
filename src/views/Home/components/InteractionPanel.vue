@@ -113,6 +113,7 @@ defineOptions({
 const canvasStore = useCanvasStore();
 const { selectedElementId, root } = storeToRefs(canvasStore);
 
+/** 选中的元素对象 */
 const selectedElement = computed(()=>{
   if(!selectedElementId.value){
     return null;

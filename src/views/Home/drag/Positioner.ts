@@ -1,5 +1,5 @@
 import type { CanvasInnerElement, CanvasRootElement } from "@/views/Home/types";
-import { CanvasElementTypeEnum } from "@/constants/home";
+import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
 import type { CanvasContainerElement } from "@/views/Home/types";
 import type { NodeInfo, DropIndicator } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
@@ -11,8 +11,8 @@ export function findDropPosition(
   dims: NodeInfo[],
   posX: number,
   posY: number
-): { index: number; where: "before" | "after" } {
-  let result = { index: 0, where: "before" as "before" | "after" };
+): { index: number; where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER } {
+  let result = { index: 0, where: DropPositionEnum.BEFORE as DropPositionEnum.BEFORE | DropPositionEnum.AFTER };
 
   let leftLimit = 0;
   let xLimit = 0;
@@ -44,17 +44,17 @@ export function findDropPosition(
       if (posY < dimDown) yLimit = dimDown;
       if (posX < xCenter) {
         xLimit = xCenter;
-        result.where = "before";
+        result.where = DropPositionEnum.BEFORE;
       } else {
         leftLimit = xCenter;
-        result.where = "after";
+        result.where = DropPositionEnum.AFTER;
       }
     } else {
       if (posY < yCenter) {
-        result.where = "before";
+        result.where = DropPositionEnum.BEFORE;
         break;
       } else {
-        result.where = "after";
+        result.where = DropPositionEnum.AFTER;
       }
     }
   }
@@ -110,8 +110,15 @@ export class Positioner {
 
     const { index, where } = findDropPosition(filteredInfos, x, y);
 
+    /** 错误信息 */
+    let error = "";
+
     /** 是否为非法落点（不能拖入自身或其后代） */
-    const error = draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root);
+    if(draggingId === null) {
+      error = "拖拽源为空";
+    }else if(this.isDescendantOrSelf(draggingId, parentId, root)){
+      error = "不允许插入到自身";
+    }
 
     /** 计算占位线 rect */
     const rect = this.computeRect(filteredInfos, index, where, parentEl);
@@ -297,7 +304,7 @@ export class Positioner {
   private computeRect(
     dims: NodeInfo[],
     index: number,
-    where: "before" | "after",
+    where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER,
     parentEl: HTMLElement
   ): { top: number; left: number; width: number; height: number } {
     const thickness = 2;
@@ -306,11 +313,11 @@ export class Positioner {
     if (targetDim) {
       if (!targetDim.inFlow) {
         /** 竖线（float 元素横排） */
-        const l = where === "before" ? targetDim.left : targetDim.left + targetDim.outerWidth;
+        const l = where === DropPositionEnum.BEFORE ? targetDim.left : targetDim.left + targetDim.outerWidth;
         return { top: targetDim.top, left: l, width: thickness, height: targetDim.outerHeight };
       } else {
         /** 横线（文档流竖排） */
-        const t = where === "before" ? targetDim.top : targetDim.bottom;
+        const t = where === DropPositionEnum.BEFORE ? targetDim.top : targetDim.bottom;
         return { top: t, left: targetDim.left, width: targetDim.outerWidth, height: thickness };
       }
     }

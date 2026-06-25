@@ -41,27 +41,27 @@
       <!-- 样式配置面板 -->
       <a-collapse v-model:activeKey="activeKey" ghost>
         <!-- 常规配置 -->
-        <a-collapse-panel :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
+        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
         </a-collapse-panel>
 
         <!-- 尺寸配置 -->
-        <a-collapse-panel :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
+        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
           <SizeConfig v-model="activeStyleConfig!.size" />
         </a-collapse-panel>
 
         <!-- 字体相关配置 -->
-        <a-collapse-panel :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
+        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
           <FontConfig v-model="activeStyleConfig!.font" />
         </a-collapse-panel>
 
         <!-- 视觉配置 -->
         <a-collapse-panel :key="StyleConfigTypeEnum.VISUAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.VISUAL]">
-          <VisualConfig v-model="activeStyleConfig!.visual" />
+          <VisualConfig v-model="activeStyleConfig!.visual" :only-background="isRootElement" />
         </a-collapse-panel>
 
         <!-- 布局配置 -->
-        <a-collapse-panel :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
+        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
           <FlexConfig v-model="activeStyleConfig!.flex" />
         </a-collapse-panel>
       </a-collapse>
@@ -87,6 +87,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/style';
+import { CanvasElementTypeEnum } from '@/constants/home';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
 import SizeConfig from './style-panel/SizeConfig.vue';
 import FontConfig from './style-panel/FontConfig.vue';
@@ -117,10 +118,8 @@ const selectedElement = computed(() => {
 /** 当前选中的 class 名称（null 表示编辑 id 选择器样式） */
 const activeClassName = ref<string | null>(null);
 
-/** 当切换选中元素时，重置 activeClassName */
-watch(selectedElementId, () => {
-  activeClassName.value = null;
-});
+/** 当前选中的是否为根元素 */
+const isRootElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.ROOT);
 
 /** 当前实际编辑的 StyleConfig */
 const activeStyleConfig = computed(() => {
@@ -202,6 +201,11 @@ function handleAddClassConfirm() {
   addClassModalVisible.value = false;
   newClassName.value = '';
 }
+
+/** 当切换选中元素时，重置 activeClassName */
+watch(selectedElementId, () => {
+  activeClassName.value = null;
+});
 </script>
 
 <style scoped lang="less">

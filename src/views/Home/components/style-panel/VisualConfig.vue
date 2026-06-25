@@ -86,7 +86,7 @@
     </div>
 
     <!-- Border -->
-    <div class="style-config-section">
+    <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Border</div>
       <div class="style-config-row">
         <div class="style-config-col">
@@ -109,7 +109,7 @@
     </div>
 
     <!-- Border radius -->
-    <div class="style-config-section">
+    <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Border radius</div>
       <div class="style-config-row">
         <div class="style-config-col">
@@ -146,7 +146,7 @@
     </div>
 
     <!-- Opacity -->
-    <div class="style-config-section">
+    <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Opacity</div>
       <div class="style-config-opacity-row">
         <a-slider v-model:value="model.opacity" :min="0" :max="1" :step="0.01" class="style-config-slider" />
@@ -162,7 +162,7 @@
     </div>
 
     <!-- Box shadow -->
-    <div class="style-config-section">
+    <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label style-config-label--flex">
         <span>Box shadow</span>
         <PlusOutlined class="style-config-add" @click="handleAddBoxShadow" />
@@ -250,6 +250,14 @@ import type { VisualConfig } from '@/views/Home/types';
 
 defineOptions({
   name: 'VisualConfig',
+});
+
+defineProps({
+  /** 是否仅显示 background 配置 */
+  onlyBackground: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 /** 视觉配置数据 */

@@ -1,6 +1,6 @@
 <!-- ? 画布按钮元素 -->
 <template>
-    <button ref="buttonEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :type="data.buttonType" :style="convertStyleConfig(data.styleConfig)" @click.stop="canvasStore.selectElement(data.id)">{{ data.text }}</button>
+    <button ref="buttonEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :type="data.buttonType" :style="style" @click.stop="canvasStore.selectElement(data.id)">{{ data.text }}</button>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +15,11 @@ const canvasStore = useCanvasStore();
 
 const data = defineModel<CanvasButtonElement>("data", {
     required: true
+});
+
+/** 样式对象 */
+const style = computed(()=>{
+    return convertStyleConfig(data.value.styleConfig);
 });
 
 /** 按鈕 DOM 引用 */

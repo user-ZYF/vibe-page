@@ -1,6 +1,6 @@
 <!-- ? 画布图片元素 -->
 <template>
-    <img ref="imageEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :src="data.src" :alt="data.title" :style="convertStyleConfig(data.styleConfig)" @click.stop="canvasStore.selectElement(data.id)">
+    <img ref="imageEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :src="data.src" :alt="data.title" :style="style" @click.stop="canvasStore.selectElement(data.id)">
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +15,11 @@ const canvasStore = useCanvasStore();
 
 const data = defineModel<CanvasImageElement>("data", {
     required: true
+});
+
+/** 样式对象 */
+const style = computed(()=>{
+    return convertStyleConfig(data.value.styleConfig);
 });
 
 /** 图片 DOM 引用 */

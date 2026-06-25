@@ -97,27 +97,27 @@ export interface BackgroundItem {
  */
 export interface GeneralConfig {
   /** 浮动 */
-  float: FloatStyleEnum;
+  float?: FloatStyleEnum;
   /** 显示方式 */
-  display: DisplayStyleEnum;
+  display?: DisplayStyleEnum;
   /** 定位方式 */
-  position: PositionStyleEnum;
+  position?: PositionStyleEnum;
   /** 顶部偏移值 */
-  top: string;
+  top?: string;
   /** 顶部偏移单位 */
-  topUnit: SizeUnitEnum;
+  topUnit?: SizeUnitEnum;
   /** 右侧偏移值 */
-  right: string;
+  right?: string;
   /** 右侧偏移单位 */
-  rightUnit: SizeUnitEnum;
+  rightUnit?: SizeUnitEnum;
   /** 左侧偏移值 */
-  left: string;
+  left?: string;
   /** 左侧偏移单位 */
-  leftUnit: SizeUnitEnum;
+  leftUnit?: SizeUnitEnum;
   /** 底部偏移值 */
-  bottom: string;
+  bottom?: string;
   /** 底部偏移单位 */
-  bottomUnit: SizeUnitEnum;
+  bottomUnit?: SizeUnitEnum;
 }
 
 /**
@@ -125,53 +125,53 @@ export interface GeneralConfig {
  */
 export interface SizeConfig {
   /** 宽度值 */
-  width: string;
+  width?: string;
   /** 宽度单位 */
-  widthUnit: SizeUnitEnum;
+  widthUnit?: SizeUnitEnum;
   /** 高度值 */
-  height: string;
+  height?: string;
   /** 高度单位 */
-  heightUnit: SizeUnitEnum;
+  heightUnit?: SizeUnitEnum;
   /** 最大宽度值 */
-  maxWidth: string;
+  maxWidth?: string;
   /** 最大宽度单位 */
-  maxWidthUnit: SizeUnitEnum;
+  maxWidthUnit?: SizeUnitEnum;
   /** 最小高度值 */
-  minHeight: string;
+  minHeight?: string;
   /** 最小高度单位 */
-  minHeightUnit: SizeUnitEnum;
+  minHeightUnit?: SizeUnitEnum;
   /** 上外边距 */
-  marginTop: number;
+  marginTop?: number;
   /** 上外边距单位 */
-  marginTopUnit: SizeUnitEnum;
+  marginTopUnit?: SizeUnitEnum;
   /** 右外边距 */
-  marginRight: number;
+  marginRight?: number;
   /** 右外边距单位 */
-  marginRightUnit: SizeUnitEnum;
+  marginRightUnit?: SizeUnitEnum;
   /** 下外边距 */
-  marginBottom: number;
+  marginBottom?: number;
   /** 下外边距单位 */
-  marginBottomUnit: SizeUnitEnum;
+  marginBottomUnit?: SizeUnitEnum;
   /** 左外边距 */
-  marginLeft: number;
+  marginLeft?: number;
   /** 左外边距单位 */
-  marginLeftUnit: SizeUnitEnum;
+  marginLeftUnit?: SizeUnitEnum;
   /** 上内边距 */
-  paddingTop: number;
+  paddingTop?: number;
   /** 上内边距单位 */
-  paddingTopUnit: SizeUnitEnum;
+  paddingTopUnit?: SizeUnitEnum;
   /** 右内边距 */
-  paddingRight: number;
+  paddingRight?: number;
   /** 右内边距单位 */
-  paddingRightUnit: SizeUnitEnum;
+  paddingRightUnit?: SizeUnitEnum;
   /** 下内边距 */
-  paddingBottom: number;
+  paddingBottom?: number;
   /** 下内边距单位 */
-  paddingBottomUnit: SizeUnitEnum;
+  paddingBottomUnit?: SizeUnitEnum;
   /** 左内边距 */
-  paddingLeft: number;
+  paddingLeft?: number;
   /** 左内边距单位 */
-  paddingLeftUnit: SizeUnitEnum;
+  paddingLeftUnit?: SizeUnitEnum;
 }
 
 /**
@@ -179,29 +179,29 @@ export interface SizeConfig {
  */
 export interface FontConfig {
   /** 字体族 */
-  fontFamily: string;
+  fontFamily?: string;
   /** 字体大小 */
-  fontSize: number;
+  fontSize?: number;
   /** 字体大小单位 */
-  fontSizeUnit: SizeUnitEnum;
+  fontSizeUnit?: SizeUnitEnum;
   /** 字体粗细 */
-  fontWeight: FontWeightEnum;
+  fontWeight?: FontWeightEnum;
   /** 字母间距值 */
-  letterSpacing: string;
+  letterSpacing?: string;
   /** 字母间距单位 */
-  letterSpacingUnit: SizeUnitEnum;
+  letterSpacingUnit?: SizeUnitEnum;
   /** 文字颜色 */
-  color: string;
+  color?: string;
   /** 行高值 */
-  lineHeight: string;
+  lineHeight?: string;
   /** 行高单位 */
-  lineHeightUnit: SizeUnitEnum;
+  lineHeightUnit?: SizeUnitEnum;
   /** 文字对齐方式 */
-  textAlign: TextAlignEnum;
+  textAlign?: TextAlignEnum;
   /** 文字装饰 */
-  textDecoration: TextDecorationEnum;
+  textDecoration?: TextDecorationEnum;
   /** 文字阴影列表 */
-  textShadows: TextShadowItem[];
+  textShadows?: TextShadowItem[];
 }
 
 /**
@@ -209,29 +209,29 @@ export interface FontConfig {
  */
 export interface VisualConfig {
   /** 背景层列表 */
-  backgrounds: BackgroundItem[];
+  backgrounds?: BackgroundItem[];
   /** 边框宽度 */
-  borderWidth: number;
+  borderWidth?: number;
   /** 边框宽度单位 */
-  borderWidthUnit: SizeUnitEnum;
+  borderWidthUnit?: SizeUnitEnum;
   /** 边框样式 */
-  borderStyle: BorderStyleEnum;
+  borderStyle?: BorderStyleEnum;
   /** 边框颜色 */
-  borderColor: string;
+  borderColor?: string;
   /** 左上圆角 */
-  borderRadiusTL: number;
+  borderRadiusTL?: number;
   /** 右上圆角 */
-  borderRadiusTR: number;
+  borderRadiusTR?: number;
   /** 左下圆角 */
-  borderRadiusBL: number;
+  borderRadiusBL?: number;
   /** 右下圆角 */
-  borderRadiusBR: number;
+  borderRadiusBR?: number;
   /** 圆角单位 */
-  borderRadiusUnit: SizeUnitEnum;
+  borderRadiusUnit?: SizeUnitEnum;
   /** 不透明度 */
-  opacity: number;
+  opacity?: number;
   /** 盒阴影列表 */
-  boxShadows: BoxShadowItem[];
+  boxShadows?: BoxShadowItem[];
 }
 
 /**
@@ -239,29 +239,29 @@ export interface VisualConfig {
  */
 export interface FlexConfig {
   /** Flex 容器类型 */
-  flexContainer: FlexContainerEnum;
+  flexContainer?: FlexContainerEnum;
   /** Flex 父级值 */
-  flexParent: number | null;
+  flexParent?: number | null;
   /** 主轴方向 */
-  flexDirection: FlexDirectionEnum;
+  flexDirection?: FlexDirectionEnum;
   /** 主轴对齐 */
-  justifyContent: JustifyContentEnum;
+  justifyContent?: JustifyContentEnum;
   /** 交叉轴对齐 */
-  alignItems: AlignItemsEnum;
+  alignItems?: AlignItemsEnum;
   /** Flex 子级值 */
-  flexChildren: number | null;
+  flexChildren?: number | null;
   /** 排列顺序 */
-  order: number | null;
+  order?: number | null;
   /** 放大比例 */
-  flexGrow: number;
+  flexGrow?: number;
   /** 缩小比例 */
-  flexShrink: number;
+  flexShrink?: number;
   /** 基准尺寸值 */
-  flexBasis: string;
+  flexBasis?: string;
   /** 基准尺寸单位 */
-  flexBasisUnit: SizeUnitEnum;
+  flexBasisUnit?: SizeUnitEnum;
   /** 自身对齐方式 */
-  alignSelf: AlignSelfEnum;
+  alignSelf?: AlignSelfEnum;
 }
 
 /** 画布元素样式配置 */
@@ -296,8 +296,10 @@ export interface CanvasElementBase {
   id: string;
   /** 元素样式配置 */
   styleConfig: StyleConfig;
-  /** 元素类名列表 */
+  /** 元素已启用的类名列表（实际应用到 DOM 的 class） */
   classes: string[];
+  /** 元素管理的所有类名列表（包含启用和禁用的 class） */
+  classNames: string[];
   /** 交互规则列表 */
   interactions: InteractionRule[];
   /** 元素别名 */
@@ -369,7 +371,7 @@ export type CanvasElement = CanvasInnerElement | CanvasRootElement;
 
 /** Layers拖拽落点目标 */
 export interface LayersDropTarget {
-  /** 拖拽魔表落点 */
+  /** 拖拽目标落点 */
   position: DropPositionEnum;
   /** 目标父容器 id */
   parentId: string;

@@ -1,6 +1,6 @@
 <!-- ? 容器组件 -->
 <template>
-  <div ref="containerEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="convertStyleConfig(data.styleConfig)" @click.stop="canvasStore.selectElement(data.id)">
+  <div ref="containerEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="canvasStore.selectElement(data.id)">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </div>
 </template>
@@ -19,6 +19,11 @@ const data = defineModel<CanvasContainerElement>("data", {
 });
 
 const canvasStore = useCanvasStore();
+
+/** 样式对象 */
+const style = computed(()=>{
+    return convertStyleConfig(data.value.styleConfig);
+});
 
 /** 容器 DOM 引用 */
 const containerEl = ref<HTMLElement>();

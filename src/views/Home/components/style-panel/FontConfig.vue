@@ -86,7 +86,7 @@
         <PlusOutlined class="style-config-add" @click="handleAddTextShadow" />
       </div>
       <div
-        v-for="(shadow, index) in model.textShadows"
+        v-for="(shadow, index) in (model.textShadows ?? [])"
         :key="index"
         class="style-config-box style-config-box--shadow"
       >
@@ -94,7 +94,7 @@
           <DragOutlined class="style-config-drag-icon" />
           <span>{{ shadow.x }} {{ shadow.y }} {{ shadow.blur }}</span>
           <BoldOutlined class="style-config-shadow-icon" />
-          <CloseOutlined class="style-config-shadow-close" @click="model.textShadows.splice(index, 1)" />
+          <CloseOutlined class="style-config-shadow-close" @click="model.textShadows?.splice(index, 1)" />
         </div>
         <!-- X & Y -->
         <div class="style-config-row">
@@ -162,6 +162,7 @@ const model = defineModel<FontConfig>({ required: true });
  * 添加 text-shadow 项
  */
 function handleAddTextShadow() {
+  if (!model.value.textShadows) model.value.textShadows = [];
   model.value.textShadows.push({
     x: 0, xUnit: SizeUnitEnum.PX,
     y: 0, yUnit: SizeUnitEnum.PX,

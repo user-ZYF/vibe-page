@@ -58,7 +58,7 @@ class DragEngine {
       if (!dragStore.isDragging) return;
 
       
-      /** 用事件实际目标找最近的注册节点，让 Positioner 从真实 hover 节点开始向上找 canvas 祖先 */
+      // /** 从事件目标元素触发，向上找注册过的画布元素 */
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
 

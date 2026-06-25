@@ -7,7 +7,7 @@
         <span>
           Background
           <CloseCircleOutlined
-            v-if="model.backgrounds.length > 0"
+            v-if="(model.backgrounds?.length ?? 0) > 0"
             class="style-config-clear"
             @click="model.backgrounds = []"
           />
@@ -17,7 +17,7 @@
 
       <!-- 每一层 background -->
       <div
-        v-for="(bg, index) in model.backgrounds"
+        v-for="(bg, index) in (model.backgrounds ?? [])"
         :key="index"
         class="style-config-box style-config-box--shadow"
       >
@@ -32,7 +32,7 @@
             v-model="bg.color"
             class="style-config-color-picker style-config-color-picker--small"
           />
-          <CloseOutlined class="style-config-shadow-close" @click="model.backgrounds.splice(index, 1)" />
+          <CloseOutlined class="style-config-shadow-close" @click="model.backgrounds?.splice(index, 1)" />
         </div>
 
         <!-- 类型切换 -->
@@ -168,14 +168,14 @@
         <PlusOutlined class="style-config-add" @click="handleAddBoxShadow" />
       </div>
       <div
-        v-for="(shadow, index) in model.boxShadows"
+        v-for="(shadow, index) in (model.boxShadows ?? [])"
         :key="index"
         class="style-config-box style-config-box--shadow"
       >
         <div class="style-config-shadow-preview">
           <DragOutlined class="style-config-drag-icon" />
           <span>{{ shadow.x }}px {{ shadow.y }}px {{ shadow.blur }}px {{ shadow.spread }}px</span>
-          <CloseOutlined class="style-config-shadow-close" @click="model.boxShadows.splice(index, 1)" />
+          <CloseOutlined class="style-config-shadow-close" @click="model.boxShadows?.splice(index, 1)" />
         </div>
         <div class="style-config-row">
           <div class="style-config-col">
@@ -259,6 +259,7 @@ const model = defineModel<VisualConfig>({ required: true });
  * 添加 background 层
  */
 function handleAddBackground() {
+  if (!model.value.backgrounds) model.value.backgrounds = [];
   model.value.backgrounds.push({
     type: BackgroundTypeEnum.IMAGE,
     imageUrl: '',
@@ -275,6 +276,7 @@ function handleAddBackground() {
  * 添加 box-shadow 项
  */
 function handleAddBoxShadow() {
+  if (!model.value.boxShadows) model.value.boxShadows = [];
   model.value.boxShadows.push({
     x: 0, xUnit: SizeUnitEnum.PX,
     y: 0, yUnit: SizeUnitEnum.PX,

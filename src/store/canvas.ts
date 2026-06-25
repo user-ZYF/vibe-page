@@ -1,6 +1,6 @@
-import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum } from "@/views/Home/types";
+import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Home/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
-import { DefaultStyleConfigMap } from "@/constants/style";
+import { DefaultStyleConfigMap, defaultClassStyleConfig } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
@@ -15,6 +15,7 @@ export const useCanvasStore = defineStore("canvas", {
       type: CanvasElementTypeEnum.ROOT,
       styleConfig: cloneDeep(DefaultStyleConfigMap[CanvasElementTypeEnum.ROOT]),
       classes: [],
+      classNames: [],
       interactions: [],
       children: [],
       alias: CanvasElementLabelMap[CanvasElementTypeEnum.ROOT],
@@ -27,8 +28,25 @@ export const useCanvasStore = defineStore("canvas", {
     isDragging: false,
     /** 插入位置 */
     positioner: new Positioner(),
+    /** 全局 class 样式配置映射 */
+    classStyles: {} as Record<string, StyleConfig>,
   }),
   actions: {
+    /** 获取指定 class 的样式配置，不存在则自动创建 */
+    getOrCreateClassStyle(className: string): StyleConfig {
+      if (!this.classStyles[className]) {
+        this.classStyles[className] = cloneDeep(defaultClassStyleConfig);
+      }
+      return this.classStyles[className];
+    },
+    /** 更新指定 class 的样式配置 */
+    updateClassStyle(className: string, styleConfig: StyleConfig) {
+      this.classStyles[className] = styleConfig;
+    },
+    /** 删除指定 class 的样式配置 */
+    removeClassStyle(className: string) {
+      delete this.classStyles[className];
+    },
     /** 获取指定id的元素 */
     getElementById (id: string): CanvasElement | null {
       if(id === this.root.id){
@@ -53,6 +71,7 @@ export const useCanvasStore = defineStore("canvas", {
         type,
         styleConfig: cloneDeep(DefaultStyleConfigMap[type as CanvasElementTypeEnum]),
         classes: [],
+        classNames: [],
         interactions: [],
         alias: CanvasElementLabelMap[type as CanvasElementTypeEnum],
       };

@@ -1,6 +1,6 @@
 <!-- ? 画布段落元素 -->
 <template>
-    <p ref="paragraphEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :style="convertStyleConfig(data.styleConfig)" @click="canvasStore.selectElement(data.id)">{{ data.text }}</p>
+    <p ref="paragraphEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :style="style" @click="canvasStore.selectElement(data.id)">{{ data.text }}</p>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +15,11 @@ const canvasStore = useCanvasStore();
 
 const data = defineModel<CanvasParagraphElement>("data", {
     required: true
+});
+
+/** 样式对象 */
+const style = computed(()=>{
+    return convertStyleConfig(data.value.styleConfig);
 });
 
 /** 段落 DOM 引用 */

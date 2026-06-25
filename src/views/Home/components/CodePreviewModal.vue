@@ -13,19 +13,19 @@
         <div class="code-preview-panel-header">
           <span class="code-preview-panel-title">HTML</span>
         </div>
-        <pre class="code-preview-panel-body"><code class="language-html" v-html="highlightedHtml" /></pre>
+        <pre class="code-preview-panel-body"><code class="language-html" v-html="highlightedHtml"></code></pre>
       </div>
       <div class="code-preview-panel">
         <div class="code-preview-panel-header">
           <span class="code-preview-panel-title">CSS</span>
         </div>
-        <pre class="code-preview-panel-body"><code class="language-css" v-html="highlightedCss" /></pre>
+        <pre class="code-preview-panel-body"><code class="language-css" v-html="highlightedCss"></code></pre>
       </div>
       <div class="code-preview-panel">
         <div class="code-preview-panel-header">
           <span class="code-preview-panel-title">JS</span>
         </div>
-        <pre class="code-preview-panel-body"><code class="language-javascript" v-html="highlightedJs" /></pre>
+        <pre class="code-preview-panel-body"><code class="language-javascript" v-html="highlightedJs"></code></pre>
       </div>
     </div>
   </a-modal>

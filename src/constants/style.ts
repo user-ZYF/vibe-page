@@ -465,151 +465,92 @@ export const DISPLAY_OPTIONS = [
 ];
 
 
-/** 通用默认样式配置（浏览器默认值） */
-const defaultStyleConfig: StyleConfig = {
-  general: {
-    float: FloatStyleEnum.NONE,
-    display: DisplayStyleEnum.BLOCK,
-    position: PositionStyleEnum.STATIC,
-    top: '',
-    topUnit: SizeUnitEnum.PX,
-    right: '',
-    rightUnit: SizeUnitEnum.PX,
-    left: '',
-    leftUnit: SizeUnitEnum.PX,
-    bottom: '',
-    bottomUnit: SizeUnitEnum.PX,
-  },
-  size: {
-    width: '',
-    widthUnit: SizeUnitEnum.PX,
-    height: '',
-    heightUnit: SizeUnitEnum.PX,
-    maxWidth: '',
-    maxWidthUnit: SizeUnitEnum.PX,
-    minHeight: '',
-    minHeightUnit: SizeUnitEnum.PX,
-    marginTop: 0,
-    marginTopUnit: SizeUnitEnum.PX,
-    marginRight: 0,
-    marginRightUnit: SizeUnitEnum.PX,
-    marginBottom: 0,
-    marginBottomUnit: SizeUnitEnum.PX,
-    marginLeft: 0,
-    marginLeftUnit: SizeUnitEnum.PX,
-    paddingTop: 0,
-    paddingTopUnit: SizeUnitEnum.PX,
-    paddingRight: 0,
-    paddingRightUnit: SizeUnitEnum.PX,
-    paddingBottom: 0,
-    paddingBottomUnit: SizeUnitEnum.PX,
-    paddingLeft: 0,
-    paddingLeftUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    fontFamily: '',
-    fontSize: 16,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.NORMAL,
-    letterSpacing: 'normal',
-    letterSpacingUnit: SizeUnitEnum.PX,
-    color: '#000000',
-    lineHeight: 'normal',
-    lineHeightUnit: SizeUnitEnum.PX,
-    textAlign: TextAlignEnum.LEFT,
-    textDecoration: TextDecorationEnum.NONE,
-    textShadows: [],
-  },
-  visual: {
-    backgrounds: [],
-    borderWidth: 0,
-    borderWidthUnit: SizeUnitEnum.PX,
-    borderStyle: BorderStyleEnum.NONE,
-    borderColor: '#000000',
-    borderRadiusTL: 0,
-    borderRadiusTR: 0,
-    borderRadiusBL: 0,
-    borderRadiusBR: 0,
-    borderRadiusUnit: SizeUnitEnum.PX,
-    opacity: 1,
-    boxShadows: [],
-  },
-  flex: {
-    flexContainer: FlexContainerEnum.DISABLE,
-    flexParent: null,
-    flexDirection: FlexDirectionEnum.ROW,
-    justifyContent: JustifyContentEnum.FLEX_START,
-    alignItems: AlignItemsEnum.STRETCH,
-    flexChildren: null,
-    order: null,
-    flexGrow: 0,
-    flexShrink: 1,
-    flexBasis: 'auto',
-    flexBasisUnit: SizeUnitEnum.PX,
-    alignSelf: AlignSelfEnum.AUTO,
-  },
-};
-
 /** 按钮元素默认样式配置 */
 export const DefaultButtonStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
   general: {
-    ...defaultStyleConfig.general,
     display: DisplayStyleEnum.INLINE_BLOCK,
   },
+  size: {},
   font: {
-    ...defaultStyleConfig.font,
-    fontWeight: FontWeightEnum.NORMAL,
     textAlign: TextAlignEnum.CENTER,
-    textDecoration: TextDecorationEnum.NONE,
   },
+  visual: {},
+  flex: {},
 };
 
 /** 容器元素默认样式配置 */
 export const DefaultContainerStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
+  general: {},
   size: {
-    ...defaultStyleConfig.size,
     minHeight: '75',
+    minHeightUnit: SizeUnitEnum.PX,
     paddingTop: 16,
+    paddingTopUnit: SizeUnitEnum.PX,
     paddingRight: 16,
+    paddingRightUnit: SizeUnitEnum.PX,
     paddingBottom: 16,
+    paddingBottomUnit: SizeUnitEnum.PX,
     paddingLeft: 16,
+    paddingLeftUnit: SizeUnitEnum.PX,
   },
+  font: {},
+  visual: {},
+  flex: {},
 };
 
 /** 段落元素默认样式配置 */
 export const DefaultParagraphStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
+  general: {},
   size: {
-    ...defaultStyleConfig.size,
     marginTop: 16,
+    marginTopUnit: SizeUnitEnum.PX,
     marginBottom: 16,
+    marginBottomUnit: SizeUnitEnum.PX,
   },
+  font: {},
+  visual: {},
+  flex: {},
 };
 
 /** 链接元素默认样式配置 */
 export const DefaultLinkStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
   general: {
-    ...defaultStyleConfig.general,
     display: DisplayStyleEnum.INLINE,
   },
+  size: {},
   font: {
-    ...defaultStyleConfig.font,
     color: '#0000EE',
     textDecoration: TextDecorationEnum.UNDERLINE,
   },
+  visual: {},
+  flex: {},
 };
 
 /** 图片元素默认样式配置 */
 export const DefaultImageStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
+  general: {},
+  size: {},
+  font: {},
+  visual: {},
+  flex: {},
 };
 
 /** 根元素默认样式配置 */
 export const DefaultRootStyleConfig: StyleConfig = {
-  ...defaultStyleConfig,
+  general: {},
+  size: {},
+  font: {},
+  visual: {},
+  flex: {},
+};
+
+/** Class 默认样式配置（空白样式，所有属性均未设置） */
+export const defaultClassStyleConfig: StyleConfig = {
+  general: {},
+  size: {},
+  font: {},
+  visual: {},
+  flex: {},
 };
 
 /** 画布元素默认样式配置映射 */

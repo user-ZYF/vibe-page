@@ -1,36 +1,48 @@
+<!-- CanvasContainer.vue -->
 <template>
-    <div class="container">
-        <div class="wrapper" draggable="true" @click.stop @dragstart.stop="handleDragstart">
-            <div class="inner" draggable="true" @click.stop @dragstart.stop="handleDragstart">
-                <button class="button" @click.stop draggable="true" @dragstart.stop="handleDragstart">click</button>
-            </div>
-        </div>
-    </div>
-</template>
+  <div class="container">
+    abc
+    <div ref="hostRef" class="canvas-host"></div>
+    <CanvasApp/>
+  </div>
+</template> 
 
-<script lang="ts" setup>
-const handleDragstart = (e: DragEvent) => {
-  console.log(e);
-};
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { createApp } from 'vue'
+import CanvasApp from './components/CanvasApp.vue'  // 画布内部的 Vue 根组件
+
+const hostRef = ref(null)
+let app = null
+let shadowRoot = null
+
+onMounted(() => {
+  // 创建 Shadow Root
+  shadowRoot = hostRef.value.attachShadow({ mode: 'open' })
+  
+  // 将 Vue 应用挂载到 Shadow Root 中
+  app = createApp(CanvasApp)
+  app.mount(shadowRoot) // Vue 3 支持挂载到 ShadowRoot
+})
+
+onUnmounted(() => {
+  if (app) app.unmount()
+})
+
+// 如果你需要从外部向画布传递数据，可以使用 props / provide / 状态管理
+// 这里直接通过 CanvasApp 的 props 传递即可（需要在挂载时传入）
 </script>
 
-<style lang="less" scoped>
-.container {
-    width: 100%;
-    height: 100%;
+<style>
+.container{
+  color: red;
+}
 
-    .wrapper {
-        width: 300px;
-        height: 300px;
-        background: red;
-        padding: 100px;
-        
-        .inner {
-            padding: 100px;
-            width: 200px;
-            height: 200px;
-            background: green;
-        }
-    }
+button {
+  background: green;
+}
+
+.canvas-host {
+  all: revert;
 }
 </style>

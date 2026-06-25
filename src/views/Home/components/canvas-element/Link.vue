@@ -1,6 +1,6 @@
 <!-- ? 画布超链接元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="convertStyleConfig(data.styleConfig)" @click="canvasStore.selectElement(data.id)">{{ data.text }}</a>
+    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="style" @click="canvasStore.selectElement(data.id)">{{ data.text }}</a>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +15,11 @@ const canvasStore = useCanvasStore();
 
 const data = defineModel<CanvasLinkElement>("data", {
     required: true
+});
+
+/** 样式对象 */
+const style = computed(()=>{
+    return convertStyleConfig(data.value.styleConfig);
 });
 
 /** 超链接 DOM 引用 */

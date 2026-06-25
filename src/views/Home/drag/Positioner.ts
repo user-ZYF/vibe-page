@@ -3,9 +3,10 @@ import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
 import type { CanvasContainerElement } from "@/views/Home/types";
 import type { NodeInfo, DropIndicator } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
+import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum } from "@/constants/style";
 
 /**
- * 纯函数：根据子元素维度数组和鼠标坐标计算插入位置（同 Craft.js findPosition 逻辑）
+ * 纯函数：根据子元素维度数组和鼠标坐标计算插入位置
  */
 export function findDropPosition(
   dims: NodeInfo[],
@@ -22,7 +23,7 @@ export function findDropPosition(
   let yCenter = 0;
   let dimDown = 0;
 
-  for (let i = 0, len = dims.length; i < len; i++) {
+  for (let i = 0; i < dims.length; i++) {
     const dim = dims[i];
 
     dimRight = dim.left + dim.outerWidth;
@@ -97,7 +98,7 @@ export class Positioner {
 
     /** 如果鼠标接近元素的边框，则上升到父级 */
     if (parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
-      parentId = this.findParentId(parentId, root)!;
+      parentId = this.findParentId(parentId, root);
     }
 
     /** 获取父级内所有直接子元素的维度 */
@@ -146,7 +147,7 @@ export class Positioner {
   }
 
   /** 在元素树中查找父节点 id */
-  private findParentId(childId: string, root: CanvasRootElement): string | null {
+  private findParentId(childId: string, root: CanvasRootElement): string {
     const find = (list: CanvasInnerElement[], parentId: string): string | null => {
       for (const el of list) {
         if (el.id === childId) return parentId;
@@ -158,7 +159,7 @@ export class Positioner {
       return null;
     };
 
-    return find(root.children, root.id);
+    return find(root.children, root.id)!;
   }
 
   /** 鼠标是否在元素边框附近 */
@@ -186,41 +187,36 @@ export class Positioner {
       const reg = registry.get(child.id);
       if (!reg) continue;
       const rect = reg.el.getBoundingClientRect();
-      const style = window.getComputedStyle(reg.el);
+      const style = getComputedStyle(reg.el);
       const parentEl = reg.el.parentElement;
-      const parentStyle = parentEl ? window.getComputedStyle(parentEl) : null;
+      const parentStyle = parentEl ? getComputedStyle(parentEl) : null;
 
-      /** 参照 craft.js getDOMInfo.ts 的 styleInFlow 逻辑：判断元素是否在纵向文档流中 */
-      const computeInFlow = (): boolean => {
+      /** 判断元素是否在纵向文档流中 */
+      function computeInFlow():boolean {
         if (!parentStyle) return true;
 
         /** 父容器是 float */
-        if (parentStyle.float !== "none") return false;
-
-        /** 父容器是 grid */
-        if (parentStyle.display === "grid") return false;
+        if (parentStyle.float !== FloatStyleEnum.NONE) return false;
 
         /** 父容器是横向 flex（flex-direction 不为 column） */
         if (
-          parentStyle.display === "flex" &&
-          parentStyle.flexDirection !== "column"
+          parentStyle.display === DisplayStyleEnum.FLEX &&
+          parentStyle.flexDirection !== FlexDirectionEnum.COLUMN && 
+          parentStyle.flexDirection !== FlexDirectionEnum.COLUMN_REVERSE
         ) {
           return false;
         }
 
         /** 自身绝对/固定定位 */
-        if (style.position === "absolute" || style.position === "fixed") return false;
+        if (style.position === PositionStyleEnum.ABSOLUTE || style.position === PositionStyleEnum.FIXED) return false;
 
         /** 自身浮动 */
-        if (style.float !== "none") return false;
+        if (style.float !== FloatStyleEnum.NONE) return false;
 
         /** 自身 display 类型 */
         switch (style.display) {
-          case "block":
-          case "list-item":
-          case "table":
-          case "flex":
-          case "grid":
+          case DisplayStyleEnum.BLOCK:
+          case DisplayStyleEnum.FLEX:
             return true;
         }
 

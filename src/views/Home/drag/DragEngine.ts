@@ -74,10 +74,26 @@ class DragEngine {
       dragStore.setIndicator(indicator);
     }
 
+    /** 拖拽离开画布区域 */
+    function handleDragLeave(e: DragEvent) {
+      const rect = el.getBoundingClientRect();
+      if (
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom
+      ) {
+        const dragStore = useDragStore();
+        dragStore.setIndicator(null);
+      }
+    }
+
     el.addEventListener("dragover", handleDragOver);
+    el.addEventListener("dragleave", handleDragLeave);
 
     return () => {
       el.removeEventListener("dragover", handleDragOver);
+      el.removeEventListener("dragleave", handleDragLeave);
     };
   }
 

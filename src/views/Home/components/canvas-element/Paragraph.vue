@@ -10,6 +10,7 @@ import { convertStyleConfig } from '@/utils/styleConfig';
 import { useCanvasStore } from '@/store/canvas';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useInteractionBinder } from '@/composables/useInteractionBinder';
+import { useElementVisibility } from '@/composables/useElementVisibility';
 
 const canvasStore = useCanvasStore();
 
@@ -24,6 +25,8 @@ const style = computed(()=>{
 
 /** 段落 DOM 引用 */
 const paragraphEl = ref<HTMLElement>();
+
+useElementVisibility(data.value.id, data);
 
 useDragConnector(paragraphEl, data.value.id);
 useInteractionBinder(paragraphEl, computed(() => data.value.interactions));

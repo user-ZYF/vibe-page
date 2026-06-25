@@ -32,9 +32,6 @@ const { root } = storeToRefs(canvasStore);
 /** 展开元素id列表 */
 const expandedKeys = ref<string[]>([]);
 
-/** 隐藏元素id列表 */
-const hiddenKeys = ref<string[]>([]);
-
 /** 当前拖拽元素id */
 const draggingId = ref<string | null>(null);
 
@@ -60,28 +57,6 @@ function collapseContainer(id: string) {
 function expandContainer(id: string) {
   if(!expandedKeys.value.includes(id)){
     expandedKeys.value.push(id);
-  }
-}
-
-/** 切换显示/隐藏 */
-function toggleShow(id: string){
-  const found = hiddenKeys.value.includes(id);
-  if(found){
-    showElement(id);
-  }else {
-    hideElement(id);
-  }
-}
-
-/** 显示元素 */
-function showElement(id: string) {
-  hiddenKeys.value = hiddenKeys.value.filter((item)=>item !== id);
-}
-
-/** 隐藏元素 */
-function hideElement(id: string) {
-  if(!hiddenKeys.value.includes(id)){
-    hiddenKeys.value.push(id);
   }
 }
 
@@ -121,8 +96,6 @@ provide(DROP_TARGET_KEY, dropTarget);
 provide(SET_DRAGGING_ID_KEY, setDraggingId);
 provide(SET_DROP_TARGET_KEY, setDropTarget);
 provide(EXECUTE_MOVE_KEY, executeMove);
-provide(HIDDEN_KEYS, hiddenKeys);
-provide(TOGGLE_SHOW_KEY, toggleShow);
 </script>
 
 <style scoped lang="less">

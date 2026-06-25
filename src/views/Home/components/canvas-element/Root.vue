@@ -13,6 +13,7 @@ import { CanvasElementComponentMap } from '../../contants';
 import { useCanvasStore } from '@/store/canvas';
 import { dragEngine } from '../../drag/DragEngine';
 import { nodeRegistry } from '../../drag/NodeRegistry';
+import { useElementVisibility } from '@/composables/useElementVisibility';
 
 const data = defineModel<CanvasRootElement>("data", {
   required: true
@@ -22,6 +23,8 @@ const canvasStore = useCanvasStore();
 
 /** 根 DOM 引用 */
 const rootEl = ref<HTMLElement>();
+
+useElementVisibility(data.value.id, data);
 
 /** 解绑函数 */
 let unbindDrop: (()=>void) | null = null;

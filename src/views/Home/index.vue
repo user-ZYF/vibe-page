@@ -8,7 +8,6 @@
         @undo="handleUndo"
         @redo="handleRedo"
         @code="handleCode"
-        @full="handleFull"
         @download="handleDownload"
         @block="handleBlock"
       />
@@ -22,12 +21,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, provide } from 'vue'
 import EditorHeader from './components/Header.vue'
 import EditorSider from './components/Sider.vue'
 import Canvas from './components/Canvas.vue'
 import CodePreviewModal from './components/CodePreviewModal.vue'
 import { canvasHistoryApi } from '@/composables/useCanvasHistory'
+import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from './contants.ts'
 
 defineOptions({
   name: 'EditorHome',
@@ -38,6 +38,31 @@ const isPreview = ref(false)
 
 /** 代码预览弹窗是否开启 */
 const codeModalVisible = ref(false);
+
+/** 隐藏元素id列表 */
+const hiddenKeys = ref<string[]>([]);
+
+/** 切换显示/隐藏 */
+function toggleShow(id: string){
+  const found = hiddenKeys.value.includes(id);
+  if(found){
+    showElement(id);
+  }else {
+    hideElement(id);
+  }
+}
+
+/** 显示元素 */
+function showElement(id: string) {
+  hiddenKeys.value = hiddenKeys.value.filter((item)=>item !== id);
+}
+
+/** 隐藏元素 */
+function hideElement(id: string) {
+  if(!hiddenKeys.value.includes(id)){
+    hiddenKeys.value.push(id);
+  }
+}
 
 /** 切换预览模式 */
 function togglePreview() {
@@ -80,20 +105,18 @@ function handleCode() {
   codeModalVisible.value = true;
 }
 
-/** 全屏 */
-function handleFull() {
-  // TODO: 实现全屏逻辑
+/** 源码下载 */
+function handleDownload(){
+  // TODO: 实现源码下载逻辑
 }
 
-/** 下载 */
-function handleDownload() {
-  // TODO: 实现下载逻辑
-}
-
-/** 块级元素 */
+/** 组件区分 */
 function handleBlock() {
-  // TODO: 实现块级元素逻辑
+  // TODO: 实现组件区分逻辑
 }
+
+provide(HIDDEN_KEYS, hiddenKeys);
+provide(TOGGLE_SHOW_KEY, toggleShow);
 </script>
 
 <style scoped lang="less">

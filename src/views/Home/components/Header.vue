@@ -29,11 +29,6 @@
             <template #icon><CodeOutlined /></template>
           </a-button>
         </a-tooltip>
-        <a-tooltip title="全屏" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('full-screen')">
-            <template #icon><FullscreenOutlined /></template>
-          </a-button>
-        </a-tooltip>
         <a-tooltip title="源码编辑" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('download')">
             <template #icon><DownloadOutlined /></template>
@@ -98,7 +93,6 @@ const emit = defineEmits<{
   (e: 'undo'): void
   (e: 'redo'): void
   (e: 'code'): void
-  (e: 'full-screen'): void
   (e: 'download'): void
   (e: 'block'): void
   (e: 'computer'): void

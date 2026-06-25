@@ -13,6 +13,7 @@ import { CanvasElementComponentMap } from '../../contants';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useInteractionBinder } from '@/composables/useInteractionBinder';
 import { useCanvasStore } from '@/store/canvas';
+import { useElementVisibility } from '@/composables/useElementVisibility';
 
 const data = defineModel<CanvasContainerElement>("data", {
   required: true
@@ -27,6 +28,8 @@ const style = computed(()=>{
 
 /** 容器 DOM 引用 */
 const containerEl = ref<HTMLElement>();
+
+useElementVisibility(data.value.id, data);
 
 useDragConnector(containerEl, data.value.id, { isCanvas: true });
 useInteractionBinder(containerEl, computed(() => data.value.interactions));

@@ -332,6 +332,8 @@ watch(selectedElementId, (newVal)=>{
       expandContainer(props.ancestorIds[i]);
     }
   }
+}, {
+  immediate: true
 });
 
 onUnmounted(() => {

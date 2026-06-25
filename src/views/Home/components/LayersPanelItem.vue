@@ -330,10 +330,8 @@ watch(selectedElementId, (newVal)=>{
     const index = props.ancestorIds.indexOf(parentId.value);
     for(let i = index; i >= 0; i--){
       expandContainer(props.ancestorIds[i]);
-    }
+    } 
   }
-}, {
-  immediate: true
 });
 
 onUnmounted(() => {

@@ -84,9 +84,7 @@ function updatePos() {
 
 /** 删除并清空选中 */
 function handleDelete() {
-  const id = selectedElementId.value!;
-  canvasStore.selectElement(null);
-  canvasStore.removeElement(id);
+  canvasStore.removeElement(selectedElementId.value!);
 }
 
 /** 监听选中元素变化 */

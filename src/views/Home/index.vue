@@ -28,6 +28,8 @@ import Canvas from './components/Canvas.vue'
 import CodePreviewModal from './components/CodePreviewModal.vue'
 import { canvasHistoryApi } from '@/composables/useCanvasHistory'
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from './contants.ts'
+import { useCanvasStore } from '@/store/canvas.ts'
+import { storeToRefs } from 'pinia'
 
 defineOptions({
   name: 'EditorHome',
@@ -41,6 +43,9 @@ const codeModalVisible = ref(false);
 
 /** 隐藏元素id列表 */
 const hiddenKeys = ref<string[]>([]);
+
+const canvasStore = useCanvasStore();
+const { selectedElementId } = storeToRefs(canvasStore);
 
 /** 切换显示/隐藏 */
 function toggleShow(id: string){
@@ -88,16 +93,10 @@ function handleKeydown(e: KeyboardEvent) {
   } else if (isMod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
     e.preventDefault();
     handleRedo();
+  }else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElementId.value) {
+    canvasStore.removeElement(selectedElementId.value);
   }
 }
-
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
-});
 
 /** 查看代码 */
 function handleCode() {
@@ -117,6 +116,14 @@ function handleBlock() {
 
 provide(HIDDEN_KEYS, hiddenKeys);
 provide(TOGGLE_SHOW_KEY, toggleShow);
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <style scoped lang="less">

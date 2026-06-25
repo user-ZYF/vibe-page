@@ -134,6 +134,9 @@ export const useCanvasStore = defineStore("canvas", {
           });
       }
       this.root.children = removeFromList(this.root.children);
+      if(this.selectedElementId === id){
+        this.selectElement(null);
+      }
     },
     /** 复制元素（递归支持多层级，插入到原元素后面） */
     duplicateElement(id: string) {

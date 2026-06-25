@@ -51,10 +51,10 @@
       </a-tooltip>
     </div>
     <div class="editor-sider-panel">
-      <StylePanel v-if="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
-      <LayersPanel v-else-if="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
-      <ComponentsPanel v-else-if="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
-      <InteractionPanel v-else-if="activePanel === SiderPanelEnum.LOGIC" class="panel-content"/>
+      <StylePanel v-show="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
+      <LayersPanel v-show="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
+      <ComponentsPanel v-show="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
+      <InteractionPanel v-show="activePanel === SiderPanelEnum.LOGIC" class="panel-content"/>
     </div>
   </a-layout-sider>
 </template>

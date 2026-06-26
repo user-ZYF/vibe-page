@@ -5,34 +5,36 @@
     <template v-else>
       <!-- class 管理栏 -->
       <div class="style-panel-classes">
-        <div class="style-panel-classes-title">Classes</div>
-        <div class="style-panel-classes-bar">
-          <div
-            v-for="cls in selectedElement!.classNames"
-            :key="cls"
-            class="style-panel-classes-tag"
-            :class="{ 'is-active': activeClassName === cls }"
-            @click.stop="handleClassTagClick(cls)"
-          >
-            <a-checkbox
-              :checked="isClassEnabled(cls)"
-              @change="(e: any) => handleClassToggle(cls, e.target.checked)"
-              @click.stop
-            ></a-checkbox>
-            <span class="style-panel-classes-tag-name">{{ cls }}</span>
-            <CloseOutlined
-              class="style-panel-classes-tag-remove"
-              @click.stop="handleClassRemove(cls)"
-            />
+        <template v-if="!isRootElement">
+          <div class="style-panel-classes-title">Classes</div>
+          <div class="style-panel-classes-bar">
+            <div
+              v-for="cls in selectedElement!.classNames"
+              :key="cls"
+              class="style-panel-classes-tag"
+              :class="{ 'is-active': activeClassName === cls }"
+              @click.stop="handleClassTagClick(cls)"
+            >
+              <a-checkbox
+                :checked="isClassEnabled(cls)"
+                @change="(e: CheckboxChangeEvent) => handleClassToggle(cls, e.target.checked)"
+                @click.stop
+              ></a-checkbox>
+              <span class="style-panel-classes-tag-name">{{ cls }}</span>
+              <CloseOutlined
+                class="style-panel-classes-tag-remove"
+                @click.stop="handleClassRemove(cls)"
+              />
+            </div>
+            <a-button
+              class="style-panel-classes-add"
+              size="small"
+              @click="handleAddClass"
+            >
+              <PlusOutlined />
+            </a-button>
           </div>
-          <a-button
-            class="style-panel-classes-add"
-            size="small"
-            @click="handleAddClass"
-          >
-            <PlusOutlined />
-          </a-button>
-        </div>
+        </template>
         <div class="style-panel-classes-selected">
           Selected: {{ selectedElement!.alias || selectedElement!.type }}{{ activeClassName ? `.${activeClassName}` : `#${selectedElement!.id}` }}
         </div>
@@ -96,6 +98,7 @@ import FlexConfig from './style-panel/FlexConfig.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface';
 
 defineOptions({
   name: 'StyleConfig',

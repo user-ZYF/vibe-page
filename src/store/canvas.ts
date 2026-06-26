@@ -5,6 +5,7 @@ import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
 import { Positioner } from "@/views/Home/drag/Positioner";
+import { convertStyleConfig } from "@/utils/styleConfig";
 
 /** 画布store */
 export const useCanvasStore = defineStore("canvas", {
@@ -31,6 +32,17 @@ export const useCanvasStore = defineStore("canvas", {
     /** 全局 class 样式配置映射 */
     classStyles: {} as Record<string, StyleConfig>,
   }),
+  getters: {
+    /** 全局class对应的最终样式 */
+    covertClassStyles(state) {
+      const styles = {} as Record<string, Record<string, string>>;
+      for(const key in state.classStyles){
+        const value = state.classStyles[key];
+        styles[key] = convertStyleConfig(value);
+      }
+      return styles;
+    }
+  },
   actions: {
     /** 获取指定 class 的样式配置，不存在则自动创建 */
     getOrCreateClassStyle(className: string): StyleConfig {

@@ -6,9 +6,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { CanvasRootElement } from '../../types';
-import { convertStyleConfig } from '@/utils/styleConfig';
+import { useElementStyle } from '@/composables/useElementStyle';
 import { CanvasElementComponentMap } from '../../contants';
 import { useCanvasStore } from '@/store/canvas';
 import { dragEngine } from '../../drag/DragEngine';
@@ -29,10 +29,8 @@ useElementVisibility(data.value.id, data);
 /** 解绑函数 */
 let unbindDrop: (()=>void) | null = null;
 
-/** 样式对象 */
-const style = computed(()=>{
-  return convertStyleConfig(data.value.styleConfig);
-});
+/** 样式对象（合并 class 选择器与 id 选择器样式） */
+const style = useElementStyle(data);
 
 onMounted(() => {
   /** 注册根画布到注册表 */

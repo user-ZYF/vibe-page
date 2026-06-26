@@ -29,19 +29,19 @@ import type {
  */
 export interface TextShadowItem {
   /** X 偏移值 */
-  x: number;
+  x?: number;
   /** X 偏移单位 */
-  xUnit: SizeUnitEnum;
+  xUnit?: SizeUnitEnum;
   /** Y 偏移值 */
-  y: number;
+  y?: number;
   /** Y 偏移单位 */
-  yUnit: SizeUnitEnum;
+  yUnit?: SizeUnitEnum;
   /** 模糊半径 */
-  blur: number;
+  blur?: number;
   /** 模糊半径单位 */
-  blurUnit: SizeUnitEnum;
+  blurUnit?: SizeUnitEnum;
   /** 阴影颜色 */
-  color: string;
+  color?: string;
 }
 
 /**
@@ -49,25 +49,25 @@ export interface TextShadowItem {
  */
 export interface BoxShadowItem {
   /** X 偏移值 */
-  x: number;
+  x?: number;
   /** X 偏移单位 */
-  xUnit: SizeUnitEnum;
+  xUnit?: SizeUnitEnum;
   /** Y 偏移值 */
-  y: number;
+  y?: number;
   /** Y 偏移单位 */
-  yUnit: SizeUnitEnum;
+  yUnit?: SizeUnitEnum;
   /** 模糊半径 */
-  blur: number;
+  blur?: number;
   /** 模糊半径单位 */
-  blurUnit: SizeUnitEnum;
+  blurUnit?: SizeUnitEnum;
   /** 扩展半径 */
-  spread: number;
+  spread?: number;
   /** 扩展半径单位 */
-  spreadUnit: SizeUnitEnum;
+  spreadUnit?: SizeUnitEnum;
   /** 阴影颜色 */
-  color: string;
+  color?: string;
   /** 是否为内阴影 */
-  inset: boolean;
+  inset?: boolean;
 }
 
 /**
@@ -75,21 +75,21 @@ export interface BoxShadowItem {
  */
 export interface BackgroundItem {
   /** 背景类型 */
-  type: BackgroundTypeEnum;
+  type?: BackgroundTypeEnum;
   /** 图片地址（type 为 image 时有效） */
-  imageUrl: string;
+  imageUrl?: string;
   /** 背景重复方式 */
-  repeat: BackgroundRepeatEnum;
+  repeat?: BackgroundRepeatEnum;
   /** 背景位置 */
-  position: BackgroundPositionEnum;
+  position?: BackgroundPositionEnum;
   /** 背景附着方式 */
-  attachment: BackgroundAttachmentEnum;
+  attachment?: BackgroundAttachmentEnum;
   /** 背景尺寸 */
-  size: BackgroundSizeEnum;
+  size?: BackgroundSizeEnum;
   /** 背景颜色（type 为 color 时有效） */
-  color: string;
+  color?: string;
   /** 渐变值（type 为 gradient 时有效） */
-  gradient: string;
+  gradient?: string;
 }
 
 /**
@@ -201,7 +201,7 @@ export interface FontConfig {
   /** 文字装饰 */
   textDecoration?: TextDecorationEnum;
   /** 文字阴影列表 */
-  textShadows?: TextShadowItem[];
+  textShadows: TextShadowItem[];
 }
 
 /**
@@ -209,7 +209,7 @@ export interface FontConfig {
  */
 export interface VisualConfig {
   /** 背景层列表 */
-  backgrounds?: BackgroundItem[];
+  backgrounds: BackgroundItem[];
   /** 边框宽度 */
   borderWidth?: number;
   /** 边框宽度单位 */
@@ -231,7 +231,7 @@ export interface VisualConfig {
   /** 不透明度 */
   opacity?: number;
   /** 盒阴影列表 */
-  boxShadows?: BoxShadowItem[];
+  boxShadows: BoxShadowItem[];
 }
 
 /**
@@ -241,7 +241,7 @@ export interface FlexConfig {
   /** Flex 容器类型 */
   flexContainer?: FlexContainerEnum;
   /** Flex 父级值 */
-  flexParent?: number | null;
+  flexParent?: number;
   /** 主轴方向 */
   flexDirection?: FlexDirectionEnum;
   /** 主轴对齐 */
@@ -249,9 +249,9 @@ export interface FlexConfig {
   /** 交叉轴对齐 */
   alignItems?: AlignItemsEnum;
   /** Flex 子级值 */
-  flexChildren?: number | null;
+  flexChildren?: number;
   /** 排列顺序 */
-  order?: number | null;
+  order?: number;
   /** 放大比例 */
   flexGrow?: number;
   /** 缩小比例 */

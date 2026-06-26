@@ -4,10 +4,10 @@ import { BackgroundTypeEnum, FlexContainerEnum } from '@/constants/style';
 /** 将单个背景层转换为 CSS background 分量字符串 */
 function convertBackgroundItem(item: BackgroundItem): string {
   if (item.type === BackgroundTypeEnum.COLOR) {
-    return item.color;
+    return item.color || 'revert';
   }
   if (item.type === BackgroundTypeEnum.GRADIENT) {
-    return item.gradient;
+    return item.gradient || 'revert';
   }
   if (item.type === BackgroundTypeEnum.IMAGE) {
     return `url("${item.imageUrl}") ${item.position} / ${item.size} ${item.repeat} ${item.attachment}`;
@@ -74,7 +74,7 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
     const colorBgs = visual.backgrounds.filter((b) => b.type === BackgroundTypeEnum.COLOR);
     const imageBgs = visual.backgrounds.filter((b) => b.type !== BackgroundTypeEnum.COLOR);
     if (colorBgs.length > 0) {
-      css['backgroundColor'] = colorBgs[colorBgs.length - 1].color;
+      css['backgroundColor'] = colorBgs[colorBgs.length - 1].color || 'revert';
     }
     if (imageBgs.length > 0) {
       css['backgroundImage'] = imageBgs.map(convertBackgroundItem).join(', ');

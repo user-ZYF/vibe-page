@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { CanvasImageElement } from '../../types';
-import { convertStyleConfig } from '@/utils/styleConfig';
+import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasStore } from '@/store/canvas';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useInteractionBinder } from '@/composables/useInteractionBinder';
@@ -18,10 +18,8 @@ const data = defineModel<CanvasImageElement>("data", {
     required: true
 });
 
-/** 样式对象 */
-const style = computed(()=>{
-    return convertStyleConfig(data.value.styleConfig);
-});
+/** 样式对象（合并 class 选择器与 id 选择器样式） */
+const style = useElementStyle(data);
 
 /** 图片 DOM 引用 */
 const imageEl = ref<HTMLElement>();

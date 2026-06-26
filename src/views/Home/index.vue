@@ -71,7 +71,7 @@ function hideElement(id: string) {
 
 /** 切换预览模式 */
 function togglePreview() {
-  isPreview.value = !isPreview.value
+  isPreview.value = !isPreview.value;
 }
 
 /** 撤销 */
@@ -86,15 +86,20 @@ function handleRedo() {
 
 /** 键盘快捷键处理 */
 function handleKeydown(e: KeyboardEvent) {
+  if(e.key === 'Delete' && selectedElementId.value){
+    // delete / backspace: 删除
+    canvasStore.removeElement(selectedElementId.value);
+    return;
+  }
   const isMod = e.ctrlKey || e.metaKey;
-  if (isMod && e.key === 'z' && !e.shiftKey) {
+  if (isMod && e.key === 'z') {
+    // ctrl + z: 重做
     e.preventDefault();
     handleUndo();
-  } else if (isMod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+  } else if (isMod && e.key === 'y') {
+    // ctrl + y: 撤销
     e.preventDefault();
     handleRedo();
-  }else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElementId.value) {
-    canvasStore.removeElement(selectedElementId.value);
   }
 }
 

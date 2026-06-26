@@ -33,7 +33,7 @@ onUnmounted(() => {
 // 这里直接通过 CanvasApp 的 props 传递即可（需要在挂载时传入）
 </script>
 
-<style>
+<!-- <style>
 .container{
   color: red;
 }
@@ -45,4 +45,4 @@ button {
 .canvas-host {
   all: revert;
 }
-</style>
+</style> -->

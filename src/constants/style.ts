@@ -1,5 +1,6 @@
 import { StyleConfig } from "@/views/Home/types";
 import { CanvasElementTypeEnum } from "./home";
+import { cloneDeep } from "lodash";
 
 /** 背景类型枚举 */
 export const enum BackgroundTypeEnum {
@@ -464,24 +465,29 @@ export const DISPLAY_OPTIONS = [
   { label: 'none', value: DisplayStyleEnum.NONE },
 ];
 
+export const DefaultGeneralStyleConfig: StyleConfig = {
+  general: {},
+  size: {},
+  font: {
+    textShadows: []
+  },
+  visual: {
+    backgrounds: [],
+    boxShadows: []
+  },
+  flex: {},
+};
 
 /** 按钮元素默认样式配置 */
 export const DefaultButtonStyleConfig: StyleConfig = {
-  general: {
-    display: DisplayStyleEnum.INLINE_BLOCK,
-  },
-  size: {},
-  font: {
-    textAlign: TextAlignEnum.CENTER,
-  },
-  visual: {},
-  flex: {},
+  ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
 /** 容器元素默认样式配置 */
 export const DefaultContainerStyleConfig: StyleConfig = {
-  general: {},
+  ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
     minHeight: '75',
     minHeightUnit: SizeUnitEnum.PX,
     paddingTop: 16,
@@ -493,64 +499,31 @@ export const DefaultContainerStyleConfig: StyleConfig = {
     paddingLeft: 16,
     paddingLeftUnit: SizeUnitEnum.PX,
   },
-  font: {},
-  visual: {},
-  flex: {},
 };
 
 /** 段落元素默认样式配置 */
 export const DefaultParagraphStyleConfig: StyleConfig = {
-  general: {},
-  size: {
-    marginTop: 16,
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: 16,
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {},
-  visual: {},
-  flex: {},
+  ...cloneDeep(DefaultGeneralStyleConfig)
 };
 
 /** 链接元素默认样式配置 */
 export const DefaultLinkStyleConfig: StyleConfig = {
-  general: {
-    display: DisplayStyleEnum.INLINE,
-  },
-  size: {},
-  font: {
-    color: '#0000EE',
-    textDecoration: TextDecorationEnum.UNDERLINE,
-  },
-  visual: {},
-  flex: {},
+ ...cloneDeep(DefaultGeneralStyleConfig)
 };
 
 /** 图片元素默认样式配置 */
 export const DefaultImageStyleConfig: StyleConfig = {
-  general: {},
-  size: {},
-  font: {},
-  visual: {},
-  flex: {},
+ ...cloneDeep(DefaultGeneralStyleConfig)
 };
 
 /** 根元素默认样式配置 */
 export const DefaultRootStyleConfig: StyleConfig = {
-  general: {},
-  size: {},
-  font: {},
-  visual: {},
-  flex: {},
+ ...cloneDeep(DefaultGeneralStyleConfig)
 };
 
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
-  general: {},
-  size: {},
-  font: {},
-  visual: {},
-  flex: {},
+ ...cloneDeep(DefaultGeneralStyleConfig)
 };
 
 /** 画布元素默认样式配置映射 */

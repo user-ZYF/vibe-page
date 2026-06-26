@@ -268,16 +268,7 @@ const model = defineModel<VisualConfig>({ required: true });
  */
 function handleAddBackground() {
   if (!model.value.backgrounds) model.value.backgrounds = [];
-  model.value.backgrounds.push({
-    type: BackgroundTypeEnum.IMAGE,
-    imageUrl: '',
-    repeat: BackgroundRepeatEnum.REPEAT,
-    position: BackgroundPositionEnum.TOP_LEFT,
-    attachment: BackgroundAttachmentEnum.SCROLL,
-    size: BackgroundSizeEnum.AUTO,
-    color: '#ffffff',
-    gradient: 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(0,0,0,1) 100%)',
-  });
+  model.value.backgrounds.push({});
 }
 
 /**

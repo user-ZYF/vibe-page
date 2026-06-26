@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { CanvasContainerElement } from '../../types';
-import { convertStyleConfig } from '@/utils/styleConfig';
+import { useElementStyle } from '@/composables/useElementStyle';
 import { CanvasElementComponentMap } from '../../contants';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useInteractionBinder } from '@/composables/useInteractionBinder';
@@ -21,10 +21,8 @@ const data = defineModel<CanvasContainerElement>("data", {
 
 const canvasStore = useCanvasStore();
 
-/** 样式对象 */
-const style = computed(()=>{
-    return convertStyleConfig(data.value.styleConfig);
-});
+/** 样式对象（合并 class 选择器与 id 选择器样式） */
+const style = useElementStyle(data);
 
 /** 容器 DOM 引用 */
 const containerEl = ref<HTMLElement>();

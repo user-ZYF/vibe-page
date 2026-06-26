@@ -498,6 +498,14 @@ export const DefaultContainerStyleConfig: StyleConfig = {
     paddingBottomUnit: SizeUnitEnum.PX,
     paddingLeft: 16,
     paddingLeftUnit: SizeUnitEnum.PX,
+    marginTop: 16,
+    marginTopUnit: SizeUnitEnum.PX,
+    marginRight: 16,
+    marginRightUnit: SizeUnitEnum.PX,
+    marginBottom: 16,
+    marginBottomUnit: SizeUnitEnum.PX,
+    marginLeft: 16,
+    marginLeftUnit: SizeUnitEnum.PX,
   },
 };
 

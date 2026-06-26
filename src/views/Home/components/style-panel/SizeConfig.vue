@@ -41,6 +41,45 @@
       </div>
     </div>
 
+    <!-- Padding -->
+    <div class="style-config-label style-config-label--padding">Padding</div>
+    <div class="style-config-box">
+      <!-- Padding Top & Right -->
+      <div class="style-config-row">
+        <div class="style-config-col">
+          <div class="style-config-label">Top</div>
+          <div class="style-config-input-group">
+            <a-input-number v-model:value="model.paddingTop" size="small" class="style-config-input-number" />
+            <a-select v-model:value="model.paddingTopUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          </div>
+        </div>
+        <div class="style-config-col">
+          <div class="style-config-label">Right</div>
+          <div class="style-config-input-group">
+            <a-input-number v-model:value="model.paddingRight" size="small" class="style-config-input-number" />
+            <a-select v-model:value="model.paddingRightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          </div>
+        </div>
+      </div>
+      <!-- Padding Bottom & Left -->
+      <div class="style-config-row">
+        <div class="style-config-col">
+          <div class="style-config-label">Bottom</div>
+          <div class="style-config-input-group">
+            <a-input-number v-model:value="model.paddingBottom" size="small" class="style-config-input-number" />
+            <a-select v-model:value="model.paddingBottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          </div>
+        </div>
+        <div class="style-config-col">
+          <div class="style-config-label">Left</div>
+          <div class="style-config-input-group">
+            <a-input-number v-model:value="model.paddingLeft" size="small" class="style-config-input-number" />
+            <a-select v-model:value="model.paddingLeftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Margin -->
     <div class="style-config-label style-config-label--margin">Margin</div>
     <div class="style-config-box">

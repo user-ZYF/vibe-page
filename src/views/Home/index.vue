@@ -84,10 +84,18 @@ function handleRedo() {
   canvasHistoryApi.redo();
 }
 
+/** 判断事件目标是否在可编辑元素内 */
+function isEditableTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el) return false;
+  const tag = el.tagName.toLowerCase();
+  return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+}
+
 /** 键盘快捷键处理 */
 function handleKeydown(e: KeyboardEvent) {
-  if(e.key === 'Delete' && selectedElementId.value){
-    // delete / backspace: 删除
+  if(e.key === 'Delete' && selectedElementId.value && !isEditableTarget(e.target)){
+    // delete: 删除
     canvasStore.removeElement(selectedElementId.value);
     return;
   }

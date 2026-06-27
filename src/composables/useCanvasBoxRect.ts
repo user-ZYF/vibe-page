@@ -32,9 +32,9 @@ export interface CanvasBoxRect {
   contentWidth: number;
   /** 内容区高度 */
   contentHeight: number;
-  /** 包含 margin 的整体区域左上角 x（相对于画布容器） */
+  /** margin box距离画布左侧的距离 */
   x: number;
-  /** 包含 margin 的整体区域左上角 y（相对于画布容器） */
+  /** margin box距离画布顶部的距离 */
   y: number;
 }
 
@@ -121,9 +121,9 @@ export function useCanvasBoxRect() {
     const contentWidth = rect.width - borderLeft - borderRight - paddingLeft - paddingRight;
     const contentHeight = rect.height - borderTop - borderBottom - paddingTop - paddingBottom;
 
-    /** 覆盖层整体左上角坐标（含 margin，相对于画布容器） */
-    const rootX = rect.left - canvasRect.left - marginLeft;
-    const rootY = rect.top - canvasRect.top - marginTop;
+    /** 元素的margin box具体画布区域左上角坐标 */
+    const x = rect.left - canvasRect.left - marginLeft;
+    const y = rect.top - canvasRect.top - marginTop;
 
     elRect.value = {
       marginTop,
@@ -140,8 +140,8 @@ export function useCanvasBoxRect() {
       paddingLeft,
       contentWidth: Math.max(0, contentWidth),
       contentHeight: Math.max(0, contentHeight),
-      x: rootX,
-      y: rootY,
+      x,
+      y,
     };
   }
 

@@ -71,6 +71,18 @@ const currentTarget = ref<Element | null>(null);
 /** 是否显示覆盖层 */
 const visible = computed(() => !!currentTarget.value && !isDragging.value);
 
+/** 名称元素自然的top位置 */
+const NATURAL_TOP = -18;
+
+/** 元素名称标签的 top 偏移（粘性定位，防止被画布顶部遮挡） */
+const labelTop = computed(() => {
+  /** 指示器边框区域具体相画布顶部的距离 */
+  const borderTop = elRect.value.y + elRect.value.marginTop;
+  /** 粘性位置：贴靠画布视口顶部（相对于边框区域） */
+  const stickyTop = -borderTop;
+  return Math.max(NATURAL_TOP, stickyTop);
+});
+
 /** 元素名称 */
 const elName = computed(() => {
   const id = currentTarget.value?.getAttribute('data-canvas-id');
@@ -270,6 +282,6 @@ onBeforeUnmount(() => {
   padding: 0 4px;
   white-space: nowrap;
   line-height: 1.5;
-  top: -18px;
+  top: v-bind('labelTop + "px"');
 }
 </style>

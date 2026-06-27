@@ -1,6 +1,7 @@
 import { onMounted, onBeforeUnmount, watch, type Ref } from 'vue';
 import { InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
 import type { InteractionRule } from '@/views/Canvas/types';
+import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 
 /** 事件枚举到 DOM 事件名的映射 */
 const EVENT_MAP: Record<InteractionEventEnum, string> = {
@@ -16,7 +17,7 @@ const EVENT_MAP: Record<InteractionEventEnum, string> = {
 function createHandler(rule: InteractionRule) {
   return function (this: HTMLElement, e: Event) {
     const target = rule.targetId
-      ? document.querySelector(`[data-canvas-id="${rule.targetId}"]`) as HTMLElement
+      ? nodeRegistry.get(rule.targetId)?.el ?? null
       : (e.currentTarget as HTMLElement);
     if (!target) return;
 

@@ -41,7 +41,7 @@
       </div>
 
       <!-- 样式配置面板 -->
-      <a-collapse v-model:activeKey="activeKey" ghost destroy-inactive-panel>
+      <a-collapse v-model:activeKey="activeKey" ghost accordion>
         <!-- 常规配置 -->
         <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
@@ -105,7 +105,7 @@ defineOptions({
 });
 
 /** 展开的面板配置 */
-const activeKey = ref([StyleConfigTypeEnum.GENERAL]);
+const activeKey = ref<StyleConfigTypeEnum>(StyleConfigTypeEnum.GENERAL);
 
 const canvasStore = useCanvasStore();
 const { selectedElementId } = storeToRefs(canvasStore);

@@ -17,18 +17,10 @@
     <div class="style-config-section">
       <div class="style-config-label">Direction</div>
       <a-radio-group v-model:value="model.flexDirection" button-style="solid" size="small" class="style-config-radio-group">
-        <a-tooltip title="row">
-          <a-radio-button value="row"><LayoutOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="row-reverse">
-          <a-radio-button value="row-reverse"><LayoutOutlined class="icon-flip-x" /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="column">
-          <a-radio-button value="column"><ColumnHeightOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="column-reverse">
-          <a-radio-button value="column-reverse"><ColumnHeightOutlined class="icon-flip-y" /></a-radio-button>
-        </a-tooltip>
+        <a-radio-button :value="FlexDirectionEnum.ROW" title="row"><LayoutOutlined /></a-radio-button>
+        <a-radio-button :value="FlexDirectionEnum.ROW_REVERSE" title="row-reverse"><LayoutOutlined class="icon-flip-x" /></a-radio-button>
+        <a-radio-button :value="FlexDirectionEnum.COLUMN" title="column"><ColumnHeightOutlined /></a-radio-button>
+        <a-radio-button :value="FlexDirectionEnum.COLUMN_REVERSE" title="column-reverse"><ColumnHeightOutlined class="icon-flip-y" /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -36,21 +28,11 @@
     <div class="style-config-section">
       <div class="style-config-label">Justify</div>
       <a-radio-group v-model:value="model.justifyContent" button-style="solid" size="small" class="style-config-radio-group">
-        <a-tooltip title="flex-start">
-          <a-radio-button value="flex-start"><VerticalLeftOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="center">
-          <a-radio-button value="center"><ColumnWidthOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="flex-end">
-          <a-radio-button value="flex-end"><VerticalRightOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="space-between">
-          <a-radio-button value="space-between"><SplitCellsOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="space-around">
-          <a-radio-button value="space-around"><ExpandOutlined /></a-radio-button>
-        </a-tooltip>
+        <a-radio-button :value="JustifyContentEnum.FLEX_START" title="flex-start"><VerticalLeftOutlined /></a-radio-button>
+        <a-radio-button :value="JustifyContentEnum.CENTER" title="center"><ColumnWidthOutlined /></a-radio-button>
+        <a-radio-button :value="JustifyContentEnum.FLEX_END" title="flex-end"><VerticalRightOutlined /></a-radio-button>
+        <a-radio-button :value="JustifyContentEnum.SPACE_BETWEEN" title="space-between"><SplitCellsOutlined /></a-radio-button>
+        <a-radio-button :value="JustifyContentEnum.SPACE_AROUND" title="space-around"><ExpandOutlined /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -58,18 +40,10 @@
     <div class="style-config-section">
       <div class="style-config-label">Align</div>
       <a-radio-group v-model:value="model.alignItems" button-style="solid" size="small" class="style-config-radio-group">
-        <a-tooltip title="flex-start">
-          <a-radio-button value="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="center">
-          <a-radio-button value="center"><VerticalAlignMiddleOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="flex-end">
-          <a-radio-button value="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="stretch">
-          <a-radio-button value="stretch"><ExpandAltOutlined /></a-radio-button>
-        </a-tooltip>
+        <a-radio-button :value="AlignItemsEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
+        <a-radio-button :value="AlignItemsEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></a-radio-button>
+        <a-radio-button :value="AlignItemsEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
+        <a-radio-button :value="AlignItemsEnum.STRETCH" title="stretch"><ExpandAltOutlined /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -112,19 +86,11 @@
     <div class="style-config-section style-config-section--mt">
       <div class="style-config-label">Align</div>
       <a-radio-group v-model:value="model.alignSelf" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button value="auto">Auto</a-radio-button>
-        <a-tooltip title="flex-start">
-          <a-radio-button value="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="center">
-          <a-radio-button value="center"><VerticalAlignMiddleOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="flex-end">
-          <a-radio-button value="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
-        </a-tooltip>
-        <a-tooltip title="stretch">
-          <a-radio-button value="stretch"><ExpandAltOutlined /></a-radio-button>
-        </a-tooltip>
+        <a-radio-button :value="AlignSelfEnum.AUTO">Auto</a-radio-button>
+        <a-radio-button :value="AlignSelfEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
+        <a-radio-button :value="AlignSelfEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></a-radio-button>
+        <a-radio-button :value="AlignSelfEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
+        <a-radio-button :value="AlignSelfEnum.STRETCH" title="stretch"><ExpandAltOutlined /></a-radio-button>
       </a-radio-group>
     </div>
   </div>
@@ -144,7 +110,7 @@ import {
   VerticalAlignBottomOutlined,
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS } from '@/constants/style';
+import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
 import type { FlexConfig } from '@/views/Home/types';
 
 defineOptions({

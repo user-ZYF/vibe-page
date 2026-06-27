@@ -41,7 +41,7 @@
       </div>
 
       <!-- 样式配置面板 -->
-      <a-collapse v-model:activeKey="activeKey" ghost>
+      <a-collapse v-model:activeKey="activeKey" ghost destroy-inactive-panel>
         <!-- 常规配置 -->
         <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
@@ -101,11 +101,11 @@ import { CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface';
 
 defineOptions({
-  name: 'StyleConfig',
+  name: 'StylePanel',
 });
 
 /** 展开的面板配置 */
-const activeKey = ref([StyleConfigTypeEnum.GENERAL, StyleConfigTypeEnum.SIZE, StyleConfigTypeEnum.FONT, StyleConfigTypeEnum.VISUAL, StyleConfigTypeEnum.FLEX]);
+const activeKey = ref([StyleConfigTypeEnum.GENERAL]);
 
 const canvasStore = useCanvasStore();
 const { selectedElementId } = storeToRefs(canvasStore);

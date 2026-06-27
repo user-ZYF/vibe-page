@@ -22,6 +22,7 @@ import type {
   SizeUnitEnum,
   TextAlignEnum,
   TextDecorationEnum,
+  ResizeDirEnum,
 } from '@/constants/style';
 
 /**
@@ -377,4 +378,21 @@ export interface LayersDropTarget {
   parentId: string;
   /** 插入索引 */
   index: number;
+}
+
+/** 有效调整尺寸方向（排除 UNDEFINED） */
+export type ValidResizeDirEnum = Exclude<ResizeDirEnum, ResizeDirEnum.UNDEFINED>;
+
+/** 调整尺寸起始状态 */
+export interface ResizeStartState {
+  /** 拖拽方向 */
+  dir: ResizeDirEnum;
+  /** 起始鼠标 X 坐标 */
+  startX: number;
+  /** 起始鼠标 Y 坐标 */
+  startY: number;
+  /** 起始宽度（border-box） */
+  startWidth: number;
+  /** 起始高度（border-box） */
+  startHeight: number;
 }

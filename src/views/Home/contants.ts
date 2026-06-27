@@ -7,7 +7,8 @@ import { CanvasElementTypeEnum } from "@/constants/home.ts";
 import Paragraph from "./components/canvas-element/Paragraph.vue";
 import Root from "./components/canvas-element/Root.vue";
 import type { InjectionKey, Ref } from 'vue';
-import { LayersDropTarget } from "./types.ts";
+import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
+import { ResizeDirEnum } from "@/constants/style.ts";
 
 /** 组件映射 */
 export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component> = {
@@ -54,3 +55,28 @@ export const IS_PREVIEW_KEY: InjectionKey<Readonly<Ref<boolean>>> = Symbol('isPr
 
 /** 边缘检测阈值（px） */
 export const EDGE_THRESHOLD = 8;
+
+/** 调整尺寸方向列表 */
+export const RESIZE_DIRS: ValidResizeDirEnum[] = [
+  ResizeDirEnum.N,
+  ResizeDirEnum.E,
+  ResizeDirEnum.S,
+  ResizeDirEnum.W,
+  ResizeDirEnum.NE,
+  ResizeDirEnum.NW,
+  ResizeDirEnum.SE,
+  ResizeDirEnum.SW,
+];
+
+/** 调整尺寸方向对应的 CSS class 后缀 */
+export const RESIZE_DIR_CLASS_MAP: Record<ValidResizeDirEnum, string> = {
+  [ResizeDirEnum.N]: 'n',
+  [ResizeDirEnum.E]: 'e',
+  [ResizeDirEnum.S]: 's',
+  [ResizeDirEnum.W]: 'w',
+  [ResizeDirEnum.NE]: 'ne',
+  [ResizeDirEnum.NW]: 'nw',
+  [ResizeDirEnum.SE]: 'se',
+  [ResizeDirEnum.SW]: 'sw',
+};
+

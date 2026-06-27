@@ -547,3 +547,25 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.IMAGE]: DefaultImageStyleConfig,
   [CanvasElementTypeEnum.ROOT]: DefaultRootStyleConfig
 };
+
+/** 调整尺寸方向枚举 */
+export const enum ResizeDirEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 北（上） */
+  N = 1,
+  /** 东（右） */
+  E = 2,
+  /** 南（下） */
+  S = 3,
+  /** 西（左） */
+  W = 4,
+  /** 东北（右上） */
+  NE = 5,
+  /** 西北（左上） */
+  NW = 6,
+  /** 东南（右下） */
+  SE = 7,
+  /** 西南（左下） */
+  SW = 8,
+}

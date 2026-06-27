@@ -5,9 +5,9 @@
     <div class="style-config-section">
       <div class="style-config-label">Float</div>
       <a-radio-group v-model:value="model.float" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button value="none"><CloseOutlined /></a-radio-button>
-        <a-radio-button value="left"><MenuFoldOutlined /></a-radio-button>
-        <a-radio-button value="right"><MenuUnfoldOutlined /></a-radio-button>
+        <a-radio-button :value="FloatStyleEnum.NONE"><CloseOutlined /></a-radio-button>
+        <a-radio-button :value="FloatStyleEnum.LEFT"><MenuFoldOutlined /></a-radio-button>
+        <a-radio-button :value="FloatStyleEnum.RIGHT"><MenuUnfoldOutlined /></a-radio-button>
       </a-radio-group>
     </div>
 
@@ -67,7 +67,7 @@
 
 <script lang="ts" setup>
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
-import { DISPLAY_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
+import { DISPLAY_OPTIONS, FloatStyleEnum, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
 import type { GeneralConfig } from '@/views/Home/types';
 
 defineOptions({

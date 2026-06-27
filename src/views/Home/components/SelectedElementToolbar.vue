@@ -21,19 +21,32 @@
           </button>
         </a-tooltip>
       </div>
+      <!-- 调整尺寸手柄 -->
+      <template v-if="showToolbar">
+        <div
+          v-for="dir in RESIZE_DIRS"
+          :key="dir"
+          class="etb-resize-handle"
+          :class="`etb-resize-handle--${RESIZE_DIR_CLASS_MAP[dir]}`"
+          @pointerdown.stop.prevent="handleResizeStart($event, dir)"
+        ></div>
+      </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
 import { useElementStyle } from '@/composables/useElementStyle';
-import type { CanvasElementBase } from '@/views/Home/types';
+import type { CanvasElementBase, ResizeStartState } from '@/views/Home/types';
+import { SizeUnitEnum } from '@/constants/style';
+import { ResizeDirEnum } from '@/constants/style';
+import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../contants';
 
 defineOptions({
   name: 'SelectedElementToolbar',
@@ -44,18 +57,38 @@ const { selectedElementId, isDragging } = storeToRefs(canvasStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
+/** 判断方向是否包含北（上） */
+function isNorthDir(dir: ResizeDirEnum): boolean {
+  return dir === ResizeDirEnum.N || dir === ResizeDirEnum.NE || dir === ResizeDirEnum.NW;
+}
+
+/** 判断方向是否包含东（右） */
+function isEastDir(dir: ResizeDirEnum): boolean {
+  return dir === ResizeDirEnum.E || dir === ResizeDirEnum.NE || dir === ResizeDirEnum.SE;
+}
+
+/** 判断方向是否包含南（下） */
+function isSouthDir(dir: ResizeDirEnum): boolean {
+  return dir === ResizeDirEnum.S || dir === ResizeDirEnum.SE || dir === ResizeDirEnum.SW;
+}
+
+/** 判断方向是否包含西（左） */
+function isWestDir(dir: ResizeDirEnum): boolean {
+  return dir === ResizeDirEnum.W || dir === ResizeDirEnum.NW || dir === ResizeDirEnum.SW;
+}
+
 /** 选中元素数据 */
-const selectedElementData = computed(() => {
+const selectedElement = computed(() => {
   if (!selectedElementId.value) return null;
   return canvasStore.getElementById(selectedElementId.value);
 });
 
 /** 选中元素最终样式 */
-const selectedElementStyle = useElementStyle(selectedElementData as Ref<CanvasElementBase>);
+const selectedElementStyle = useElementStyle(selectedElement as Ref<CanvasElementBase>);
 
 /** 选中元素是否可见（display 不为 none，基于画布数据判断） */
 const isElementDisplayed = computed(() => {
-  if (!selectedElementData.value) return true;
+  if (!selectedElement.value) return true;
   return selectedElementStyle.value.display !== 'none';
 });
 
@@ -82,6 +115,78 @@ function handleDelete() {
   canvasStore.removeElement(selectedElementId.value!);
 }
 
+/** 是否正在调整尺寸 */
+const isResizing = ref(false);
+
+/** 调整尺寸状态 */
+let resizeState: ResizeStartState | null = null;
+
+/** 获取元素 border-box 尺寸 */
+function getBorderBoxSize(): { width: number; height: number } {
+  const r = elRect.value;
+  return {
+    width: r.contentWidth + r.paddingLeft + r.paddingRight + r.borderLeft + r.borderRight,
+    height: r.contentHeight + r.paddingTop + r.paddingBottom + r.borderTop + r.borderBottom,
+  };
+}
+
+/** 开始调整尺寸 */
+function handleResizeStart(e: PointerEvent, dir: ResizeDirEnum) {
+  if (!selectedElement.value) return;
+
+  const { width, height } = getBorderBoxSize();
+
+  resizeState = {
+    dir,
+    startX: e.clientX,
+    startY: e.clientY,
+    startWidth: width,
+    startHeight: height,
+  };
+
+  isResizing.value = true;
+  window.addEventListener('pointermove', handleResizeMove);
+  window.addEventListener('pointerup', handleResizeEnd);
+}
+
+/** 调整尺寸移动中 */
+function handleResizeMove(e: PointerEvent) {
+  if (!resizeState || !selectedElement.value) return;
+
+  const dx = e.clientX - resizeState.startX;
+  const dy = e.clientY - resizeState.startY;
+  const { dir, startWidth, startHeight } = resizeState;
+
+  let newWidth = startWidth;
+  let newHeight = startHeight;
+
+  if (isEastDir(dir)) newWidth = startWidth + dx;
+  if (isWestDir(dir)) newWidth = startWidth - dx;
+  if (isSouthDir(dir)) newHeight = startHeight + dy;
+  if (isNorthDir(dir)) newHeight = startHeight - dy;
+
+  newWidth = Math.max(20, Math.round(newWidth));
+  newHeight = Math.max(20, Math.round(newHeight));
+
+  const sizeConfig = selectedElement.value.styleConfig.size;
+  sizeConfig.width = String(newWidth);
+  sizeConfig.widthUnit = SizeUnitEnum.PX;
+  sizeConfig.height = String(newHeight);
+  sizeConfig.heightUnit = SizeUnitEnum.PX;
+
+  nextTick(updatePos);
+}
+
+/** 结束调整尺寸 */
+function handleResizeEnd() {
+  resizeState = null;
+  isResizing.value = false;
+  window.removeEventListener('pointermove', handleResizeMove);
+  window.removeEventListener('pointerup', handleResizeEnd);
+
+  updatePos();
+}
+
 /** 获取选中元素的 DOM */
 function getSelectedEl(): Element | null {
   if (!selectedElementId.value) return null;
@@ -99,7 +204,7 @@ function updatePos() {
 /** 监听选中元素变化 */
 watch(selectedElementId, (id) => {
   if (id) {
-    nextTick(updatePos);
+    updatePos();
   } else {
     resetElRect();
   }
@@ -120,7 +225,7 @@ onMounted(() => {
   }
   /** 初始化时如果已有选中元素，立即更新位置 */
   if (selectedElementId.value) {
-    nextTick(updatePos);
+    updatePos();
   }
 });
 
@@ -130,6 +235,9 @@ onBeforeUnmount(() => {
     canvasEl.removeEventListener('scroll', handleRecompute, true);
     window.removeEventListener('resize', handleRecompute);
   }
+
+  window.removeEventListener('pointermove', handleResizeMove);
+  window.removeEventListener('pointerup', handleResizeEnd);
 });
 </script>
 
@@ -189,6 +297,88 @@ onBeforeUnmount(() => {
     &:hover {
       background: rgba(255, 77, 79, 0.8);
     }
+  }
+}
+
+/* 调整尺寸手柄 */
+.etb-resize-handle {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #4096ff;
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 101;
+
+  &--n,
+  &--s {
+    width: 20px;
+    height: 6px;
+  }
+
+  &--e,
+  &--w {
+    width: 6px;
+    height: 20px;
+  }
+
+  &--ne,
+  &--nw,
+  &--se,
+  &--sw {
+    width: 8px;
+    height: 8px;
+  }
+
+  &--n {
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+  }
+
+  &--s {
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+  }
+
+  &--e {
+    right: -3px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+  }
+
+  &--w {
+    left: -3px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+  }
+
+  &--ne {
+    top: -4px;
+    right: -4px;
+    cursor: nesw-resize;
+  }
+
+  &--nw {
+    top: -4px;
+    left: -4px;
+    cursor: nwse-resize;
+  }
+
+  &--se {
+    bottom: -4px;
+    right: -4px;
+    cursor: nwse-resize;
+  }
+
+  &--sw {
+    bottom: -4px;
+    left: -4px;
+    cursor: nesw-resize;
   }
 }
 </style>

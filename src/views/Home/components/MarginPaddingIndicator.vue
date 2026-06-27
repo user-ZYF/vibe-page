@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
 .sei-root {
   position: absolute;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 100;
 }
 
 /* margin 层 */

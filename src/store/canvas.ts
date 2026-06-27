@@ -255,10 +255,10 @@ export const useCanvasStore = defineStore("canvas", {
       this.root.children = insertInList(this.root.children);
     },
     /** 选中元素的父节点 */
-    selectParentElement(id: string | null) {
+    selectParentElement() {
       const findParentId = (list: CanvasInnerElement[], parentId: string | null): { found: boolean; parentId: string | null } => {
         for (const el of list) {
-          if (el.id === id) return { found: true, parentId };
+          if (el.id === this.selectedElementId) return { found: true, parentId };
           if (el.type === CanvasElementTypeEnum.CONTAINER) {
             const result = findParentId((el as CanvasContainerElement).children, el.id);
             if (result.found) return result;

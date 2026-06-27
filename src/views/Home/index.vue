@@ -16,7 +16,7 @@
         <Canvas />
       </a-layout-content>
     </a-layout>
-    <EditorSider :is-preview="isPreview" />
+    <EditorSider :is-preview="isPreview" /> 
   </a-layout>
 </template>
 
@@ -159,7 +159,6 @@ onUnmounted(() => {
 }
 
 .editor-canvas {
-  position: relative;
   transition: background 0.3s ease;
 }
 

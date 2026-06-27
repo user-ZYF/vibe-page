@@ -6,7 +6,7 @@
       <!-- 操作工具栏 -->
       <div v-if="showToolbar" class="etb-bar">
         <a-tooltip title="选中父元素" placement="top">
-          <button class="etb-btn" @click.stop="canvasStore.selectParentElement(selectedElementId!)">
+          <button class="etb-btn" @click.stop="canvasStore.selectParentElement">
             <ArrowUpOutlined />
           </button>
         </a-tooltip>
@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
 .etb-root {
   position: absolute;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 100;
 }
 
 /* 蓝色边框区域 */

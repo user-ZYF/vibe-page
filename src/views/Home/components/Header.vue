@@ -29,9 +29,9 @@
             <template #icon><CodeOutlined /></template>
           </a-button>
         </a-tooltip>
-        <a-tooltip title="源码编辑" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('download')">
-            <template #icon><DownloadOutlined /></template>
+        <a-tooltip title="导入代码" overlay-class-name="editor-tooltip-white">
+          <a-button type="text" size="small" @click="emit('import')">
+            <template #icon><ImportOutlined /></template>
           </a-button>
         </a-tooltip>
         <a-tooltip title="组件区分" overlay-class-name="editor-tooltip-white">
@@ -69,8 +69,7 @@ import {
   UndoOutlined,
   RedoOutlined,
   CodeOutlined,
-  FullscreenOutlined,
-  DownloadOutlined,
+  ImportOutlined,
   BorderOutlined,
   DesktopOutlined,
   MobileOutlined,
@@ -93,7 +92,7 @@ const emit = defineEmits<{
   (e: 'undo'): void
   (e: 'redo'): void
   (e: 'code'): void
-  (e: 'download'): void
+  (e: 'import'): void
   (e: 'block'): void
   (e: 'computer'): void
   (e: 'phone'): void

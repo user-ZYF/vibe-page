@@ -1,96 +1,94 @@
 <!-- ? 选中元素操作工具栏 -->
 <template>
-  <div v-if="selectedElementId && !isDragging" class="etb-root" :style="rootStyle">
-    <a-tooltip title="选中父元素" placement="top">
-      <button class="etb-btn" @click.stop="canvasStore.selectParentElement(selectedElementId)">
-        <ArrowUpOutlined />
-      </button>
-    </a-tooltip>
-    <a-tooltip title="复制" placement="top">
-      <button class="etb-btn" @click.stop="canvasStore.duplicateElement(selectedElementId)">
-        <CopyOutlined />
-      </button>
-    </a-tooltip>
-    <a-tooltip title="删除" placement="top">
-      <button class="etb-btn etb-btn--danger" @click.stop="handleDelete">
-        <DeleteOutlined />
-      </button>
-    </a-tooltip>
+  <div v-if="visible" class="etb-root" :style="elMarginBox">
+    <!-- 蓝色边框区域 -->
+    <div class="etb-border-area">
+      <!-- 操作工具栏 -->
+      <div v-if="showToolbar" class="etb-bar">
+        <a-tooltip title="选中父元素" placement="top">
+          <button class="etb-btn" @click.stop="canvasStore.selectParentElement(selectedElementId!)">
+            <ArrowUpOutlined />
+          </button>
+        </a-tooltip>
+        <a-tooltip title="复制" placement="top">
+          <button class="etb-btn" @click.stop="canvasStore.duplicateElement(selectedElementId!)">
+            <CopyOutlined />
+          </button>
+        </a-tooltip>
+        <a-tooltip title="删除" placement="top">
+          <button class="etb-btn etb-btn--danger" @click.stop="handleDelete">
+            <DeleteOutlined />
+          </button>
+        </a-tooltip>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
+import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
+import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
 
 defineOptions({
-  name: 'ElementToolbar',
+  name: 'SelectedElementToolbar',
 });
 
 const canvasStore = useCanvasStore();
 const { selectedElementId, isDragging } = storeToRefs(canvasStore);
 
-/** 工具栏位置 */
-const pos = ref({ top: 0, left: 0 });
+const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
-/** 工具栏实际尺寸（宽度根据按鈕数量估算） */
-const TOOLBAR_HEIGHT = 30;
-const TOOLBAR_WIDTH = 116;
+/** 是否显示（含蓝色边框） */
+const visible = computed(() => !!selectedElementId.value && !isDragging.value);
 
-/** 画布容器 DOM */
-function getCanvasEl(): Element | null {
-  return document.querySelector('.canvas-container');
-}
+/** 是否显示操作工具栏按钮（根画布元素不显示） */
+const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
 
-/** 工具栏根节点定位样式 */
-const rootStyle = computed(() => ({
-  top: pos.value.top + 'px',
-  left: pos.value.left + 'px',
-}));
+/** 工具栏高度 */
+const TOOLBAR_HEIGHT = 28;
 
-/** 更新工具栏位置 */
-function updatePos() {
-  const canvasEl = getCanvasEl();
-  if (!canvasEl || !selectedElementId.value) return;
-  const el = canvasEl.querySelector(`[data-canvas-id="${selectedElementId.value}"]`);
-  if (!el) return;
-  const elRect = el.getBoundingClientRect();
-  const canvasRect = canvasEl.getBoundingClientRect();
+/** 工具栏自然 top 偏移（位于边框区域上方） */
+const NATURAL_TOP = -(TOOLBAR_HEIGHT + 2);
 
-  /** 元素相对于画布的坐标 */
-  const elTop = elRect.top - canvasRect.top;
-  const elRight = elRect.right - canvasRect.left;
-  const canvasHeight = canvasRect.height;
-  const canvasWidth = canvasRect.width;
-
-  /** 垂直方向：优先显示在元素上方，没有空间则贴靠元素顶部内侧 */
-  let top: number;
-  if (elTop >= TOOLBAR_HEIGHT + 2) {
-    top = elTop - TOOLBAR_HEIGHT - 2;
-  } else {
-    top = Math.max(0, elTop + 2);
-  }
-  /** 垂直方向防止超出画布底部 */
-  top = Math.min(top, canvasHeight - TOOLBAR_HEIGHT);
-
-  /** 水平方向：右对齐元素右边界，防止超出画布左右边 */
-  let left = elRight - TOOLBAR_WIDTH;
-  left = Math.max(0, Math.min(left, canvasWidth - TOOLBAR_WIDTH));
-
-  pos.value = { top, left };
-}
+/** 工具栏 top 偏移（粘性定位，防止被画布顶部遮挡） */
+const toolbarTop = computed(() => {
+  /** 边框区域距离画布顶部的距离 */
+  const borderTop = elRect.value.y + elRect.value.marginTop;
+  /** 粘性位置：贴靠画布视口顶部（相对于边框区域） */
+  const stickyTop = -borderTop;
+  return Math.max(NATURAL_TOP, stickyTop);
+});
 
 /** 删除并清空选中 */
 function handleDelete() {
   canvasStore.removeElement(selectedElementId.value!);
 }
 
+/** 获取选中元素的 DOM */
+function getSelectedEl(): Element | null {
+  if (!selectedElementId.value) return null;
+  return nodeRegistry.get(selectedElementId.value)?.el ?? null;
+}
+
+/** 更新工具栏位置 */
+function updatePos() {
+  const el = getSelectedEl();
+  if (el) {
+    updateBox(el);
+  }
+}
+
 /** 监听选中元素变化 */
 watch(selectedElementId, (id) => {
-  if (!id) return;
-  requestAnimationFrame(updatePos);
+  if (id) {
+    nextTick(updatePos);
+  } else {
+    resetElRect();
+  }
 });
 
 /** 滚动或窗口尺寸变化时同步更新位置 */
@@ -106,6 +104,10 @@ onMounted(() => {
     canvasEl.addEventListener('scroll', handleRecompute, true);
     window.addEventListener('resize', handleRecompute);
   }
+  /** 初始化时如果已有选中元素，立即更新位置 */
+  if (selectedElementId.value) {
+    nextTick(updatePos);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -120,37 +122,59 @@ onBeforeUnmount(() => {
 <style scoped lang="less">
 .etb-root {
   position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* 蓝色边框区域 */
+.etb-border-area {
+  position: absolute;
+  top: v-bind('elRect.marginTop + "px"');
+  left: v-bind('elRect.marginLeft + "px"');
+  right: v-bind('elRect.marginRight + "px"');
+  bottom: v-bind('elRect.marginBottom + "px"');
+  outline: 2px solid #4096ff;
+  outline-offset: -1px;
+}
+
+/* 操作工具栏 */
+.etb-bar {
+  position: absolute;
+  right: -1px;
+  top: v-bind('toolbarTop + "px"');
   display: flex;
   align-items: center;
   gap: 2px;
-  background: #1f1f1f;
-  border-radius: 4px;
-  padding: 3px 4px;
-  z-index: 10001;
-  pointer-events: all;
+  height: 28px;
+  padding: 0 4px;
+  background: #4096ff;
+  pointer-events: auto;
+  white-space: nowrap;
 }
 
+/* 工具栏按钮 */
 .etb-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border: none;
-  border-radius: 3px;
+  border-radius: 2px;
   background: transparent;
   color: #fff;
-  font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s;
+  font-size: 13px;
+  transition: background-color 0.2s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
   }
 
-  &.etb-btn--danger:hover {
-    background: rgba(255, 77, 79, 0.3);
-    color: #ff4d4f;
+  &--danger {
+    &:hover {
+      background: rgba(255, 77, 79, 0.8);
+    }
   }
 }
 </style>

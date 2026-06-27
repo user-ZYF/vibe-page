@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
-import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
+import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 
 /** 盒模型尺寸数据 */
 export interface CanvasBoxRect {

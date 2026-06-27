@@ -149,7 +149,7 @@ import {
   BoldOutlined,
 } from '@ant-design/icons-vue';
 import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
-import type { FontConfig } from '@/views/Home/types';
+import type { FontConfig } from '@/views/Canvas/types';
 
 defineOptions({
   name: 'FontConfig',

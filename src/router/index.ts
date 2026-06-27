@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '@/views/Home/index.vue';
+import Canvas from '@/views/Canvas/index.vue';
 import Playground from '@/views/playground/index.vue';
 
 const router = createRouter({
@@ -7,8 +7,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'Canvas',
+      component: Canvas
     },
     {
       path: '/playground',

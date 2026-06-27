@@ -1,7 +1,7 @@
 import { inject, onBeforeUnmount, watch, type Ref } from 'vue';
-import { HIDDEN_KEYS } from '@/views/Home/contants';
+import { HIDDEN_KEYS } from '@/views/Canvas/contants';
 import { DisplayStyleEnum } from '@/constants/style';
-import type { StyleConfig } from '@/views/Home/types';
+import type { StyleConfig } from '@/views/Canvas/types';
 
 /** 存储元素隐藏前的原始 display 值 */
 const originalDisplayMap = new Map<string, DisplayStyleEnum | undefined>();

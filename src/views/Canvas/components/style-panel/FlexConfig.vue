@@ -111,7 +111,7 @@ import {
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
 import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
-import type { FlexConfig } from '@/views/Home/types';
+import type { FlexConfig } from '@/views/Canvas/types';
 
 defineOptions({
   name: 'FlexConfig',

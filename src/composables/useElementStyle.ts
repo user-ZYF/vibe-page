@@ -1,5 +1,5 @@
 import { computed, type Ref } from 'vue';
-import type { CanvasElementBase } from '@/views/Home/types';
+import type { CanvasElementBase } from '@/views/Canvas/types';
 import { convertStyleConfig } from '@/utils/styleConfig';
 import { useCanvasStore } from '@/store/canvas';
 

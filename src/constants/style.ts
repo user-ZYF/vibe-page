@@ -1,4 +1,4 @@
-import { StyleConfig } from "@/views/Home/types";
+import { StyleConfig } from "@/views/Canvas/types";
 import { CanvasElementTypeEnum } from "./home";
 import { cloneDeep } from "lodash";
 

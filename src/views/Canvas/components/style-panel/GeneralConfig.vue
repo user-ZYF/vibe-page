@@ -68,7 +68,7 @@
 <script lang="ts" setup>
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
 import { DISPLAY_OPTIONS, FloatStyleEnum, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
-import type { GeneralConfig } from '@/views/Home/types';
+import type { GeneralConfig } from '@/views/Canvas/types';
 
 defineOptions({
   name: 'GeneralConfig',

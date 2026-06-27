@@ -58,7 +58,7 @@ actions:
 
 ## 二、类型定义
 
-**文件**：`src/views/Home/drag/types.ts`
+**文件**：`src/views/Canvas/drag/types.ts`
 
 ```ts
 /** 单个子元素的几何维度（复用于 findDropPosition） */
@@ -91,7 +91,7 @@ interface NodeRegistration {
 
 ## 三、NodeRegistry（DOM 注册表）
 
-**文件**：`src/views/Home/drag/NodeRegistry.ts`
+**文件**：`src/views/Canvas/drag/NodeRegistry.ts`
 
 替代 Craft.js 中 `store.actions.setDOM(id, el)` 的功能。
 
@@ -119,7 +119,7 @@ export const nodeRegistry = new NodeRegistry()
 
 ## 四、Positioner（落点计算）
 
-**文件**：`src/views/Home/drag/Positioner.ts`
+**文件**：`src/views/Canvas/drag/Positioner.ts`
 
 ```ts
 class Positioner {
@@ -155,7 +155,7 @@ function findDropPosition(dims: NodeInfo[], x: number, y: number): { index: numb
 
 ## 五、DragEngine（事件协调中心）
 
-**文件**：`src/views/Home/drag/DragEngine.ts`
+**文件**：`src/views/Canvas/drag/DragEngine.ts`
 
 类比 Craft.js 的 `DefaultEventHandlers`，管理所有 drag 事件的注册与清理。
 
@@ -199,7 +199,7 @@ export const dragEngine = new DragEngine()
 
 ## 六、createShadow（拖影）
 
-**文件**：`src/views/Home/drag/createShadow.ts`（直接参考 Craft.js 实现）
+**文件**：`src/views/Canvas/drag/createShadow.ts`（直接参考 Craft.js 实现）
 
 ```ts
 function createShadow(e: DragEvent, el: HTMLElement): HTMLElement
@@ -212,7 +212,7 @@ function createShadow(e: DragEvent, el: HTMLElement): HTMLElement
 
 ## 七、useDragConnector（Vue Composable）
 
-**文件**：`src/views/Home/drag/useDragConnector.ts`
+**文件**：`src/views/Canvas/drag/useDragConnector.ts`
 
 每个画布元素组件在 `onMounted` 调用，`onUnmounted` 清理，类比 Craft.js 的 `.connect()` connector。
 
@@ -247,7 +247,7 @@ function useDragConnector(
 
 ## 八、DropIndicatorOverlay（占位线组件）
 
-**文件**：`src/views/Home/components/DropIndicatorOverlay.vue`
+**文件**：`src/views/Canvas/components/DropIndicatorOverlay.vue`
 
 ```vue
 <!-- position: fixed，通过 dragStore.indicator 的 rect 定位 -->
@@ -282,13 +282,13 @@ moveElement(
 ## 十、改造步骤（实施顺序）
 
 1. **新增** `src/store/drag.ts`（DragState + actions）
-2. **新增** `src/views/Home/drag/types.ts`（类型定义）
-3. **新增** `src/views/Home/drag/NodeRegistry.ts`
-4. **新增** `src/views/Home/drag/createShadow.ts`
-5. **新增** `src/views/Home/drag/Positioner.ts`（含 `findDropPosition`）
-6. **新增** `src/views/Home/drag/DragEngine.ts`
-7. **新增** `src/views/Home/drag/useDragConnector.ts`
-8. **新增** `src/views/Home/components/DropIndicatorOverlay.vue`
+2. **新增** `src/views/Canvas/drag/types.ts`（类型定义）
+3. **新增** `src/views/Canvas/drag/NodeRegistry.ts`
+4. **新增** `src/views/Canvas/drag/createShadow.ts`
+5. **新增** `src/views/Canvas/drag/Positioner.ts`（含 `findDropPosition`）
+6. **新增** `src/views/Canvas/drag/DragEngine.ts`
+7. **新增** `src/views/Canvas/drag/useDragConnector.ts`
+8. **新增** `src/views/Canvas/components/DropIndicatorOverlay.vue`
 9. **改造** `src/store/canvas.ts`：添加 `moveElement` action
 10. **改造** `Canvas.vue`：移除 `useDraggable`，调用 `connectDroppable(null)` + 渲染 `DropIndicatorOverlay`
 11. **改造** 每个画布元素组件（`Container.vue` / `Button.vue` 等）：移除 `useDraggable`，调用 `useDragConnector`

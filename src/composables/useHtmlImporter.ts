@@ -7,7 +7,7 @@ import {
   CanvasParagraphElement,
   CanvasImageElement,
   CanvasLinkElement,
-} from '@/views/Home/types';
+} from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, ButtonTypeEnum, CanvasElementLabelMap } from '@/constants/home';
 import { DefaultStyleConfigMap } from '@/constants/style';
 

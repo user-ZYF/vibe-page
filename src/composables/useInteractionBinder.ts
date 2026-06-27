@@ -1,6 +1,6 @@
 import { onMounted, onBeforeUnmount, watch, type Ref } from 'vue';
 import { InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
-import type { InteractionRule } from '@/views/Home/types';
+import type { InteractionRule } from '@/views/Canvas/types';
 
 /** 事件枚举到 DOM 事件名的映射 */
 const EVENT_MAP: Record<InteractionEventEnum, string> = {

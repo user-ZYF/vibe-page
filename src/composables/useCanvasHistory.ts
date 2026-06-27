@@ -1,6 +1,6 @@
 import { ref, computed, watch, type Ref } from 'vue';
 import { cloneDeep } from 'lodash';
-import type { CanvasInnerElement, CanvasRootElement } from '@/views/Home/types';
+import type { CanvasInnerElement, CanvasRootElement } from '@/views/Canvas/types';
 
 /** 历史记录最大长度 */
 const MAX_HISTORY_LENGTH = 50;

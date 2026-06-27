@@ -1,7 +1,7 @@
 import { inject, ref } from 'vue';
 import type { Ref } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
-import { IS_PREVIEW_KEY } from '@/views/Home/contants';
+import { IS_PREVIEW_KEY } from '@/views/Canvas/contants';
 
 /**
  * 画布元素交互 composable

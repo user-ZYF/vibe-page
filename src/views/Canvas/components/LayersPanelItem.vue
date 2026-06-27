@@ -92,7 +92,7 @@ import { computed, inject, PropType, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
-import type { CanvasInnerElement, CanvasContainerElement, CanvasElement, CanvasRootElement } from '@/views/Home/types';
+import type { CanvasInnerElement, CanvasContainerElement, CanvasElement, CanvasRootElement } from '@/views/Canvas/types';
 import {
   TOGGLE_EXPAND_KEY,
   EXPAND_CONTAINER_KEY,

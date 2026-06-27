@@ -246,7 +246,7 @@ import {
   BackgroundSizeEnum,
   SizeUnitEnum,
 } from '@/constants/style';
-import type { VisualConfig } from '@/views/Home/types';
+import type { VisualConfig } from '@/views/Canvas/types';
 
 defineOptions({
   name: 'VisualConfig',

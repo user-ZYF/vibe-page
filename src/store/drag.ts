@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { DrapSourceTypeEnum } from "@/constants/home";
-import type { DropIndicator } from "@/views/Home/drag/types";
-import { CanvasInnerElementTypeEnum } from "@/views/Home/types";
+import type { DropIndicator } from "@/views/Canvas/drag/types";
+import { CanvasInnerElementTypeEnum } from "@/views/Canvas/types";
 
 /** 拖拽 store */
 export const useDragStore = defineStore("drag", {

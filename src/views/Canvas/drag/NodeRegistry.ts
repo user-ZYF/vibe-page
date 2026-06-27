@@ -1,7 +1,7 @@
 import type { NodeRegistration } from "./types";
-import type { CanvasInnerElement } from "@/views/Home/types";
+import type { CanvasInnerElement } from "@/views/Canvas/types";
 import { CanvasElementTypeEnum } from "@/constants/home";
-import type { CanvasContainerElement } from "@/views/Home/types";
+import type { CanvasContainerElement } from "@/views/Canvas/types";
 
 /**
  * DOM 节点注册表，替代 Craft.js 中 store.actions.setDOM(id, el) 的功能

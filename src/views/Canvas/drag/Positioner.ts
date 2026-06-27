@@ -1,6 +1,6 @@
-import type { CanvasInnerElement, CanvasRootElement } from "@/views/Home/types";
+import type { CanvasInnerElement, CanvasRootElement } from "@/views/Canvas/types";
 import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
-import type { CanvasContainerElement } from "@/views/Home/types";
+import type { CanvasContainerElement } from "@/views/Canvas/types";
 import type { NodeInfo, DropIndicator } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
 import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum } from "@/constants/style";

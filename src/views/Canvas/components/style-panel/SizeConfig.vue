@@ -123,7 +123,7 @@
 
 <script lang="ts" setup>
 import { SIZE_UNIT_OPTIONS } from '@/constants/style';
-import type { SizeConfig } from '@/views/Home/types';
+import type { SizeConfig } from '@/views/Canvas/types';
 
 defineOptions({
   name: 'SizeConfig',

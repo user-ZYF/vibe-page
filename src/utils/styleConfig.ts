@@ -1,4 +1,4 @@
-import type { StyleConfig, BackgroundItem, TextShadowItem, BoxShadowItem } from '@/views/Home/types';
+import type { StyleConfig, BackgroundItem, TextShadowItem, BoxShadowItem } from '@/views/Canvas/types';
 import { BackgroundTypeEnum, FlexContainerEnum } from '@/constants/style';
 
 /** 将单个背景层转换为 CSS background 分量字符串 */

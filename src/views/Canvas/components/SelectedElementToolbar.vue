@@ -40,10 +40,10 @@ import { computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
-import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
+import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
 import { useElementStyle } from '@/composables/useElementStyle';
-import type { CanvasElementBase, ResizeStartState } from '@/views/Home/types';
+import type { CanvasElementBase, ResizeStartState } from '@/views/Canvas/types';
 import { SizeUnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../contants';

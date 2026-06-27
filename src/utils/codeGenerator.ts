@@ -8,7 +8,7 @@ import {
   InteractionRule,
   CanvasRootElement,
   CanvasElement,
-} from '@/views/Home/types';
+} from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
 

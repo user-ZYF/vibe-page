@@ -1,10 +1,10 @@
-import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Home/types";
+import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Canvas/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
-import { Positioner } from "@/views/Home/drag/Positioner";
+import { Positioner } from "@/views/Canvas/drag/Positioner";
 import { convertStyleConfig } from "@/utils/styleConfig";
 
 /** 画布store */

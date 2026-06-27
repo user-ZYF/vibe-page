@@ -8,7 +8,7 @@
         :style="style"
         :contenteditable="isEditing"
         :is-editing="isEditing"
-        @click="canvasStore.selectElement(data.id)"
+        @click="handleClick"
         @dblclick="handleDblClick"
         @blur="handleBlur"
         @keydown.enter="handleEnter"
@@ -16,19 +16,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, inject } from 'vue';
 import { CanvasParagraphElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasStore } from '@/store/canvas';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useInteractionBinder } from '@/composables/useInteractionBinder';
 import { useElementVisibility } from '@/composables/useElementVisibility';
+import { IS_PREVIEW_KEY } from '../../contants';
 
 const canvasStore = useCanvasStore();
 
 const data = defineModel<CanvasParagraphElement>("data", {
     required: true
 });
+
+/** 是否处于预览模式 */
+const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 
 /** 样式对象（合并 class 选择器与 id 选择器样式） */
 const style = useElementStyle(data);
@@ -39,8 +43,15 @@ const paragraphEl = ref<HTMLElement>();
 /** 是否正在编辑文本 */
 const isEditing = ref(false);
 
-/** 双击进入编辑模式 */
+/** 点击选中元素（预览模式下禁用） */
+function handleClick() {
+    if (isPreview.value) return;
+    canvasStore.selectElement(data.value.id);
+}
+
+/** 双击进入编辑模式（预览模式下禁用） */
 function handleDblClick() {
+    if (isPreview.value) return;
     isEditing.value = true;
     canvasStore.selectElement(data.value.id);
     nextTick(() => {

@@ -26,12 +26,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
+import { useElementStyle } from '@/composables/useElementStyle';
+import type { CanvasElementBase } from '@/views/Home/types';
 
 defineOptions({
   name: 'SelectedElementToolbar',
@@ -42,8 +44,23 @@ const { selectedElementId, isDragging } = storeToRefs(canvasStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
+/** 选中元素数据 */
+const selectedElementData = computed(() => {
+  if (!selectedElementId.value) return null;
+  return canvasStore.getElementById(selectedElementId.value);
+});
+
+/** 选中元素最终样式 */
+const selectedElementStyle = useElementStyle(selectedElementData as Ref<CanvasElementBase>);
+
+/** 选中元素是否可见（display 不为 none，基于画布数据判断） */
+const isElementDisplayed = computed(() => {
+  if (!selectedElementData.value) return true;
+  return selectedElementStyle.value.display !== 'none';
+});
+
 /** 是否显示（含蓝色边框） */
-const visible = computed(() => !!selectedElementId.value && !isDragging.value);
+const visible = computed(() => !!selectedElementId.value && !isDragging.value && isElementDisplayed.value);
 
 /** 是否显示操作工具栏按钮（根画布元素不显示） */
 const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
@@ -77,7 +94,7 @@ function getSelectedEl(): Element | null {
 /** 更新工具栏位置 */
 function updatePos() {
   const el = getSelectedEl();
-  if (el) {
+  if (el && isElementDisplayed.value) {
     updateBox(el);
   }
 }

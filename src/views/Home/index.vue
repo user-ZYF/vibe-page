@@ -27,7 +27,7 @@ import EditorSider from './components/Sider.vue'
 import Canvas from './components/Canvas.vue'
 import CodePreviewModal from './components/CodePreviewModal.vue'
 import { canvasHistoryApi } from '@/composables/useCanvasHistory'
-import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from './contants.ts'
+import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './contants.ts'
 import { useCanvasStore } from '@/store/canvas.ts'
 import { storeToRefs } from 'pinia'
 
@@ -72,6 +72,9 @@ function hideElement(id: string) {
 /** 切换预览模式 */
 function togglePreview() {
   isPreview.value = !isPreview.value;
+  if (isPreview.value) {
+    canvasStore.selectElement(null);
+  }
 }
 
 /** 撤销 */
@@ -94,6 +97,8 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 /** 键盘快捷键处理 */
 function handleKeydown(e: KeyboardEvent) {
+  /** 预览模式下禁用一切画布操作 */
+  if (isPreview.value) return;
   if(e.key === 'Delete' && selectedElementId.value && !isEditableTarget(e.target)){
     // delete: 删除
     canvasStore.removeElement(selectedElementId.value);
@@ -129,6 +134,7 @@ function handleBlock() {
 
 provide(HIDDEN_KEYS, hiddenKeys);
 provide(TOGGLE_SHOW_KEY, toggleShow);
+provide(IS_PREVIEW_KEY, isPreview);
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown);

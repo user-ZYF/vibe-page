@@ -49,5 +49,8 @@ export const HIDDEN_KEYS: InjectionKey<Ref<string[]>> = Symbol('hiddenKeys');
 /** 切换元素显示/隐藏 */
 export const TOGGLE_SHOW_KEY: InjectionKey<(id: string) => void> = Symbol('toggleShow');
 
+/** 是否处于预览模式 */
+export const IS_PREVIEW_KEY: InjectionKey<Readonly<Ref<boolean>>> = Symbol('isPreview');
+
 /** 边缘检测阈值（px） */
 export const EDGE_THRESHOLD = 8;

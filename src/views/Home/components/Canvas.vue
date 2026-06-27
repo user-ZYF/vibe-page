@@ -8,14 +8,14 @@
       }" 
     >
         <Root v-model:data="root" />
-        <MarginPaddingIndicator />
-        <SelectedElementToolbar />
+        <MarginPaddingIndicator v-if="!isPreview" />
+        <SelectedElementToolbar v-if="!isPreview" />
     </div>
-    <DropIndicatorOverlay />
+    <DropIndicatorOverlay v-if="!isPreview" />
 </template>
 
 <script lang="ts" setup>
-import { watch, onMounted } from "vue";
+import { watch, onMounted, inject, ref } from "vue";
 import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
@@ -24,9 +24,13 @@ import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
 import DropIndicatorOverlay from "./DropIndicatorOverlay.vue";
 import Root from './canvas-element/Root.vue';
+import { IS_PREVIEW_KEY } from '../contants';
 
 const canvasStore = useCanvasStore();
 const { root } = storeToRefs(canvasStore);
+
+/** 是否处于预览模式 */
+const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 
 /** 撤销/重做功能 */
 const { recordHistory } = useCanvasHistory(root);

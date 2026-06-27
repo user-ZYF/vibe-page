@@ -108,6 +108,8 @@ class DragEngine {
     function handleDragStart(e: DragEvent) {
       e.stopPropagation();
       const dragStore = useDragStore();
+      const canvasStore = useCanvasStore();
+      canvasStore.selectElement(null);
       dragStore.startNewDrag(type);
     };
 

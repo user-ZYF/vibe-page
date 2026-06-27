@@ -22,7 +22,7 @@
         </a-tooltip>
       </div>
       <!-- 调整尺寸手柄 -->
-      <template v-if="showToolbar">
+      <template v-if="showResizer">
         <div
           v-for="dir in RESIZE_DIRS"
           :key="dir"
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
+import { computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
@@ -47,13 +47,14 @@ import type { CanvasElementBase, ResizeStartState } from '@/views/Home/types';
 import { SizeUnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../contants';
+import { CanvasElementTypeEnum } from '@/constants/home';
 
 defineOptions({
   name: 'SelectedElementToolbar',
 });
 
 const canvasStore = useCanvasStore();
-const { selectedElementId, isDragging } = storeToRefs(canvasStore);
+const { selectedElementId, isDragging, isResizing } = storeToRefs(canvasStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
@@ -98,6 +99,9 @@ const visible = computed(() => !!selectedElementId.value && !isDragging.value &&
 /** 是否显示操作工具栏按钮（根画布元素不显示） */
 const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
 
+/** 是否显示resizer（只有选中非根容器元素才会出现） */
+const showResizer = computed(()=> showToolbar && selectedElement.value?.type === CanvasElementTypeEnum.CONTAINER);
+
 /** 工具栏自然 top 偏移（位于边框区域上方） */
 const NATURAL_TOP = -28;
 
@@ -114,9 +118,6 @@ const toolbarTop = computed(() => {
 function handleDelete() {
   canvasStore.removeElement(selectedElementId.value!);
 }
-
-/** 是否正在调整尺寸 */
-const isResizing = ref(false);
 
 /** 调整尺寸状态 */
 let resizeState: ResizeStartState | null = null;

@@ -61,7 +61,7 @@ const props = defineProps({
 });
 
 const canvasStore = useCanvasStore();
-const { isDragging } = storeToRefs(canvasStore);
+const { isDragging, isResizing } = storeToRefs(canvasStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
@@ -69,7 +69,7 @@ const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBo
 const currentTarget = ref<Element | null>(null);
 
 /** 是否显示覆盖层 */
-const visible = computed(() => !!currentTarget.value && !isDragging.value);
+const visible = computed(() => !!currentTarget.value && !isDragging.value && !isResizing.value);
 
 /** 名称元素自然的top位置 */
 const NATURAL_TOP = -18;
@@ -114,6 +114,13 @@ watch(currentTarget, (el) => {
     updateBox(el);
   } else {
     resetElRect();
+  }
+});
+
+/** 拖拽/调整尺寸结束时，刷新元素尺寸数据，避免显示旧尺寸 */
+watch([isDragging, isResizing], () => {
+  if (!isDragging.value && !isResizing.value && currentTarget.value) {
+    updateBox(currentTarget.value);
   }
 });
 

@@ -27,6 +27,8 @@ export const useCanvasStore = defineStore("canvas", {
     activePanel: SiderPanelEnum.COMPONENTS as SiderPanelEnum,
     /** 是否正在拖拽元素 */
     isDragging: false,
+    /** 是否正在调整元素尺寸 */
+    isResizing: false,
     /** 插入位置 */
     positioner: new Positioner(),
     /** 全局 class 样式配置映射 */

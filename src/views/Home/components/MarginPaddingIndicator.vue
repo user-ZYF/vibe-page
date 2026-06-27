@@ -266,7 +266,7 @@ onBeforeUnmount(() => {
   left: v-bind('elRect.marginLeft + "px"');
   right: v-bind('elRect.marginRight + "px"');
   bottom: v-bind('elRect.marginBottom + "px"');
-  outline: 2px solid #4096ff;
+  outline: 1px solid #4096ff;
   outline-offset: -1px;
   z-index: 1;
 }
@@ -274,12 +274,13 @@ onBeforeUnmount(() => {
 /* 元素类别名称标签（悬停时显示） */
 .sei-selected-label {
   position: absolute;
-  left: -1px;
+  z-index: 1;
+  left: 0px;
   background: #4096ff;
   color: #fff;
   font-size: 12px;
   font-family: monospace;
-  padding: 0 4px;
+  padding: 0 2px;
   white-space: nowrap;
   line-height: 1.5;
   top: v-bind('labelTop + "px"');

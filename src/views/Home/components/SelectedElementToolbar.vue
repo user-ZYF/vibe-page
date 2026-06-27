@@ -65,11 +65,8 @@ const visible = computed(() => !!selectedElementId.value && !isDragging.value &&
 /** 是否显示操作工具栏按钮（根画布元素不显示） */
 const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
 
-/** 工具栏高度 */
-const TOOLBAR_HEIGHT = 28;
-
 /** 工具栏自然 top 偏移（位于边框区域上方） */
-const NATURAL_TOP = -(TOOLBAR_HEIGHT + 2);
+const NATURAL_TOP = -28;
 
 /** 工具栏 top 偏移（粘性定位，防止被画布顶部遮挡） */
 const toolbarTop = computed(() => {
@@ -151,13 +148,13 @@ onBeforeUnmount(() => {
   right: v-bind('elRect.marginRight + "px"');
   bottom: v-bind('elRect.marginBottom + "px"');
   outline: 2px solid #4096ff;
-  outline-offset: -1px;
+  outline-offset: -2px;
 }
 
 /* 操作工具栏 */
 .etb-bar {
   position: absolute;
-  right: -1px;
+  right: 0px;
   top: v-bind('toolbarTop + "px"');
   display: flex;
   align-items: center;

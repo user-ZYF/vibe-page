@@ -36,7 +36,7 @@
 
     <!-- 蓝色边框 + 元素类别名称标签 -->
     <div class="sei-selected-wrapper">
-      <span class="sei-selected-label" :class="{ 'to-bottom': nameToBottom }">{{ elName }}</span>
+      <span class="sei-selected-label">{{ elName }}</span>
     </div>
   </div>
 </template>
@@ -71,9 +71,6 @@ const currentTarget = ref<Element | null>(null);
 /** 是否显示覆盖层 */
 const visible = computed(() => !!currentTarget.value && !isDragging.value);
 
-/** 元素名称是否显示在指示器下方 */
-const nameToBottom = ref(false);
-
 /** 元素名称 */
 const elName = computed(() => {
   const id = currentTarget.value?.getAttribute('data-canvas-id');
@@ -93,7 +90,7 @@ function handleMouseLeave() {
   currentTarget.value = null;
 }
 
-/** 滚动或窗口尺寸变化时同步更新位置 */
+/** 窗口尺寸变化时同步更新元素尺寸 */
 function handleRecompute() {
   if (currentTarget.value) {
     updateBox(currentTarget.value);
@@ -274,10 +271,5 @@ onBeforeUnmount(() => {
   white-space: nowrap;
   line-height: 1.5;
   top: -18px;
-
-  /** 底部有空间：显示在元素外侧底部 */
-  &.to-bottom {
-    bottom: -18px;
-  }
 }
 </style>

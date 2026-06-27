@@ -1,4 +1,6 @@
 import { ref, computed } from 'vue';
+import { useCanvasStore } from '@/store/canvas';
+import { nodeRegistry } from '@/views/Home/drag/NodeRegistry';
 
 /** 盒模型尺寸数据 */
 export interface CanvasBoxRect {
@@ -36,26 +38,6 @@ export interface CanvasBoxRect {
   y: number;
 }
 
-/** 默认盒模型数据 */
-const defaultBox = (): CanvasBoxRect => ({
-  marginTop: 0,
-  marginRight: 0,
-  marginBottom: 0,
-  marginLeft: 0,
-  paddingTop: 0,
-  paddingRight: 0,
-  paddingBottom: 0,
-  paddingLeft: 0,
-  borderTop: 0,
-  borderRight: 0,
-  borderBottom: 0,
-  borderLeft: 0,
-  contentWidth: 0,
-  contentHeight: 0,
-  x: 0,
-  y: 0,
-});
-
 /** 从 computed style 中解析 px 数值 */
 function parsePx(value: string): number {
   return parseFloat(value) || 0;
@@ -66,36 +48,55 @@ function parsePx(value: string): number {
  * 提供 box 数据、rootStyle 计算属性、updateBox 方法以及 scroll/resize 自动更新
  */
 export function useCanvasBoxRect() {
-  /** 盒模型尺寸数据 */
-  const box = ref<CanvasBoxRect>(defaultBox());
+  const canvasStore = useCanvasStore();
 
-  /** 覆盖层根节点的定位样式（含 margin 的完整区域） */
-  const rootStyle = computed(() => ({
-    left: box.value.x + 'px',
-    top: box.value.y + 'px',
+  /** 盒模型尺寸数据 */
+  const elRect = ref<CanvasBoxRect>({
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    borderTop: 0,
+    borderRight: 0,
+    borderBottom: 0,
+    borderLeft: 0,
+    contentWidth: 0,
+    contentHeight: 0,
+    x: 0,
+    y: 0,
+  });
+
+  /** 元素的margin盒 */
+  const elMarginBox = computed(() => ({
+    left: elRect.value.x + 'px',
+    top: elRect.value.y + 'px',
     width:
-      box.value.marginLeft +
-      box.value.borderLeft +
-      box.value.paddingLeft +
-      box.value.contentWidth +
-      box.value.paddingRight +
-      box.value.borderRight +
-      box.value.marginRight +
+      elRect.value.marginLeft +
+      elRect.value.borderLeft +
+      elRect.value.paddingLeft +
+      elRect.value.contentWidth +
+      elRect.value.paddingRight +
+      elRect.value.borderRight +
+      elRect.value.marginRight +
       'px',
     height:
-      box.value.marginTop +
-      box.value.borderTop +
-      box.value.paddingTop +
-      box.value.contentHeight +
-      box.value.paddingBottom +
-      box.value.borderBottom +
-      box.value.marginBottom +
+      elRect.value.marginTop +
+      elRect.value.borderTop +
+      elRect.value.paddingTop +
+      elRect.value.contentHeight +
+      elRect.value.paddingBottom +
+      elRect.value.borderBottom +
+      elRect.value.marginBottom +
       'px',
   }));
 
   /** 根据 DOM 元素更新盒模型数据 */
   function updateBox(el: Element) {
-    const canvasEl = document.querySelector('.canvas-container');
+    const canvasEl = getCanvasEl();
     if (!canvasEl) return;
 
     const rect = el.getBoundingClientRect();
@@ -124,7 +125,7 @@ export function useCanvasBoxRect() {
     const rootX = rect.left - canvasRect.left - marginLeft;
     const rootY = rect.top - canvasRect.top - marginTop;
 
-    box.value = {
+    elRect.value = {
       marginTop,
       marginRight,
       marginBottom,
@@ -144,21 +145,38 @@ export function useCanvasBoxRect() {
     };
   }
 
-  /** 重置盒模型数据 */
-  function resetBox() {
-    box.value = defaultBox();
+  /** 重置元素尺寸数据 */
+  function resetElRect() {
+    elRect.value = {
+      marginTop: 0,
+      marginRight: 0,
+      marginBottom: 0,
+      marginLeft: 0,
+      paddingTop: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      borderTop: 0,
+      borderRight: 0,
+      borderBottom: 0,
+      borderLeft: 0,
+      contentWidth: 0,
+      contentHeight: 0,
+      x: 0,
+      y: 0,
+    };
   }
 
-  /** 获取画布容器 DOM */
+  /** 获取画布根节点 DOM（通过 NodeRegistry 注册表获取） */
   function getCanvasEl(): Element | null {
-    return document.querySelector('.canvas-container');
+    return nodeRegistry.get(canvasStore.root.id)?.el ?? null;
   }
 
   return {
-    box,
-    rootStyle,
+    elRect,
+    elMarginBox,
     updateBox,
-    resetBox,
+    resetElRect,
     getCanvasEl,
   };
 }

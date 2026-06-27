@@ -8,8 +8,8 @@
       }" 
     >
         <Root v-model:data="root" />
-        <SelectedElementIndicator />
-        <ElementToolbar />
+        <MarginPaddingIndicator />
+        <SelectedElementToolbar />
     </div>
     <DropIndicatorOverlay />
 </template>
@@ -20,8 +20,8 @@ import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
-import SelectedElementIndicator from "./SelectedElementIndicator.vue";
-import ElementToolbar from "./ElementToolbar.vue";
+import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
+import SelectedElementToolbar from "./SelectedElementToolbar.vue";
 import DropIndicatorOverlay from "./DropIndicatorOverlay.vue";
 import Root from './canvas-element/Root.vue';
 

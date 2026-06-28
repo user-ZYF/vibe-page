@@ -12,12 +12,28 @@
       <div class="code-preview-panel">
         <div class="code-preview-panel-header">
           <span class="code-preview-panel-title">HTML</span>
+          <a-button
+            type="text"
+            size="small"
+            class="code-preview-panel-copy"
+            @click="handleCopy(htmlCode)"
+          >
+            <template #icon><CopyOutlined /></template>
+          </a-button>
         </div>
         <pre class="code-preview-panel-body"><code class="language-html" v-html="highlightedHtml"></code></pre>
       </div>
       <div class="code-preview-panel">
         <div class="code-preview-panel-header">
           <span class="code-preview-panel-title">CSS</span>
+          <a-button
+            type="text"
+            size="small"
+            class="code-preview-panel-copy"
+            @click="handleCopy(cssCode)"
+          >
+            <template #icon><CopyOutlined /></template>
+          </a-button>
         </div>
         <pre class="code-preview-panel-body"><code class="language-css" v-html="highlightedCss"></code></pre>
       </div>
@@ -27,6 +43,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { message } from 'ant-design-vue'
+import { CopyOutlined } from '@ant-design/icons-vue'
 import hljs from 'highlight.js/lib/core'
 import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
@@ -50,6 +68,16 @@ const highlightedHtml = computed(() => hljs.highlight(htmlCode.value, { language
 
 /** 高亮后的 CSS 代码 */
 const highlightedCss = computed(() => hljs.highlight(cssCode.value, { language: 'css' }).value)
+
+/** 复制代码到剪贴板 */
+async function handleCopy(code: string) {
+  try {
+    await navigator.clipboard.writeText(code)
+    message.success('复制成功')
+  } catch {
+    message.error('复制失败')
+  }
+}
 
 /** 关闭弹窗 */
 function handleClose() {
@@ -76,6 +104,7 @@ function handleClose() {
 .code-preview-panel-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 8px 16px;
   background: #fafafa;
   border-bottom: 1px solid #e8e8e8;
@@ -85,6 +114,14 @@ function handleClose() {
   font-size: 13px;
   font-weight: 600;
   color: #333;
+}
+
+.code-preview-panel-copy {
+  color: #999;
+
+  &:hover {
+    color: #333;
+  }
 }
 
 .code-preview-panel-body {

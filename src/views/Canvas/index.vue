@@ -8,8 +8,7 @@
         @undo="handleUndo"
         @redo="handleRedo"
         @code="handleCode"
-        @download="handleDownload"
-        @block="handleBlock"
+        @import="handleImport"
       />
       <CodePreviewModal v-model:open="codeModalVisible" />
       <a-layout-content class="editor-canvas">
@@ -21,22 +20,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, provide } from 'vue'
-import EditorHeader from './components/Header.vue'
-import EditorSider from './components/Sider.vue'
-import Canvas from './components/Canvas.vue'
-import CodePreviewModal from './components/CodePreviewModal.vue'
-import { canvasHistoryApi } from '@/composables/useCanvasHistory'
-import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './contants.ts'
-import { useCanvasStore } from '@/store/canvas.ts'
-import { storeToRefs } from 'pinia'
+import { ref, onMounted, onUnmounted, provide } from 'vue';
+import EditorHeader from './components/Header.vue';
+import EditorSider from './components/Sider.vue';
+import Canvas from './components/Canvas.vue';
+import CodePreviewModal from './components/CodePreviewModal.vue';
+import { canvasHistoryApi } from '@/composables/useCanvasHistory';
+import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './contants.ts';
+import { useCanvasStore } from '@/store/canvas.ts';
+import { storeToRefs } from 'pinia';
 
 defineOptions({
   name: 'EditorHome',
 })
 
 /** 是否处于预览模式 */
-const isPreview = ref(false)
+const isPreview = ref(false);
 
 /** 代码预览弹窗是否开启 */
 const codeModalVisible = ref(false);
@@ -123,13 +122,8 @@ function handleCode() {
 }
 
 /** 源码下载 */
-function handleDownload(){
+function handleImport(){
   // TODO: 实现源码下载逻辑
-}
-
-/** 组件区分 */
-function handleBlock() {
-  // TODO: 实现组件区分逻辑
 }
 
 provide(HIDDEN_KEYS, hiddenKeys);

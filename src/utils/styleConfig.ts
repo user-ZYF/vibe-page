@@ -41,6 +41,7 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (general.right !== undefined && general.right !== '') css['right'] = `${general.right}${general.rightUnit}`;
   if (general.bottom !== undefined && general.bottom !== '') css['bottom'] = `${general.bottom}${general.bottomUnit}`;
   if (general.left !== undefined && general.left !== '') css['left'] = `${general.left}${general.leftUnit}`;
+  if (general.overflow !== undefined) css['overflow'] = general.overflow;
 
   // --- size ---
   if (size.width !== undefined && size.width !== '') css['width'] = `${size.width}${size.widthUnit}`;

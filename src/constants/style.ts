@@ -465,6 +465,26 @@ export const DISPLAY_OPTIONS = [
   { label: 'none', value: DisplayStyleEnum.NONE },
 ];
 
+/** overflow 枚举 */
+export enum OverflowStyleEnum {
+  /** 可见 */
+  VISIBLE = "visible",
+  /** 隐藏 */
+  HIDDEN = "hidden",
+  /** 滚动 */
+  SCROLL = "scroll",
+  /** 自动 */
+  AUTO = "auto",
+}
+
+/** overflow 选项 */
+export const OVERFLOW_OPTIONS = [
+  { label: 'visible', value: OverflowStyleEnum.VISIBLE },
+  { label: 'hidden', value: OverflowStyleEnum.HIDDEN },
+  { label: 'scroll', value: OverflowStyleEnum.SCROLL },
+  { label: 'auto', value: OverflowStyleEnum.AUTO },
+];
+
 export const DefaultGeneralStyleConfig: StyleConfig = {
   general: {},
   size: {},

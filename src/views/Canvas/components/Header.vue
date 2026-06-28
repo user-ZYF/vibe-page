@@ -3,16 +3,6 @@
   <div class="editor-header-wrapper" :class="{ 'is-preview': isPreview }">
     <a-layout-header class="editor-header">
       <a-space>
-        <a-tooltip title="电脑端预览" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('computer')">
-            <template #icon><DesktopOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip title="手机端预览" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('phone')">
-            <template #icon><MobileOutlined /></template>
-          </a-button>
-        </a-tooltip>
         <a-divider type="vertical" />
         <a-tooltip title="撤销" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('undo')">
@@ -32,11 +22,6 @@
         <a-tooltip title="导入代码" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('import')">
             <template #icon><ImportOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip title="组件区分" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('block')">
-            <template #icon><BorderOutlined /></template>
           </a-button>
         </a-tooltip>
         <a-divider type="vertical" />
@@ -70,9 +55,6 @@ import {
   RedoOutlined,
   CodeOutlined,
   ImportOutlined,
-  BorderOutlined,
-  DesktopOutlined,
-  MobileOutlined,
 } from '@ant-design/icons-vue'
 
 defineOptions({
@@ -93,9 +75,6 @@ const emit = defineEmits<{
   (e: 'redo'): void
   (e: 'code'): void
   (e: 'import'): void
-  (e: 'block'): void
-  (e: 'computer'): void
-  (e: 'phone'): void
 }>()
 </script>
 

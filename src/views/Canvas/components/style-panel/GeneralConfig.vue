@@ -23,6 +23,12 @@
       </div>
     </div>
 
+    <!-- Overflow -->
+    <div class="style-config-section">
+      <div class="style-config-label">Overflow</div>
+      <a-select v-model:value="model.overflow" size="small" class="style-config-select" :options="OVERFLOW_OPTIONS" />
+    </div>
+
     <!-- Top & Right -->
     <div class="style-config-row">
       <div class="style-config-col">
@@ -67,7 +73,7 @@
 
 <script lang="ts" setup>
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
-import { DISPLAY_OPTIONS, FloatStyleEnum, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
+import { DISPLAY_OPTIONS, FloatStyleEnum, OVERFLOW_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
 import type { GeneralConfig } from '@/views/Canvas/types';
 
 defineOptions({

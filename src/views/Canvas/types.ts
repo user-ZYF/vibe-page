@@ -18,6 +18,7 @@ import type {
   JustifyContentEnum,
   AlignItemsEnum,
   AlignSelfEnum,
+  OverflowStyleEnum,
   PositionStyleEnum,
   SizeUnitEnum,
   TextAlignEnum,
@@ -119,6 +120,8 @@ export interface GeneralConfig {
   bottom?: string;
   /** 底部偏移单位 */
   bottomUnit?: SizeUnitEnum;
+  /** 溢出处理方式 */
+  overflow?: OverflowStyleEnum;
 }
 
 /**

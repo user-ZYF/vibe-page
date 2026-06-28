@@ -1,6 +1,6 @@
 <!-- ? 根组件 -->
 <template>
-  <div ref="rootEl" class="canvas-root" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <div ref="rootEl" class="canvas-root" :class="{ 'is-preview': isPreview }" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </div>
 </template>
@@ -64,11 +64,3 @@ onBeforeUnmount(() => {
   unbindDropFn();
 });
 </script>
-
-<style scoped lang="less">
-.canvas-root {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-}
-</style>

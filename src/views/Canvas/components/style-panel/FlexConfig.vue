@@ -61,7 +61,7 @@
         <div class="style-config-input-group style-config-input-group--basis">
           <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" @blur="handleBasisBlur('flexBasis', 'flexBasisUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>

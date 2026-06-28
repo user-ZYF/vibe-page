@@ -11,7 +11,7 @@
         <div class="style-config-label">Font size</div>
         <div class="style-config-input-group">
           <a-input-number v-model:value="model.fontSize" size="small" class="style-config-input-number" placeholder="16" @blur="handleUnitBlur('fontSize', 'fontSizeUnit')" />
-          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.letterSpacing" size="small" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('letterSpacing', 'letterSpacingUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>
@@ -47,7 +47,7 @@
       <div class="style-config-input-group style-config-input-group--half">
         <a-input v-model:value="model.lineHeight" size="small" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('lineHeight', 'lineHeightUnit')" />
         <span class="style-config-separator">-</span>
-        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
       </div>
     </div>
 
@@ -102,14 +102,14 @@
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'x', 'xUnit')" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'y', 'yUnit')" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@
           <div class="style-config-label">Blur</div>
           <div class="style-config-input-group style-config-input-group--half">
             <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
-            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
           </div>
         </div>
         <!-- Shadow Color -->

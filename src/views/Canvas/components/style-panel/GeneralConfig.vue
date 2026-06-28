@@ -36,7 +36,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.top" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('top', 'topUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
       <div class="style-config-col">
@@ -44,7 +44,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.right" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('right', 'rightUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>
@@ -56,7 +56,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.left" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('left', 'leftUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
       <div class="style-config-col">
@@ -64,7 +64,7 @@
         <div class="style-config-input-group">
           <a-input v-model:value="model.bottom" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('bottom', 'bottomUnit')" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+          <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>

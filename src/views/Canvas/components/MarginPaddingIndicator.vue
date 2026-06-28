@@ -36,13 +36,13 @@
 
     <!-- 蓝色边框 + 元素类别名称标签 -->
     <div class="sei-selected-wrapper">
-      <span class="sei-selected-label">{{ elName }}</span>
+      <span ref="labelRef" class="sei-selected-label">{{ elName }}</span>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
@@ -68,6 +68,12 @@ const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBo
 /** 当前悬停的画布 DOM 元素 */
 const currentTarget = ref<Element | null>(null);
 
+/** 名称标签 DOM 引用 */
+const labelRef = ref<HTMLElement | null>(null);
+
+/** 名称标签宽度（固定不变，只需测量一次） */
+const labelWidth = ref(0);
+
 /** 是否显示覆盖层 */
 const visible = computed(() => !!currentTarget.value && !isDragging.value && !isResizing.value);
 
@@ -81,6 +87,17 @@ const labelTop = computed(() => {
   /** 粘性位置：贴靠画布视口顶部（相对于边框区域） */
   const stickyTop = -borderTop;
   return Math.max(NATURAL_TOP, stickyTop);
+});
+
+/** 元素名称标签的 left 偏移（粘性定位，防止被画布左右两侧遮挡） */
+const labelLeft = computed(() => {
+  /** 边框区域距离画布左侧的距离 */
+  const borderLeft = elRect.value.x + elRect.value.marginLeft;
+  /** 防止左侧溢出：标签左边缘不超出画布视口左侧 */
+  const minLeft = Math.max(0, -borderLeft);
+  /** 防止右侧溢出：标签右边缘不超出画布视口右侧 */
+  const maxLeft = elRect.value.canvasWidth - borderLeft - labelWidth.value;
+  return Math.min(maxLeft, Math.max(minLeft, Math.min(0, maxLeft)));
 });
 
 /** 元素名称 */
@@ -112,6 +129,9 @@ function handleRecompute() {
 watch(currentTarget, (el) => {
   if (el) {
     updateBox(el);
+    nextTick(() => {
+      labelWidth.value = labelRef.value?.offsetWidth ?? 0;
+    });
   } else {
     resetElRect();
   }
@@ -282,7 +302,7 @@ onBeforeUnmount(() => {
 .sei-selected-label {
   position: absolute;
   z-index: 1;
-  left: 0px;
+  left: v-bind('labelLeft + "px"');
   background: #4096ff;
   color: #fff;
   font-size: 12px;

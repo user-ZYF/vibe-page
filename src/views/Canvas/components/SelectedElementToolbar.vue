@@ -4,7 +4,7 @@
     <!-- 蓝色边框区域 -->
     <div class="etb-border-area">
       <!-- 操作工具栏 -->
-      <div v-if="showToolbar" class="etb-bar">
+      <div v-if="showToolbar" ref="toolbarRef" class="etb-bar">
         <a-tooltip title="选中父元素" placement="top">
           <button class="etb-btn" @click.stop="canvasStore.selectParentElement">
             <ArrowUpOutlined />
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
@@ -57,6 +57,12 @@ const canvasStore = useCanvasStore();
 const { selectedElementId, isDragging, isResizing } = storeToRefs(canvasStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
+
+/** 工具栏 DOM 引用 */
+const toolbarRef = ref<HTMLElement | null>(null);
+
+/** 工具栏宽度 */
+const toolbarWidth = ref(0);
 
 /** 判断方向是否包含北（上） */
 function isNorthDir(dir: ResizeDirEnum): boolean {
@@ -112,6 +118,26 @@ const toolbarTop = computed(() => {
   /** 粘性位置：贴靠画布视口顶部（相对于边框区域） */
   const stickyTop = -borderTop;
   return Math.max(NATURAL_TOP, stickyTop);
+});
+
+/** 工具栏 right 偏移（粘性定位，防止被画布左右两侧遮挡） */
+const toolbarRight = computed(() => {
+  /** 边框区域距离画布左侧的距离 */
+  const borderLeft = elRect.value.x + elRect.value.marginLeft;
+  /** 边框区域宽度 */
+  const borderWidth =
+    elRect.value.contentWidth +
+    elRect.value.paddingLeft +
+    elRect.value.paddingRight +
+    elRect.value.borderLeft +
+    elRect.value.borderRight;
+  /** 边框区域右边缘距离画布左侧的距离 */
+  const borderRight = borderLeft + borderWidth;
+  /** 防止右侧溢出：工具栏右边缘不超出画布视口右侧 */
+  const minRight = Math.max(0, borderRight - elRect.value.canvasWidth);
+  /** 防止左侧溢出：工具栏左边缘不超出画布视口左侧 */
+  const maxRight = borderRight - toolbarWidth.value;
+  return Math.min(maxRight, Math.max(minRight, Math.min(0, maxRight)));
 });
 
 /** 删除并清空选中 */
@@ -199,6 +225,9 @@ function updatePos() {
   const el = getSelectedEl();
   if (el && isElementDisplayed.value) {
     updateBox(el);
+    nextTick(() => {
+      toolbarWidth.value = toolbarRef.value?.offsetWidth ?? 0;
+    });
   }
 }
 
@@ -210,6 +239,17 @@ watch(selectedElementId, (id) => {
     resetElRect();
   }
 });
+
+/** 监听选中元素数据变化（如文本内容修改导致尺寸变化），更新工具栏位置 */
+watch(
+  () => selectedElement.value,
+  () => {
+    if (selectedElementId.value && !isResizing.value) {
+      nextTick(updatePos);
+    }
+  },
+  { deep: true },
+);
 
 /** 滚动或窗口尺寸变化时同步更新位置 */
 function handleRecompute() {
@@ -263,7 +303,7 @@ onBeforeUnmount(() => {
 /* 操作工具栏 */
 .etb-bar {
   position: absolute;
-  right: 0px;
+  right: v-bind('toolbarRight + "px"');
   top: v-bind('toolbarTop + "px"');
   display: flex;
   align-items: center;

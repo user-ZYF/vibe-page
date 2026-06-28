@@ -36,6 +36,8 @@ export interface CanvasBoxRect {
   x: number;
   /** margin box距离画布顶部的距离 */
   y: number;
+  /** 画布视口宽度 */
+  canvasWidth: number;
 }
 
 /** 从 computed style 中解析 px 数值 */
@@ -68,6 +70,7 @@ export function useCanvasBoxRect() {
     contentHeight: 0,
     x: 0,
     y: 0,
+    canvasWidth: 0,
   });
 
   /** 元素的margin盒 */
@@ -124,6 +127,7 @@ export function useCanvasBoxRect() {
     /** 元素的margin box具体画布区域左上角坐标 */
     const x = rect.left - canvasRect.left - marginLeft;
     const y = rect.top - canvasRect.top - marginTop;
+    const canvasWidth = canvasEl.clientWidth;
 
     elRect.value = {
       marginTop,
@@ -142,6 +146,7 @@ export function useCanvasBoxRect() {
       contentHeight: Math.max(0, contentHeight),
       x,
       y,
+      canvasWidth,
     };
   }
 
@@ -164,6 +169,7 @@ export function useCanvasBoxRect() {
       contentHeight: 0,
       x: 0,
       y: 0,
+      canvasWidth: 0,
     };
   }
 

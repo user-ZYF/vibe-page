@@ -17,7 +17,7 @@
     <template v-if="model.type === CanvasElementTypeEnum.BUTTON">
       <div class="style-config-section">
         <div class="style-config-label">按钮文本</div>
-        <a-input v-model:value="(model as CanvasButtonElement).text" size="small" class="style-config-input" />
+        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">按钮类型</div>
@@ -29,7 +29,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.PARAGRAPH">
       <div class="style-config-section">
         <div class="style-config-label">段落文本</div>
-        <a-textarea v-model:value="(model as CanvasParagraphElement).text" :rows="3" size="small" />
+        <a-textarea v-model:value="pendingText" :rows="3" size="small" @blur="commitText" />
       </div>
     </template>
 
@@ -49,7 +49,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LINK">
       <div class="style-config-section">
         <div class="style-config-label">链接文本</div>
-        <a-input v-model:value="(model as CanvasLinkElement).text" size="small" class="style-config-input" />
+        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">链接地址</div>
@@ -141,7 +141,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LABEL">
       <div class="style-config-section">
         <div class="style-config-label">标签文本</div>
-        <a-input v-model:value="(model as CanvasLabelElement).text" size="small" class="style-config-input" />
+        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">关联表单元素</div>
@@ -159,7 +159,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS } from '@/constants/home';
 import { useCanvasStore } from '@/store/canvas';
@@ -189,6 +189,32 @@ const canvasStore = useCanvasStore();
 
 /** 编辑前的 id */
 const oldId = ref('');
+
+/** 文本内容编辑的临时值（blur 后才同步到 model，避免输入过程中频繁触发元素尺寸重算） */
+const pendingText = ref('');
+
+/** 同步 model 文本到临时值 */
+watch(
+  () => model.value,
+  (el) => {
+    if (!el) return;
+    if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
+    else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
+    else if (el.type === CanvasElementTypeEnum.LINK) pendingText.value = (el as CanvasLinkElement).text;
+    else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
+  },
+  { immediate: true, deep: true },
+);
+
+/** blur 时将临时文本同步到 model */
+function commitText() {
+  const el = model.value;
+  if (!el) return;
+  if (el.type === CanvasElementTypeEnum.BUTTON) (el as CanvasButtonElement).text = pendingText.value;
+  else if (el.type === CanvasElementTypeEnum.PARAGRAPH) (el as CanvasParagraphElement).text = pendingText.value;
+  else if (el.type === CanvasElementTypeEnum.LINK) (el as CanvasLinkElement).text = pendingText.value;
+  else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
+}
 
 /** id 输入框聚焦时保存原值 */
 function handleIdFocus() {

@@ -49,6 +49,8 @@ const { selectedElementId } = storeToRefs(canvasStore);
 /** 切换显示/隐藏 */
 function toggleShow(id: string){
   const found = hiddenKeys.value.includes(id);
+  // 切换显示隐藏可能导致所选中元素的尺寸/位置受到影响，进而影响toolbar显示，这里暂时做取消选中处理
+  canvasStore.selectElement(null);
   if(found){
     showElement(id);
   }else {

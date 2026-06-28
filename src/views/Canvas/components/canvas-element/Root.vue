@@ -1,9 +1,9 @@
 <!-- ? 根组件 -->
 <template>
-  <div ref="rootEl" class="canvas-root" :class="{ 'is-preview': isPreview }" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <div ref="rootEl" class="canvas-root" :class="[data.classes, { 'is-preview': isPreview }]" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </div>
-</template>
+</template> 
 
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';

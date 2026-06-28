@@ -88,14 +88,16 @@
         <div class="style-config-col">
           <div class="style-config-label">Top</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.marginTop" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('marginTop', 'marginTopUnit')" />
+            <a-input v-model:value="model.marginTop" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginTop', 'marginTopUnit')" />
+            <span class="style-config-separator">-</span>
             <a-select v-model:value="model.marginTopUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Right</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.marginRight" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('marginRight', 'marginRightUnit')" />
+            <a-input v-model:value="model.marginRight" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginRight', 'marginRightUnit')" />
+            <span class="style-config-separator">-</span>
             <a-select v-model:value="model.marginRightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
@@ -105,14 +107,16 @@
         <div class="style-config-col">
           <div class="style-config-label">Bottom</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.marginBottom" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('marginBottom', 'marginBottomUnit')" />
+            <a-input v-model:value="model.marginBottom" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginBottom', 'marginBottomUnit')" />
+            <span class="style-config-separator">-</span>
             <a-select v-model:value="model.marginBottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Left</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.marginLeft" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('marginLeft', 'marginLeftUnit')" />
+            <a-input v-model:value="model.marginLeft" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginLeft', 'marginLeftUnit')" />
+            <span class="style-config-separator">-</span>
             <a-select v-model:value="model.marginLeftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
@@ -123,7 +127,7 @@
 
 <script lang="ts" setup>
 import { SIZE_UNIT_OPTIONS } from '@/constants/style';
-import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
+import { useUnitAutoFill, useAutoUnitBlur } from '@/composables/useUnitAutoFill';
 import type { SizeConfig } from '@/views/Canvas/types';
 
 defineOptions({
@@ -135,6 +139,9 @@ const model = defineModel<SizeConfig>({ required: true });
 
 /** 各尺寸值失焦时自动填充单位 */
 const handleUnitBlur = useUnitAutoFill(model);
+
+/** margin 值失焦时校验：非数值非 auto 则转为 auto，auto 时清除单位 */
+const handleMarginBlur = useAutoUnitBlur(model);
 </script>
 
 <style scoped lang="less">

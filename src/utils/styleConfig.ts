@@ -53,10 +53,10 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (isNotEmptyish(size.height)) css['height'] = `${size.height}${size.heightUnit}`;
   if (isNotEmptyish(size.maxWidth)) css['maxWidth'] = `${size.maxWidth}${size.maxWidthUnit}`;
   if (isNotEmptyish(size.minHeight)) css['minHeight'] = `${size.minHeight}${size.minHeightUnit}`;
-  if (isNotEmptyish(size.marginTop)) css['marginTop'] = `${size.marginTop}${size.marginTopUnit}`;
-  if (isNotEmptyish(size.marginRight)) css['marginRight'] = `${size.marginRight}${size.marginRightUnit}`;
-  if (isNotEmptyish(size.marginBottom)) css['marginBottom'] = `${size.marginBottom}${size.marginBottomUnit}`;
-  if (isNotEmptyish(size.marginLeft)) css['marginLeft'] = `${size.marginLeft}${size.marginLeftUnit}`;
+  if (isNotEmptyish(size.marginTop)) css['marginTop'] = size.marginTop === 'auto' ? 'auto' : `${size.marginTop}${size.marginTopUnit}`;
+  if (isNotEmptyish(size.marginRight)) css['marginRight'] = size.marginRight === 'auto' ? 'auto' : `${size.marginRight}${size.marginRightUnit}`;
+  if (isNotEmptyish(size.marginBottom)) css['marginBottom'] = size.marginBottom === 'auto' ? 'auto' : `${size.marginBottom}${size.marginBottomUnit}`;
+  if (isNotEmptyish(size.marginLeft)) css['marginLeft'] = size.marginLeft === 'auto' ? 'auto' : `${size.marginLeft}${size.marginLeftUnit}`;
   if (isNotEmptyish(size.paddingTop)) css['paddingTop'] = `${size.paddingTop}${size.paddingTopUnit}`;
   if (isNotEmptyish(size.paddingRight)) css['paddingRight'] = `${size.paddingRight}${size.paddingRightUnit}`;
   if (isNotEmptyish(size.paddingBottom)) css['paddingBottom'] = `${size.paddingBottom}${size.paddingBottomUnit}`;

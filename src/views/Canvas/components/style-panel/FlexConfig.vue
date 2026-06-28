@@ -59,7 +59,7 @@
       <div class="style-config-section">
         <div class="style-config-label">Basis</div>
         <div class="style-config-input-group style-config-input-group--basis">
-          <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('flexBasis', 'flexBasisUnit')" />
+          <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" @blur="handleBasisBlur('flexBasis', 'flexBasisUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
@@ -95,7 +95,7 @@ import {
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
 import { SIZE_UNIT_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
-import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
+import { useAutoUnitBlur } from '@/composables/useUnitAutoFill';
 import type { FlexConfig } from '@/views/Canvas/types';
 
 defineOptions({
@@ -105,8 +105,8 @@ defineOptions({
 /** 布局配置数据 */
 const model = defineModel<FlexConfig>({ required: true });
 
-/** flex-basis 失焦时自动填充单位 */
-const handleUnitBlur = useUnitAutoFill(model);
+/** flex-basis 值失焦时校验：非数值非 auto 则转为 auto，auto 时清除单位 */
+const handleBasisBlur = useAutoUnitBlur(model);
 </script>
 
 <style scoped lang="less">

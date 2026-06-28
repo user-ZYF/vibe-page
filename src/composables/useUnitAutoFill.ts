@@ -41,3 +41,31 @@ export function useUnitAutoFill<T extends Record<string, any>>(
 ): (valueKey: keyof T | (keyof T)[], unitKey: keyof T) => void {
   return (valueKey, unitKey) => autoFillUnit(objRef.value, valueKey, unitKey);
 }
+
+/**
+ * 创建支持 auto 关键字的 blur 处理函数
+ *
+ * 值为 auto 时清除单位；值为非数值非 auto 时自动转为 auto 并清除单位；
+ * 值为有效数值时执行单位自动填充
+ *
+ * @param objRef 响应式对象的 Ref
+ * @returns 接受 valueKey / unitKey 的 blur 处理函数
+ */
+export function useAutoUnitBlur<T extends Record<string, any>>(
+  objRef: Ref<T>,
+): (valueKey: keyof T, unitKey: keyof T) => void {
+  return (valueKey, unitKey) => {
+    const obj = objRef.value;
+    const val = obj[valueKey] as string | undefined;
+    if (val === 'auto') {
+      obj[unitKey] = undefined as T[keyof T];
+      return;
+    }
+    if (val !== undefined && val !== '' && isNaN(Number(val))) {
+      obj[valueKey] = 'auto' as T[keyof T];
+      obj[unitKey] = undefined as T[keyof T];
+      return;
+    }
+    autoFillUnit(objRef.value, valueKey, unitKey);
+  };
+}

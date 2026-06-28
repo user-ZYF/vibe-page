@@ -144,19 +144,19 @@ export interface SizeConfig {
   /** 最小高度单位 */
   minHeightUnit?: SizeUnitEnum;
   /** 上外边距 */
-  marginTop?: number;
+  marginTop?: string;
   /** 上外边距单位 */
   marginTopUnit?: SizeUnitEnum;
   /** 右外边距 */
-  marginRight?: number;
+  marginRight?: string;
   /** 右外边距单位 */
   marginRightUnit?: SizeUnitEnum;
   /** 下外边距 */
-  marginBottom?: number;
+  marginBottom?: string;
   /** 下外边距单位 */
   marginBottomUnit?: SizeUnitEnum;
   /** 左外边距 */
-  marginLeft?: number;
+  marginLeft?: string;
   /** 左外边距单位 */
   marginLeftUnit?: SizeUnitEnum;
   /** 上内边距 */

@@ -71,7 +71,7 @@ const currentTarget = ref<Element | null>(null);
 /** 名称标签 DOM 引用 */
 const labelRef = ref<HTMLElement | null>(null);
 
-/** 名称标签宽度（固定不变，只需测量一次） */
+/** 名称标签宽度 */
 const labelWidth = ref(0);
 
 /** 是否显示覆盖层 */
@@ -97,7 +97,7 @@ const labelLeft = computed(() => {
   const minLeft = Math.max(0, -borderLeft);
   /** 防止右侧溢出：标签右边缘不超出画布视口右侧 */
   const maxLeft = elRect.value.canvasWidth - borderLeft - labelWidth.value;
-  return Math.min(maxLeft, Math.max(minLeft, Math.min(0, maxLeft)));
+  return Math.min(maxLeft, minLeft);
 });
 
 /** 元素名称 */

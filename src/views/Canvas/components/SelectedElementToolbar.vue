@@ -137,7 +137,7 @@ const toolbarRight = computed(() => {
   const minRight = Math.max(0, borderRight - elRect.value.canvasWidth);
   /** 防止左侧溢出：工具栏左边缘不超出画布视口左侧 */
   const maxRight = borderRight - toolbarWidth.value;
-  return Math.min(maxRight, Math.max(minRight, Math.min(0, maxRight)));
+  return Math.min(maxRight, minRight);
 });
 
 /** 删除并清空选中 */

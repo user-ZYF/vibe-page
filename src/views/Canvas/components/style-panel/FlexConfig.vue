@@ -122,7 +122,7 @@ defineOptions({
 const model = defineModel<FlexConfig>({ required: true });
 
 /** flex-basis 失焦时自动填充单位 */
-const handleUnitBlur = useUnitAutoFill(model.value);
+const handleUnitBlur = useUnitAutoFill(model);
 </script>
 
 <style scoped lang="less">

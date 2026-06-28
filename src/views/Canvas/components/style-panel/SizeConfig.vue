@@ -134,7 +134,7 @@ defineOptions({
 const model = defineModel<SizeConfig>({ required: true });
 
 /** 各尺寸值失焦时自动填充单位 */
-const handleUnitBlur = useUnitAutoFill(model.value);
+const handleUnitBlur = useUnitAutoFill(model);
 </script>
 
 <style scoped lang="less">

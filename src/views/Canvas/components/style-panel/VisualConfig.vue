@@ -244,7 +244,7 @@ import {
   SizeUnitEnum,
 } from '@/constants/style';
 import type { VisualConfig, BoxShadowItem } from '@/views/Canvas/types';
-import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
+import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import { computed } from 'vue';
 
 defineOptions({
@@ -263,11 +263,11 @@ defineProps({
 const model = defineModel<VisualConfig>({ required: true });
 
 /** 各视觉值失焦时自动填充单位 */
-const handleUnitBlur = useUnitAutoFill(model.value);
+const handleUnitBlur = useUnitAutoFill(model);
 
 /** 盒阴影各值失焦时自动填充单位 */
 function handleBoxShadowUnitBlur(shadow: BoxShadowItem, valueKey: keyof BoxShadowItem, unitKey: keyof BoxShadowItem) {
-  useUnitAutoFill(shadow)(valueKey, unitKey);
+  autoFillUnit(shadow, valueKey, unitKey);
 }
 
 /** 透明度（无值时默认为 1） */

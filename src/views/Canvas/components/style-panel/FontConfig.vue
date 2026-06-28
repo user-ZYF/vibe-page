@@ -149,7 +149,7 @@ import {
   BoldOutlined,
 } from '@ant-design/icons-vue';
 import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
-import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
+import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import type { FontConfig, TextShadowItem } from '@/views/Canvas/types';
 
 defineOptions({
@@ -160,11 +160,11 @@ defineOptions({
 const model = defineModel<FontConfig>({ required: true });
 
 /** 各字体值失焦时自动填充单位 */
-const handleUnitBlur = useUnitAutoFill(model.value);
+const handleUnitBlur = useUnitAutoFill(model);
 
 /** 文字阴影各值失焦时自动填充单位 */
 function handleTextShadowUnitBlur(shadow: TextShadowItem, valueKey: keyof TextShadowItem, unitKey: keyof TextShadowItem) {
-  useUnitAutoFill(shadow)(valueKey, unitKey);
+  autoFillUnit(shadow, valueKey, unitKey);
 }
 
 /**

@@ -22,9 +22,9 @@ export enum StyleConfigTypeEnum {
   GENERAL,
   /** 尺寸 */
   SIZE,
-  /** 额外的 */
+  /** 额外 */
   EXTRA,
-  /** 字体相关 */
+  /** 字体 */
   FONT,
   /** 视觉 */
   VISUAL,
@@ -38,8 +38,8 @@ export enum StyleConfigTypeEnum {
 export const STYLE_CONFIG_TYPE_NAME = {
   [StyleConfigTypeEnum.GENERAL]: '常规',
   [StyleConfigTypeEnum.SIZE]: '尺寸',
-  [StyleConfigTypeEnum.EXTRA]: '额外的',
-  [StyleConfigTypeEnum.FONT]: '字体相关',
+  [StyleConfigTypeEnum.EXTRA]: '额外',
+  [StyleConfigTypeEnum.FONT]: '字体',
   [StyleConfigTypeEnum.VISUAL]: '视觉',
   [StyleConfigTypeEnum.FLEX]: '弹性盒',
   [StyleConfigTypeEnum.SETTING]: '设置',

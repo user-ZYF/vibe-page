@@ -34,7 +34,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Top</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.top" size="small" class="style-config-input" placeholder="auto" />
+          <a-input v-model:value="model.top" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('top', 'topUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
@@ -42,7 +42,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Right</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.right" size="small" class="style-config-input" placeholder="auto" />
+          <a-input v-model:value="model.right" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('right', 'rightUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
@@ -54,7 +54,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Left</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.left" size="small" class="style-config-input" placeholder="auto" />
+          <a-input v-model:value="model.left" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('left', 'leftUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
@@ -62,7 +62,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Bottom</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.bottom" size="small" class="style-config-input" placeholder="auto" />
+          <a-input v-model:value="model.bottom" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('bottom', 'bottomUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
@@ -74,6 +74,7 @@
 <script lang="ts" setup>
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
 import { DISPLAY_OPTIONS, FloatStyleEnum, OVERFLOW_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
+import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
 import type { GeneralConfig } from '@/views/Canvas/types';
 
 defineOptions({
@@ -82,6 +83,9 @@ defineOptions({
 
 /** 常规配置数据 */
 const model = defineModel<GeneralConfig>({ required: true });
+
+/** 各偏移值失焦时自动填充单位 */
+const handleUnitBlur = useUnitAutoFill(model.value);
 </script>
 
 <style scoped lang="less">

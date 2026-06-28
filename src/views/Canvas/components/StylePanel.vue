@@ -57,7 +57,7 @@
           <SizeConfig v-model="activeStyleConfig!.size" />
         </a-collapse-panel>
 
-        <!-- 字体相关配置 -->
+        <!-- 字体配置 -->
         <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
           <FontConfig v-model="activeStyleConfig!.font" />
         </a-collapse-panel>

@@ -92,7 +92,7 @@
         <div class="style-config-col">
           <div class="style-config-label">Width</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+            <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderWidth', 'borderWidthUnit')" />
             <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
@@ -115,14 +115,14 @@
         <div class="style-config-col">
           <div class="style-config-label">TL</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+            <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">TR</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+            <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
@@ -131,14 +131,14 @@
         <div class="style-config-col">
           <div class="style-config-label">BL</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+            <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">BR</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+            <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
@@ -182,14 +182,14 @@
           <div class="style-config-col">
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" />
+              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'x', 'xUnit')" />
               <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" />
+              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'y', 'yUnit')" />
               <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
@@ -198,14 +198,14 @@
           <div class="style-config-col">
             <div class="style-config-label">Blur</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+              <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
               <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Spread</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" placeholder="0" />
+              <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'spread', 'spreadUnit')" />
               <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
@@ -243,7 +243,8 @@ import {
   BackgroundTypeEnum,
   SizeUnitEnum,
 } from '@/constants/style';
-import type { VisualConfig } from '@/views/Canvas/types';
+import type { VisualConfig, BoxShadowItem } from '@/views/Canvas/types';
+import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
 import { computed } from 'vue';
 
 defineOptions({
@@ -260,6 +261,14 @@ defineProps({
 
 /** 视觉配置数据 */
 const model = defineModel<VisualConfig>({ required: true });
+
+/** 各视觉值失焦时自动填充单位 */
+const handleUnitBlur = useUnitAutoFill(model.value);
+
+/** 盒阴影各值失焦时自动填充单位 */
+function handleBoxShadowUnitBlur(shadow: BoxShadowItem, valueKey: keyof BoxShadowItem, unitKey: keyof BoxShadowItem) {
+  useUnitAutoFill(shadow)(valueKey, unitKey);
+}
 
 /** 透明度（无值时默认为 1） */
 const opacity = computed({

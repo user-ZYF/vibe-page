@@ -49,21 +49,21 @@
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
-              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" />
+              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" placeholder="repeat" />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Position</div>
-              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" />
+              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" placeholder="center" />
             </div>
           </div>
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Attachment</div>
-              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" />
+              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" placeholder="scroll" />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Size</div>
-              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" />
+              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" placeholder="auto" />
             </div>
           </div>
         </template>
@@ -93,12 +93,12 @@
           <div class="style-config-label">Width</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-            <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Style</div>
-          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" />
+          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" />
         </div>
       </div>
       <div class="style-config-label">Color</div>
@@ -116,14 +116,14 @@
           <div class="style-config-label">TL</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">TR</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
       </div>
@@ -132,14 +132,14 @@
           <div class="style-config-label">BL</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">BR</div>
           <div class="style-config-input-group">
             <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
       </div>
@@ -182,14 +182,14 @@
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
         </div>
@@ -198,14 +198,14 @@
             <div class="style-config-label">Blur</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" placeholder="0" />
-              <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Spread</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" placeholder="0" />
-              <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
         </div>

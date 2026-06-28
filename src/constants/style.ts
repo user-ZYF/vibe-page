@@ -493,7 +493,8 @@ export const DefaultGeneralStyleConfig: StyleConfig = {
   },
   visual: {
     backgrounds: [],
-    boxShadows: []
+    boxShadows: [],
+    opacity: 1
   },
   flex: {},
 };

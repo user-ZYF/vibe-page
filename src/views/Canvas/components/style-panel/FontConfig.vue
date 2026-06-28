@@ -5,13 +5,13 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font family</div>
-        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" />
+        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" placeholder="inherit" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Font size</div>
         <div class="style-config-input-group">
           <a-input-number v-model:value="model.fontSize" size="small" class="style-config-input-number" placeholder="16" />
-          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
       </div>
     </div>
@@ -20,14 +20,14 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font weight</div>
-        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" />
+        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" placeholder="normal" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Letter spacing</div>
         <div class="style-config-input-group">
           <a-input v-model:value="model.letterSpacing" size="small" class="style-config-input" placeholder="normal" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
       </div>
     </div>
@@ -47,7 +47,7 @@
       <div class="style-config-input-group style-config-input-group--half">
         <a-input v-model:value="model.lineHeight" size="small" class="style-config-input" placeholder="normal" />
         <span class="style-config-separator">-</span>
-        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
       </div>
     </div>
 
@@ -102,14 +102,14 @@
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
               <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@
           <div class="style-config-label">Blur</div>
           <div class="style-config-input-group style-config-input-group--half">
             <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" placeholder="0" />
-            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
           </div>
         </div>
         <!-- Shadow Color -->

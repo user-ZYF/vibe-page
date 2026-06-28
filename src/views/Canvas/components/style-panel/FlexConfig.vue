@@ -5,7 +5,7 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Flex Container</div>
-        <a-select v-model:value="model.flexContainer" size="small" class="style-config-select" :options="FLEX_CONTAINER_OPTIONS" />
+        <a-select v-model:value="model.flexContainer" size="small" class="style-config-select" :options="FLEX_CONTAINER_OPTIONS" placeholder="none" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Flex Parent</div>
@@ -77,7 +77,7 @@
         <div class="style-config-input-group style-config-input-group--basis">
           <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
+          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
       </div>
     </div>

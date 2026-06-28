@@ -13,7 +13,6 @@ import type {
   BorderStyleEnum,
   DisplayStyleEnum,
   FloatStyleEnum,
-  FlexContainerEnum,
   FlexDirectionEnum,
   JustifyContentEnum,
   AlignItemsEnum,
@@ -242,18 +241,12 @@ export interface VisualConfig {
  * 弹性盒配置
  */
 export interface FlexConfig {
-  /** Flex 容器类型 */
-  flexContainer?: FlexContainerEnum;
-  /** Flex 父级值 */
-  flexParent?: number;
   /** 主轴方向 */
   flexDirection?: FlexDirectionEnum;
   /** 主轴对齐 */
   justifyContent?: JustifyContentEnum;
   /** 交叉轴对齐 */
   alignItems?: AlignItemsEnum;
-  /** Flex 子级值 */
-  flexChildren?: number;
   /** 排列顺序 */
   order?: number;
   /** 放大比例 */

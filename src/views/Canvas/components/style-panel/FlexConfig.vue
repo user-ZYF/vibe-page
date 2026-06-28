@@ -1,18 +1,6 @@
 <!-- ? 弹性盒配置面板 -->
 <template>
   <div>
-    <!-- Flex Container & Flex Parent -->
-    <div class="style-config-row">
-      <div class="style-config-col">
-        <div class="style-config-label">Flex Container</div>
-        <a-select v-model:value="model.flexContainer" size="small" class="style-config-select" :options="FLEX_CONTAINER_OPTIONS" placeholder="none" />
-      </div>
-      <div class="style-config-col">
-        <div class="style-config-label">Flex Parent</div>
-        <a-input-number v-model:value="model.flexParent" size="small" class="style-config-input-number" placeholder="0" />
-      </div>
-    </div>
-
     <!-- Direction -->
     <div class="style-config-section">
       <div class="style-config-label">Direction</div>
@@ -47,12 +35,8 @@
       </a-radio-group>
     </div>
 
-    <!-- Flex Children & Order -->
+    <!-- Order -->
     <div class="style-config-row">
-      <div class="style-config-col">
-        <div class="style-config-label">Flex Children</div>
-        <a-input-number v-model:value="model.flexChildren" size="small" class="style-config-input-number" placeholder="0" />
-      </div>
       <div class="style-config-col">
         <div class="style-config-label">Order</div>
         <a-input-number v-model:value="model.order" size="small" class="style-config-input-number" placeholder="0" />
@@ -84,7 +68,7 @@
 
     <!-- Align self -->
     <div class="style-config-section style-config-section--mt">
-      <div class="style-config-label">Align</div>
+      <div class="style-config-label">Align Self</div>
       <a-radio-group v-model:value="model.alignSelf" button-style="solid" size="small" class="style-config-radio-group">
         <a-radio-button :value="AlignSelfEnum.AUTO">Auto</a-radio-button>
         <a-radio-button :value="AlignSelfEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
@@ -110,7 +94,7 @@ import {
   VerticalAlignBottomOutlined,
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FLEX_CONTAINER_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
+import { SIZE_UNIT_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
 import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
 import type { FlexConfig } from '@/views/Canvas/types';
 

@@ -1,5 +1,5 @@
 import type { StyleConfig, BackgroundItem, TextShadowItem, BoxShadowItem } from '@/views/Canvas/types';
-import { BackgroundTypeEnum, FlexContainerEnum } from '@/constants/style';
+import { BackgroundTypeEnum } from '@/constants/style';
 
 /** 判断值是否不为 null、undefined 和空字符串 */
 function isNotEmptyish<T>(value: T | null | undefined): value is T {
@@ -107,12 +107,9 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   }
 
   // --- flex ---
-  if (flex.flexContainer === FlexContainerEnum.ENABLE) {
-    css['display'] = 'flex';
-    if (isNotEmptyish(flex.flexDirection)) css['flexDirection'] = flex.flexDirection;
-    if (isNotEmptyish(flex.justifyContent)) css['justifyContent'] = flex.justifyContent;
-    if (isNotEmptyish(flex.alignItems)) css['alignItems'] = flex.alignItems;
-  }
+  if (isNotEmptyish(flex.flexDirection)) css['flexDirection'] = flex.flexDirection;
+  if (isNotEmptyish(flex.justifyContent)) css['justifyContent'] = flex.justifyContent;
+  if (isNotEmptyish(flex.alignItems)) css['alignItems'] = flex.alignItems;
   if (isNotEmptyish(flex.order)) css['order'] = String(flex.order);
   if (isNotEmptyish(flex.flexGrow)) css['flexGrow'] = String(flex.flexGrow);
   if (isNotEmptyish(flex.flexShrink)) css['flexShrink'] = String(flex.flexShrink);

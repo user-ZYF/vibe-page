@@ -158,21 +158,6 @@ export const TEXT_ALIGN_OPTIONS = [
   { label: 'Justify', value: TextAlignEnum.JUSTIFY },
 ];
 
-/** flex-container 枚举 */
-export enum FlexContainerEnum {
-  /** 禁用 */
-  DISABLE = "disable",
-  /** 启用 */
-  ENABLE = "enable",
-}
-
-/** flex-container 选项 */
-export const FLEX_CONTAINER_OPTIONS = [
-  { label: 'Disable', value: FlexContainerEnum.DISABLE },
-  { label: 'Enable', value: FlexContainerEnum.ENABLE },
-];
-
-
 /** flex-direction 枚举 */
 export enum FlexDirectionEnum {
   /** row */

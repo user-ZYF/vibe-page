@@ -164,6 +164,13 @@ export const useCanvasStore = defineStore("canvas", {
         this.selectElement(null);
       }
     },
+    /** 清空所有元素（保留根元素） */
+    clearAllElements() {
+      this.root.children = [];
+      if(this.selectedElementId !== this.root.id){
+        this.selectElement(null);
+      }
+    },
     /** 复制元素（递归支持多层级，插入到原元素后面） */
     duplicateElement(id: string) {
       /** 递归为元素及其所有后代重新生成 id */

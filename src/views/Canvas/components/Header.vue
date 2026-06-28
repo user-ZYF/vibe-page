@@ -30,6 +30,12 @@
             <template #icon><ImportOutlined /></template>
           </a-button>
         </a-tooltip>
+        <a-divider type="vertical" />
+        <a-tooltip title="清空画布" overlay-class-name="editor-tooltip-white">
+          <a-button type="text" size="small" @click="emit('clear')">
+            <template #icon><ClearOutlined /></template>
+          </a-button>
+        </a-tooltip>
       </a-space>
     </a-layout-header>
     <Transition name="preview-btn">
@@ -55,6 +61,7 @@ import {
   RedoOutlined,
   CodeOutlined,
   ImportOutlined,
+  ClearOutlined,
 } from '@ant-design/icons-vue'
 
 defineOptions({
@@ -75,6 +82,7 @@ const emit = defineEmits<{
   (e: 'redo'): void
   (e: 'code'): void
   (e: 'import'): void
+  (e: 'clear'): void
 }>()
 </script>
 

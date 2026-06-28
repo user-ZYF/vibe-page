@@ -9,6 +9,7 @@
         @redo="handleRedo"
         @code="handleCode"
         @import="handleImport"
+        @clear="handleClear"
       />
       <CodePreviewModal v-model:open="codeModalVisible" />
       <a-layout-content class="editor-canvas">
@@ -21,6 +22,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, provide } from 'vue';
+import { Modal } from 'ant-design-vue';
 import EditorHeader from './components/Header.vue';
 import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
@@ -121,6 +123,19 @@ function handleKeydown(e: KeyboardEvent) {
 function handleCode() {
   // TODO: 实现查看代码逻辑
   codeModalVisible.value = true;
+}
+
+/** 清空画布 */
+function handleClear(){
+  Modal.confirm({
+    title: '确认清空画布？',
+    content: '将删除画布中除根元素外的所有元素，此操作可通过撤销恢复。',
+    okText: '确认',
+    cancelText: '取消',
+    onOk() {
+      canvasStore.clearAllElements();
+    },
+  });
 }
 
 /** 源码下载 */

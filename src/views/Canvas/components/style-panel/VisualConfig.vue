@@ -149,13 +149,14 @@
     <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Opacity</div>
       <div class="style-config-opacity-row">
-        <a-slider v-model:value="model.opacity" :min="0" :max="1" :step="0.01" class="style-config-slider" />
+        <a-slider v-model:value="opacity" :min="0" :max="1" :step="0.01" class="style-config-slider" />
         <a-input-number
           v-model:value="model.opacity"
           size="small"
           :min="0"
           :max="1"
           :step="0.01"
+          placeholder="1"
           class="style-config-opacity-input"
         />
       </div>
@@ -240,13 +241,10 @@ import {
   BG_SIZE_OPTIONS,
   BG_POSITION_OPTIONS,
   BackgroundTypeEnum,
-  BackgroundRepeatEnum,
-  BackgroundPositionEnum,
-  BackgroundAttachmentEnum,
-  BackgroundSizeEnum,
   SizeUnitEnum,
 } from '@/constants/style';
 import type { VisualConfig } from '@/views/Canvas/types';
+import { computed } from 'vue';
 
 defineOptions({
   name: 'VisualConfig',
@@ -262,6 +260,12 @@ defineProps({
 
 /** 视觉配置数据 */
 const model = defineModel<VisualConfig>({ required: true });
+
+/** 透明度（无值时默认为 1） */
+const opacity = computed({
+  get: () => model.value.opacity ?? 1,
+  set: (val) => { model.value.opacity = val; },
+});
 
 /**
  * 添加 background 层

@@ -3,6 +3,12 @@
   <div class="editor-header-wrapper" :class="{ 'is-preview': isPreview }">
     <a-layout-header class="editor-header">
       <a-space>
+        <a-tooltip title="效果预览" overlay-class-name="editor-tooltip-white">
+          <a-button type="text" size="small" @click="emit('toggle-preview')">
+            <template #icon><EyeOutlined /></template>
+          </a-button>
+        </a-tooltip>
+        <a-divider type="vertical" />
         <a-tooltip title="撤销" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('undo')">
             <template #icon><UndoOutlined /></template>
@@ -13,6 +19,7 @@
             <template #icon><RedoOutlined /></template>
           </a-button>
         </a-tooltip>
+        <a-divider type="vertical" />
         <a-tooltip title="预览源码" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('code')">
             <template #icon><CodeOutlined /></template>
@@ -21,12 +28,6 @@
         <a-tooltip title="导入代码" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('import')">
             <template #icon><ImportOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-divider type="vertical" />
-        <a-tooltip title="效果预览" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('toggle-preview')">
-            <template #icon><EyeOutlined /></template>
           </a-button>
         </a-tooltip>
       </a-space>

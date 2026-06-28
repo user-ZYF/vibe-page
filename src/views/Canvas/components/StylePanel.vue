@@ -42,6 +42,11 @@
 
       <!-- 样式配置面板 -->
       <a-collapse v-model:activeKey="activeKey" ghost accordion>
+        <!-- 元素设置配置 -->
+        <a-collapse-panel v-if="!isRootElement && !activeClassName" :key="StyleConfigTypeEnum.SETTING" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SETTING]">
+          <SettingConfig v-model="(selectedElement as CanvasInnerElement)" />
+        </a-collapse-panel>
+
         <!-- 常规配置 -->
         <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
@@ -90,11 +95,13 @@
 import { computed, ref, watch } from 'vue';
 import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/style';
 import { CanvasElementTypeEnum } from '@/constants/home';
+import type { CanvasInnerElement } from '@/views/Canvas/types';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
 import SizeConfig from './style-panel/SizeConfig.vue';
 import FontConfig from './style-panel/FontConfig.vue';
 import VisualConfig from './style-panel/VisualConfig.vue';
 import FlexConfig from './style-panel/FlexConfig.vue';
+import SettingConfig from './style-panel/SettingConfig.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
@@ -105,7 +112,7 @@ defineOptions({
 });
 
 /** 展开的面板配置 */
-const activeKey = ref<StyleConfigTypeEnum>(StyleConfigTypeEnum.GENERAL);
+const activeKey = ref<StyleConfigTypeEnum>(StyleConfigTypeEnum.SETTING);
 
 const canvasStore = useCanvasStore();
 const { selectedElementId } = storeToRefs(canvasStore);

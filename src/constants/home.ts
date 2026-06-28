@@ -23,7 +23,21 @@ export enum CanvasElementTypeEnum {
   /** 段落 */
   PARAGRAPH,
   /** 根元素 */
-  ROOT
+  ROOT,
+  /** 单行文本框 */
+  INPUT,
+  /** 多行文本框 */
+  TEXTAREA,
+  /** 单选框 */
+  RADIO,
+  /** 多选框 */
+  CHECKBOX,
+  /** 视频 */
+  VIDEO,
+  /** 音频 */
+  AUDIO,
+  /** 标签 */
+  LABEL,
 }
 
 /** 画布元素label */
@@ -34,6 +48,13 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.BUTTON]: "button",
   [CanvasElementTypeEnum.PARAGRAPH]: "paragaph",
   [CanvasElementTypeEnum.ROOT]: "root",
+  [CanvasElementTypeEnum.INPUT]: "input",
+  [CanvasElementTypeEnum.TEXTAREA]: "textarea",
+  [CanvasElementTypeEnum.RADIO]: "radio",
+  [CanvasElementTypeEnum.CHECKBOX]: "checkbox",
+  [CanvasElementTypeEnum.VIDEO]: "video",
+  [CanvasElementTypeEnum.AUDIO]: "audio",
+  [CanvasElementTypeEnum.LABEL]: "label",
 }
 
 /** 按钮类型 */
@@ -45,6 +66,13 @@ export enum ButtonTypeEnum {
   /** 提交 */
   SUBMIT = "submit",
 }
+
+/** 按钮类型选项 */
+export const BUTTON_TYPE_OPTIONS = [
+  { label: 'button', value: ButtonTypeEnum.BUTTON },
+  { label: 'reset', value: ButtonTypeEnum.RESET },
+  { label: 'submit', value: ButtonTypeEnum.SUBMIT },
+];
 
 /** 拖拽落点 */
 export enum DropPositionEnum {

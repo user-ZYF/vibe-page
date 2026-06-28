@@ -1,28 +1,28 @@
-<!-- ? 画布超链接元素 -->
+<!-- ? 画布音频元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="style" @click.stop="handleSelect">{{ data.text }}</a>
+    <audio ref="audioEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :src="data.src" :controls="data.controls" :style="style" @click.stop="handleSelect"></audio>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { CanvasLinkElement } from '../../types';
+import { CanvasAudioElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 
-const data = defineModel<CanvasLinkElement>("data", {
+const data = defineModel<CanvasAudioElement>("data", {
     required: true
 });
 
 /** 样式对象（合并 class 选择器与 id 选择器样式） */
 const style = useElementStyle(data);
 
-/** 超链接 DOM 引用 */
-const linkEl = ref<HTMLElement>();
+/** 音频 DOM 引用 */
+const audioEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(linkEl, data.value.id);
+useDragConnector(audioEl, data.value.id);
 </script>

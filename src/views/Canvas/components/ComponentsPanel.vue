@@ -32,11 +32,18 @@ const activeKeys = ref<string[]>(['basic'])
 
 /** 基础组件元素列表 */
 const basicComponents = ref<CanvasInnerElementTypeEnum[]>([
-  CanvasElementTypeEnum.BUTTON,
   CanvasElementTypeEnum.CONTAINER,
+  CanvasElementTypeEnum.BUTTON,
   CanvasElementTypeEnum.IMAGE,
   CanvasElementTypeEnum.LINK,
   CanvasElementTypeEnum.PARAGRAPH,
+  CanvasElementTypeEnum.INPUT,
+  CanvasElementTypeEnum.TEXTAREA,
+  CanvasElementTypeEnum.RADIO,
+  CanvasElementTypeEnum.CHECKBOX,
+  CanvasElementTypeEnum.VIDEO,
+  CanvasElementTypeEnum.AUDIO,
+  CanvasElementTypeEnum.LABEL,
 ]);
 
 /** 每个组件项的解绑函数映射 */

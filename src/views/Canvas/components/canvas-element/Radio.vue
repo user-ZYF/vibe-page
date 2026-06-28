@@ -1,28 +1,28 @@
-<!-- ? 画布超链接元素 -->
+<!-- ? 画布单选框元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="style" @click.stop="handleSelect">{{ data.text }}</a>
+    <input ref="radioEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" type="radio" :name="data.name" :value="data.value" :checked="data.checked" :style="style" @click.stop="handleSelect" />
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { CanvasLinkElement } from '../../types';
+import { CanvasRadioElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 
-const data = defineModel<CanvasLinkElement>("data", {
+const data = defineModel<CanvasRadioElement>("data", {
     required: true
 });
 
 /** 样式对象（合并 class 选择器与 id 选择器样式） */
 const style = useElementStyle(data);
 
-/** 超链接 DOM 引用 */
-const linkEl = ref<HTMLElement>();
+/** 单选框 DOM 引用 */
+const radioEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(linkEl, data.value.id);
+useDragConnector(radioEl, data.value.id);
 </script>

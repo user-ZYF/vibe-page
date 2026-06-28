@@ -75,7 +75,7 @@ onMounted(() => {
         overflow: auto;
       }
 
-      .canvas-root:not(.is-preview), .canvas-root:not(.is-preview) * {
+      .canvas-root:not(.is-preview), .canvas-root:not(.is-preview) [data-canvas-id] {
         outline: 1px dashed #ccc;
         outline-offset: -1px;
       }

@@ -6,6 +6,13 @@ import Button from "./components/canvas-element/Button.vue";
 import { CanvasElementTypeEnum } from "@/constants/home.ts";
 import Paragraph from "./components/canvas-element/Paragraph.vue";
 import Root from "./components/canvas-element/Root.vue";
+import Input from "./components/canvas-element/Input.vue";
+import Textarea from "./components/canvas-element/Textarea.vue";
+import Radio from "./components/canvas-element/Radio.vue";
+import Checkbox from "./components/canvas-element/Checkbox.vue";
+import Video from "./components/canvas-element/Video.vue";
+import Audio from "./components/canvas-element/Audio.vue";
+import Label from "./components/canvas-element/Label.vue";
 import type { InjectionKey, Ref } from 'vue';
 import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";
@@ -17,7 +24,14 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.LINK]: Link,
     [CanvasElementTypeEnum.IMAGE]: Image,
     [CanvasElementTypeEnum.BUTTON]: Button,
-    [CanvasElementTypeEnum.ROOT]: Root
+    [CanvasElementTypeEnum.ROOT]: Root,
+    [CanvasElementTypeEnum.INPUT]: Input,
+    [CanvasElementTypeEnum.TEXTAREA]: Textarea,
+    [CanvasElementTypeEnum.RADIO]: Radio,
+    [CanvasElementTypeEnum.CHECKBOX]: Checkbox,
+    [CanvasElementTypeEnum.VIDEO]: Video,
+    [CanvasElementTypeEnum.AUDIO]: Audio,
+    [CanvasElementTypeEnum.LABEL]: Label,
 };
 
 /** 展开的元素id列表 */

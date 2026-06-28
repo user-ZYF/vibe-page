@@ -1,4 +1,4 @@
-import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasLinkElement, CanvasParagraphElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Canvas/types";
+import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasInputElement, CanvasLinkElement, CanvasParagraphElement, CanvasRadioElement, CanvasCheckboxElement, CanvasVideoElement, CanvasAudioElement, CanvasTextareaElement, CanvasLabelElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Canvas/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig } from "@/constants/style";
 import { defineStore } from "pinia";
@@ -98,6 +98,20 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, text: '链接', href: '' } as CanvasLinkElement;
         case CanvasElementTypeEnum.CONTAINER:
           return { ...elBase, children: [] }  as CanvasContainerElement;
+        case CanvasElementTypeEnum.INPUT:
+          return { ...elBase, placeholder: '请输入内容', value: '' } as CanvasInputElement;
+        case CanvasElementTypeEnum.TEXTAREA:
+          return { ...elBase, placeholder: '请输入内容', value: '', rows: 4 } as CanvasTextareaElement;
+        case CanvasElementTypeEnum.RADIO:
+          return { ...elBase, name: '', value: '', checked: false } as CanvasRadioElement;
+        case CanvasElementTypeEnum.CHECKBOX:
+          return { ...elBase, name: '', value: '', checked: false } as CanvasCheckboxElement;
+        case CanvasElementTypeEnum.VIDEO:
+          return { ...elBase, src: '', controls: true } as CanvasVideoElement;
+        case CanvasElementTypeEnum.AUDIO:
+          return { ...elBase, src: '', controls: true } as CanvasAudioElement;
+        case CanvasElementTypeEnum.LABEL:
+          return { ...elBase, text: '标签', for: '' } as CanvasLabelElement;
       }
     },
     /** 添加元素到指定容器 */

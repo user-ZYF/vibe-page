@@ -342,6 +342,82 @@ export interface CanvasLinkElement extends CanvasElementBase {
   text: string;
 }
 
+/** 画布单行文本框元素 */
+export interface CanvasInputElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.INPUT;
+  /** 占位提示文本 */
+  placeholder: string;
+  /** 当前值 */
+  value: string;
+}
+
+/** 画布多行文本框元素 */
+export interface CanvasTextareaElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TEXTAREA;
+  /** 占位提示文本 */
+  placeholder: string;
+  /** 当前值 */
+  value: string;
+  /** 行数 */
+  rows: number;
+}
+
+/** 画布单选框元素 */
+export interface CanvasRadioElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.RADIO;
+  /** 单选组名称 */
+  name: string;
+  /** 选项值 */
+  value: string;
+  /** 是否选中 */
+  checked: boolean;
+}
+
+/** 画布多选框元素 */
+export interface CanvasCheckboxElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.CHECKBOX;
+  /** 多选组名称 */
+  name: string;
+  /** 选项值 */
+  value: string;
+  /** 是否选中 */
+  checked: boolean;
+}
+
+/** 画布视频元素 */
+export interface CanvasVideoElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.VIDEO;
+  /** 视频地址 */
+  src: string;
+  /** 是否显示控件 */
+  controls: boolean;
+}
+
+/** 画布音频元素 */
+export interface CanvasAudioElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.AUDIO;
+  /** 音频地址 */
+  src: string;
+  /** 是否显示控件 */
+  controls: boolean;
+}
+
+/** 画布标签元素 */
+export interface CanvasLabelElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.LABEL;
+  /** 标签文本 */
+  text: string;
+  /** 关联的表单元素 id（为空表示未绑定） */
+  for: string;
+}
+
 /** 画布根元素 */
 export interface CanvasRootElement extends CanvasElementBase {
   /** 元素类型 */
@@ -354,7 +430,7 @@ export interface CanvasRootElement extends CanvasElementBase {
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement;
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement;
 
 /** 画布元素 */
 export type CanvasElement = CanvasInnerElement | CanvasRootElement;

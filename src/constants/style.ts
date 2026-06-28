@@ -30,6 +30,8 @@ export enum StyleConfigTypeEnum {
   VISUAL,
   /** 布局 */
   FLEX,
+  /** 设置 */
+  SETTING,
 }
 
 /** 样式配置类型名称 */
@@ -40,6 +42,7 @@ export const STYLE_CONFIG_TYPE_NAME = {
   [StyleConfigTypeEnum.FONT]: '字体相关',
   [StyleConfigTypeEnum.VISUAL]: '视觉',
   [StyleConfigTypeEnum.FLEX]: '布局',
+  [StyleConfigTypeEnum.SETTING]: '设置',
 };
 
 /** 尺寸&位置单位 */
@@ -553,6 +556,41 @@ export const DefaultRootStyleConfig: StyleConfig = {
  }
 };
 
+/** 单行文本框元素默认样式配置 */
+export const DefaultInputStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 多行文本框元素默认样式配置 */
+export const DefaultTextareaStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 单选框元素默认样式配置 */
+export const DefaultRadioStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 多选框元素默认样式配置 */
+export const DefaultCheckboxStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 视频元素默认样式配置 */
+export const DefaultVideoStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 音频元素默认样式配置 */
+export const DefaultAudioStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 标签元素默认样式配置 */
+export const DefaultLabelStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig)
@@ -565,7 +603,14 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.PARAGRAPH]: DefaultParagraphStyleConfig,
   [CanvasElementTypeEnum.LINK]: DefaultLinkStyleConfig,
   [CanvasElementTypeEnum.IMAGE]: DefaultImageStyleConfig,
-  [CanvasElementTypeEnum.ROOT]: DefaultRootStyleConfig
+  [CanvasElementTypeEnum.ROOT]: DefaultRootStyleConfig,
+  [CanvasElementTypeEnum.INPUT]: DefaultInputStyleConfig,
+  [CanvasElementTypeEnum.TEXTAREA]: DefaultTextareaStyleConfig,
+  [CanvasElementTypeEnum.RADIO]: DefaultRadioStyleConfig,
+  [CanvasElementTypeEnum.CHECKBOX]: DefaultCheckboxStyleConfig,
+  [CanvasElementTypeEnum.VIDEO]: DefaultVideoStyleConfig,
+  [CanvasElementTypeEnum.AUDIO]: DefaultAudioStyleConfig,
+  [CanvasElementTypeEnum.LABEL]: DefaultLabelStyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

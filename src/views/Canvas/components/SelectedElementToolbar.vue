@@ -240,7 +240,7 @@ watch(selectedElementId, (id) => {
   }
 });
 
-/** 监听选中元素数据变化（如文本内容修改导致尺寸变化），更新工具栏位置 */
+/** 监听选中元素数据变化（如内容、class变化），更新工具栏位置 */
 watch(
   () => selectedElement.value,
   () => {

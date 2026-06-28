@@ -19,10 +19,17 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.IMAGE]: 'img',
   [CanvasElementTypeEnum.LINK]: 'a',
   [CanvasElementTypeEnum.ROOT]: 'body',
+  [CanvasElementTypeEnum.INPUT]: 'input',
+  [CanvasElementTypeEnum.TEXTAREA]: 'textarea',
+  [CanvasElementTypeEnum.RADIO]: 'input',
+  [CanvasElementTypeEnum.CHECKBOX]: 'input',
+  [CanvasElementTypeEnum.VIDEO]: 'video',
+  [CanvasElementTypeEnum.AUDIO]: 'audio',
+  [CanvasElementTypeEnum.LABEL]: 'label',
 };
 
 /** 自闭合标签集合 */
-const VOID_TAGS = new Set(['img']);
+const VOID_TAGS = new Set(['img', 'input']);
 
 // /**
 //  * 将 style 对象转换为内联样式字符串

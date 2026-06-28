@@ -9,7 +9,7 @@
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Flex Parent</div>
-        <a-input-number v-model:value="model.flexParent" size="small" class="style-config-input-number" />
+        <a-input-number v-model:value="model.flexParent" size="small" class="style-config-input-number" placeholder="0" />
       </div>
     </div>
 
@@ -51,11 +51,11 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Flex Children</div>
-        <a-input-number v-model:value="model.flexChildren" size="small" class="style-config-input-number" />
+        <a-input-number v-model:value="model.flexChildren" size="small" class="style-config-input-number" placeholder="0" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Order</div>
-        <a-input-number v-model:value="model.order" size="small" class="style-config-input-number" />
+        <a-input-number v-model:value="model.order" size="small" class="style-config-input-number" placeholder="0" />
       </div>
     </div>
 
@@ -65,17 +65,17 @@
       <div class="style-config-row">
         <div class="style-config-col">
           <div class="style-config-label">Grow</div>
-          <a-input-number v-model:value="model.flexGrow" size="small" class="style-config-input-number" :min="0" />
+          <a-input-number v-model:value="model.flexGrow" size="small" class="style-config-input-number" :min="0" placeholder="0" />
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Shrink</div>
-          <a-input-number v-model:value="model.flexShrink" size="small" class="style-config-input-number" :min="0" />
+          <a-input-number v-model:value="model.flexShrink" size="small" class="style-config-input-number" :min="0" placeholder="1" />
         </div>
       </div>
       <div class="style-config-section">
         <div class="style-config-label">Basis</div>
         <div class="style-config-input-group style-config-input-group--basis">
-          <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" />
+          <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>

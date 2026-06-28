@@ -6,13 +6,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { CanvasContainerElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { CanvasElementComponentMap } from '../../contants';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
-import { useInteractionBinder } from '@/composables/useInteractionBinder';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 
 const data = defineModel<CanvasContainerElement>("data", {
@@ -29,5 +28,4 @@ useElementVisibility(data.value.id, data);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
 useDragConnector(containerEl, data.value.id, { isCanvas: true });
-useInteractionBinder(containerEl, computed(() => data.value.interactions));
 </script>

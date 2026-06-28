@@ -17,7 +17,6 @@ export const useCanvasStore = defineStore("canvas", {
       styleConfig: cloneDeep(DefaultStyleConfigMap[CanvasElementTypeEnum.ROOT]),
       classes: [],
       classNames: [],
-      interactions: [],
       children: [],
       alias: CanvasElementLabelMap[CanvasElementTypeEnum.ROOT],
     } as CanvasRootElement,
@@ -86,7 +85,6 @@ export const useCanvasStore = defineStore("canvas", {
         styleConfig: cloneDeep(DefaultStyleConfigMap[type as CanvasElementTypeEnum]),
         classes: [],
         classNames: [],
-        interactions: [],
         alias: CanvasElementLabelMap[type as CanvasElementTypeEnum],
       };
       switch(type){

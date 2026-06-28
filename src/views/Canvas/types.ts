@@ -2,7 +2,7 @@
  * 样式面板各配置项的类型定义
  */
 
-import type { ButtonTypeEnum, CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum, DropPositionEnum } from '@/constants/home';
+import type { ButtonTypeEnum, CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -282,18 +282,6 @@ export interface StyleConfig {
   flex: FlexConfig;
 }
 
-/** 单条交互规则 */
-export interface InteractionRule {
-  /** 触发事件 */
-  event: InteractionEventEnum;
-  /** 执行动作 */
-  action: InteractionActionEnum;
-  /** 目标元素 ID（为空表示自身） */
-  targetId: string;
-  /** 动作参数 */
-  params: Record<string, string>;
-}
-
 /** 画布元素通用属性 */
 export interface CanvasElementBase {
   /** 元素id */
@@ -304,8 +292,6 @@ export interface CanvasElementBase {
   classes: string[];
   /** 元素管理的所有类名列表（包含启用和禁用的 class） */
   classNames: string[];
-  /** 交互规则列表 */
-  interactions: InteractionRule[];
   /** 元素别名 */
   alias?: string;
 }

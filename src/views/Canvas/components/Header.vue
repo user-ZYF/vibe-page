@@ -3,7 +3,6 @@
   <div class="editor-header-wrapper" :class="{ 'is-preview': isPreview }">
     <a-layout-header class="editor-header">
       <a-space>
-        <a-divider type="vertical" />
         <a-tooltip title="撤销" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('undo')">
             <template #icon><UndoOutlined /></template>

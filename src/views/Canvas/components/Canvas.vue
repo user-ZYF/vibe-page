@@ -40,15 +40,6 @@ const debouncedRecord = useDebounceFn(() => {
   recordHistory();
 }, 300);
 
-/** 监听画布元素变化，自动记录历史快照 */
-watch(
-  () => canvasStore.root,
-  () => {
-    debouncedRecord();
-  },
-  { deep: true },
-);
-
 /** Shadow DOM 宿主元素引用 */
 const shadowHostRef = ref<HTMLElement>();
 
@@ -57,6 +48,15 @@ const shadowRoot = ref<ShadowRoot | null>(null);
 
 /** Teleport 目标（Shadow Root，类型断言以兼容 Teleport 的 to prop 类型） */
 const teleportTarget = computed(() => shadowRoot.value as unknown as HTMLElement);
+
+/** 监听画布元素变化，自动记录历史快照 */
+watch(
+  () => canvasStore.root,
+  () => {
+    debouncedRecord();
+  },
+  { deep: true },
+);
 
 onMounted(() => {
   if (shadowHostRef.value) {

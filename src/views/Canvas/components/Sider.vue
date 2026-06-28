@@ -39,22 +39,11 @@
           <template #icon><AppstoreOutlined /></template>
         </a-button>
       </a-tooltip>
-      <a-tooltip title="交互逻辑" overlay-class-name="editor-tooltip-white">
-        <a-button
-          type="text"
-          size="small"
-          :class="{ 'is-active': activePanel === SiderPanelEnum.LOGIC }"
-          @click="handlePanelSwitch(SiderPanelEnum.LOGIC)"
-        >
-          <template #icon><ThunderboltOutlined /></template>
-        </a-button>
-      </a-tooltip>
     </div>
     <div class="editor-sider-panel">
       <StylePanel v-show="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
       <LayersPanel v-show="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
       <ComponentsPanel v-show="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
-      <InteractionPanel v-show="activePanel === SiderPanelEnum.LOGIC" class="panel-content"/>
     </div>
   </a-layout-sider>
 </template>
@@ -64,13 +53,11 @@ import {
   EditOutlined,
   AppstoreOutlined,
   BlockOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons-vue'
 import { SiderPanelEnum } from '@/constants/home'
 import ComponentsPanel from './ComponentsPanel.vue';
 import LayersPanel from './LayersPanel.vue';
 import StylePanel from './StylePanel.vue';
-import InteractionPanel from './InteractionPanel.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 

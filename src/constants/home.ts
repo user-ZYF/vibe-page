@@ -46,49 +46,6 @@ export enum ButtonTypeEnum {
   SUBMIT = "submit",
 }
 
-/** 交互事件类型 */
-export enum InteractionEventEnum {
-  /** 点击 */
-  CLICK,
-  /** 双击 */
-  DOUBLE_CLICK,
-  /** 鼠标移入 */
-  MOUSE_ENTER,
-  /** 鼠标移出 */
-  MOUSE_LEAVE,
-}
-
-/** 交互事件选项 */
-export const INTERACTION_EVENT_OPTIONS: { label: string; value: InteractionEventEnum }[] = [
-  { label: '点击', value: InteractionEventEnum.CLICK },
-  { label: '双击', value: InteractionEventEnum.DOUBLE_CLICK },
-  { label: '鼠标移入', value: InteractionEventEnum.MOUSE_ENTER },
-  { label: '鼠标移出', value: InteractionEventEnum.MOUSE_LEAVE },
-];
-
-/** 交互动作类型 */
-export enum InteractionActionEnum {
-  /** 显示元素 */
-  SHOW = 0,
-  /** 隐藏元素 */
-  HIDE = 1,
-  /** 切换显示/隐藏 */
-  TOGGLE_VISIBILITY = 2,
-  /** 切换 CSS 类名 */
-  TOGGLE_CLASS = 3,
-  /** 跳转 URL */
-  NAVIGATE = 4,
-}
-
-/** 交互动作选项 */
-export const INTERACTION_ACTION_OPTIONS: { label: string; value: InteractionActionEnum }[] = [
-  { label: '显示元素', value: InteractionActionEnum.SHOW },
-  { label: '隐藏元素', value: InteractionActionEnum.HIDE },
-  { label: '切换显示/隐藏', value: InteractionActionEnum.TOGGLE_VISIBILITY },
-  { label: '切换 CSS 类名', value: InteractionActionEnum.TOGGLE_CLASS },
-  { label: '跳转 URL', value: InteractionActionEnum.NAVIGATE },
-];
-
 /** 拖拽落点 */
 export enum DropPositionEnum {
   /** 元素之前 */

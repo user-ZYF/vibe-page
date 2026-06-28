@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
-import { generateHtml, generateCss, generateJs, generateCode } from '@/utils/codeGenerator';
+import { generateHtml, generateCss, generateCode } from '@/utils/codeGenerator';
 
 /**
  * 响应式代码生成 composable
@@ -17,16 +17,12 @@ export function useCodeGenerator() {
   /** 生成的 CSS 代码 */
   const cssCode = computed(() => generateCss(root.value));
 
-  /** 生成的 JS 代码 */
-  const jsCode = computed(() => generateJs(root.value));
-
   /** 同时获取 HTML、CSS 和 JS */
   const fullCode = computed(() => generateCode(root.value));
 
   return {
     htmlCode,
     cssCode,
-    jsCode,
     fullCode,
   };
 }

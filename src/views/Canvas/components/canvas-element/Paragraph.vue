@@ -16,13 +16,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, nextTick } from 'vue';
 import { CanvasParagraphElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasStore } from '@/store/canvas';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
-import { useInteractionBinder } from '@/composables/useInteractionBinder';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 
 const canvasStore = useCanvasStore();
@@ -80,6 +79,4 @@ function handleEnter(e: KeyboardEvent) {
 }
 
 useElementVisibility(data.value.id, data);
-
-useInteractionBinder(paragraphEl, computed(() => data.value.interactions));
 </script>

@@ -5,11 +5,10 @@ import {
   CanvasParagraphElement,
   CanvasImageElement,
   CanvasLinkElement,
-  InteractionRule,
   CanvasRootElement,
   CanvasElement,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum, InteractionEventEnum, InteractionActionEnum } from '@/constants/home';
+import { CanvasElementTypeEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
 
 /** 元素类型到 HTML 标签的映射 */
@@ -191,78 +190,14 @@ export function generateCss(root: CanvasRootElement): string {
   return collectCssRules(root);
 }
 
-/** 事件枚举到 DOM 事件名的映射 */
-const EVENT_NAME_MAP: Record<InteractionEventEnum, string> = {
-  [InteractionEventEnum.CLICK]: 'click',
-  [InteractionEventEnum.DOUBLE_CLICK]: 'dblclick',
-  [InteractionEventEnum.MOUSE_ENTER]: 'mouseenter',
-  [InteractionEventEnum.MOUSE_LEAVE]: 'mouseleave',
-};
-
 /**
- * 生成单条交互规则的 JS 代码
- */
-function interactionRuleToJs(rule: InteractionRule): string {
-  const eventName = EVENT_NAME_MAP[rule.event];
-  const targetSelector = rule.targetId
-    ? `document.querySelector('[data-canvas-id="${rule.targetId}"]')`
-    : 'el';
-
-  let actionCode = '';
-  switch (rule.action) {
-    case InteractionActionEnum.SHOW:
-      actionCode = `${targetSelector}.style.display = '';`;
-      break;
-    case InteractionActionEnum.HIDE:
-      actionCode = `${targetSelector}.style.display = 'none';`;
-      break;
-    case InteractionActionEnum.TOGGLE_VISIBILITY:
-      actionCode = `{ var d = ${targetSelector}.style.display; ${targetSelector}.style.display = d === 'none' ? '' : 'none'; }`;
-      break;
-    case InteractionActionEnum.TOGGLE_CLASS:
-      actionCode = `${targetSelector}.classList.toggle('${rule.params.className || ''}');`;
-      break;
-    case InteractionActionEnum.NAVIGATE:
-      actionCode = `window.open('${rule.params.url || '#'}', '_blank');`;
-      break;
-  }
-
-  return `el.addEventListener('${eventName}', function(e) {\n  ${actionCode}\n});`;
-}
-
-/**
- * 从画布元素列表生成交互 JS 代码
+ * 从画布元素列表同时生成 HTML、CSS
  * @param root 画布根元素
- * @returns JS 代码字符串
+ * @returns { html: string, css: string }
  */
-export function generateJs(root: CanvasRootElement): string {
-  const blocks: string[] = [];
-
-  function collect(el: CanvasInnerElement) {
-    if (el.interactions && el.interactions.length > 0) {
-      const rules = el.interactions
-        .map((rule) => `  ${interactionRuleToJs(rule)}`)
-        .join('\n');
-      blocks.push(`(function() {\n  var el = document.getElementById('${el.id}');\n  if (!el) return;\n${rules}\n})();`);
-    }
-    if (el.type === CanvasElementTypeEnum.CONTAINER) {
-      (el as CanvasContainerElement).children.forEach(collect);
-    }
-  }
-
-  root.children.forEach(collect);
-  return blocks.join('\n\n');
-}
-
-/**
- * 从画布元素列表同时生成 HTML、CSS 和 JS
- * @param root 画布根元素
- * @returns { html: string, css: string, js: string }
- */
-export function generateCode(root: CanvasRootElement): { html: string; css: string; js: string } {
+export function generateCode(root: CanvasRootElement): { html: string; css: string; } {
   return {
     html: generateHtml(root),
     css: generateCss(root),
-    js: generateJs(root),
   };
 }

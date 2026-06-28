@@ -34,7 +34,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Top</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.top" size="small" class="style-config-input" />
+          <a-input v-model:value="model.top" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
@@ -42,7 +42,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Right</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.right" size="small" class="style-config-input" />
+          <a-input v-model:value="model.right" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
@@ -54,7 +54,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Left</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.left" size="small" class="style-config-input" />
+          <a-input v-model:value="model.left" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>
@@ -62,7 +62,7 @@
       <div class="style-config-col">
         <div class="style-config-label">Bottom</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.bottom" size="small" class="style-config-input" />
+          <a-input v-model:value="model.bottom" size="small" class="style-config-input" placeholder="auto" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
         </div>

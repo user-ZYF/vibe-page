@@ -72,7 +72,7 @@
         <template v-else-if="bg.type === BackgroundTypeEnum.COLOR">
           <div class="style-config-label">Color</div>
           <div class="style-config-color-row">
-            <a-input v-model:value="bg.color" size="small" class="style-config-input" />
+            <a-input v-model:value="bg.color" size="small" class="style-config-input" placeholder="#ffffff" />
             <input type="color" v-model="bg.color" class="style-config-color-picker" />
           </div>
         </template>
@@ -92,7 +92,7 @@
         <div class="style-config-col">
           <div class="style-config-label">Width</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" />
+            <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" />
             <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
@@ -103,7 +103,7 @@
       </div>
       <div class="style-config-label">Color</div>
       <div class="style-config-color-row">
-        <a-input v-model:value="model.borderColor" size="small" class="style-config-input" />
+        <a-input v-model:value="model.borderColor" size="small" class="style-config-input" placeholder="#000000" />
         <input type="color" v-model="model.borderColor" class="style-config-color-picker" />
       </div>
     </div>
@@ -115,14 +115,14 @@
         <div class="style-config-col">
           <div class="style-config-label">TL</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" />
+            <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">TR</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" />
+            <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
@@ -131,14 +131,14 @@
         <div class="style-config-col">
           <div class="style-config-label">BL</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" />
+            <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">BR</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" />
+            <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" />
             <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
           </div>
         </div>
@@ -181,14 +181,14 @@
           <div class="style-config-col">
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" />
+              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" />
               <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" />
+              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" />
               <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
@@ -197,21 +197,21 @@
           <div class="style-config-col">
             <div class="style-config-label">Blur</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" />
+              <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" placeholder="0" />
               <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Spread</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" />
+              <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" placeholder="0" />
               <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" />
             </div>
           </div>
         </div>
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row style-config-color-row--mb">
-          <a-input v-model:value="shadow.color" size="small" class="style-config-input" />
+          <a-input v-model:value="shadow.color" size="small" class="style-config-input" placeholder="#000000" />
           <input type="color" v-model="shadow.color" class="style-config-color-picker" />
         </div>
         <a-checkbox v-model:checked="shadow.inset" size="small">

@@ -1,4 +1,4 @@
-<!-- ? 布局（Flex）配置面板 -->
+<!-- ? 弹性盒配置面板 -->
 <template>
   <div>
     <!-- Flex Container & Flex Parent -->

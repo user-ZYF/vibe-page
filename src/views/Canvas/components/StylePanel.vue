@@ -67,7 +67,7 @@
           <VisualConfig v-model="activeStyleConfig!.visual" :only-background="isRootElement" />
         </a-collapse-panel>
 
-        <!-- 布局配置 -->
+        <!-- 弹性盒配置 -->
         <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
           <FlexConfig v-model="activeStyleConfig!.flex" />
         </a-collapse-panel>

@@ -239,7 +239,7 @@ export interface VisualConfig {
 }
 
 /**
- * 布局（Flex）配置
+ * 弹性盒配置
  */
 export interface FlexConfig {
   /** Flex 容器类型 */

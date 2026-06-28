@@ -28,7 +28,7 @@ export enum StyleConfigTypeEnum {
   FONT,
   /** 视觉 */
   VISUAL,
-  /** 布局 */
+  /** 弹性盒 */
   FLEX,
   /** 设置 */
   SETTING,
@@ -41,7 +41,7 @@ export const STYLE_CONFIG_TYPE_NAME = {
   [StyleConfigTypeEnum.EXTRA]: '额外的',
   [StyleConfigTypeEnum.FONT]: '字体相关',
   [StyleConfigTypeEnum.VISUAL]: '视觉',
-  [StyleConfigTypeEnum.FLEX]: '布局',
+  [StyleConfigTypeEnum.FLEX]: '弹性盒',
   [StyleConfigTypeEnum.SETTING]: '设置',
 };
 

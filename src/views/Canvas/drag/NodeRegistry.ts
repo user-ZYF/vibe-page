@@ -1,7 +1,6 @@
 import type { NodeRegistration } from "./types";
-import type { CanvasInnerElement } from "@/views/Canvas/types";
-import { CanvasElementTypeEnum } from "@/constants/home";
-import type { CanvasContainerElement } from "@/views/Canvas/types";
+import type { CanvasInnerElement, CanvasParentElement } from "@/views/Canvas/types";
+import { isParentElement } from "@/views/Canvas/types";
 
 /**
  * DOM 节点注册表，替代 Craft.js 中 store.actions.setDOM(id, el) 的功能
@@ -52,12 +51,12 @@ export class NodeRegistry {
     /** 在元素树中查找父节点 id */
     const findParentId = (list: CanvasInnerElement[], childId: string): string | null => {
       for (const el of list) {
-        if (el.type === CanvasElementTypeEnum.CONTAINER) {
-          const container = el as CanvasContainerElement;
-          if (container.children.some((c) => c.id === childId)) {
-            return container.id;
+        if (isParentElement(el)) {
+          const parent = el as CanvasParentElement;
+          if (parent.children.some((c) => c.id === childId)) {
+            return parent.id;
           }
-          const found = findParentId(container.children, childId);
+          const found = findParentId(parent.children, childId);
           if (found) return found;
         }
       }

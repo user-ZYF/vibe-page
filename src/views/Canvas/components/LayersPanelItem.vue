@@ -92,7 +92,7 @@ import { computed, inject, PropType, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
-import type { CanvasInnerElement, CanvasContainerElement, CanvasElement, CanvasRootElement } from '@/views/Canvas/types';
+import { type CanvasInnerElement, type CanvasElement, type CanvasRootElement, type CanvasParentElement, isParentElement } from '@/views/Canvas/types';
 import {
   TOGGLE_EXPAND_KEY,
   EXPAND_CONTAINER_KEY,
@@ -166,7 +166,7 @@ const isSelected = computed(() => selectedElementId.value === props.element.id);
 
 /** 是否为容器元素 */
 const isContainer = computed(() => {
-  return props.element.type === CanvasElementTypeEnum.CONTAINER || props.element.type === CanvasElementTypeEnum.ROOT;
+  return props.element.type === CanvasElementTypeEnum.ROOT || isParentElement(props.element);
 });
 
 /** 是否隐藏 */
@@ -181,7 +181,7 @@ const parentId = computed(() => props.ancestorIds[props.ancestorIds.length - 1]!
 /** 子元素列表 */
 const children = computed<CanvasInnerElement[]>(() => {
   if (isContainer.value) {
-    return (props.element as CanvasContainerElement | CanvasRootElement).children;
+    return (props.element as CanvasParentElement | CanvasRootElement).children;
   }
   return [];
 });

@@ -524,7 +524,18 @@ export const DefaultParagraphStyleConfig: StyleConfig = {
 
 /** 链接元素默认样式配置 */
 export const DefaultLinkStyleConfig: StyleConfig = {
- ...cloneDeep(DefaultGeneralStyleConfig)
+ ...cloneDeep(DefaultGeneralStyleConfig),
+ general: {
+  ...cloneDeep(DefaultGeneralStyleConfig.general),
+  display: DisplayStyleEnum.INLINE_BLOCK,
+ },
+ size: {
+  ...cloneDeep(DefaultGeneralStyleConfig.size),
+  minWidth: '50',
+  minWidthUnit: SizeUnitEnum.PX,
+  minHeight: '30',
+  minHeightUnit: SizeUnitEnum.PX,
+ },
 };
 
 /** 图片元素默认样式配置 */

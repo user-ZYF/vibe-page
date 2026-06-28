@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <!-- Max width & Min height -->
+    <!-- Max width & Min width -->
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Max width</div>
@@ -29,6 +29,26 @@
           <a-input v-model:value="model.maxWidth" size="small" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxWidth', 'maxWidthUnit')" />
           <span class="style-config-separator">-</span>
           <a-select v-model:value="model.maxWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+        </div>
+      </div>
+      <div class="style-config-col">
+        <div class="style-config-label">Min width</div>
+        <div class="style-config-input-group">
+          <a-input v-model:value="model.minWidth" size="small" class="style-config-input" placeholder="0" @blur="handleUnitBlur('minWidth', 'minWidthUnit')" />
+          <span class="style-config-separator">-</span>
+          <a-select v-model:value="model.minWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Max height & Min height -->
+    <div class="style-config-row">
+      <div class="style-config-col">
+        <div class="style-config-label">Max height</div>
+        <div class="style-config-input-group">
+          <a-input v-model:value="model.maxHeight" size="small" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxHeight', 'maxHeightUnit')" />
+          <span class="style-config-separator">-</span>
+          <a-select v-model:value="model.maxHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" />
         </div>
       </div>
       <div class="style-config-col">

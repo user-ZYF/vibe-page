@@ -52,6 +52,8 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (isNotEmptyish(size.width)) css['width'] = `${size.width}${size.widthUnit}`;
   if (isNotEmptyish(size.height)) css['height'] = `${size.height}${size.heightUnit}`;
   if (isNotEmptyish(size.maxWidth)) css['maxWidth'] = `${size.maxWidth}${size.maxWidthUnit}`;
+  if (isNotEmptyish(size.minWidth)) css['minWidth'] = `${size.minWidth}${size.minWidthUnit}`;
+  if (isNotEmptyish(size.maxHeight)) css['maxHeight'] = `${size.maxHeight}${size.maxHeightUnit}`;
   if (isNotEmptyish(size.minHeight)) css['minHeight'] = `${size.minHeight}${size.minHeightUnit}`;
   if (isNotEmptyish(size.marginTop)) css['marginTop'] = size.marginTop === 'auto' ? 'auto' : `${size.marginTop}${size.marginTopUnit}`;
   if (isNotEmptyish(size.marginRight)) css['marginRight'] = size.marginRight === 'auto' ? 'auto' : `${size.marginRight}${size.marginRightUnit}`;

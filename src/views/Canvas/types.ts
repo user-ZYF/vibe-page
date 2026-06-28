@@ -2,7 +2,8 @@
  * 样式面板各配置项的类型定义
  */
 
-import type { ButtonTypeEnum, CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
+import { CanvasElementTypeEnum } from '@/constants/home';
+import type { ButtonTypeEnum, DropPositionEnum, LinkTargetEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -139,6 +140,14 @@ export interface SizeConfig {
   maxWidth?: string;
   /** 最大宽度单位 */
   maxWidthUnit?: SizeUnitEnum;
+  /** 最小宽度值 */
+  minWidth?: string;
+  /** 最小宽度单位 */
+  minWidthUnit?: SizeUnitEnum;
+  /** 最大高度值 */
+  maxHeight?: string;
+  /** 最大高度单位 */
+  maxHeightUnit?: SizeUnitEnum;
   /** 最小高度值 */
   minHeight?: string;
   /** 最小高度单位 */
@@ -331,8 +340,10 @@ export interface CanvasLinkElement extends CanvasElementBase {
   type: CanvasElementTypeEnum.LINK;
   /** 连接地址 */
   href: string;
-  /** 链接文本 */
-  text: string;
+  /** 打开方式 */
+  target: LinkTargetEnum;
+  /** 子元素 */
+  children: CanvasInnerElement[];
 }
 
 /** 画布单行文本框元素 */
@@ -424,6 +435,14 @@ export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasEl
 
 /** 画布内部元素 */
 export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement;
+
+/** 可包含子元素的画布元素 */
+export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement;
+
+/** 判断元素是否包含子元素 */
+export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
+  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK;
+}
 
 /** 画布元素 */
 export type CanvasElement = CanvasInnerElement | CanvasRootElement;

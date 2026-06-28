@@ -59,6 +59,11 @@ watch(
 );
 
 onMounted(() => {
+  /** 加载默认画布内容 */
+  if (canvasStore.root.children.length === 0) {
+    canvasStore.loadDefaultContent();
+  }
+
   if (shadowHostRef.value) {
     const shadow = shadowHostRef.value.attachShadow({ mode: 'open' });
 

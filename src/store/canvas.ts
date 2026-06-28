@@ -1,6 +1,6 @@
-import { CanvasButtonElement, CanvasContainerElement, CanvasInnerElement, CanvasImageElement, CanvasInputElement, CanvasLinkElement, CanvasParagraphElement, CanvasRadioElement, CanvasCheckboxElement, CanvasVideoElement, CanvasAudioElement, CanvasTextareaElement, CanvasLabelElement, CanvasRootElement, CanvasElement, CanvasInnerElementTypeEnum, StyleConfig } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, SiderPanelEnum } from "@/constants/home";
-import { DefaultStyleConfigMap, defaultClassStyleConfig } from "@/constants/style";
+import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum } from "@/constants/home";
+import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
@@ -68,8 +68,8 @@ export const useCanvasStore = defineStore("canvas", {
       const findInList = (list: CanvasInnerElement[]): CanvasInnerElement | null => {
         for (const el of list) {
           if (el.id === id) return el;
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            const found = findInList((el as CanvasContainerElement).children);
+          if (isParentElement(el)) {
+            const found = findInList(el.children);
             if (found) return found;
           }
         }
@@ -95,7 +95,7 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.IMAGE:
           return { ...elBase, src: '', title: '图片' }  as CanvasImageElement;
         case CanvasElementTypeEnum.LINK:
-          return { ...elBase, text: '链接', href: '' } as CanvasLinkElement;
+          return { ...elBase, href: '', target: LinkTargetEnum.SELF, children: [] } as CanvasLinkElement;
         case CanvasElementTypeEnum.CONTAINER:
           return { ...elBase, children: [] }  as CanvasContainerElement;
         case CanvasElementTypeEnum.INPUT:
@@ -120,16 +120,16 @@ export const useCanvasStore = defineStore("canvas", {
       const findInList = (list: CanvasInnerElement[]): CanvasInnerElement | null => {
         for (const el of list) {
           if (el.id === containerId) return el;
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            const found = findInList((el as CanvasContainerElement).children);
+          if (isParentElement(el)) {
+            const found = findInList(el.children);
             if (found) return found;
           }
         }
         return null;
       };
       const container = findInList(this.root.children);
-      if (container && container.type === CanvasElementTypeEnum.CONTAINER) {
-        (container as CanvasContainerElement).children.push(element);
+      if (container && isParentElement(container)) {
+        container.children.push(element);
       }
     },
     /** 选中元素 */
@@ -153,8 +153,8 @@ export const useCanvasStore = defineStore("canvas", {
         return list
           .filter((el) => el.id !== id)
           .map((el) => {
-            if (el.type === CanvasElementTypeEnum.CONTAINER) {
-              return { ...el, children: removeFromList((el as CanvasContainerElement).children) };
+            if (isParentElement(el)) {
+              return { ...el, children: removeFromList(el.children) };
             }
             return el;
           });
@@ -168,9 +168,9 @@ export const useCanvasStore = defineStore("canvas", {
     duplicateElement(id: string) {
       /** 递归为元素及其所有后代重新生成 id */
       const renewIds = (el: CanvasInnerElement): CanvasInnerElement => {
-        const next = { ...el, id: nanoid() };
-        if (next.type === CanvasElementTypeEnum.CONTAINER) {
-          (next as CanvasContainerElement).children = (el as CanvasContainerElement).children.map(renewIds);
+        const next = { ...el, id: nanoid() } as CanvasInnerElement;
+        if (isParentElement(next)) {
+          next.children = next.children.map(renewIds);
         }
         return next;
       };
@@ -180,8 +180,8 @@ export const useCanvasStore = defineStore("canvas", {
           result.push(el);
           if (el.id === id) {
             result.push(renewIds(cloneDeep(el)));
-          } else if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            result[result.length - 1] = { ...el, children: duplicateInList((el as CanvasContainerElement).children) };
+          } else if (isParentElement(el)) {
+            result[result.length - 1] = { ...el, children: duplicateInList(el.children) };
           }
         }
         return result;
@@ -200,8 +200,8 @@ export const useCanvasStore = defineStore("canvas", {
       const replaceWithTemp = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
         return list.map((el) => {
           if (el.id === id) return tempTarget;
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            return { ...el, children: replaceWithTemp((el as CanvasContainerElement).children) };
+          if (isParentElement(el)) {
+            return { ...el, children: replaceWithTemp(el.children) };
           }
           return el;
         });
@@ -216,14 +216,14 @@ export const useCanvasStore = defineStore("canvas", {
         /** 插入到目标位置 */
         const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
           return list.map((el) => {
-            if (el.id === targetParentId && el.type === CanvasElementTypeEnum.CONTAINER) {
-              const children = [...(el as CanvasContainerElement).children];
+            if (el.id === targetParentId && isParentElement(el)) {
+              const children = [...el.children];
               const clampedIndex = Math.min(index, children.length);
               children.splice(clampedIndex, 0, target);
               return { ...el, children };
             }
-            if (el.type === CanvasElementTypeEnum.CONTAINER) {
-              return { ...el, children: insertInList((el as CanvasContainerElement).children) };
+            if (isParentElement(el)) {
+              return { ...el, children: insertInList(el.children) };
             }
             return el;
           });
@@ -235,8 +235,8 @@ export const useCanvasStore = defineStore("canvas", {
         return list
           .filter((el) => el.id !== tempId)
           .map((el) => {
-            if (el.type === CanvasElementTypeEnum.CONTAINER) {
-              return { ...el, children: removeFromList((el as CanvasContainerElement).children) };
+            if (isParentElement(el)) {
+              return { ...el, children: removeFromList(el.children) };
             }
             return el;
           });
@@ -254,14 +254,14 @@ export const useCanvasStore = defineStore("canvas", {
       }
       const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
         return list.map((el) => {
-          if (el.id === containerId && el.type === CanvasElementTypeEnum.CONTAINER) {
-            const children = [...(el as CanvasContainerElement).children];
+          if (el.id === containerId && isParentElement(el)) {
+            const children = [...el.children];
             const clampedIndex = Math.min(index, children.length);
             children.splice(clampedIndex, 0, element);
             return { ...el, children };
           }
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            return { ...el, children: insertInList((el as CanvasContainerElement).children) };
+          if (isParentElement(el)) {
+            return { ...el, children: insertInList(el.children) };
           }
           return el;
         });
@@ -273,8 +273,8 @@ export const useCanvasStore = defineStore("canvas", {
       const findParentId = (list: CanvasInnerElement[], parentId: string | null): { found: boolean; parentId: string | null } => {
         for (const el of list) {
           if (el.id === this.selectedElementId) return { found: true, parentId };
-          if (el.type === CanvasElementTypeEnum.CONTAINER) {
-            const result = findParentId((el as CanvasContainerElement).children, el.id);
+          if (isParentElement(el)) {
+            const result = findParentId(el.children, el.id);
             if (result.found) return result;
           }
         }
@@ -284,6 +284,273 @@ export const useCanvasStore = defineStore("canvas", {
       if (found) {
         this.selectElement(parentId);
       }
+    },
+    /** 加载默认画布内容 */
+    loadDefaultContent() {
+      /** 创建基础样式配置 */
+      const mkStyle = (overrides: Partial<StyleConfig> = {}): StyleConfig => ({
+        general: {},
+        size: {},
+        font: { textShadows: [] },
+        visual: { backgrounds: [], boxShadows: [] },
+        flex: {},
+        ...overrides,
+      });
+
+      /** 创建容器元素 */
+      const mkContainer = (styleConfig: StyleConfig, children: CanvasInnerElement[] = [], alias?: string): CanvasContainerElement => ({
+        id: nanoid(),
+        type: CanvasElementTypeEnum.CONTAINER,
+        styleConfig,
+        classes: [],
+        classNames: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.CONTAINER],
+        children,
+      });
+
+      /** 创建段落元素 */
+      const mkParagraph = (text: string, styleConfig: StyleConfig, alias?: string): CanvasParagraphElement => ({
+        id: nanoid(),
+        type: CanvasElementTypeEnum.PARAGRAPH,
+        styleConfig,
+        classes: [],
+        classNames: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.PARAGRAPH],
+        text,
+      });
+
+      /** 创建按钮元素 */
+      const mkButton = (text: string, styleConfig: StyleConfig, alias?: string): CanvasButtonElement => ({
+        id: nanoid(),
+        type: CanvasElementTypeEnum.BUTTON,
+        styleConfig,
+        classes: [],
+        classNames: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.BUTTON],
+        text,
+        buttonType: ButtonTypeEnum.BUTTON,
+      });
+
+      /** 创建链接元素 */
+      const mkLink = (href: string, styleConfig: StyleConfig, children: CanvasInnerElement[] = [], alias?: string): CanvasLinkElement => ({
+        id: nanoid(),
+        type: CanvasElementTypeEnum.LINK,
+        styleConfig,
+        classes: [],
+        classNames: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.LINK],
+        href,
+        target: LinkTargetEnum.SELF,
+        children,
+      });
+
+      /** 创建输入框元素 */
+      const mkInput = (placeholder: string, styleConfig: StyleConfig, alias?: string): CanvasInputElement => ({
+        id: nanoid(),
+        type: CanvasElementTypeEnum.INPUT,
+        styleConfig,
+        classes: [],
+        classNames: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.INPUT],
+        placeholder,
+        value: '',
+      });
+
+      /** ---- 导航栏 ---- */
+      const navbar = mkContainer(
+        mkStyle({
+          general: { display: DisplayStyleEnum.FLEX },
+          flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER },
+          size: {
+            paddingTop: 12, paddingTopUnit: SizeUnitEnum.PX,
+            paddingRight: 24, paddingRightUnit: SizeUnitEnum.PX,
+            paddingBottom: 12, paddingBottomUnit: SizeUnitEnum.PX,
+            paddingLeft: 24, paddingLeftUnit: SizeUnitEnum.PX,
+            width: '100', widthUnit: SizeUnitEnum.PERCENT,
+          },
+          visual: {
+            backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
+            boxShadows: [],
+            borderWidth: 1,
+            borderStyle: 'solid' as never,
+            borderColor: '#e8e8e8',
+          },
+        }),
+        [
+          mkParagraph('VibePage', mkStyle({
+            font: { fontSize: 20, fontSizeUnit: SizeUnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a1a', textShadows: [] },
+          }), 'logo'),
+          mkContainer(
+            mkStyle({
+              general: { display: DisplayStyleEnum.FLEX },
+              flex: { flexDirection: FlexDirectionEnum.ROW, alignItems: AlignItemsEnum.CENTER },
+            }),
+            [
+              mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: SizeUnitEnum.PX } }), [
+                mkParagraph('首页', mkStyle({ font: { color: '#333333', fontSize: 14, fontSizeUnit: SizeUnitEnum.PX, textShadows: [] } })),
+              ]),
+              mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: SizeUnitEnum.PX } }), [
+                mkParagraph('功能', mkStyle({ font: { color: '#333333', fontSize: 14, fontSizeUnit: SizeUnitEnum.PX, textShadows: [] } })),
+              ]),
+              mkLink('#', mkStyle({}), [
+                mkParagraph('关于', mkStyle({ font: { color: '#333333', fontSize: 14, fontSizeUnit: SizeUnitEnum.PX, textShadows: [] } })),
+              ]),
+            ],
+            'nav-links',
+          ),
+        ],
+        'navbar',
+      );
+
+      /** ---- Hero 区域 ---- */
+      const hero = mkContainer(
+        mkStyle({
+          general: { display: DisplayStyleEnum.FLEX },
+          flex: { flexDirection: FlexDirectionEnum.COLUMN, justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER },
+          size: {
+            paddingTop: 64, paddingTopUnit: SizeUnitEnum.PX,
+            paddingRight: 24, paddingRightUnit: SizeUnitEnum.PX,
+            paddingBottom: 64, paddingBottomUnit: SizeUnitEnum.PX,
+            paddingLeft: 24, paddingLeftUnit: SizeUnitEnum.PX,
+            width: '100', widthUnit: SizeUnitEnum.PERCENT,
+          },
+          visual: {
+            backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f5f7fa' }],
+            boxShadows: [],
+          },
+        }),
+        [
+          mkParagraph('构建你的页面', mkStyle({
+            font: { fontSize: 36, fontSizeUnit: SizeUnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a1a', textAlign: TextAlignEnum.CENTER, textShadows: [] },
+            size: { marginBottom: '16', marginBottomUnit: SizeUnitEnum.PX },
+          }), 'hero-title'),
+          mkParagraph('可视化拖拽编辑器，所见即所得，轻松搭建专业页面', mkStyle({
+            font: { fontSize: 16, fontSizeUnit: SizeUnitEnum.PX, color: '#666666', textAlign: TextAlignEnum.CENTER, textShadows: [] },
+            size: { marginBottom: '32', marginBottomUnit: SizeUnitEnum.PX, maxWidth: '600', maxWidthUnit: SizeUnitEnum.PX },
+          }), 'hero-desc'),
+          mkButton('开始使用', mkStyle({
+            font: { fontSize: 16, fontSizeUnit: SizeUnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] },
+            visual: {
+              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#1677ff' }],
+              boxShadows: [],
+              borderRadiusTL: 6, borderRadiusTR: 6, borderRadiusBL: 6, borderRadiusBR: 6, borderRadiusUnit: SizeUnitEnum.PX,
+            },
+            size: {
+              paddingTop: 10, paddingTopUnit: SizeUnitEnum.PX,
+              paddingRight: 32, paddingRightUnit: SizeUnitEnum.PX,
+              paddingBottom: 10, paddingBottomUnit: SizeUnitEnum.PX,
+              paddingLeft: 32, paddingLeftUnit: SizeUnitEnum.PX,
+            },
+          }), 'hero-cta'),
+        ],
+        'hero',
+      );
+
+      /** ---- 功能卡片区域 ---- */
+      const mkFeatureCard = (title: string, desc: string, alias: string): CanvasContainerElement => {
+        return mkContainer(
+          mkStyle({
+            general: { display: DisplayStyleEnum.FLEX },
+            flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.FLEX_START },
+            size: {
+              paddingTop: 24, paddingTopUnit: SizeUnitEnum.PX,
+              paddingRight: 24, paddingRightUnit: SizeUnitEnum.PX,
+              paddingBottom: 24, paddingBottomUnit: SizeUnitEnum.PX,
+              paddingLeft: 24, paddingLeftUnit: SizeUnitEnum.PX,
+              width: '30', widthUnit: SizeUnitEnum.PERCENT,
+            },
+            visual: {
+              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
+              boxShadows: [{ x: 0, xUnit: SizeUnitEnum.PX, y: 2, yUnit: SizeUnitEnum.PX, blur: 8, blurUnit: SizeUnitEnum.PX, spread: 0, spreadUnit: SizeUnitEnum.PX, color: 'rgba(0,0,0,0.08)', inset: false }],
+              borderRadiusTL: 8, borderRadiusTR: 8, borderRadiusBL: 8, borderRadiusBR: 8, borderRadiusUnit: SizeUnitEnum.PX,
+            },
+          }),
+          [
+            mkParagraph(title, mkStyle({
+              font: { fontSize: 18, fontSizeUnit: SizeUnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#1a1a1a', textShadows: [] },
+              size: { marginBottom: '12', marginBottomUnit: SizeUnitEnum.PX },
+            })),
+            mkParagraph(desc, mkStyle({
+              font: { fontSize: 14, fontSizeUnit: SizeUnitEnum.PX, color: '#666666', lineHeight: '1.6', textShadows: [] },
+            })),
+          ],
+          alias,
+        );
+      };
+
+      const features = mkContainer(
+        mkStyle({
+          general: { display: DisplayStyleEnum.FLEX },
+          flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START },
+          size: {
+            paddingTop: 48, paddingTopUnit: SizeUnitEnum.PX,
+            paddingRight: 24, paddingRightUnit: SizeUnitEnum.PX,
+            paddingBottom: 48, paddingBottomUnit: SizeUnitEnum.PX,
+            paddingLeft: 24, paddingLeftUnit: SizeUnitEnum.PX,
+            width: '100', widthUnit: SizeUnitEnum.PERCENT,
+          },
+        }),
+        [
+          mkFeatureCard('拖拽编辑', '所见即所得的可视化编辑体验，无需编写代码即可搭建页面。', 'feature-1'),
+          mkFeatureCard('组件丰富', '内置多种基础组件，容器、按钮、图片、表单等一应俱全。', 'feature-2'),
+          mkFeatureCard('实时预览', '随时切换预览模式，查看最终页面效果，确保设计无误。', 'feature-3'),
+        ],
+        'features',
+      );
+
+      /** ---- 表单区域 ---- */
+      const formSection = mkContainer(
+        mkStyle({
+          general: { display: DisplayStyleEnum.FLEX },
+          flex: { flexDirection: FlexDirectionEnum.COLUMN, justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER },
+          size: {
+            paddingTop: 48, paddingTopUnit: SizeUnitEnum.PX,
+            paddingRight: 24, paddingRightUnit: SizeUnitEnum.PX,
+            paddingBottom: 48, paddingBottomUnit: SizeUnitEnum.PX,
+            paddingLeft: 24, paddingLeftUnit: SizeUnitEnum.PX,
+            width: '100', widthUnit: SizeUnitEnum.PERCENT,
+          },
+        }),
+        [
+          mkParagraph('联系我们', mkStyle({
+            font: { fontSize: 24, fontSizeUnit: SizeUnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a1a', textAlign: TextAlignEnum.CENTER, textShadows: [] },
+            size: { marginBottom: '24', marginBottomUnit: SizeUnitEnum.PX },
+          }), 'form-title'),
+          mkInput('请输入你的邮箱', mkStyle({
+            size: {
+              width: '400', widthUnit: SizeUnitEnum.PX,
+              paddingTop: 10, paddingTopUnit: SizeUnitEnum.PX,
+              paddingRight: 16, paddingRightUnit: SizeUnitEnum.PX,
+              paddingBottom: 10, paddingBottomUnit: SizeUnitEnum.PX,
+              paddingLeft: 16, paddingLeftUnit: SizeUnitEnum.PX,
+              marginBottom: '16', marginBottomUnit: SizeUnitEnum.PX,
+            },
+            visual: {
+              backgrounds: [],
+              boxShadows: [],
+              borderRadiusTL: 6, borderRadiusTR: 6, borderRadiusBL: 6, borderRadiusBR: 6, borderRadiusUnit: SizeUnitEnum.PX,
+              borderWidth: 1, borderStyle: 'solid' as never, borderColor: '#d9d9d9',
+            },
+          }), 'form-email'),
+          mkButton('提交', mkStyle({
+            font: { fontSize: 14, fontSizeUnit: SizeUnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.NORMAL, textShadows: [] },
+            visual: {
+              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#1677ff' }],
+              boxShadows: [],
+              borderRadiusTL: 6, borderRadiusTR: 6, borderRadiusBL: 6, borderRadiusBR: 6, borderRadiusUnit: SizeUnitEnum.PX,
+            },
+            size: {
+              paddingTop: 10, paddingTopUnit: SizeUnitEnum.PX,
+              paddingRight: 32, paddingRightUnit: SizeUnitEnum.PX,
+              paddingBottom: 10, paddingBottomUnit: SizeUnitEnum.PX,
+              paddingLeft: 32, paddingLeftUnit: SizeUnitEnum.PX,
+            },
+          }), 'form-submit'),
+        ],
+        'form-section',
+      );
+
+      this.root.children = [navbar, hero, features, formSection];
     },
   }
 });

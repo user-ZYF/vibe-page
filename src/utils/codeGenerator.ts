@@ -1,14 +1,15 @@
 import {
   CanvasInnerElement,
-  CanvasContainerElement,
   CanvasButtonElement,
   CanvasParagraphElement,
   CanvasImageElement,
   CanvasLinkElement,
   CanvasRootElement,
   CanvasElement,
+  isParentElement,
+  CanvasParentElement,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum } from '@/constants/home';
+import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
 
 /** 元素类型到 HTML 标签的映射 */
@@ -98,6 +99,12 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.LINK: {
       const link = element as CanvasLinkElement;
       if (link.href) attrs.push(`href="${escapeAttrValue(link.href)}"`);
+      const TARGET_ATTR_MAP: Record<LinkTargetEnum, string> = {
+        [LinkTargetEnum.SELF]: '_self',
+        [LinkTargetEnum.BLANK]: '_blank',
+      };
+      const targetAttr = TARGET_ATTR_MAP[link.target];
+      if (targetAttr) attrs.push(`target="${targetAttr}"`);
       break;
     }
   }
@@ -121,8 +128,6 @@ function getElementContent(element: CanvasElement): string {
       return escapeAttrValue((element as CanvasButtonElement).text);
     case CanvasElementTypeEnum.PARAGRAPH:
       return escapeAttrValue((element as CanvasParagraphElement).text);
-    case CanvasElementTypeEnum.LINK:
-      return escapeAttrValue((element as CanvasLinkElement).text);
     default:
       return '';
   }
@@ -142,8 +147,8 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
   }
 
   /** 容器元素或根元素：递归生成子元素 */
-  if (element.type === CanvasElementTypeEnum.CONTAINER || element.type === CanvasElementTypeEnum.ROOT) {
-    const container = element as CanvasContainerElement | CanvasRootElement;
+  if (element.type === CanvasElementTypeEnum.ROOT || isParentElement(element)) {
+    const container = element as CanvasParentElement | CanvasRootElement;
     if (container.children.length === 0) {
       return `${pad}<${tag}${attrs}></${tag}>`;
     }
@@ -170,8 +175,8 @@ function collectCssRules(root: CanvasRootElement): string {
       rules.push(`#${el.id} {\n${styleStr}\n}`);
     }
 
-    if (el.type === CanvasElementTypeEnum.CONTAINER) {
-      (el as CanvasContainerElement).children.forEach(collect);
+    if (isParentElement(el)) {
+      el.children.forEach(collect);
     }
   }
 

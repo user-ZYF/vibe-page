@@ -43,7 +43,7 @@ import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
 import { useElementStyle } from '@/composables/useElementStyle';
-import type { CanvasElementBase, ResizeStartState } from '@/views/Canvas/types';
+import { type CanvasInnerElement, isParentElement, type CanvasElementBase, type ResizeStartState } from '@/views/Canvas/types';
 import { SizeUnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../contants';
@@ -105,8 +105,8 @@ const visible = computed(() => !!selectedElementId.value && !isDragging.value &&
 /** 是否显示操作工具栏按钮（根画布元素不显示） */
 const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
 
-/** 是否显示resizer（只有选中非根容器元素才会出现） */
-const showResizer = computed(()=> showToolbar && selectedElement.value?.type === CanvasElementTypeEnum.CONTAINER);
+/** 是否显示resizer（只有选中非根容器元素或链接元素才会出现） */
+const showResizer = computed(() => showToolbar && !!selectedElement.value && selectedElement.value.type !== CanvasElementTypeEnum.ROOT && isParentElement(selectedElement.value as CanvasInnerElement));
 
 /** 工具栏自然 top 偏移（位于边框区域上方） */
 const NATURAL_TOP = -28;

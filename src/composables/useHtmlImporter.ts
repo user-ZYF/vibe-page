@@ -8,7 +8,7 @@ import {
   CanvasImageElement,
   CanvasLinkElement,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum, ButtonTypeEnum, CanvasElementLabelMap } from '@/constants/home';
+import { CanvasElementTypeEnum, ButtonTypeEnum, CanvasElementLabelMap, LinkTargetEnum } from '@/constants/home';
 import { DefaultStyleConfigMap } from '@/constants/style';
 
 /** HTML 标签名到画布元素类型的映射 */
@@ -71,6 +71,7 @@ function domNodeToCanvasElement(node: Element): CanvasInnerElement | null {
     id,
     styleConfig,
     classes,
+    classNames: [] as string[],
     alias: CanvasElementLabelMap[resolvedType as CanvasElementTypeEnum],
   };
 
@@ -102,11 +103,25 @@ function domNodeToCanvasElement(node: Element): CanvasInnerElement | null {
       } as CanvasImageElement;
     }
     case CanvasElementTypeEnum.LINK: {
+      const targetAttr = node.getAttribute('target');
+      const TARGET_ATTR_MAP: Record<string, LinkTargetEnum> = {
+        '_self': LinkTargetEnum.SELF,
+        '_blank': LinkTargetEnum.BLANK,
+      };
+      /** 递归处理子节点 */
+      const children: CanvasInnerElement[] = [];
+      node.childNodes.forEach((child) => {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          const converted = domNodeToCanvasElement(child as Element);
+          if (converted) children.push(converted);
+        }
+      });
       return {
         ...base,
         type: CanvasElementTypeEnum.LINK,
         href: node.getAttribute('href') || '',
-        text: node.textContent?.trim() || '链接',
+        target: targetAttr && TARGET_ATTR_MAP[targetAttr] ? TARGET_ATTR_MAP[targetAttr] : LinkTargetEnum.SELF,
+        children,
       } as CanvasLinkElement;
     }
     case CanvasElementTypeEnum.CONTAINER:

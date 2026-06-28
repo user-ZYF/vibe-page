@@ -74,6 +74,20 @@ export const BUTTON_TYPE_OPTIONS = [
   { label: 'submit', value: ButtonTypeEnum.SUBMIT },
 ];
 
+/** 超链接打开方式 */
+export enum LinkTargetEnum {
+  /** 当前窗口 */
+  SELF = 1,
+  /** 新窗口 */
+  BLANK = 2,
+}
+
+/** 超链接打开方式选项 */
+export const LINK_TARGET_OPTIONS = [
+  { label: '当前窗口', value: LinkTargetEnum.SELF },
+  { label: '新窗口', value: LinkTargetEnum.BLANK },
+];
+
 /** 拖拽落点 */
 export enum DropPositionEnum {
   /** 元素之前 */

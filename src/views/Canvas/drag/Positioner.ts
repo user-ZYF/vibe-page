@@ -1,6 +1,6 @@
-import type { CanvasInnerElement, CanvasRootElement } from "@/views/Canvas/types";
-import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
-import type { CanvasContainerElement } from "@/views/Canvas/types";
+import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement } from "@/views/Canvas/types";
+import { DropPositionEnum } from "@/constants/home";
+import { isParentElement } from "@/views/Canvas/types";
 import type { NodeInfo, DropIndicator } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
 import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum } from "@/constants/style";
@@ -151,8 +151,8 @@ export class Positioner {
     const find = (list: CanvasInnerElement[], parentId: string): string | null => {
       for (const el of list) {
         if (el.id === childId) return parentId;
-        if (el.type === CanvasElementTypeEnum.CONTAINER) {
-          const found = find((el as CanvasContainerElement).children, el.id);
+        if (isParentElement(el)) {
+          const found = find(el.children, el.id);
           if (found) return found;
         }
       }
@@ -244,19 +244,19 @@ export class Positioner {
     if(parentId === root.id){
       return root.children;
     }
-    const findContainer = (list: CanvasInnerElement[]): CanvasContainerElement | null => {
+    const findParent = (list: CanvasInnerElement[]): CanvasParentElement | null => {
       for (const el of list) {
-        if (el.id === parentId) return el as CanvasContainerElement;
-        if (el.type === CanvasElementTypeEnum.CONTAINER) {
-          const found = findContainer((el as CanvasContainerElement).children);
+        if (el.id === parentId && isParentElement(el)) return el;
+        if (isParentElement(el)) {
+          const found = findParent(el.children);
           if (found) return found;
         }
       }
       return null;
     };
 
-    const container = findContainer(root.children);
-    return container?.children ?? [];
+    const parent = findParent(root.children);
+    return parent?.children ?? [];
   }
 
   /** 判断 targetId 是否是 sourceId 的后代或本身 */
@@ -270,8 +270,8 @@ export class Positioner {
     const findEl = (list: CanvasInnerElement[], id: string): CanvasInnerElement | null => {
       for (const el of list) {
         if (el.id === id) return el;
-        if (el.type === CanvasElementTypeEnum.CONTAINER) {
-          const found = findEl((el as CanvasContainerElement).children, id);
+        if (isParentElement(el)) {
+          const found = findEl(el.children, id);
           if (found) return found;
         }
       }
@@ -279,19 +279,19 @@ export class Positioner {
     };
 
     const sourceEl = findEl(root.children, sourceId);
-    if (!sourceEl || sourceEl.type !== CanvasElementTypeEnum.CONTAINER) return false;
+    if (!sourceEl || !isParentElement(sourceEl)) return false;
 
     const isInside = (list: CanvasInnerElement[], targetId: string): boolean => {
       for (const el of list) {
         if (el.id === targetId) return true;
-        if (el.type === CanvasElementTypeEnum.CONTAINER) {
-          if (isInside((el as CanvasContainerElement).children, targetId)) return true;
+        if (isParentElement(el)) {
+          if (isInside(el.children, targetId)) return true;
         }
       }
       return false;
     };
 
-    return isInside((sourceEl as CanvasContainerElement).children, targetId);
+    return isInside((sourceEl as CanvasParentElement).children, targetId);
   }
 
   /** 根据落点信息计算占位线的 rect（视口坐标） */

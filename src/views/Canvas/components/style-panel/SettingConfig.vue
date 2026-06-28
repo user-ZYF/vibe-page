@@ -48,12 +48,12 @@
     <!-- 超链接 -->
     <template v-else-if="model.type === CanvasElementTypeEnum.LINK">
       <div class="style-config-section">
-        <div class="style-config-label">链接文本</div>
-        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
-      </div>
-      <div class="style-config-section">
         <div class="style-config-label">链接地址</div>
         <a-input v-model:value="(model as CanvasLinkElement).href" size="small" class="style-config-input" placeholder="https://" />
+      </div>
+      <div class="style-config-section">
+        <div class="style-config-label">打开方式</div>
+        <a-select v-model:value="(model as CanvasLinkElement).target" size="small" class="style-config-select" :options="LINK_TARGET_OPTIONS" />
       </div>
     </template>
 
@@ -161,21 +161,22 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
-import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS } from '@/constants/home';
+import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS } from '@/constants/home';
 import { useCanvasStore } from '@/store/canvas';
-import type {
-  CanvasInnerElement,
-  CanvasButtonElement,
-  CanvasParagraphElement,
-  CanvasImageElement,
-  CanvasLinkElement,
-  CanvasInputElement,
-  CanvasTextareaElement,
-  CanvasRadioElement,
-  CanvasCheckboxElement,
-  CanvasVideoElement,
-  CanvasAudioElement,
-  CanvasLabelElement,
+import {
+  type CanvasInnerElement,
+  type CanvasButtonElement,
+  type CanvasParagraphElement,
+  type CanvasImageElement,
+  type CanvasLinkElement,
+  type CanvasInputElement,
+  type CanvasTextareaElement,
+  type CanvasRadioElement,
+  type CanvasCheckboxElement,
+  type CanvasVideoElement,
+  type CanvasAudioElement,
+  type CanvasLabelElement,
+  isParentElement,
 } from '@/views/Canvas/types';
 
 defineOptions({
@@ -200,7 +201,6 @@ watch(
     if (!el) return;
     if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
     else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
-    else if (el.type === CanvasElementTypeEnum.LINK) pendingText.value = (el as CanvasLinkElement).text;
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
   },
   { immediate: true, deep: true },
@@ -212,7 +212,6 @@ function commitText() {
   if (!el) return;
   if (el.type === CanvasElementTypeEnum.BUTTON) (el as CanvasButtonElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.PARAGRAPH) (el as CanvasParagraphElement).text = pendingText.value;
-  else if (el.type === CanvasElementTypeEnum.LINK) (el as CanvasLinkElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
 }
 
@@ -261,8 +260,8 @@ const formElementOptions = computed(() => {
           value: el.id,
         });
       }
-      if (el.type === CanvasElementTypeEnum.CONTAINER) {
-        collect((el as { children: CanvasInnerElement[] }).children);
+      if (isParentElement(el)) {
+        collect(el.children);
       }
     }
   };

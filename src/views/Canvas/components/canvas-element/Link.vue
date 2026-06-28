@@ -1,11 +1,14 @@
 <!-- ? 画布超链接元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="style" @click.stop="handleSelect">{{ data.text }}</a>
+    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="data.href" :style="style" @click.stop="handleClick">
+        <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
+    </a>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { CanvasLinkElement } from '../../types';
+import { CanvasElementComponentMap } from '../../contants';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
@@ -23,6 +26,18 @@ const linkEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
-const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(linkEl, data.value.id);
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
+useDragConnector(linkEl, data.value.id, { isCanvas: true });
+
+/** 点击处理：编辑模式下阻止跳转并选中元素，预览模式下固定在新窗口打开 */
+function handleClick(e: MouseEvent) {
+  e.preventDefault();
+  if (!isPreview.value) {
+    handleSelect();
+    return;
+  }
+  if (data.value.href) {
+    window.open(data.value.href, '_blank');
+  }
+}
 </script>

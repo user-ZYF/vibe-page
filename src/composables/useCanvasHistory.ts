@@ -25,6 +25,7 @@ export const canvasHistoryApi = {
 /**
  * 画布撤销/重做功能
  * 通过快照机制实现历史记录管理，支持对任意数据进行监控
+ * 优化：recordHistory中也需要判断isUndoRedoing状态，避免在使用watch+recordHistory时因撤销重做导致数据变化引起的状态记录
  */
 export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
   /** 历史记录快照列表 */

@@ -226,7 +226,7 @@ export const useCanvasStore = defineStore("canvas", {
       if(targetParentId === this.root.id) {
         const clampedIndex = Math.min(index, this.root.children.length);
         this.root.children.splice(clampedIndex, 0, target);
-      }else {
+      } else {
         /** 插入到目标位置 */
         const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
           return list.map((el) => {
@@ -244,18 +244,7 @@ export const useCanvasStore = defineStore("canvas", {
         };
         this.root.children = insertInList(this.root.children);
       }
-      /** 从原位置移除临时标记元素 */
-      const removeFromList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
-        return list
-          .filter((el) => el.id !== tempId)
-          .map((el) => {
-            if (isParentElement(el)) {
-              return { ...el, children: removeFromList(el.children) };
-            }
-            return el;
-          });
-      };
-      this.root.children = removeFromList(this.root.children);
+      this.removeElement(tempId);
     },
     /** 在指定容器的 index 位置添加元素 */
     addElementToContainerAt(type: CanvasInnerElementTypeEnum, containerId: string, index: number) {

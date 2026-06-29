@@ -64,7 +64,7 @@ export function findDropPosition(
 }
 
 /**
- * Positioner 负责计算拖拽过程中的落点 Indicator（类比 Craft.js Positioner）
+ * Positioner 负责计算拖拽过程中的落点 Indicator
  */
 export class Positioner {
   static BORDER_OFFSET = 10;
@@ -104,12 +104,7 @@ export class Positioner {
     /** 获取父级内所有直接子元素的维度 */
     const childInfos = this.getChildNodeInfos(parentId, root, registry);
 
-    /** 过滤掉正在被拖拽的元素自身 */
-    const filteredInfos = draggingId
-      ? childInfos.filter((n) => n.id !== draggingId)
-      : childInfos;
-
-    const { index, where } = findDropPosition(filteredInfos, x, y);
+    const { index, where } = findDropPosition(childInfos, x, y);
 
     /** 错误信息 */
     let error = "";
@@ -120,7 +115,7 @@ export class Positioner {
     }
 
     /** 计算占位线 rect */
-    const rect = this.computeRect(filteredInfos, index, where, parentEl);
+    const rect = this.computeRect(childInfos, index, where, parentEl);
 
     return {
       parentId,
@@ -192,7 +187,7 @@ export class Positioner {
       const parentStyle = parentEl ? getComputedStyle(parentEl) : null;
 
       /** 判断元素是否在纵向文档流中 */
-      function computeInFlow():boolean {
+      const computeInFlow = () => {
         if (!parentStyle) return true;
 
         /** 父容器是 float */

@@ -49,8 +49,7 @@
       </span>
 
       <!-- 元素名称 -->
-      <!-- <span class="comp-layer-item-label">{{ element.alias }}</span> -->
-      <span class="comp-layer-item-label">{{ element.id }}</span>
+      <span class="comp-layer-item-label">{{ element.alias || CanvasElementLabelMap[element.type] }}</span>
 
       <!-- 删除按钮 -->
       <DeleteOutlined 
@@ -91,7 +90,7 @@
 import { computed, inject, PropType, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
-import { CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
+import { CanvasElementLabelMap, CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
 import { type CanvasInnerElement, type CanvasElement, type CanvasRootElement, type CanvasParentElement, isParentElement } from '@/views/Canvas/types';
 import {
   TOGGLE_EXPAND_KEY,

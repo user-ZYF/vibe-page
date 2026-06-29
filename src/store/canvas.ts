@@ -173,6 +173,8 @@ export const useCanvasStore = defineStore("canvas", {
     },
     /** 复制元素（递归支持多层级，插入到原元素后面） */
     duplicateElement(id: string) {
+      /** 复制出来的新元素 id */
+      let duplicatedId: string | null = null;
       /** 递归为元素及其所有后代重新生成 id */
       const renewIds = (el: CanvasInnerElement): CanvasInnerElement => {
         const next = { ...el, id: nanoid() } as CanvasInnerElement;
@@ -186,7 +188,9 @@ export const useCanvasStore = defineStore("canvas", {
         for (const el of list) {
           result.push(el);
           if (el.id === id) {
-            result.push(renewIds(cloneDeep(el)));
+            const duplicated = renewIds(cloneDeep(el));
+            duplicatedId = duplicated.id;
+            result.push(duplicated);
           } else if (isParentElement(el)) {
             result[result.length - 1] = { ...el, children: duplicateInList(el.children) };
           }
@@ -194,6 +198,9 @@ export const useCanvasStore = defineStore("canvas", {
         return result;
       };
       this.root.children = duplicateInList(this.root.children);
+      if (duplicatedId) {
+        this.selectElement(duplicatedId);
+      }
     },
     /** 移动已有元素（支持跨容器） */
     moveElement(id: string, targetParentId: string, index: number) {
@@ -249,7 +256,6 @@ export const useCanvasStore = defineStore("canvas", {
           });
       };
       this.root.children = removeFromList(this.root.children);
-     
     },
     /** 在指定容器的 index 位置添加元素 */
     addElementToContainerAt(type: CanvasInnerElementTypeEnum, containerId: string, index: number) {

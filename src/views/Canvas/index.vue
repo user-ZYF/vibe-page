@@ -90,6 +90,17 @@ function handleRedo() {
   canvasHistoryApi.redo();
 }
 
+/** 获取事件的真实目标元素（穿透 Shadow DOM 的事件重定向） */
+function getRealEventTarget(e: Event): HTMLElement | null {
+  const path = e.composedPath();
+  for (const node of path) {
+    if (node instanceof HTMLElement) {
+      return node;
+    }
+  }
+  return e.target as HTMLElement | null;
+}
+
 /** 判断事件目标是否在可编辑元素内 */
 function isEditableTarget(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
@@ -100,20 +111,24 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 /** 键盘快捷键处理 */
 function handleKeydown(e: KeyboardEvent) {
+  const realTarget = getRealEventTarget(e);
+  /** 在可编辑元素中不处理画布快捷键 */
+  if (isEditableTarget(realTarget)) return;
   /** 预览模式下禁用一切画布操作 */
   if (isPreview.value) return;
-  if(e.key === 'Delete' && selectedElementId.value && !isEditableTarget(e.target)){
+
+  if(e.key === 'Delete' && selectedElementId.value) {
     // delete: 删除
     canvasStore.removeElement(selectedElementId.value);
     return;
   }
   const isMod = e.ctrlKey || e.metaKey;
   if (isMod && e.key === 'z') {
-    // ctrl + z: 重做
+    // ctrl + z: 撤销
     e.preventDefault();
     handleUndo();
   } else if (isMod && e.key === 'y') {
-    // ctrl + y: 撤销
+    // ctrl + y: 重做
     e.preventDefault();
     handleRedo();
   }

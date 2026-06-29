@@ -26,6 +26,9 @@ class DragEngine {
       e.stopPropagation();
       const dragStore = useDragStore();
       dragStore.startDrag(id);
+      
+      const canvasStore = useCanvasStore();
+      canvasStore.selectElement(null);
     }
 
     /** 拖拽结束 */
@@ -138,6 +141,7 @@ class DragEngine {
       const insertIndex =
         indicator.index + (indicator.where === DropPositionEnum.AFTER ? 1 : 0);
       canvasStore.moveElement(draggingId, indicator.parentId, insertIndex);
+      canvasStore.selectElement(draggingId);
     }
 
     this.cleanup();

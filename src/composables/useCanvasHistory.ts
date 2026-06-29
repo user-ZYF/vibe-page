@@ -43,17 +43,14 @@ export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
 
   /** 记录当前状态到历史 */
   function recordHistory() {
-    if (_isUndoRedoing.value) {
-      _isUndoRedoing.value = false;
-      return;
-    }
-    history.value = history.value.slice(0, historyIndex.value + 1);
-    history.value.push(cloneDeep(options.snapshot()));
-    if (history.value.length > MAX_HISTORY_LENGTH) {
-      history.value.shift();
+    const newHistory = history.value.slice(0, historyIndex.value + 1);
+    newHistory.push(cloneDeep(options.snapshot()));
+    if (newHistory.length > MAX_HISTORY_LENGTH) {
+      newHistory.shift();
     } else {
-      historyIndex.value = history.value.length - 1;
+      historyIndex.value = newHistory.length - 1;
     }
+    history.value = newHistory;
   }
 
   /** 刷新待记录的防抖快照，确保最新状态已入历史 */
@@ -72,6 +69,10 @@ export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
   }, options.debounceMs ?? 300);
 
   function debouncedRecord() {
+    if (_isUndoRedoing.value) {
+      _isUndoRedoing.value = false;
+      return;
+    }
     _isRecordPending.value = true;
     _debouncedFn();
   }

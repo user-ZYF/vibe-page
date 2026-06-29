@@ -10,12 +10,12 @@
         </a-tooltip>
         <a-divider type="vertical" />
         <a-tooltip title="撤销" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('undo')">
+          <a-button type="text" size="small" :disabled="!canUndo" @click="emit('undo')">
             <template #icon><UndoOutlined /></template>
           </a-button>
         </a-tooltip>
         <a-tooltip title="重做" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('redo')">
+          <a-button type="text" size="small" :disabled="!canRedo" @click="emit('redo')">
             <template #icon><RedoOutlined /></template>
           </a-button>
         </a-tooltip>
@@ -80,6 +80,16 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  /** 是否可撤销 */
+  canUndo: {
+    type: Boolean,
+    default: false,
+  },
+  /** 是否可重做 */
+  canRedo: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -122,6 +132,16 @@ const emit = defineEmits<{
 
     &:hover {
       color: rgba(255, 255, 255, 0.75);
+    }
+
+    &.is-disabled,
+    &:disabled {
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.3);
+      }
     }
   }
 

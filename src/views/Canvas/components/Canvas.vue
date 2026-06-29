@@ -93,7 +93,7 @@ onMounted(() => {
     shadowRoot.value = shadow;
   }
 
-  recordHistory();
+  // recordHistory();
 });
 </script>
 

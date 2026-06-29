@@ -4,6 +4,8 @@
     <a-layout class="editor-left">
       <EditorHeader
         :is-preview="isPreview"
+        :can-undo="canvasHistoryApi.canUndo.value"
+        :can-redo="canvasHistoryApi.canRedo.value"
         @toggle-preview="togglePreview"
         @undo="handleUndo"
         @redo="handleRedo"

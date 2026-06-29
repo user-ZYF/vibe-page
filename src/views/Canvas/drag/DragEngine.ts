@@ -2,8 +2,8 @@ import { nodeRegistry } from "./NodeRegistry";
 import { Positioner } from "./Positioner";
 import { useDragStore } from "@/store/drag";
 import { useCanvasStore } from "@/store/canvas";
-import { CanvasInnerElementTypeEnum } from "../types";
-import { DropPositionEnum } from "@/constants/home";
+import { CanvasInnerElementTypeEnum, type CanvasInnerElement } from "../types";
+import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
 
 
 /**
@@ -60,7 +60,19 @@ class DragEngine {
 
       if (!dragStore.isDragging) return;
 
-      
+      /** 计算当前拖拽元素的类型（已有元素从树中查找，新元素取 dragNewType） */
+      let dragType: CanvasInnerElementTypeEnum | null = null;
+      let dragElement: CanvasInnerElement | null = null;
+      if (dragStore.draggingId) {
+        const draggedEl = canvasStore.getElementById(dragStore.draggingId);
+        if (draggedEl && draggedEl.type !== CanvasElementTypeEnum.ROOT) {
+          dragType = draggedEl.type as CanvasInnerElementTypeEnum;
+          dragElement = draggedEl as CanvasInnerElement;
+        }
+      } else if (dragStore.dragNewType !== null) {
+        dragType = dragStore.dragNewType;
+      }
+
       // /** 从事件目标元素触发，向上找注册过的画布元素 */
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
@@ -71,7 +83,9 @@ class DragEngine {
         e.clientY,
         canvasStore.root,
         nodeRegistry,
-        dragStore.draggingId
+        dragStore.draggingId,
+        dragType,
+        dragElement
       );
 
       dragStore.setIndicator(indicator);

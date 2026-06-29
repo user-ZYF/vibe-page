@@ -91,7 +91,7 @@ import { computed, inject, PropType, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementLabelMap, CanvasElementTypeEnum, DropPositionEnum } from '@/constants/home';
-import { type CanvasInnerElement, type CanvasElement, type CanvasRootElement, type CanvasParentElement, isParentElement } from '@/views/Canvas/types';
+import { type CanvasInnerElement, type CanvasElement, type CanvasRootElement, type CanvasParentElement, isParentElement, isSubtreeAllowed } from '@/views/Canvas/types';
 import {
   TOGGLE_EXPAND_KEY,
   EXPAND_CONTAINER_KEY,
@@ -259,17 +259,31 @@ function handleDragOver(e: DragEvent) {
     return;
   }
 
+  /** 获取被拖拽元素 */
+  const draggedEl = canvasStore.getElementById(draggingId.value!);
+  if (!draggedEl || draggedEl.type === CanvasElementTypeEnum.ROOT) {
+    setDropTarget(null);
+    return;
+  }
+  const dragElement = draggedEl as CanvasInnerElement;
+
   if (e.dataTransfer) {
     e.dataTransfer.dropEffect = 'move';
   }
 
-  const rect = (e.target as HTMLElement).getBoundingClientRect();
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
   // 鼠标相对于事件目标元素顶部的距离
   const top = e.clientY - rect.top;
   const height = rect.height;
 
   /** 上边缘 → 插入到当前元素之前 */
   if (top < EDGE_THRESHOLD && !props.isRoot) {
+    /** 检查父元素是否允许接收该拖拽子树 */
+    const parentEl = canvasStore.getElementById(parentId.value);
+    if (parentEl && !isSubtreeAllowed(parentEl, dragElement)) {
+      setDropTarget(null);
+      return;
+    }
     clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.BEFORE,
@@ -281,6 +295,12 @@ function handleDragOver(e: DragEvent) {
 
   /** 下边缘 → 插入到当前元素之后 */
   if (top > height - EDGE_THRESHOLD && !props.isRoot) {
+    /** 检查父元素是否允许接收该拖拽子树 */
+    const parentEl = canvasStore.getElementById(parentId.value);
+    if (parentEl && !isSubtreeAllowed(parentEl, dragElement)) {
+      setDropTarget(null);
+      return;
+    }
     clearExpandTimer();
     setDropTarget({
       position: DropPositionEnum.AFTER,
@@ -292,6 +312,11 @@ function handleDragOver(e: DragEvent) {
 
   /** 中间区域 */
   if (isContainer.value) {
+    /** 检查当前容器是否允许接收该拖拽子树 */
+    if (!isSubtreeAllowed(props.element, dragElement)) {
+      setDropTarget(null);
+      return;
+    }
     /** 容器元素 → 延迟 0.5s 后展开并设置插入目标 */
     if (!isExpanded.value) {
       if(!expandTimer){
@@ -313,6 +338,12 @@ function handleDragOver(e: DragEvent) {
       });
     }
   } else if(!props.isRoot){
+    /** 检查父元素是否允许接收该拖拽子树 */
+    const parentEl = canvasStore.getElementById(parentId.value);
+    if (parentEl && !isSubtreeAllowed(parentEl, dragElement)) {
+      setDropTarget(null);
+      return;
+    }
     /** 非容器元素 → 插入到当前元素之后 */
     clearExpandTimer();
     setDropTarget({

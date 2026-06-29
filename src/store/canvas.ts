@@ -1,11 +1,12 @@
 import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum } from "@/constants/home";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
 import { Positioner } from "@/views/Canvas/drag/Positioner";
 import { convertStyleConfig } from "@/utils/styleConfig";
+import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
 
 /** 画布store */
 export const useCanvasStore = defineStore("canvas", {
@@ -75,20 +76,7 @@ export const useCanvasStore = defineStore("canvas", {
     },
     /** 获取指定id的元素 */
     getElementById (id: string): CanvasElement | null {
-      if(id === this.root.id){
-        return this.root;
-      }
-      const findInList = (list: CanvasInnerElement[]): CanvasInnerElement | null => {
-        for (const el of list) {
-          if (el.id === id) return el;
-          if (isParentElement(el)) {
-            const found = findInList(el.children);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-      return findInList(this.root.children);
+      return findElementInTree(this.root, id);
     },
     /** 生成一个元素 */
     generateElement(type: CanvasInnerElementTypeEnum): CanvasInnerElement {
@@ -108,7 +96,7 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.IMAGE:
           return { ...elBase, src: '', title: '图片' }  as CanvasImageElement;
         case CanvasElementTypeEnum.LINK:
-          return { ...elBase, href: '', target: LinkTargetEnum.SELF, children: [] } as CanvasLinkElement;
+          return { ...elBase, href: '', target: LinkTargetEnum.SELF, children: [], exclude: [...LINK_EXCLUDE_TYPES] } as CanvasLinkElement;
         case CanvasElementTypeEnum.CONTAINER:
           return { ...elBase, children: [] }  as CanvasContainerElement;
         case CanvasElementTypeEnum.INPUT:
@@ -357,6 +345,7 @@ export const useCanvasStore = defineStore("canvas", {
         href,
         target: LinkTargetEnum.SELF,
         children,
+        exclude: [...LINK_EXCLUDE_TYPES],
       });
 
       /** 创建输入框元素 */

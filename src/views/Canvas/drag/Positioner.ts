@@ -1,6 +1,7 @@
-import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement } from "@/views/Canvas/types";
+import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement, CanvasInnerElementTypeEnum } from "@/views/Canvas/types";
 import { DropPositionEnum } from "@/constants/home";
-import { isParentElement } from "@/views/Canvas/types";
+import { isParentElement, isChildTypeAllowed, isSubtreeAllowed } from "@/views/Canvas/types";
+import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
 import type { NodeInfo, DropIndicator } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
 import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum } from "@/constants/style";
@@ -84,7 +85,9 @@ export class Positioner {
     y: number,
     root: CanvasRootElement,
     registry: NodeRegistry,
-    draggingId: string | null
+    draggingId: string | null,
+    dragType: CanvasInnerElementTypeEnum | null,
+    dragElement: CanvasInnerElement | null
   ): DropIndicator | null {
     /** 找到最近的 isCanvas 祖先 */
     let parentId = this.getCanvasAncestor(dropTargetId, root, registry)!;
@@ -112,6 +115,24 @@ export class Positioner {
     /** 是否为非法落点（不能拖入自身或其后代） */
     if(draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root)){
       error = "不允许插入到自身";
+    }
+
+    /** 检查子元素类型是否被父元素的 include/exclude 规则允许 */
+    if(!error && dragType !== null){
+      const parentElement = findElementInTree(root, parentId);
+      if(parentElement){
+        if(dragElement){
+          /** 已有元素：递归检查整个子树 */
+          if(!isSubtreeAllowed(parentElement, dragElement)){
+            error = "该元素或其子元素不允许放入此容器";
+          }
+        } else {
+          /** 新元素：仅检查类型 */
+          if(!isChildTypeAllowed(parentElement, dragType)){
+            error = "该元素不允许放入此容器";
+          }
+        }
+      }
     }
 
     /** 计算占位线 rect */

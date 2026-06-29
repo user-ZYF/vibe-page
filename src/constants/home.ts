@@ -113,3 +113,20 @@ export const FORM_ELEMENT_TYPES = [
   CanvasElementTypeEnum.RADIO,
   CanvasElementTypeEnum.CHECKBOX,
 ];
+
+/**
+ * a元素不允许嵌套的子元素类型集合
+ * 根据 HTML 规范，a 元素（带 href）的内容模型为透明模型，
+ * 但不得包含交互式内容（interactive content）后代
+ */
+export const LINK_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.LINK,
+  CanvasElementTypeEnum.BUTTON,
+  CanvasElementTypeEnum.INPUT,
+  CanvasElementTypeEnum.TEXTAREA,
+  CanvasElementTypeEnum.RADIO,
+  CanvasElementTypeEnum.CHECKBOX,
+  CanvasElementTypeEnum.VIDEO,
+  CanvasElementTypeEnum.AUDIO,
+  CanvasElementTypeEnum.LABEL,
+];

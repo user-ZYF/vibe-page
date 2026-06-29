@@ -299,6 +299,10 @@ export interface CanvasElementBase {
   classNames: string[];
   /** 元素别名 */
   alias?: string;
+  /** 允许接收的子元素类型列表（为空或不设置表示不限制） */
+  include?: CanvasInnerElementTypeEnum[];
+  /** 不允许接收的子元素类型列表（为空或不设置表示不限制） */
+  exclude?: CanvasInnerElementTypeEnum[];
 }
 
 /** 画布容器元素 */
@@ -445,6 +449,47 @@ export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement;
 /** 判断元素是否包含子元素 */
 export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
   return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK;
+}
+
+/**
+ * 判断元素类型是否允许作为指定父元素的子元素
+ * 规则：
+ * 1. include、exclude 均为空（空数组或不存在）：允许所有元素
+ * 2. 仅有 include：include 中出现的元素
+ * 3. 仅有 exclude：exclude 外的元素
+ * 4. include、exclude 均不为空：include 中存在且 exclude 中不存在的元素
+ * @param parent 父元素模型数据
+ * @param childType 待放入的子元素类型
+ */
+export function isChildTypeAllowed(parent: CanvasElementBase, childType: CanvasInnerElementTypeEnum): boolean {
+  const { include, exclude } = parent;
+  const hasInclude = !!include && include.length > 0;
+  const hasExclude = !!exclude && exclude.length > 0;
+
+  if (!hasInclude && !hasExclude) return true;
+  if (hasInclude && !hasExclude) return include!.includes(childType);
+  if (!hasInclude && hasExclude) return !exclude!.includes(childType);
+  return include!.includes(childType) && !exclude!.includes(childType);
+}
+
+/**
+ * 判断拖拽元素及其所有后代是否均允许作为指定父元素的子元素
+ * 递归检查子树中每个元素的类型是否满足父元素的 include/exclude 规则
+ *
+ * 语义说明：此函数检查子树中**所有节点**（含深层后代）是否均满足目标父元素的规则，
+ * 适用于 HTML 规范中透明内容模型的限制场景（如 a 元素不允许嵌套交互式内容后代）。
+ * 若仅需限制直接子元素类型，请使用 isChildTypeAllowed。
+ * @param parent 目标父元素模型数据
+ * @param child 待放入的子元素（含其后代子树）
+ */
+export function isSubtreeAllowed(parent: CanvasElementBase, child: CanvasInnerElement): boolean {
+  if (!isChildTypeAllowed(parent, child.type as CanvasInnerElementTypeEnum)) return false;
+  if (isParentElement(child)) {
+    for (const descendant of child.children) {
+      if (!isSubtreeAllowed(parent, descendant)) return false;
+    }
+  }
+  return true;
 }
 
 /** 画布元素 */

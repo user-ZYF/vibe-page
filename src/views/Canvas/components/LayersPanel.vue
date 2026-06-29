@@ -19,7 +19,7 @@ import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import LayersPanelItem from './LayersPanelItem.vue';
 import { DropPositionEnum } from '@/constants/home.ts';
-import { EXPANDED_KEYS, TOGGLE_EXPAND_KEY, EXPAND_CONTAINER_KEY, DRAGGING_ID_KEY, DROP_TARGET_KEY, SET_DRAGGING_ID_KEY, SET_DROP_TARGET_KEY, EXECUTE_MOVE_KEY } from '../contants.ts';
+import { EXPANDED_KEYS, TOGGLE_EXPAND_KEY, EXPAND_CONTAINER_KEY, DRAGGING_ID_KEY, DROP_TARGET_KEY, SET_DRAGGING_ID_KEY, SET_DROP_TARGET_KEY, EXECUTE_MOVE_KEY } from '../constants.ts';
 import { LayersDropTarget } from '../types.ts';
 
 defineOptions({

@@ -104,7 +104,7 @@ import {
   EDGE_THRESHOLD,
   HIDDEN_KEYS,
   TOGGLE_SHOW_KEY,
-} from '../contants.ts';
+} from '../constants.ts';
 import {
   DeleteOutlined,
   EyeOutlined,

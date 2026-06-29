@@ -105,3 +105,11 @@ export enum DrapSourceTypeEnum {
   /** 新元素 */
   NEW,
 }
+
+/** label可关联的表单元素类型集合 */
+export const FORM_ELEMENT_TYPES = [
+  CanvasElementTypeEnum.INPUT,
+  CanvasElementTypeEnum.TEXTAREA,
+  CanvasElementTypeEnum.RADIO,
+  CanvasElementTypeEnum.CHECKBOX,
+];

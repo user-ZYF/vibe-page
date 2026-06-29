@@ -9,7 +9,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { CanvasRootElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
-import { CanvasElementComponentMap } from '../../contants';
+import { CanvasElementComponentMap } from '../../constants';
 import { dragEngine } from '../../drag/DragEngine';
 import { nodeRegistry } from '../../drag/NodeRegistry';
 import { useElementVisibility } from '@/composables/useElementVisibility';

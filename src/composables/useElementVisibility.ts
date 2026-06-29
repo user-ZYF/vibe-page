@@ -1,5 +1,5 @@
 import { inject, onBeforeUnmount, watch, type Ref } from 'vue';
-import { HIDDEN_KEYS } from '@/views/Canvas/contants';
+import { HIDDEN_KEYS } from '@/views/Canvas/constants';
 import { DisplayStyleEnum } from '@/constants/style';
 import type { StyleConfig } from '@/views/Canvas/types';
 

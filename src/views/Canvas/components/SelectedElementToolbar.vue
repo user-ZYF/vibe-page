@@ -46,7 +46,7 @@ import { useElementStyle } from '@/composables/useElementStyle';
 import { type CanvasInnerElement, isParentElement, type CanvasElementBase, type ResizeStartState } from '@/views/Canvas/types';
 import { SizeUnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
-import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../contants';
+import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../constants';
 import { CanvasElementTypeEnum } from '@/constants/home';
 
 defineOptions({

@@ -93,4 +93,3 @@ export const RESIZE_DIR_CLASS_MAP: Record<ValidResizeDirEnum, string> = {
   [ResizeDirEnum.SE]: 'se',
   [ResizeDirEnum.SW]: 'sw',
 };
-

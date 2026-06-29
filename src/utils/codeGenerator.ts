@@ -8,6 +8,13 @@ import {
   CanvasElement,
   isParentElement,
   CanvasParentElement,
+  CanvasInputElement,
+  CanvasTextareaElement,
+  CanvasRadioElement,
+  CanvasCheckboxElement,
+  CanvasVideoElement,
+  CanvasAudioElement,
+  CanvasLabelElement,
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
@@ -97,6 +104,52 @@ function buildAttributes(element: CanvasElement): string {
       if (targetAttr) attrs.push(`target="${targetAttr}"`);
       break;
     }
+    case CanvasElementTypeEnum.INPUT: {
+      const input = element as CanvasInputElement;
+      attrs.push(`type="text"`);
+      if (input.placeholder) attrs.push(`placeholder="${escapeAttrValue(input.placeholder)}"`);
+      if (input.value) attrs.push(`value="${escapeAttrValue(input.value)}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.TEXTAREA: {
+      const textarea = element as CanvasTextareaElement;
+      if (textarea.placeholder) attrs.push(`placeholder="${escapeAttrValue(textarea.placeholder)}"`);
+      if (textarea.rows) attrs.push(`rows="${textarea.rows}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.RADIO: {
+      const radio = element as CanvasRadioElement;
+      attrs.push(`type="radio"`);
+      if (radio.name) attrs.push(`name="${escapeAttrValue(radio.name)}"`);
+      if (radio.value) attrs.push(`value="${escapeAttrValue(radio.value)}"`);
+      if (radio.checked) attrs.push(`checked`);
+      break;
+    }
+    case CanvasElementTypeEnum.CHECKBOX: {
+      const checkbox = element as CanvasCheckboxElement;
+      attrs.push(`type="checkbox"`);
+      if (checkbox.name) attrs.push(`name="${escapeAttrValue(checkbox.name)}"`);
+      if (checkbox.value) attrs.push(`value="${escapeAttrValue(checkbox.value)}"`);
+      if (checkbox.checked) attrs.push(`checked`);
+      break;
+    }
+    case CanvasElementTypeEnum.VIDEO: {
+      const video = element as CanvasVideoElement;
+      if (video.src) attrs.push(`src="${escapeAttrValue(video.src)}"`);
+      if (video.controls) attrs.push(`controls`);
+      break;
+    }
+    case CanvasElementTypeEnum.AUDIO: {
+      const audio = element as CanvasAudioElement;
+      if (audio.src) attrs.push(`src="${escapeAttrValue(audio.src)}"`);
+      if (audio.controls) attrs.push(`controls`);
+      break;
+    }
+    case CanvasElementTypeEnum.LABEL: {
+      const label = element as CanvasLabelElement;
+      if (label.for) attrs.push(`for="${escapeAttrValue(label.for)}"`);
+      break;
+    }
   }
 
   return attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
@@ -111,6 +164,10 @@ function getElementContent(element: CanvasElement): string {
       return escapeAttrValue((element as CanvasButtonElement).text);
     case CanvasElementTypeEnum.PARAGRAPH:
       return escapeAttrValue((element as CanvasParagraphElement).text);
+    case CanvasElementTypeEnum.TEXTAREA:
+      return escapeAttrValue((element as CanvasTextareaElement).value);
+    case CanvasElementTypeEnum.LABEL:
+      return escapeAttrValue((element as CanvasLabelElement).text);
     default:
       return '';
   }

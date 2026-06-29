@@ -9,7 +9,7 @@
 import { ref } from 'vue';
 import { CanvasContainerElement } from '../../types';
 import { useElementStyle } from '@/composables/useElementStyle';
-import { CanvasElementComponentMap } from '../../contants';
+import { CanvasElementComponentMap } from '../../constants';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';

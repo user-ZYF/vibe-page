@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { CanvasLinkElement } from '../../types';
-import { CanvasElementComponentMap } from '../../contants';
+import { CanvasElementComponentMap } from '../../constants';
 import { useElementStyle } from '@/composables/useElementStyle';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';

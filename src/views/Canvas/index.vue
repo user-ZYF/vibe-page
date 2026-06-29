@@ -31,7 +31,7 @@ import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
 import CodePreviewModal from './components/CodePreviewModal.vue';
 import { canvasHistoryApi } from '@/composables/useCanvasHistory';
-import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './contants.ts';
+import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './constants.ts';
 import { useCanvasStore } from '@/store/canvas.ts';
 import { storeToRefs } from 'pinia';
 

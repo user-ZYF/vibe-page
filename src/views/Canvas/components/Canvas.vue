@@ -23,7 +23,7 @@ import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
 import DropIndicatorOverlay from "./DropIndicatorOverlay.vue";
 import Root from './canvas-element/Root.vue';
-import { IS_PREVIEW_KEY } from '../contants';
+import { IS_PREVIEW_KEY } from '../constants.ts';
 
 const canvasStore = useCanvasStore();
 const { root, classStyles } = storeToRefs(canvasStore);

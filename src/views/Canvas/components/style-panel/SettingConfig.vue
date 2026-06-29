@@ -166,7 +166,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
-import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS } from '@/constants/home';
+import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import { isSafeUrl } from '@/utils/sanitize';
@@ -277,14 +277,6 @@ function handleHrefBlur() {
     message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
   }
 }
-
-/** 可关联的表单元素类型集合 */
-const FORM_ELEMENT_TYPES = [
-  CanvasElementTypeEnum.INPUT,
-  CanvasElementTypeEnum.TEXTAREA,
-  CanvasElementTypeEnum.RADIO,
-  CanvasElementTypeEnum.CHECKBOX,
-];
 
 /** 递归收集所有表单元素，生成下拉选项 */
 const formElementOptions = computed(() => {

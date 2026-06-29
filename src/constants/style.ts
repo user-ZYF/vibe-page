@@ -630,3 +630,6 @@ export const enum ResizeDirEnum {
   /** 西南（左下） */
   SW = 8,
 }
+
+/** CSS class/id 名称合法性校验正则（须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符） */
+export const CSS_NAME_REGEX = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;

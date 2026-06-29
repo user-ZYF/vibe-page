@@ -35,7 +35,7 @@ export const useCanvasStore = defineStore("canvas", {
   }),
   getters: {
     /** 全局class对应的最终样式 */
-    covertClassStyles(state) {
+    convertClassStyles(state) {
       const styles = {} as Record<string, Record<string, string>>;
       for(const key in state.classStyles){
         const value = state.classStyles[key];
@@ -56,9 +56,24 @@ export const useCanvasStore = defineStore("canvas", {
     updateClassStyle(className: string, styleConfig: StyleConfig) {
       this.classStyles[className] = styleConfig;
     },
-    /** 删除指定 class 的样式配置 */
-    removeClassStyle(className: string) {
-      delete this.classStyles[className];
+    /** 清理未被任何元素引用的孤立 class 样式 */
+    cleanupUnusedClassStyles() {
+      /** 递归收集所有元素引用的 class 名称 */
+      const usedClasses = new Set<string>();
+      const collect = (list: CanvasInnerElement[]) => {
+        for (const el of list) {
+          el.classes.forEach((cls) => usedClasses.add(cls));
+          if (isParentElement(el)) {
+            collect(el.children);
+          }
+        }
+      };
+      collect(this.root.children);
+      for (const className of Object.keys(this.classStyles)) {
+        if (!usedClasses.has(className)) {
+          delete this.classStyles[className];
+        }
+      }
     },
     /** 获取指定id的元素 */
     getElementById (id: string): CanvasElement | null {

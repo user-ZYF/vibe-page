@@ -11,6 +11,7 @@ import {
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
+import type { StyleConfig } from '@/views/Canvas/types';
 
 /** 元素类型到 HTML 标签的映射 */
 const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
@@ -31,17 +32,6 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
 
 /** 自闭合标签集合 */
 const VOID_TAGS = new Set(['img', 'input']);
-
-// /**
-//  * 将 style 对象转换为内联样式字符串
-//  * @example { color: 'red', 'font-size': '16px' } → "color:red;font-size:16px;"
-//  */
-// function styleObjectToString(style: Record<string, string>): string {
-//   return Object.entries(style)
-//     .filter(([, value]) => value !== '' && value !== undefined)
-//     .map(([prop, value]) => `${prop}:${value};`)
-//     .join('');
-// }
 
 /**
  * 将 camelCase 的 CSS 属性名转换为 kebab-case
@@ -109,13 +99,6 @@ function buildAttributes(element: CanvasElement): string {
     }
   }
 
-  // /** 内联样式 */
-  // const styleObj = convertStyleConfig(element.styleConfig);
-  // const styleStr = styleObjectToString(styleObj);
-  // if (styleStr) {
-  //   attrs.push(`style="${escapeAttrValue(styleStr)}"`);
-  // }
-
   return attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
 }
 
@@ -163,11 +146,21 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
 
 /**
  * 递归收集所有元素的样式，生成 CSS 规则字符串
- * 每个元素通过 #id 选择器关联其内联样式
+ * 1. 先生成全局 class 选择器规则（按定义顺序，模拟 CSS 源码顺序）
+ * 2. 再生成各元素的 #id 选择器规则（id 特殊性高于 class，自然覆盖）
  */
-function collectCssRules(root: CanvasRootElement): string {
+function collectCssRules(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): string {
   const rules: string[] = [`* {\n  box-sizing: border-box;\n}`];
 
+  /** 全局 class 选择器规则（按定义顺序） */
+  for (const [className, styleConfig] of Object.entries(classStyles)) {
+    const styleStr = styleObjectToCss(convertStyleConfig(styleConfig));
+    if (styleStr) {
+      rules.push(`.${className} {\n${styleStr}\n}`);
+    }
+  }
+
+  /** 各元素的 id 选择器规则 */
   function collect(el: CanvasInnerElement) {
     const styleObj = convertStyleConfig(el.styleConfig);
     const styleStr = styleObjectToCss(styleObj);
@@ -195,21 +188,23 @@ export function generateHtml(root: CanvasRootElement): string {
 
 /**
  * 从画布元素列表生成 CSS 字符串
- * @param elements 画布根层级元素列表
+ * @param root 画布根元素
+ * @param classStyles 全局 class 样式配置映射
  * @returns CSS 规则字符串
  */
-export function generateCss(root: CanvasRootElement): string {
-  return collectCssRules(root);
+export function generateCss(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): string {
+  return collectCssRules(root, classStyles);
 }
 
 /**
  * 从画布元素列表同时生成 HTML、CSS
  * @param root 画布根元素
+ * @param classStyles 全局 class 样式配置映射
  * @returns { html: string, css: string }
  */
-export function generateCode(root: CanvasRootElement): { html: string; css: string; } {
+export function generateCode(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): { html: string; css: string; } {
   return {
     html: generateHtml(root),
-    css: generateCss(root),
+    css: generateCss(root, classStyles),
   };
 }

@@ -8,9 +8,14 @@
         :value="model.id"
         size="small"
         class="style-config-input"
+        :status="pendingId && !isIdNameValid ? 'error' : ''"
         @focus="handleIdFocus"
+        @input="handleIdInput"
         @blur="handleIdBlur"
       />
+      <div v-if="pendingId && !isIdNameValid" class="style-config-error">
+        ID 名称须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符
+      </div>
     </div>
 
     <!-- 按钮 -->
@@ -162,6 +167,7 @@
 import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS } from '@/constants/home';
+import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import {
   type CanvasInnerElement,
@@ -191,6 +197,12 @@ const canvasStore = useCanvasStore();
 /** 编辑前的 id */
 const oldId = ref('');
 
+/** id 输入框当前值（用于实时校验显示） */
+const pendingId = ref('');
+
+/** id 名称是否合法 */
+const isIdNameValid = computed(() => CSS_NAME_REGEX.test(pendingId.value.trim()));
+
 /** 文本内容编辑的临时值（blur 后才同步到 model，避免输入过程中频繁触发元素尺寸重算） */
 const pendingText = ref('');
 
@@ -199,6 +211,7 @@ watch(
   () => model.value,
   (el) => {
     if (!el) return;
+    pendingId.value = '';
     if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
     else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
@@ -218,20 +231,32 @@ function commitText() {
 /** id 输入框聚焦时保存原值 */
 function handleIdFocus() {
   oldId.value = model.value.id;
+  pendingId.value = model.value.id;
 }
 
-/** id 输入框失焦时校验唯一性 */
+/** id 输入框输入时同步到 pendingId */
+function handleIdInput(e: Event) {
+  pendingId.value = (e.target as HTMLInputElement).value;
+}
+
+/** id 输入框失焦时校验格式与唯一性 */
 function handleIdBlur(e: FocusEvent) {
   const newId = (e.target as HTMLInputElement).value.trim();
+  pendingId.value = '';
   if (!newId || newId === oldId.value) {
     model.value.id = oldId.value;
+    return;
+  }
+  /** 格式校验 */
+  if (!CSS_NAME_REGEX.test(newId)) {
+    model.value.id = oldId.value;
+    message.warning('ID 名称格式不合法');
     return;
   }
   /** 临时恢复旧 id，检查新 id 是否已被其他元素使用 */
   model.value.id = oldId.value;
   const existing = canvasStore.getElementById(newId);
   if (existing) {
-    model.value.id = oldId.value;
     message.warning('该 ID 已被其他元素使用');
   } else {
     model.value.id = newId;

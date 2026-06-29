@@ -80,20 +80,25 @@
       title="添加 Class"
       :ok-text="'确认'"
       :cancel-text="'取消'"
+      :ok-button-props="{ disabled: !isClassNameValid }"
       @ok="handleAddClassConfirm"
     >
       <a-input
         v-model:value="newClassName"
         placeholder="请输入 class 名称"
+        :status="newClassName && !isClassNameValid ? 'error' : ''"
         @pressEnter="handleAddClassConfirm"
       />
+      <div v-if="newClassName && !isClassNameValid" class="style-panel-classes-error">
+        class 名称须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符
+      </div>
     </a-modal>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
-import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME } from '@/constants/style';
+import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME, CSS_NAME_REGEX } from '@/constants/style';
 import { CanvasElementTypeEnum } from '@/constants/home';
 import type { CanvasInnerElement } from '@/views/Canvas/types';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
@@ -192,6 +197,9 @@ const addClassModalVisible = ref(false);
 /** 新增 class 名称输入值 */
 const newClassName = ref('');
 
+/** class 名称是否合法 */
+const isClassNameValid = computed(() => CSS_NAME_REGEX.test(newClassName.value.trim()));
+
 /** 打开新增 class 弹窗 */
 function handleAddClass() {
   newClassName.value = '';
@@ -202,7 +210,7 @@ function handleAddClass() {
 function handleAddClassConfirm() {
   const cls = newClassName.value.trim();
   const el = selectedElement.value;
-  if (!cls || !el) return;
+  if (!cls || !el || !isClassNameValid.value) return;
   if (!el.classNames.includes(cls)) {
     el.classNames.push(cls);
     el.classes.push(cls);
@@ -303,6 +311,12 @@ watch(selectedElementId, () => {
     &-selected {
       margin-top: 8px;
       color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+    }
+
+    &-error {
+      margin-top: 6px;
+      color: #ff4d4f;
       font-size: 12px;
     }
   }

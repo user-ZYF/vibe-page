@@ -136,7 +136,6 @@ function handleKeydown(e: KeyboardEvent) {
 
 /** 查看代码 */
 function handleCode() {
-  // TODO: 实现查看代码逻辑
   codeModalVisible.value = true;
 }
 

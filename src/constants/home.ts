@@ -38,6 +38,8 @@ export enum CanvasElementTypeEnum {
   AUDIO,
   /** 标签 */
   LABEL,
+  /** 表单 */
+  FORM,
 }
 
 /** 画布元素label */
@@ -55,6 +57,7 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.VIDEO]: "video",
   [CanvasElementTypeEnum.AUDIO]: "audio",
   [CanvasElementTypeEnum.LABEL]: "label",
+  [CanvasElementTypeEnum.FORM]: "form",
 }
 
 /** 按钮类型 */
@@ -106,6 +109,20 @@ export enum DrapSourceTypeEnum {
   NEW,
 }
 
+/** 表单提交方式 */
+export enum FormMethodEnum {
+  /** GET */
+  GET = 'get',
+  /** POST */
+  POST = 'post',
+}
+
+/** 表单提交方式选项 */
+export const FORM_METHOD_OPTIONS = [
+  { label: 'GET', value: FormMethodEnum.GET },
+  { label: 'POST', value: FormMethodEnum.POST },
+];
+
 /** label可关联的表单元素类型集合 */
 export const FORM_ELEMENT_TYPES = [
   CanvasElementTypeEnum.INPUT,
@@ -129,4 +146,12 @@ export const LINK_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
   CanvasElementTypeEnum.VIDEO,
   CanvasElementTypeEnum.AUDIO,
   CanvasElementTypeEnum.LABEL,
+];
+
+/**
+ * form元素不允许嵌套的子元素类型集合
+ * 根据 HTML 规范，form 元素不得包含另一个 form 元素
+ */
+export const FORM_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.FORM,
 ];

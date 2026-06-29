@@ -13,6 +13,7 @@ import Checkbox from "./components/canvas-element/Checkbox.vue";
 import Video from "./components/canvas-element/Video.vue";
 import Audio from "./components/canvas-element/Audio.vue";
 import Label from "./components/canvas-element/Label.vue";
+import Form from "./components/canvas-element/Form.vue";
 import type { InjectionKey, Ref } from 'vue';
 import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";
@@ -32,6 +33,7 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.VIDEO]: Video,
     [CanvasElementTypeEnum.AUDIO]: Audio,
     [CanvasElementTypeEnum.LABEL]: Label,
+    [CanvasElementTypeEnum.FORM]: Form,
 };
 
 /** 展开的元素id列表 */

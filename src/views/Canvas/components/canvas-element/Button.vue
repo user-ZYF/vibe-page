@@ -1,6 +1,6 @@
 <!-- ? 画布按钮元素 -->
 <template>
-    <button ref="buttonEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :type="data.buttonType" :style="style" @click.stop="handleSelect">{{ data.text }}</button>
+    <button ref="buttonEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :type="data.buttonType" :style="style" @click.stop="handleClick">{{ data.text }}</button>
 </template>
 
 <script lang="ts" setup>
@@ -23,6 +23,14 @@ const buttonEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
-const { handleSelect } = useCanvasInteraction(data.value.id);
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(buttonEl, data.value.id);
+
+/** 点击处理：编辑模式下阻止默认行为（如表单提交）并选中元素，预览模式下允许默认交互 */
+function handleClick(e: MouseEvent) {
+  if (!isPreview.value) {
+    e.preventDefault();
+    handleSelect();
+  }
+}
 </script>

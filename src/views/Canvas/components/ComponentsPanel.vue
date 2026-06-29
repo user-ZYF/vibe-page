@@ -44,6 +44,7 @@ const basicComponents = ref<CanvasInnerElementTypeEnum[]>([
   CanvasElementTypeEnum.VIDEO,
   CanvasElementTypeEnum.AUDIO,
   CanvasElementTypeEnum.LABEL,
+  CanvasElementTypeEnum.FORM,
 ]);
 
 /** 每个组件项的解绑函数映射 */

@@ -3,7 +3,7 @@
  */
 
 import { CanvasElementTypeEnum } from '@/constants/home';
-import type { ButtonTypeEnum, DropPositionEnum, LinkTargetEnum } from '@/constants/home';
+import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, LinkTargetEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -123,6 +123,8 @@ export interface GeneralConfig {
   bottomUnit?: SizeUnitEnum;
   /** 溢出处理方式 */
   overflow?: OverflowStyleEnum;
+  /** 层叠顺序 */
+  zIndex?: number;
 }
 
 /**
@@ -361,6 +363,8 @@ export interface CanvasInputElement extends CanvasElementBase {
   placeholder: string;
   /** 当前值 */
   value: string;
+  /** 是否必填 */
+  required: boolean;
 }
 
 /** 画布多行文本框元素 */
@@ -373,6 +377,8 @@ export interface CanvasTextareaElement extends CanvasElementBase {
   value: string;
   /** 行数 */
   rows: number;
+  /** 是否必填 */
+  required: boolean;
 }
 
 /** 画布单选框元素 */
@@ -385,6 +391,8 @@ export interface CanvasRadioElement extends CanvasElementBase {
   value: string;
   /** 是否选中 */
   checked: boolean;
+  /** 是否必填 */
+  required: boolean;
 }
 
 /** 画布多选框元素 */
@@ -397,6 +405,8 @@ export interface CanvasCheckboxElement extends CanvasElementBase {
   value: string;
   /** 是否选中 */
   checked: boolean;
+  /** 是否必填 */
+  required: boolean;
 }
 
 /** 画布视频元素 */
@@ -429,6 +439,18 @@ export interface CanvasLabelElement extends CanvasElementBase {
   for: string;
 }
 
+/** 画布表单元素 */
+export interface CanvasFormElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.FORM;
+  /** 提交地址 */
+  action: string;
+  /** 提交方式 */
+  method: FormMethodEnum;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
 /** 画布根元素 */
 export interface CanvasRootElement extends CanvasElementBase {
   /** 元素类型 */
@@ -441,14 +463,14 @@ export interface CanvasRootElement extends CanvasElementBase {
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement;
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement;
 
 /** 可包含子元素的画布元素 */
-export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement;
+export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement;
 
 /** 判断元素是否包含子元素 */
 export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
-  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK;
+  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM;
 }
 
 /**

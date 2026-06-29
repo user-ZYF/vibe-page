@@ -1,6 +1,6 @@
 <!-- ? 画布多行文本框元素 -->
 <template>
-    <textarea ref="textareaEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :placeholder="data.placeholder" :rows="data.rows" :style="style" @click.stop="handleSelect"></textarea>
+    <textarea ref="textareaEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :placeholder="data.placeholder" :rows="data.rows" :required="data.required" :readonly="!isPreview" :style="style" @click.stop="handleSelect"></textarea>
 </template>
 
 <script lang="ts" setup>
@@ -23,6 +23,6 @@ const textareaEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
-const { handleSelect } = useCanvasInteraction(data.value.id);
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(textareaEl, data.value.id);
 </script>

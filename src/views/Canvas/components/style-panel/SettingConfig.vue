@@ -72,6 +72,9 @@
         <div class="style-config-label">默认值</div>
         <a-input v-model:value="(model as CanvasInputElement).value" size="small" class="style-config-input" />
       </div>
+      <div class="style-config-section">
+        <a-checkbox v-model:checked="(model as CanvasInputElement).required">必填</a-checkbox>
+      </div>
     </template>
 
     <!-- 多行文本框 -->
@@ -88,6 +91,9 @@
         <div class="style-config-label">行数</div>
         <a-input-number v-model:value="(model as CanvasTextareaElement).rows" size="small" class="style-config-input-number" :min="1" />
       </div>
+      <div class="style-config-section">
+        <a-checkbox v-model:checked="(model as CanvasTextareaElement).required">必填</a-checkbox>
+      </div>
     </template>
 
     <!-- 单选框 -->
@@ -103,6 +109,9 @@
       <div class="style-config-section">
         <a-checkbox v-model:checked="(model as CanvasRadioElement).checked">默认选中</a-checkbox>
       </div>
+      <div class="style-config-section">
+        <a-checkbox v-model:checked="(model as CanvasRadioElement).required">必填</a-checkbox>
+      </div>
     </template>
 
     <!-- 多选框 -->
@@ -117,6 +126,9 @@
       </div>
       <div class="style-config-section">
         <a-checkbox v-model:checked="(model as CanvasCheckboxElement).checked">默认选中</a-checkbox>
+      </div>
+      <div class="style-config-section">
+        <a-checkbox v-model:checked="(model as CanvasCheckboxElement).required">必填</a-checkbox>
       </div>
     </template>
 
@@ -160,13 +172,25 @@
         />
       </div>
     </template>
+
+    <!-- 表单 -->
+    <template v-else-if="model.type === CanvasElementTypeEnum.FORM">
+      <div class="style-config-section">
+        <div class="style-config-label">提交地址</div>
+        <a-input v-model:value="(model as CanvasFormElement).action" size="small" class="style-config-input" placeholder="https://" @blur="handleActionBlur" />
+      </div>
+      <div class="style-config-section">
+        <div class="style-config-label">提交方式</div>
+        <a-select v-model:value="(model as CanvasFormElement).method" size="small" class="style-config-select" :options="FORM_METHOD_OPTIONS" />
+      </div>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
-import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES } from '@/constants/home';
+import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES, FORM_METHOD_OPTIONS } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import { isSafeUrl } from '@/utils/sanitize';
@@ -183,6 +207,7 @@ import {
   type CanvasVideoElement,
   type CanvasAudioElement,
   type CanvasLabelElement,
+  type CanvasFormElement,
   isParentElement,
 } from '@/views/Canvas/types';
 
@@ -276,6 +301,20 @@ function handleHrefBlur() {
     el.href = '';
     message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
   }
+}
+
+/** 表单提交地址失焦时校验协议安全性 */
+function handleActionBlur() {
+  const el = model.value as CanvasFormElement;
+  if (!el || el.type !== CanvasElementTypeEnum.FORM) return;
+  const action = el.action?.trim() ?? '';
+  if (!action) return;
+  if (!isSafeUrl(action)) {
+    el.action = '';
+    message.warning('提交地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    return;
+  }
+  el.action = action;
 }
 
 /** 递归收集所有表单元素，生成下拉选项 */

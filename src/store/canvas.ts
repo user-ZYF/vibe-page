@@ -1,5 +1,5 @@
-import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES } from "@/constants/home";
+import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
@@ -100,19 +100,21 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.CONTAINER:
           return { ...elBase, children: [] }  as CanvasContainerElement;
         case CanvasElementTypeEnum.INPUT:
-          return { ...elBase, placeholder: '请输入内容', value: '' } as CanvasInputElement;
+          return { ...elBase, placeholder: '请输入内容', value: '', required: false } as CanvasInputElement;
         case CanvasElementTypeEnum.TEXTAREA:
-          return { ...elBase, placeholder: '请输入内容', value: '', rows: 4 } as CanvasTextareaElement;
+          return { ...elBase, placeholder: '请输入内容', value: '', rows: 4, required: false } as CanvasTextareaElement;
         case CanvasElementTypeEnum.RADIO:
-          return { ...elBase, name: '', value: '', checked: false } as CanvasRadioElement;
+          return { ...elBase, name: '', value: '', checked: false, required: false } as CanvasRadioElement;
         case CanvasElementTypeEnum.CHECKBOX:
-          return { ...elBase, name: '', value: '', checked: false } as CanvasCheckboxElement;
+          return { ...elBase, name: '', value: '', checked: false, required: false } as CanvasCheckboxElement;
         case CanvasElementTypeEnum.VIDEO:
           return { ...elBase, src: '', controls: true } as CanvasVideoElement;
         case CanvasElementTypeEnum.AUDIO:
           return { ...elBase, src: '', controls: true } as CanvasAudioElement;
         case CanvasElementTypeEnum.LABEL:
           return { ...elBase, text: '标签', for: '' } as CanvasLabelElement;
+        case CanvasElementTypeEnum.FORM:
+          return { ...elBase, action: '', method: FormMethodEnum.GET, children: [], exclude: [...FORM_EXCLUDE_TYPES] } as CanvasFormElement;
       }
     },
     /** 添加元素到指定容器 */
@@ -358,6 +360,7 @@ export const useCanvasStore = defineStore("canvas", {
         alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.INPUT],
         placeholder,
         value: '',
+        required: false,
       });
 
       /** ---- 导航栏 ---- */

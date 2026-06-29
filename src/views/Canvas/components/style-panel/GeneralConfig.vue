@@ -68,6 +68,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Z-Index -->
+    <div class="style-config-section">
+      <div class="style-config-label">Z-Index</div>
+      <a-input-number v-model:value="model.zIndex" size="small" class="style-config-input-number" placeholder="auto" :precision="0" />
+    </div>
   </div>
 </template>
 

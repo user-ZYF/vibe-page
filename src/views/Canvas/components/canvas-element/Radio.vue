@@ -1,6 +1,6 @@
 <!-- ? 画布单选框元素 -->
 <template>
-    <input ref="radioEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" type="radio" :name="data.name" :value="data.value" :checked="data.checked" :style="style" @click.stop="handleSelect" />
+    <input ref="radioEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" type="radio" :name="data.name" :value="data.value" :checked="data.checked" :required="data.required" :disabled="!isPreview" :style="style" @click.stop="handleSelect" />
 </template>
 
 <script lang="ts" setup>
@@ -23,6 +23,6 @@ const radioEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
-const { handleSelect } = useCanvasInteraction(data.value.id);
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(radioEl, data.value.id);
 </script>

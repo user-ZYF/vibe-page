@@ -601,6 +601,11 @@ export const DefaultLabelStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
+/** 表单元素默认样式配置 */
+export const DefaultFormStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig)
@@ -621,6 +626,7 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.VIDEO]: DefaultVideoStyleConfig,
   [CanvasElementTypeEnum.AUDIO]: DefaultAudioStyleConfig,
   [CanvasElementTypeEnum.LABEL]: DefaultLabelStyleConfig,
+  [CanvasElementTypeEnum.FORM]: DefaultFormStyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

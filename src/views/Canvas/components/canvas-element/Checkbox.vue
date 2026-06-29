@@ -1,6 +1,6 @@
 <!-- ? 画布多选框元素 -->
 <template>
-    <input ref="checkboxEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" type="checkbox" :name="data.name" :value="data.value" :checked="data.checked" :style="style" @click.stop="handleSelect" />
+    <input ref="checkboxEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" type="checkbox" :name="data.name" :value="data.value" :checked="data.checked" :required="data.required" :disabled="!isPreview" :style="style" @click.stop="handleSelect" />
 </template>
 
 <script lang="ts" setup>
@@ -23,6 +23,6 @@ const checkboxEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
 
-const { handleSelect } = useCanvasInteraction(data.value.id);
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(checkboxEl, data.value.id);
 </script>

@@ -15,6 +15,7 @@ import {
   CanvasVideoElement,
   CanvasAudioElement,
   CanvasLabelElement,
+  CanvasFormElement,
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
@@ -35,6 +36,7 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.VIDEO]: 'video',
   [CanvasElementTypeEnum.AUDIO]: 'audio',
   [CanvasElementTypeEnum.LABEL]: 'label',
+  [CanvasElementTypeEnum.FORM]: 'form',
 };
 
 /** 自闭合标签集合 */
@@ -109,12 +111,14 @@ function buildAttributes(element: CanvasElement): string {
       attrs.push(`type="text"`);
       if (input.placeholder) attrs.push(`placeholder="${escapeAttrValue(input.placeholder)}"`);
       if (input.value) attrs.push(`value="${escapeAttrValue(input.value)}"`);
+      if (input.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.TEXTAREA: {
       const textarea = element as CanvasTextareaElement;
       if (textarea.placeholder) attrs.push(`placeholder="${escapeAttrValue(textarea.placeholder)}"`);
       if (textarea.rows) attrs.push(`rows="${textarea.rows}"`);
+      if (textarea.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.RADIO: {
@@ -123,6 +127,7 @@ function buildAttributes(element: CanvasElement): string {
       if (radio.name) attrs.push(`name="${escapeAttrValue(radio.name)}"`);
       if (radio.value) attrs.push(`value="${escapeAttrValue(radio.value)}"`);
       if (radio.checked) attrs.push(`checked`);
+      if (radio.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.CHECKBOX: {
@@ -131,6 +136,7 @@ function buildAttributes(element: CanvasElement): string {
       if (checkbox.name) attrs.push(`name="${escapeAttrValue(checkbox.name)}"`);
       if (checkbox.value) attrs.push(`value="${escapeAttrValue(checkbox.value)}"`);
       if (checkbox.checked) attrs.push(`checked`);
+      if (checkbox.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.VIDEO: {
@@ -148,6 +154,12 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.LABEL: {
       const label = element as CanvasLabelElement;
       if (label.for) attrs.push(`for="${escapeAttrValue(label.for)}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.FORM: {
+      const form = element as CanvasFormElement;
+      if (form.action) attrs.push(`action="${escapeAttrValue(form.action)}"`);
+      attrs.push(`method="${escapeAttrValue(form.method)}"`);
       break;
     }
   }

@@ -33,6 +33,11 @@
         <a-divider type="vertical" />
         <a-tooltip title="清空画布" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('clear')">
+            <template #icon><DeleteOutlined /></template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip title="清理未使用的 class" overlay-class-name="editor-tooltip-white">
+          <a-button type="text" size="small" @click="emit('cleanup-classes')">
             <template #icon><ClearOutlined /></template>
           </a-button>
         </a-tooltip>
@@ -61,6 +66,7 @@ import {
   RedoOutlined,
   CodeOutlined,
   ImportOutlined,
+  DeleteOutlined,
   ClearOutlined,
 } from '@ant-design/icons-vue'
 
@@ -83,6 +89,7 @@ const emit = defineEmits<{
   (e: 'code'): void
   (e: 'import'): void
   (e: 'clear'): void
+  (e: 'cleanup-classes'): void
 }>()
 </script>
 

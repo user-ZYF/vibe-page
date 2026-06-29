@@ -52,17 +52,13 @@ export const useCanvasStore = defineStore("canvas", {
       }
       return this.classStyles[className];
     },
-    /** 更新指定 class 的样式配置 */
-    updateClassStyle(className: string, styleConfig: StyleConfig) {
-      this.classStyles[className] = styleConfig;
-    },
-    /** 清理未被任何元素引用的孤立 class 样式 */
+    /** 清理未被任何元素锁定且样式内容为空的孤立 class 样式 */
     cleanupUnusedClassStyles() {
-      /** 递归收集所有元素引用的 class 名称 */
+      /** 递归收集所有元素管理的 class 名称（包含启用和禁用） */
       const usedClasses = new Set<string>();
       const collect = (list: CanvasInnerElement[]) => {
         for (const el of list) {
-          el.classes.forEach((cls) => usedClasses.add(cls));
+          el.classNames.forEach((cls) => usedClasses.add(cls));
           if (isParentElement(el)) {
             collect(el.children);
           }
@@ -70,7 +66,9 @@ export const useCanvasStore = defineStore("canvas", {
       };
       collect(this.root.children);
       for (const className of Object.keys(this.classStyles)) {
-        if (!usedClasses.has(className)) {
+        /** 未被任何元素锁定且样式内容为空则删除 */
+        const isEmptyStyle = Object.keys(convertStyleConfig(this.classStyles[className])).length === 0;
+        if (!usedClasses.has(className) && isEmptyStyle) {
           delete this.classStyles[className];
         }
       }

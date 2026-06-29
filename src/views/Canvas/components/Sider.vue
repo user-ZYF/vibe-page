@@ -53,8 +53,8 @@ import {
   EditOutlined,
   AppstoreOutlined,
   BlockOutlined,
-} from '@ant-design/icons-vue'
-import { SiderPanelEnum } from '@/constants/home'
+} from '@ant-design/icons-vue';
+import { SiderPanelEnum } from '@/constants/home';
 import ComponentsPanel from './ComponentsPanel.vue';
 import LayersPanel from './LayersPanel.vue';
 import StylePanel from './StylePanel.vue';
@@ -63,7 +63,7 @@ import { storeToRefs } from 'pinia';
 
 defineOptions({
   name: 'EditorSider',
-})
+});
 
 defineProps({
   /** 是否处于预览模式 */
@@ -71,7 +71,7 @@ defineProps({
     type: Boolean,
     default: false,
   },
-})
+});
 
 const canvasStore = useCanvasStore();
 const { activePanel } = storeToRefs(canvasStore);

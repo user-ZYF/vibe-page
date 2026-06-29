@@ -10,6 +10,7 @@
         @code="handleCode"
         @import="handleImport"
         @clear="handleClear"
+        @cleanup-classes="handleCleanupClasses"
       />
       <CodePreviewModal v-model:open="codeModalVisible" />
       <a-layout-content class="editor-canvas">
@@ -148,6 +149,19 @@ function handleClear(){
     cancelText: '取消',
     onOk() {
       canvasStore.clearAllElements();
+    },
+  });
+}
+
+/** 清理未使用的 class */
+function handleCleanupClasses() {
+  Modal.confirm({
+    title: '确认清理未使用的 class？',
+    content: '将删除所有未被元素引用且样式内容为空的 class 样式，此操作可通过撤销恢复。',
+    okText: '确认',
+    cancelText: '取消',
+    onOk() {
+      canvasStore.cleanupUnusedClassStyles();
     },
   });
 }

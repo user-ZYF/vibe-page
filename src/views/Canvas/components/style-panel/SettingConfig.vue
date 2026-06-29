@@ -54,7 +54,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LINK">
       <div class="style-config-section">
         <div class="style-config-label">链接地址</div>
-        <a-input v-model:value="(model as CanvasLinkElement).href" size="small" class="style-config-input" placeholder="https://" />
+        <a-input v-model:value="(model as CanvasLinkElement).href" size="small" class="style-config-input" placeholder="https://" @blur="handleHrefBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">打开方式</div>
@@ -169,6 +169,7 @@ import { message } from 'ant-design-vue';
 import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
+import { isSafeUrl } from '@/utils/sanitize';
 import {
   type CanvasInnerElement,
   type CanvasButtonElement,
@@ -263,6 +264,17 @@ function handleIdBlur(e: FocusEvent) {
     if (canvasStore.selectedElementId === oldId.value) {
       canvasStore.selectElement(newId);
     }
+  }
+}
+
+/** 链接地址失焦时校验协议安全性 */
+function handleHrefBlur() {
+  const el = model.value as CanvasLinkElement;
+  if (!el || el.type !== CanvasElementTypeEnum.LINK) return;
+  const href = el.href?.trim() ?? '';
+  if (href && !isSafeUrl(href)) {
+    el.href = '';
+    message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
   }
 }
 

@@ -1,9 +1,19 @@
-import { ref, computed, watch, type Ref } from 'vue';
+import { ref, shallowRef, computed, watch } from 'vue';
 import { cloneDeep } from 'lodash';
-import type { CanvasInnerElement, CanvasRootElement } from '@/views/Canvas/types';
+import { useDebounceFn } from '@vueuse/core';
 
 /** 历史记录最大长度 */
 const MAX_HISTORY_LENGTH = 50;
+
+/** 撤销/重做配置选项 */
+export interface UseCanvasHistoryOptions<T> {
+  /** 获取当前状态快照 */
+  snapshot: () => T;
+  /** 从快照恢复状态 */
+  restore: (state: T) => void;
+  /** 防抖记录时间（ms），默认 300 */
+  debounceMs?: number;
+}
 
 export const canvasHistoryApi = {
   undo: () => {},
@@ -14,29 +24,31 @@ export const canvasHistoryApi = {
 
 /**
  * 画布撤销/重做功能
- * 通过深克隆 elements 数组实现历史快照管理
+ * 通过快照机制实现历史记录管理，支持对任意数据进行监控
  */
-export function useCanvasHistory(root: Ref<CanvasRootElement>) {
+export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
   /** 历史记录快照列表 */
-  const history = ref<CanvasRootElement[]>([]);
+  const history = shallowRef<T[]>([]);
   /** 当前历史位置 */
   const historyIndex = ref(-1);
   /** 是否正在执行撤销/重做（防止循环记录） */
   const _isUndoRedoing = ref(false);
+  /** 是否有待记录的防抖快照 */
+  const _isRecordPending = ref(false);
 
   /** 是否可撤销 */
   const canUndo = computed(() => historyIndex.value > 0);
   /** 是否可重做 */
   const canRedo = computed(() => historyIndex.value < history.value.length - 1);
 
-  /** 记录当前画布状态到历史 */
+  /** 记录当前状态到历史 */
   function recordHistory() {
     if (_isUndoRedoing.value) {
       _isUndoRedoing.value = false;
       return;
     }
     history.value = history.value.slice(0, historyIndex.value + 1);
-    history.value.push(cloneDeep(root.value));
+    history.value.push(cloneDeep(options.snapshot()));
     if (history.value.length > MAX_HISTORY_LENGTH) {
       history.value.shift();
     } else {
@@ -44,20 +56,42 @@ export function useCanvasHistory(root: Ref<CanvasRootElement>) {
     }
   }
 
+  /** 刷新待记录的防抖快照，确保最新状态已入历史 */
+  function flushPendingRecord() {
+    if (_isRecordPending.value) {
+      _isRecordPending.value = false;
+      recordHistory();
+    }
+  }
+
+  /** 防抖记录历史，避免频繁操作（如拖拽滑块、输入文本）产生过多快照 */
+  const _debouncedFn = useDebounceFn(() => {
+    if (!_isRecordPending.value) return;
+    _isRecordPending.value = false;
+    recordHistory();
+  }, options.debounceMs ?? 300);
+
+  function debouncedRecord() {
+    _isRecordPending.value = true;
+    _debouncedFn();
+  }
+
   /** 撤销 */
   function undo() {
+    flushPendingRecord();
     if (!canUndo.value) return;
     _isUndoRedoing.value = true;
     historyIndex.value--;
-    root.value = cloneDeep(history.value[historyIndex.value]);
+    options.restore(cloneDeep(history.value[historyIndex.value]));
   }
 
   /** 重做 */
   function redo() {
+    flushPendingRecord();
     if (!canRedo.value) return;
     _isUndoRedoing.value = true;
     historyIndex.value++;
-    root.value = cloneDeep(history.value[historyIndex.value]);
+    options.restore(cloneDeep(history.value[historyIndex.value]));
   }
 
   /** 同步到模块级 API，供其他组件调用 */
@@ -70,6 +104,7 @@ export function useCanvasHistory(root: Ref<CanvasRootElement>) {
     canUndo,
     canRedo,
     recordHistory,
+    debouncedRecord,
     undo,
     redo,
   };

@@ -8,6 +8,7 @@ import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
   FontWeightEnum,
+  FontStyleEnum,
   BackgroundPositionEnum,
   BackgroundRepeatEnum,
   BackgroundSizeEnum,
@@ -198,6 +199,8 @@ export interface FontConfig {
   fontSizeUnit?: SizeUnitEnum;
   /** 字体粗细 */
   fontWeight?: FontWeightEnum;
+  /** 字体倾斜 */
+  fontStyle?: FontStyleEnum;
   /** 字母间距值 */
   letterSpacing?: string;
   /** 字母间距单位 */

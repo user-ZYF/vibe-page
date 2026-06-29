@@ -32,6 +32,12 @@
       </div>
     </div>
 
+    <!-- Font style -->
+    <div class="style-config-section">
+      <div class="style-config-label">Font style</div>
+      <a-select v-model:value="model.fontStyle" size="small" class="style-config-select" :options="FONT_STYLE_OPTIONS" placeholder="normal" allow-clear />
+    </div>
+
     <!-- Color -->
     <div class="style-config-section">
       <div class="style-config-label">Color</div>
@@ -148,7 +154,7 @@ import {
   DragOutlined,
   BoldOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
+import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, FONT_STYLE_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import type { FontConfig, TextShadowItem } from '@/views/Canvas/types';
 

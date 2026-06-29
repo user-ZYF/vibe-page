@@ -18,7 +18,6 @@
 import { watch, onMounted, inject, ref, computed } from "vue";
 import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
-import { useDebounceFn } from "@vueuse/core";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
@@ -27,18 +26,22 @@ import Root from './canvas-element/Root.vue';
 import { IS_PREVIEW_KEY } from '../contants';
 
 const canvasStore = useCanvasStore();
-const { root } = storeToRefs(canvasStore);
+const { root, classStyles } = storeToRefs(canvasStore);
 
 /** 是否处于预览模式 */
 const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 
 /** 撤销/重做功能 */
-const { recordHistory } = useCanvasHistory(root);
-
-/** 防抖记录历史，避免频繁操作（如拖拽滑块、输入文本）产生过多快照 */
-const debouncedRecord = useDebounceFn(() => {
-  recordHistory();
-}, 300);
+const { recordHistory, debouncedRecord } = useCanvasHistory({
+  snapshot: () => ({
+    root: canvasStore.root,
+    classStyles: canvasStore.classStyles,
+  }),
+  restore: (state) => {
+    root.value = state.root;
+    classStyles.value = state.classStyles;
+  },
+});
 
 /** Shadow DOM 宿主元素引用 */
 const shadowHostRef = ref<HTMLElement>();
@@ -51,7 +54,7 @@ const teleportTarget = computed(() => shadowRoot.value as unknown as HTMLElement
 
 /** 监听画布元素变化，自动记录历史快照 */
 watch(
-  () => canvasStore.root,
+  [() => canvasStore.root, () => canvasStore.classStyles],
   () => {
     debouncedRecord();
   },

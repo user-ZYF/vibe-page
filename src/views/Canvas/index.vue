@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, provide } from 'vue';
-import { Modal } from 'ant-design-vue';
+import { Modal, message } from 'ant-design-vue';
 import EditorHeader from './components/Header.vue';
 import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
@@ -166,9 +166,9 @@ function handleCleanupClasses() {
   });
 }
 
-/** 源码下载 */
+/** 源码导入 */
 function handleImport(){
-  // TODO: 实现源码下载逻辑
+  message.info('源码导入功能正在开发中，敬请期待');
 }
 
 provide(HIDDEN_KEYS, hiddenKeys);

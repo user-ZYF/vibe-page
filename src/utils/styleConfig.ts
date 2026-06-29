@@ -1,5 +1,6 @@
 import type { StyleConfig, BackgroundItem, TextShadowItem, BoxShadowItem } from '@/views/Canvas/types';
 import { BackgroundTypeEnum } from '@/constants/style';
+import { sanitizeCssUrl, sanitizeUrl } from '@/utils/sanitize';
 
 /** 判断值是否不为 null、undefined 和空字符串 */
 function isNotEmptyish<T>(value: T | null | undefined): value is T {
@@ -17,10 +18,11 @@ function convertBackgroundItem(item: BackgroundItem): string {
     return item.color || 'revert';
   }
   if (item.type === BackgroundTypeEnum.GRADIENT) {
-    return item.gradient || 'revert';
+    return sanitizeCssUrl(item.gradient || 'revert');
   }
   if (item.type === BackgroundTypeEnum.IMAGE) {
-    return `url("${item.imageUrl}") ${item.position} / ${item.size} ${item.repeat} ${item.attachment}`;
+    const safeUrl = sanitizeUrl(item.imageUrl ?? '');
+    return `url("${safeUrl}") ${item.position} / ${item.size} ${item.repeat} ${item.attachment}`;
   }
   return '';
 }
@@ -73,6 +75,7 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (font.fontFamily) css['fontFamily'] = font.fontFamily;
   if (isNotEmptyish(font.fontSize)) css['fontSize'] = `${font.fontSize}${safeUnit(font.fontSizeUnit)}`;
   if (isNotEmptyish(font.fontWeight)) css['fontWeight'] = String(font.fontWeight);
+  if (isNotEmptyish(font.fontStyle)) css['fontStyle'] = font.fontStyle;
   if (isNotEmptyish(font.letterSpacing)) css['letterSpacing'] = font.letterSpacing === 'normal' ? 'normal' : `${font.letterSpacing}${safeUnit(font.letterSpacingUnit)}`;
   if (isNotEmptyish(font.color)) css['color'] = font.color;
   if (isNotEmptyish(font.lineHeight)) css['lineHeight'] = font.lineHeight === 'normal' ? 'normal' : `${font.lineHeight}${safeUnit(font.lineHeightUnit)}`;

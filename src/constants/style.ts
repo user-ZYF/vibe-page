@@ -138,6 +138,20 @@ export const FONT_WEIGHT_OPTIONS = [
   { label: 'Ultra-Bold', value: FontWeightEnum.ULTRA_BOLD },
 ];
 
+/** font-style 枚举 */
+export enum FontStyleEnum {
+  /** 正常 */
+  NORMAL = 'normal',
+  /** 斜体 */
+  ITALIC = 'italic',
+}
+
+/** font-style 选项 */
+export const FONT_STYLE_OPTIONS = [
+  { label: 'Normal', value: FontStyleEnum.NORMAL },
+  { label: 'Italic', value: FontStyleEnum.ITALIC },
+];
+
 /** text-align 枚举 */
 export enum TextAlignEnum {
   /** 左对齐 */

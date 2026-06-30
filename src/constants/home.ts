@@ -210,11 +210,11 @@ export const FORM_ELEMENT_TYPES = [
 ];
 
 /**
- * a元素不允许嵌套的子元素类型集合
+ * a元素不允许嵌套的后代元素类型集合
  * 根据 HTML 规范，a 元素（带 href）的内容模型为透明模型，
  * 但不得包含交互式内容（interactive content）后代
  */
-export const LINK_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const LINK_DESCENDANT_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.LINK,
   CanvasElementTypeEnum.BUTTON,
   CanvasElementTypeEnum.INPUT,
@@ -227,35 +227,35 @@ export const LINK_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
 ];
 
 /**
- * form元素不允许嵌套的子元素类型集合
+ * form元素不允许嵌套的后代元素类型集合
  * 根据 HTML 规范，form 元素不得包含另一个 form 元素
  */
-export const FORM_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const FORM_DESCENDANT_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.FORM,
 ];
 
 /**
- * ul元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，ul 元素仅允许包含 li 子元素
+ * ul元素允许的直接子元素类型集合
+ * 根据 HTML 规范，ul 元素仅允许包含 li 作为直接子元素
  */
-export const UL_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const UL_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.LIST_ITEM,
 ];
 
 /**
- * ol元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，ol 元素仅允许包含 li 子元素
+ * ol元素允许的直接子元素类型集合
+ * 根据 HTML 规范，ol 元素仅允许包含 li 作为直接子元素
  */
-export const OL_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const OL_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.LIST_ITEM,
 ];
 
 /**
- * span元素允许嵌套的子元素类型集合
+ * span元素允许的后代元素类型集合
  * 根据 HTML 规范，span 元素的内容模型为 phrasing content，
- * 仅允许包含 phrasing content 类型的子元素
+ * 所有后代必须是 phrasing content 类型
  */
-export const SPAN_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const SPAN_DESCENDANT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.LINK,
   CanvasElementTypeEnum.IMAGE,
   CanvasElementTypeEnum.BUTTON,
@@ -271,10 +271,10 @@ export const SPAN_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
 ];
 
 /**
- * table元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，table 元素允许包含 caption、colgroup、thead、tbody、tfoot、tr
+ * table元素允许的直接子元素类型集合
+ * 根据 HTML 规范，table 元素允许包含 caption、colgroup、thead、tbody、tfoot、tr 作为直接子元素
  */
-export const TABLE_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const TABLE_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_CAPTION,
   CanvasElementTypeEnum.TABLE_COL_GROUP,
   CanvasElementTypeEnum.TABLE_HEAD,
@@ -284,43 +284,43 @@ export const TABLE_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTy
 ];
 
 /**
- * thead元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，thead 元素仅允许包含 tr
+ * thead元素允许的直接子元素类型集合
+ * 根据 HTML 规范，thead 元素仅允许包含 tr 作为直接子元素
  */
-export const THEAD_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const THEAD_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_ROW,
 ];
 
 /**
- * tbody元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，tbody 元素仅允许包含 tr
+ * tbody元素允许的直接子元素类型集合
+ * 根据 HTML 规范，tbody 元素仅允许包含 tr 作为直接子元素
  */
-export const TBODY_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const TBODY_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_ROW,
 ];
 
 /**
- * tfoot元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，tfoot 元素仅允许包含 tr
+ * tfoot元素允许的直接子元素类型集合
+ * 根据 HTML 规范，tfoot 元素仅允许包含 tr 作为直接子元素
  */
-export const TFOOT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const TFOOT_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_ROW,
 ];
 
 /**
- * tr元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，tr 元素允许包含 td 和 th
+ * tr元素允许的直接子元素类型集合
+ * 根据 HTML 规范，tr 元素允许包含 td 和 th 作为直接子元素
  */
-export const TR_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const TR_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_DATA,
   CanvasElementTypeEnum.TABLE_HEADER_CELL,
 ];
 
 /**
- * colgroup元素允许嵌套的子元素类型集合
- * 根据 HTML 规范，colgroup 元素仅允许包含 col
+ * colgroup元素允许的直接子元素类型集合
+ * 根据 HTML 规范，colgroup 元素仅允许包含 col 作为直接子元素
  */
-export const COLGROUP_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+export const COLGROUP_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_COL,
 ];
 

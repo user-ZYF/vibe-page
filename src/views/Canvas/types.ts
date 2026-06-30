@@ -308,10 +308,14 @@ export interface CanvasElementBase {
   classNames: string[];
   /** 元素别名 */
   alias?: string;
-  /** 允许接收的子元素类型列表（为空或不设置表示不限制） */
-  include?: CanvasInnerElementTypeEnum[];
-  /** 不允许接收的子元素类型列表（为空或不设置表示不限制） */
-  exclude?: CanvasInnerElementTypeEnum[];
+  /** 允许的直接子元素类型列表（仅约束直接子元素，为空或不设置表示不限制） */
+  directInclude?: CanvasInnerElementTypeEnum[];
+  /** 不允许的直接子元素类型列表（仅约束直接子元素，为空或不设置表示不限制） */
+  directExclude?: CanvasInnerElementTypeEnum[];
+  /** 允许的后代元素类型列表（约束所有后代含直接子元素，为空或不设置表示不限制） */
+  descendantInclude?: CanvasInnerElementTypeEnum[];
+  /** 不允许的后代元素类型列表（约束所有后代含直接子元素，为空或不设置表示不限制） */
+  descendantExclude?: CanvasInnerElementTypeEnum[];
 }
 
 /** 画布容器元素 */
@@ -701,41 +705,114 @@ export function isParentElement(el: CanvasInnerElement): el is CanvasParentEleme
 }
 
 /**
- * 判断元素类型是否允许作为指定父元素的子元素
- * 规则：
- * 1. include、exclude 均为空（空数组或不存在）：允许所有元素
- * 2. 仅有 include：include 中出现的元素
- * 3. 仅有 exclude：exclude 外的元素
- * 4. include、exclude 均不为空：include 中存在且 exclude 中不存在的元素
+ * 判断元素类型是否允许作为指定父元素的直接子元素
+ *
+ * 仅检查类型本身，不递归检查后代子树。适用于新元素拖入时仅知道类型、不知道子树的场景。
+ *
+ * 校验时直接子元素同时受两组约束限制，每组约束的 include 与 exclude 组合规则如下：
+ * 1. include 不为空且 exclude 为空：只接收 include 中的元素
+ * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
+ * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
+ * 4. include、exclude 均为空：接收所有元素
+ *
+ * 直接子元素约束（`directInclude` / `directExclude`）和后代元素约束（`descendantInclude` / `descendantExclude`）
+ * 均适用上述规则，且直接子元素需同时满足两组约束。
+ *
  * @param parent 父元素模型数据
  * @param childType 待放入的子元素类型
  */
 export function isChildTypeAllowed(parent: CanvasElementBase, childType: CanvasInnerElementTypeEnum): boolean {
-  const { include, exclude } = parent;
-  const hasInclude = !!include && include.length > 0;
-  const hasExclude = !!exclude && exclude.length > 0;
-
-  if (!hasInclude && !hasExclude) return true;
-  if (hasInclude && !hasExclude) return include!.includes(childType);
-  if (!hasInclude && hasExclude) return !exclude!.includes(childType);
-  return include!.includes(childType) && !exclude!.includes(childType);
+  const { directInclude, directExclude, descendantInclude, descendantExclude } = parent;
+  if (directInclude && directInclude.length > 0 && !directInclude.includes(childType)) return false;
+  if (directExclude && directExclude.length > 0 && directExclude.includes(childType)) return false;
+  if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(childType)) return false;
+  if (descendantExclude && descendantExclude.length > 0 && descendantExclude.includes(childType)) return false;
+  return true;
 }
 
 /**
  * 判断拖拽元素及其所有后代是否均允许作为指定父元素的子元素
- * 递归检查子树中每个元素的类型是否满足父元素的 include/exclude 规则
  *
- * 语义说明：此函数检查子树中**所有节点**（含深层后代）是否均满足目标父元素的规则，
- * 适用于 HTML 规范中透明内容模型的限制场景（如 a 元素不允许嵌套交互式内容后代）。
- * 若仅需限制直接子元素类型，请使用 isChildTypeAllowed。
+ * 校验规则基于父元素的四个约束字段，按作用范围分为两组：
+ *
+ * **直接子元素约束**（仅检查待放入元素本身）：
+ * - `directInclude`：白名单，列表不为空时，直接子元素类型必须在列表中
+ * - `directExclude`：黑名单，列表不为空时，直接子元素类型不得在列表中
+ *
+ * **后代元素约束**（检查待放入元素及其所有递归后代，含直接子元素）：
+ * - `descendantInclude`：白名单，列表不为空时，所有后代类型必须在列表中
+ * - `descendantExclude`：黑名单，列表不为空时，所有后代类型不得在列表中
+ *
+ * 每组约束的 include 与 exclude 组合规则：
+ * 1. include 不为空且 exclude 为空：只接收 include 中的元素
+ * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
+ * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
+ * 4. include、exclude 均为空：接收所有元素
+ *
+ * 校验流程：
+ * - 直接子元素：同时检查直接子元素约束和后代元素约束（因为直接子元素也是后代）
+ * - 更深层后代：仅检查后代元素约束（通过 isDescendantAllowed 递归）
+ * - 仅当存在后代元素约束时才需要递归；仅有直接子元素约束时不递归
+ *
+ * 典型场景：
+ * - `ul`：`directInclude=[li]` → 直接子元素只能是 li，li 内部不限制
+ * - `span`：`descendantInclude=[link, image, text, ...]` → 所有后代必须是 phrasing content
+ * - `a`：`descendantExclude=[link, button, input, ...]` → 所有后代不允许交互式内容
+ * - `form`：`descendantExclude=[form]` → 所有后代不允许嵌套 form
  * @param parent 目标父元素模型数据
  * @param child 待放入的子元素（含其后代子树）
  */
 export function isSubtreeAllowed(parent: CanvasElementBase, child: CanvasInnerElement): boolean {
-  if (!isChildTypeAllowed(parent, child.type as CanvasInnerElementTypeEnum)) return false;
-  if (isParentElement(child)) {
+  const { directInclude, directExclude, descendantInclude, descendantExclude } = parent;
+  const hasDirectInclude = !!directInclude && directInclude.length > 0;
+  const hasDirectExclude = !!directExclude && directExclude.length > 0;
+  const hasDescendantInclude = !!descendantInclude && descendantInclude.length > 0;
+  const hasDescendantExclude = !!descendantExclude && descendantExclude.length > 0;
+  const childType = child.type as CanvasInnerElementTypeEnum;
+
+  /** 检查直接子元素约束 */
+  if (hasDirectInclude && !directInclude!.includes(childType)) return false;
+  if (hasDirectExclude && directExclude!.includes(childType)) return false;
+
+  /** 检查后代约束（直接子元素也是后代，需要检查） */
+  if (hasDescendantInclude && !descendantInclude!.includes(childType)) return false;
+  if (hasDescendantExclude && descendantExclude!.includes(childType)) return false;
+
+  /** 若存在后代约束，需要递归检查所有更深层后代 */
+  if ((hasDescendantInclude || hasDescendantExclude) && isParentElement(child)) {
     for (const descendant of child.children) {
-      if (!isSubtreeAllowed(parent, descendant)) return false;
+      if (!isDescendantAllowed(parent, descendant)) return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * 递归检查后代元素是否满足父元素的后代约束
+ *
+ * 仅检查 `descendantInclude` 和 `descendantExclude`，不检查直接子元素约束
+ * （因为更深层后代不受直接子元素约束的限制）。
+ *
+ * include 与 exclude 组合规则：
+ * 1. include 不为空且 exclude 为空：只接收 include 中的元素
+ * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
+ * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
+ * 4. include、exclude 均为空：接收所有元素
+ *
+ * @param parent 目标父元素模型数据
+ * @param descendant 待检查的后代元素
+ */
+function isDescendantAllowed(parent: CanvasElementBase, descendant: CanvasInnerElement): boolean {
+  const { descendantInclude, descendantExclude } = parent;
+  const descendantType = descendant.type as CanvasInnerElementTypeEnum;
+
+  if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(descendantType)) return false;
+  if (descendantExclude && descendantExclude.length > 0 && descendantExclude.includes(descendantType)) return false;
+
+  if (isParentElement(descendant)) {
+    for (const child of descendant.children) {
+      if (!isDescendantAllowed(parent, child)) return false;
     }
   }
   return true;

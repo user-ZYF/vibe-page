@@ -1,0 +1,110 @@
+import { type Directive, type Ref, nextTick } from 'vue';
+import { useCanvasStore } from '@/store/canvas';
+
+/** v-editable 指令参数 */
+export interface EditableBinding {
+  /** 元素 ID，用于选中元素 */
+  id: string;
+  /** 是否处于预览模式 */
+  isPreview: Readonly<Ref<boolean>>;
+  /** 获取当前文本 */
+  getText: () => string;
+  /** 保存文本 */
+  onSave: (text: string) => void;
+  /** 文本为空时的回调（可选，如 Text 元素会删除自身） */
+  onEmpty?: () => void;
+}
+
+/** 指令内部状态 */
+interface EditableState {
+  /** 是否正在编辑 */
+  isEditing: boolean;
+  /** 当前绑定参数 */
+  binding: EditableBinding;
+  /** 双击处理函数 */
+  dblclickHandler: (e: MouseEvent) => void;
+  /** 失焦处理函数 */
+  blurHandler: () => void;
+  /** 键盘事件处理函数 */
+  keydownHandler: (e: KeyboardEvent) => void;
+}
+
+/** 存储各元素的可编辑状态 */
+const editableStateMap = new WeakMap<HTMLElement, EditableState>();
+
+/**
+ * v-editable 自定义指令
+ * 统一管理画布元素的双击编辑、失焦保存、Enter 退出等可编辑行为
+ * 内置预览模式守卫，预览模式下双击不会进入编辑
+ */
+export const editable: Directive<HTMLElement, EditableBinding> = {
+  mounted(el, binding) {
+    const canvasStore = useCanvasStore();
+
+    const state: EditableState = {
+      isEditing: false,
+      binding: binding.value,
+      dblclickHandler: () => {
+        const opts = state.binding;
+        if (opts.isPreview.value) return;
+        state.isEditing = true;
+        el.setAttribute('contenteditable', 'true');
+        el.setAttribute('is-editing', 'true');
+        canvasStore.selectElement(opts.id);
+        nextTick(() => {
+          el.focus();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        });
+      },
+      blurHandler: () => {
+        if (!state.isEditing) return;
+        state.isEditing = false;
+        el.setAttribute('contenteditable', 'false');
+        el.setAttribute('is-editing', 'false');
+        const newText = el.innerText.trim();
+        if (!newText && state.binding.onEmpty) {
+          state.binding.onEmpty();
+          return;
+        }
+        if (newText !== state.binding.getText()) {
+          state.binding.onSave(newText);
+        }
+      },
+      keydownHandler: (e: KeyboardEvent) => {
+        if (e.shiftKey) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          el.blur();
+        }
+      },
+    };
+
+    editableStateMap.set(el, state);
+
+    el.setAttribute('contenteditable', 'false');
+    el.setAttribute('is-editing', 'false');
+    el.addEventListener('dblclick', state.dblclickHandler);
+    el.addEventListener('blur', state.blurHandler);
+    el.addEventListener('keydown', state.keydownHandler);
+  },
+
+  updated(el, binding) {
+    const state = editableStateMap.get(el);
+    if (state) {
+      state.binding = binding.value;
+    }
+  },
+
+  unmounted(el) {
+    const state = editableStateMap.get(el);
+    if (!state) return;
+    el.removeEventListener('dblclick', state.dblclickHandler);
+    el.removeEventListener('blur', state.blurHandler);
+    el.removeEventListener('keydown', state.keydownHandler);
+    editableStateMap.delete(el);
+  },
+};

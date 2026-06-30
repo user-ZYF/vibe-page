@@ -323,3 +323,35 @@ export const TR_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeE
 export const COLGROUP_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.TABLE_COL,
 ];
+
+/** 表头单元格 scope 属性枚举 */
+export enum TableScopeEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 行 */
+  ROW = 1,
+  /** 列 */
+  COL = 2,
+  /** 行组 */
+  ROWGROUP = 3,
+  /** 列组 */
+  COLGROUP = 4,
+}
+
+/** 表头单元格 scope 属性值到 HTML 属性值的映射 */
+export const TABLE_SCOPE_ATTR_MAP: Record<TableScopeEnum, string> = {
+  [TableScopeEnum.UNDEFINED]: '',
+  [TableScopeEnum.ROW]: 'row',
+  [TableScopeEnum.COL]: 'col',
+  [TableScopeEnum.ROWGROUP]: 'rowgroup',
+  [TableScopeEnum.COLGROUP]: 'colgroup',
+};
+
+/** 表头单元格 scope 属性选项 */
+export const TABLE_SCOPE_OPTIONS = [
+  { label: '未设置', value: TableScopeEnum.UNDEFINED },
+  { label: 'row', value: TableScopeEnum.ROW },
+  { label: 'col', value: TableScopeEnum.COL },
+  { label: 'rowgroup', value: TableScopeEnum.ROWGROUP },
+  { label: 'colgroup', value: TableScopeEnum.COLGROUP },
+];

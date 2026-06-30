@@ -3,7 +3,7 @@
  */
 
 import { CanvasElementTypeEnum } from '@/constants/home';
-import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, LinkTargetEnum } from '@/constants/home';
+import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, LinkTargetEnum, TableScopeEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -12,6 +12,7 @@ import type {
   BackgroundPositionEnum,
   BackgroundRepeatEnum,
   BackgroundSizeEnum,
+  BorderCollapseEnum,
   BorderStyleEnum,
   DisplayStyleEnum,
   FloatStyleEnum,
@@ -123,6 +124,8 @@ export interface GeneralConfig {
   bottomUnit?: SizeUnitEnum;
   /** 溢出处理方式 */
   overflow?: OverflowStyleEnum;
+  /** 表格边框合并方式 */
+  borderCollapse?: BorderCollapseEnum;
   /** 层叠顺序 */
   zIndex?: number;
 }
@@ -539,6 +542,10 @@ export interface CanvasTableRowElement extends CanvasElementBase {
 export interface CanvasTableDataElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_DATA;
+  /** 跨列数 */
+  colspan: number;
+  /** 跨行数 */
+  rowspan: number;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -547,6 +554,12 @@ export interface CanvasTableDataElement extends CanvasElementBase {
 export interface CanvasTableHeaderCellElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_HEADER_CELL;
+  /** 跨列数 */
+  colspan: number;
+  /** 跨行数 */
+  rowspan: number;
+  /** 表头范围 */
+  scope: TableScopeEnum;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -563,6 +576,8 @@ export interface CanvasTableCaptionElement extends CanvasElementBase {
 export interface CanvasTableColGroupElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_COL_GROUP;
+  /** 跨列数 */
+  span: number;
   /** 子元素 */
   children: CanvasInnerElement[];
 }

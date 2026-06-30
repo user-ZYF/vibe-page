@@ -47,6 +47,11 @@
           <SettingConfig v-model="(selectedElement as CanvasInnerElement)" />
         </a-collapse-panel>
 
+        <!-- 额外属性配置 -->
+        <a-collapse-panel v-if="!isRootElement && !isTextElement && !activeClassName && hasExtraConfig" :key="StyleConfigTypeEnum.EXTRA" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.EXTRA]">
+          <ExtraConfig v-model="(selectedElement as CanvasInnerElement)" />
+        </a-collapse-panel>
+
         <!-- 常规配置 -->
         <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
@@ -107,10 +112,12 @@ import FontConfig from './style-panel/FontConfig.vue';
 import VisualConfig from './style-panel/VisualConfig.vue';
 import FlexConfig from './style-panel/FlexConfig.vue';
 import SettingConfig from './style-panel/SettingConfig.vue';
+import ExtraConfig from './style-panel/ExtraConfig.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface';
+import { EXTRA_CONFIG_TYPES } from '../constants.ts';
 
 defineOptions({
   name: 'StylePanel',
@@ -138,6 +145,9 @@ const isRootElement = computed(() => selectedElement.value?.type === CanvasEleme
 
 /** 当前选中的是否为纯文本元素 */
 const isTextElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.TEXT);
+
+/** 是否存在额外配置 */
+const hasExtraConfig = computed(() => EXTRA_CONFIG_TYPES.includes(selectedElement.value?.type as CanvasElementTypeEnum));
 
 /** 当前实际编辑的 StyleConfig */
 const activeStyleConfig = computed(() => {

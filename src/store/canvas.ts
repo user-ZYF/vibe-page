@@ -1,5 +1,5 @@
 import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeading1Element, type CanvasHeading2Element, type CanvasHeading3Element, type CanvasHeading4Element, type CanvasHeading5Element, type CanvasHeading6Element, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, SPAN_INCLUDE_TYPES, UL_INCLUDE_TYPES, OL_INCLUDE_TYPES, TABLE_INCLUDE_TYPES, THEAD_INCLUDE_TYPES, TBODY_INCLUDE_TYPES, TFOOT_INCLUDE_TYPES, TR_INCLUDE_TYPES, COLGROUP_INCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, SPAN_INCLUDE_TYPES, UL_INCLUDE_TYPES, OL_INCLUDE_TYPES, TABLE_INCLUDE_TYPES, THEAD_INCLUDE_TYPES, TBODY_INCLUDE_TYPES, TFOOT_INCLUDE_TYPES, TR_INCLUDE_TYPES, COLGROUP_INCLUDE_TYPES, FormMethodEnum, TableScopeEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
@@ -25,8 +25,6 @@ export const useCanvasStore = defineStore("canvas", {
     selectedElementId: null as string | null,
     /** 当前激活的 Sider 面板 */
     activePanel: SiderPanelEnum.COMPONENTS as SiderPanelEnum,
-    /** 是否正在拖拽元素 */
-    isDragging: false,
     /** 是否正在调整元素尺寸 */
     isResizing: false,
     /** 插入位置 */
@@ -150,13 +148,13 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.TABLE_ROW:
           return { ...elBase, children: [], include: [...TR_INCLUDE_TYPES] } as CanvasTableRowElement;
         case CanvasElementTypeEnum.TABLE_DATA:
-          return { ...elBase, children: [] } as CanvasTableDataElement;
+          return { ...elBase, colspan: 1, rowspan: 1, children: [] } as CanvasTableDataElement;
         case CanvasElementTypeEnum.TABLE_HEADER_CELL:
-          return { ...elBase, children: [] } as CanvasTableHeaderCellElement;
+          return { ...elBase, colspan: 1, rowspan: 1, scope: TableScopeEnum.UNDEFINED, children: [] } as CanvasTableHeaderCellElement;
         case CanvasElementTypeEnum.TABLE_CAPTION:
           return { ...elBase, children: [] } as CanvasTableCaptionElement;
         case CanvasElementTypeEnum.TABLE_COL_GROUP:
-          return { ...elBase, children: [], include: [...COLGROUP_INCLUDE_TYPES] } as CanvasTableColGroupElement;
+          return { ...elBase, span: 1, children: [], include: [...COLGROUP_INCLUDE_TYPES] } as CanvasTableColGroupElement;
         case CanvasElementTypeEnum.TABLE_COL:
           return { ...elBase, span: 1 } as CanvasTableColElement;
         case CanvasElementTypeEnum.HEADER:
@@ -204,14 +202,11 @@ export const useCanvasStore = defineStore("canvas", {
     },
     /** 选中元素 */
     selectElement(id: string | null = null) {
+      if (id && !this.getElementById(id)) return;
       this.selectedElementId = id;
       if(id && this.activePanel === SiderPanelEnum.COMPONENTS){
         this.activePanel = SiderPanelEnum.EDIT;
       }
-    },
-    /** 设置拖拽状态 */
-    setDragging(val: boolean) {
-      this.isDragging = val;
     },
     /** 切换 Sider 面板 */
     switchPanel(panel: SiderPanelEnum) {

@@ -48,13 +48,17 @@ import { SizeUnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../constants';
 import { CanvasElementTypeEnum } from '@/constants/home';
+import { useDragStore } from '@/store/drag';
 
 defineOptions({
   name: 'SelectedElementToolbar',
 });
 
 const canvasStore = useCanvasStore();
-const { selectedElementId, isDragging, isResizing } = storeToRefs(canvasStore);
+const { selectedElementId, isResizing } = storeToRefs(canvasStore);
+
+const dragStore = useDragStore();
+const { isDragging } = storeToRefs(dragStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
@@ -240,9 +244,9 @@ watch(selectedElementId, (id) => {
   }
 });
 
-/** 监听选中元素数据变化（如内容、class变化），更新工具栏位置 */
+/** 监听选中元素数据变化（如内容、class变化）或拖拽状态变化（因为可能是选中的元素被拖拽了），更新工具栏位置 */
 watch(
-  () => selectedElement.value,
+  [() => selectedElement.value, () => isDragging.value],
   () => {
     if (selectedElementId.value && !isResizing.value) {
       nextTick(updatePos);

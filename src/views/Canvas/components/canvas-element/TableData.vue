@@ -1,6 +1,6 @@
 <!-- ? 表格单元格元素 -->
 <template>
-  <td ref="tdEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <td ref="tdEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :colspan="data.colspan > 1 ? data.colspan : undefined" :rowspan="data.rowspan > 1 ? data.rowspan : undefined" :style="style" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </td>
 </template>

@@ -18,6 +18,9 @@ import {
   CanvasFormElement,
   CanvasTextElement,
   CanvasTableColElement,
+  CanvasTableDataElement,
+  CanvasTableHeaderCellElement,
+  CanvasTableColGroupElement,
   CanvasHeading1Element,
   CanvasHeading2Element,
   CanvasHeading3Element,
@@ -25,7 +28,7 @@ import {
   CanvasHeading5Element,
   CanvasHeading6Element,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
+import { CanvasElementTypeEnum, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
 import type { StyleConfig } from '@/views/Canvas/types';
 
@@ -199,6 +202,25 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.TABLE_COL: {
       const col = element as CanvasTableColElement;
       if (col.span > 1) attrs.push(`span="${col.span}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.TABLE_DATA: {
+      const td = element as CanvasTableDataElement;
+      if (td.colspan > 1) attrs.push(`colspan="${td.colspan}"`);
+      if (td.rowspan > 1) attrs.push(`rowspan="${td.rowspan}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.TABLE_HEADER_CELL: {
+      const th = element as CanvasTableHeaderCellElement;
+      if (th.colspan > 1) attrs.push(`colspan="${th.colspan}"`);
+      if (th.rowspan > 1) attrs.push(`rowspan="${th.rowspan}"`);
+      const scopeAttr = TABLE_SCOPE_ATTR_MAP[th.scope];
+      if (scopeAttr) attrs.push(`scope="${scopeAttr}"`);
+      break;
+    }
+    case CanvasElementTypeEnum.TABLE_COL_GROUP: {
+      const colgroup = element as CanvasTableColGroupElement;
+      if (colgroup.span > 1) attrs.push(`span="${colgroup.span}"`);
       break;
     }
   }

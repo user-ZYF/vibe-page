@@ -147,3 +147,11 @@ export const RESIZE_DIR_CLASS_MAP: Record<ValidResizeDirEnum, string> = {
   [ResizeDirEnum.SE]: 'se',
   [ResizeDirEnum.SW]: 'sw',
 };
+
+/** 当前选中元素是否有额外属性配置 */
+export const EXTRA_CONFIG_TYPES = [
+  CanvasElementTypeEnum.TABLE,
+  CanvasElementTypeEnum.TABLE_DATA,
+  CanvasElementTypeEnum.TABLE_HEADER_CELL,
+  CanvasElementTypeEnum.TABLE_COL_GROUP,
+];

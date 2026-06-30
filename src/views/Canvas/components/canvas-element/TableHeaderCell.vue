@@ -1,6 +1,6 @@
 <!-- ? 表头单元格元素 -->
 <template>
-  <th ref="thEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <th ref="thEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :colspan="data.colspan > 1 ? data.colspan : undefined" :rowspan="data.rowspan > 1 ? data.rowspan : undefined" :scope="scopeAttr || undefined" :style="style" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </th>
 </template>
@@ -13,6 +13,8 @@ import { CanvasElementComponentMap } from '../../constants';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
+import { TABLE_SCOPE_ATTR_MAP } from '@/constants/home';
+import { computed } from 'vue';
 
 const data = defineModel<CanvasTableHeaderCellElement>("data", {
   required: true
@@ -25,6 +27,9 @@ const style = useElementStyle(data);
 const thEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id, data);
+
+/** scope 属性值 */
+const scopeAttr = computed(() => TABLE_SCOPE_ATTR_MAP[data.value.scope]);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
 useDragConnector(thEl, data.value.id, { isCanvas: true });

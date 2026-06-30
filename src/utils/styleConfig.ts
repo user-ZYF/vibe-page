@@ -54,6 +54,7 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (isNotEmptyish(general.bottom)) css['bottom'] = `${general.bottom}${safeUnit(general.bottomUnit)}`;
   if (isNotEmptyish(general.left)) css['left'] = `${general.left}${safeUnit(general.leftUnit)}`;
   if (isNotEmptyish(general.overflow)) css['overflow'] = general.overflow;
+  if (isNotEmptyish(general.borderCollapse)) css['borderCollapse'] = general.borderCollapse;
   if (isNotEmptyish(general.zIndex)) css['zIndex'] = String(general.zIndex);
 
   // --- size ---

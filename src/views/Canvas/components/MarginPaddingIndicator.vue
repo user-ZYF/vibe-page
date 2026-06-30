@@ -47,6 +47,7 @@ import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
+import { useDragStore } from '@/store/drag';
 
 defineOptions({
   name: 'MarginPaddingIndicator',
@@ -61,7 +62,10 @@ const props = defineProps({
 });
 
 const canvasStore = useCanvasStore();
-const { isDragging, isResizing } = storeToRefs(canvasStore);
+const { isResizing } = storeToRefs(canvasStore);
+
+const dragStore = useDragStore();
+const { isDragging } = storeToRefs(dragStore);
 
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 

@@ -1,6 +1,6 @@
 <!-- ? 表格列组元素 -->
 <template>
-  <colgroup ref="colgroupEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <colgroup ref="colgroupEl" :class="data.classes" :id="data.id" :data-canvas-id="data.id" :span="data.span > 1 ? data.span : undefined" :style="style" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </colgroup>
 </template>

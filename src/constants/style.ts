@@ -355,6 +355,20 @@ export const BG_POSITION_OPTIONS = [
   { label: 'bottom right', value: BackgroundPositionEnum.BOTTOM_RIGHT },
 ];
 
+/** border-collapse 枚举 */
+export enum BorderCollapseEnum {
+  /** 分离 */
+  SEPARATE = "separate",
+  /** 合并 */
+  COLLAPSE = "collapse",
+}
+
+/** border-collapse 选项 */
+export const BORDER_COLLAPSE_OPTIONS = [
+  { label: 'separate', value: BorderCollapseEnum.SEPARATE },
+  { label: 'collapse', value: BorderCollapseEnum.COLLAPSE },
+];
+
 /** border-style枚举 */
 export enum BorderStyleEnum {
   /** 无样式 */
@@ -512,21 +526,21 @@ export const DefaultContainerStyleConfig: StyleConfig = {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minHeight: '100',
     minHeightUnit: SizeUnitEnum.PX,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingTopUnit: SizeUnitEnum.PX,
-    paddingRight: 16,
+    paddingRight: 12,
     paddingRightUnit: SizeUnitEnum.PX,
-    paddingBottom: 16,
+    paddingBottom: 8,
     paddingBottomUnit: SizeUnitEnum.PX,
-    paddingLeft: 16,
+    paddingLeft: 12,
     paddingLeftUnit: SizeUnitEnum.PX,
-    marginTop: '16',
+    marginTop: '8',
     marginTopUnit: SizeUnitEnum.PX,
-    marginRight: '16',
+    marginRight: '12',
     marginRightUnit: SizeUnitEnum.PX,
-    marginBottom: '16',
+    marginBottom: '8',
     marginBottomUnit: SizeUnitEnum.PX,
-    marginLeft: '16',
+    marginLeft: '12',
     marginLeftUnit: SizeUnitEnum.PX,
   },
 };
@@ -545,10 +559,18 @@ export const DefaultLinkStyleConfig: StyleConfig = {
  },
  size: {
   ...cloneDeep(DefaultGeneralStyleConfig.size),
-  minWidth: '50',
+  minWidth: '80',
   minWidthUnit: SizeUnitEnum.PX,
-  minHeight: '30',
+  minHeight: '40',
   minHeightUnit: SizeUnitEnum.PX,
+  paddingTop: 8,
+  paddingTopUnit: SizeUnitEnum.PX,
+  paddingRight: 12,
+  paddingRightUnit: SizeUnitEnum.PX,
+  paddingBottom: 8,
+  paddingBottomUnit: SizeUnitEnum.PX,
+  paddingLeft: 12,
+  paddingLeftUnit: SizeUnitEnum.PX,
  },
 };
 
@@ -615,13 +637,17 @@ export const DefaultSpanStyleConfig: StyleConfig = {
   },
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    paddingTop: 16,
+    minWidth: '80',
+    minWidthUnit: SizeUnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: SizeUnitEnum.PX,
+    paddingTop: 8,
     paddingTopUnit: SizeUnitEnum.PX,
-    paddingRight: 24,
+    paddingRight: 12,
     paddingRightUnit: SizeUnitEnum.PX,
-    paddingBottom: 16,
+    paddingBottom: 8,
     paddingBottomUnit: SizeUnitEnum.PX,
-    paddingLeft: 24,
+    paddingLeft: 12,
     paddingLeftUnit: SizeUnitEnum.PX,
   },
 };
@@ -671,6 +697,10 @@ export const DefaultListItemStyleConfig: StyleConfig = {
 /** 表格元素默认样式配置 */
 export const DefaultTableStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  general: {
+    ...cloneDeep(DefaultGeneralStyleConfig.general),
+    borderCollapse: BorderCollapseEnum.COLLAPSE,
+  },
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     width: '100',

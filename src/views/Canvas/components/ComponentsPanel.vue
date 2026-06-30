@@ -1,12 +1,16 @@
 <!-- ? 组件库面板 -->
 <template>
   <div class="components-panel">
-    <a-collapse v-model:activeKey="activeKeys" ghost>
-      <a-collapse-panel key="basic" header="Basic">
+    <a-collapse v-model:activeKey="activeKeys" ghost accordion>
+      <a-collapse-panel
+        v-for="group in componentGroups"
+        :key="group.key"
+        :header="group.header"
+      >
         <div class="components-grid">
           <div
             class="component-item"
-            v-for="comp in basicComponents"
+            v-for="comp in group.components"
             :key="comp"
             :ref="(el) => bindCreateConnector(el as HTMLElement, comp)"
             :data-element-type="comp"
@@ -21,33 +25,56 @@
 import { ref, onUnmounted } from 'vue'
 import { CanvasElementLabelMap, CanvasElementTypeEnum } from '@/constants/home';
 import { dragEngine } from '../drag/DragEngine';
-import { CanvasInnerElementTypeEnum } from '../types';
+import { CanvasInnerElementTypeEnum, ComponentGroup } from '../types';
 
 defineOptions({
   name: 'ComponentsPanel',
 })
 
 /** 当前展开的折叠面板 */
-const activeKeys = ref<string[]>(['basic'])
+const activeKeys = ref<string>('basic')
 
-/** 基础组件元素列表 */
-const basicComponents = ref<CanvasInnerElementTypeEnum[]>([
-  CanvasElementTypeEnum.CONTAINER,
-  CanvasElementTypeEnum.BUTTON,
-  CanvasElementTypeEnum.IMAGE,
-  CanvasElementTypeEnum.LINK,
-  CanvasElementTypeEnum.PARAGRAPH,
-  CanvasElementTypeEnum.INPUT,
-  CanvasElementTypeEnum.TEXTAREA,
-  CanvasElementTypeEnum.RADIO,
-  CanvasElementTypeEnum.CHECKBOX,
-  CanvasElementTypeEnum.VIDEO,
-  CanvasElementTypeEnum.AUDIO,
-  CanvasElementTypeEnum.LABEL,
-  CanvasElementTypeEnum.FORM,
-  CanvasElementTypeEnum.SPAN,
-  CanvasElementTypeEnum.TEXT,
-]);
+/** 组件分组列表 */
+const componentGroups: ComponentGroup[] = [
+  {
+    key: 'basic',
+    header: 'Basic',
+    components: [
+      CanvasElementTypeEnum.CONTAINER,
+      CanvasElementTypeEnum.SPAN,
+      CanvasElementTypeEnum.TEXT,
+      CanvasElementTypeEnum.PARAGRAPH,
+      CanvasElementTypeEnum.LINK,
+      CanvasElementTypeEnum.BUTTON,
+      CanvasElementTypeEnum.LABEL,
+    ],
+  },
+  {
+    key: 'form',
+    header: 'Form',
+    components: [
+      CanvasElementTypeEnum.FORM,
+      CanvasElementTypeEnum.INPUT,
+      CanvasElementTypeEnum.TEXTAREA,
+      CanvasElementTypeEnum.RADIO,
+      CanvasElementTypeEnum.CHECKBOX,
+    ],
+  },
+  {
+    key: 'media',
+    header: 'Media',
+    components: [
+      CanvasElementTypeEnum.IMAGE,
+      CanvasElementTypeEnum.VIDEO,
+      CanvasElementTypeEnum.AUDIO,
+    ],
+  },
+  {
+    key: 'structure',
+    header: 'Structure',
+    components: [],
+  },
+];
 
 /** 每个组件项的解绑函数映射 */
 const unbindMap = new Map<CanvasElementTypeEnum, () => void>();

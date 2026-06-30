@@ -559,3 +559,13 @@ export interface ResizeStartState {
   /** 起始高度（border-box） */
   startHeight: number;
 }
+
+/** 组件分组配置 */
+export interface ComponentGroup {
+  /** 分组标识 */
+  key: string;
+  /** 分组标题 */
+  header: string;
+  /** 分组内组件列表 */
+  components: CanvasInnerElementTypeEnum[];
+}

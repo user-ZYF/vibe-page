@@ -15,7 +15,7 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Display</div>
-        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="DISPLAY_OPTIONS" placeholder="block" />
+        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="displayOptions" placeholder="block" />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Position</div>
@@ -78,8 +78,10 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
-import { DISPLAY_OPTIONS, FloatStyleEnum, OVERFLOW_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
+import { DISPLAY_OPTIONS, DISPLAY_OPTIONS_MAP, FloatStyleEnum, OVERFLOW_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
+import { CanvasElementTypeEnum } from '@/constants/home';
 import { useUnitAutoFill } from '@/composables/useUnitAutoFill';
 import type { GeneralConfig } from '@/views/Canvas/types';
 
@@ -87,8 +89,22 @@ defineOptions({
   name: 'GeneralConfig',
 });
 
+/** 元素类型 */
+const props = defineProps<{
+  /** 当前编辑的元素类型 */
+  elementType?: CanvasElementTypeEnum;
+}>();
+
 /** 常规配置数据 */
 const model = defineModel<GeneralConfig>({ required: true });
+
+/** 当前元素对应的 display 选项 */
+const displayOptions = computed(() => {
+  if (props.elementType && DISPLAY_OPTIONS_MAP[props.elementType]) {
+    return DISPLAY_OPTIONS_MAP[props.elementType]!;
+  }
+  return DISPLAY_OPTIONS;
+});
 
 /** 各偏移值失焦时自动填充单位 */
 const handleUnitBlur = useUnitAutoFill(model);

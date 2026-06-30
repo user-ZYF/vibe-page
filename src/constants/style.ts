@@ -470,6 +470,28 @@ export enum DisplayStyleEnum {
   FLEX = "flex",
   /** 隐藏 */
   NONE = "none",
+  /** 表格 */
+  TABLE = "table",
+  /** 行内表格 */
+  INLINE_TABLE = "inline-table",
+  /** 表格行 */
+  TABLE_ROW = "table-row",
+  /** 表格单元格 */
+  TABLE_CELL = "table-cell",
+  /** 表格列 */
+  TABLE_COLUMN = "table-column",
+  /** 表格列组 */
+  TABLE_COLUMN_GROUP = "table-column-group",
+  /** 表头组 */
+  TABLE_HEADER_GROUP = "table-header-group",
+  /** 表体行组 */
+  TABLE_ROW_GROUP = "table-row-group",
+  /** 表脚行组 */
+  TABLE_FOOTER_GROUP = "table-footer-group",
+  /** 表格标题 */
+  TABLE_CAPTION = "table-caption",
+  /** 列表项 */
+  LIST_ITEM = "list-item",
 }
 
 /** display选项 */
@@ -480,6 +502,113 @@ export const DISPLAY_OPTIONS = [
   { label: 'flex', value: DisplayStyleEnum.FLEX },
   { label: 'none', value: DisplayStyleEnum.NONE },
 ];
+
+/** 表格元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE = [
+  { label: 'table', value: DisplayStyleEnum.TABLE },
+  { label: 'inline-table', value: DisplayStyleEnum.INLINE_TABLE },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表格行元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_ROW = [
+  { label: 'table-row', value: DisplayStyleEnum.TABLE_ROW },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表格单元格元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_CELL = [
+  { label: 'table-cell', value: DisplayStyleEnum.TABLE_CELL },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'inline-block', value: DisplayStyleEnum.INLINE_BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表头组元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_HEADER_GROUP = [
+  { label: 'table-header-group', value: DisplayStyleEnum.TABLE_HEADER_GROUP },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表体行组元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_ROW_GROUP = [
+  { label: 'table-row-group', value: DisplayStyleEnum.TABLE_ROW_GROUP },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表脚行组元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_FOOTER_GROUP = [
+  { label: 'table-footer-group', value: DisplayStyleEnum.TABLE_FOOTER_GROUP },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表格标题元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_CAPTION = [
+  { label: 'table-caption', value: DisplayStyleEnum.TABLE_CAPTION },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表格列组元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_COLUMN_GROUP = [
+  { label: 'table-column-group', value: DisplayStyleEnum.TABLE_COLUMN_GROUP },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 表格列元素 display 选项 */
+export const DISPLAY_OPTIONS_TABLE_COLUMN = [
+  { label: 'table-column', value: DisplayStyleEnum.TABLE_COLUMN },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 列表元素 display 选项 */
+export const DISPLAY_OPTIONS_LIST = [
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'list-item', value: DisplayStyleEnum.LIST_ITEM },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 列表项元素 display 选项 */
+export const DISPLAY_OPTIONS_LIST_ITEM = [
+  { label: 'list-item', value: DisplayStyleEnum.LIST_ITEM },
+  { label: 'block', value: DisplayStyleEnum.BLOCK },
+  { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'none', value: DisplayStyleEnum.NONE },
+];
+
+/** 元素类型到 display 选项的映射 */
+export const DISPLAY_OPTIONS_MAP: Partial<Record<CanvasElementTypeEnum, { label: string; value: DisplayStyleEnum }[]>> = {
+  [CanvasElementTypeEnum.TABLE]: DISPLAY_OPTIONS_TABLE,
+  [CanvasElementTypeEnum.TABLE_ROW]: DISPLAY_OPTIONS_TABLE_ROW,
+  [CanvasElementTypeEnum.TABLE_DATA]: DISPLAY_OPTIONS_TABLE_CELL,
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: DISPLAY_OPTIONS_TABLE_CELL,
+  [CanvasElementTypeEnum.TABLE_HEAD]: DISPLAY_OPTIONS_TABLE_HEADER_GROUP,
+  [CanvasElementTypeEnum.TABLE_BODY]: DISPLAY_OPTIONS_TABLE_ROW_GROUP,
+  [CanvasElementTypeEnum.TABLE_FOOT]: DISPLAY_OPTIONS_TABLE_FOOTER_GROUP,
+  [CanvasElementTypeEnum.TABLE_CAPTION]: DISPLAY_OPTIONS_TABLE_CAPTION,
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: DISPLAY_OPTIONS_TABLE_COLUMN_GROUP,
+  [CanvasElementTypeEnum.TABLE_COL]: DISPLAY_OPTIONS_TABLE_COLUMN,
+  [CanvasElementTypeEnum.UNORDERED_LIST]: DISPLAY_OPTIONS_LIST,
+  [CanvasElementTypeEnum.ORDERED_LIST]: DISPLAY_OPTIONS_LIST,
+  [CanvasElementTypeEnum.LIST_ITEM]: DISPLAY_OPTIONS_LIST_ITEM,
+};
 
 /** overflow 枚举 */
 export enum OverflowStyleEnum {

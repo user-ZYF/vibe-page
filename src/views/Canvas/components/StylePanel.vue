@@ -54,7 +54,7 @@
 
         <!-- 常规配置 -->
         <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
-          <GeneralConfig v-model="activeStyleConfig!.general" />
+          <GeneralConfig v-model="activeStyleConfig!.general" :element-type="selectedElement!.type" />
         </a-collapse-panel>
 
         <!-- 尺寸配置 -->

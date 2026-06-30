@@ -29,7 +29,7 @@ const thEl = ref<HTMLElement>();
 useElementVisibility(data.value.id, data);
 
 /** scope 属性值 */
-const scopeAttr = computed(() => TABLE_SCOPE_ATTR_MAP[data.value.scope]);
+const scopeAttr = computed(() => data.value.scope ? TABLE_SCOPE_ATTR_MAP[data.value.scope] : '');
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
 useDragConnector(thEl, data.value.id, { isCanvas: true });

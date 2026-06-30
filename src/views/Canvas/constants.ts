@@ -16,6 +16,30 @@ import Label from "./components/canvas-element/Label.vue";
 import Form from "./components/canvas-element/Form.vue";
 import Span from "./components/canvas-element/Span.vue";
 import Text from "./components/canvas-element/Text.vue";
+import UnorderedList from "./components/canvas-element/UnorderedList.vue";
+import OrderedList from "./components/canvas-element/OrderedList.vue";
+import ListItem from "./components/canvas-element/ListItem.vue";
+import Table from "./components/canvas-element/Table.vue";
+import TableHead from "./components/canvas-element/TableHead.vue";
+import TableBody from "./components/canvas-element/TableBody.vue";
+import TableFoot from "./components/canvas-element/TableFoot.vue";
+import TableRow from "./components/canvas-element/TableRow.vue";
+import TableData from "./components/canvas-element/TableData.vue";
+import TableHeaderCell from "./components/canvas-element/TableHeaderCell.vue";
+import TableCaption from "./components/canvas-element/TableCaption.vue";
+import TableColGroup from "./components/canvas-element/TableColGroup.vue";
+import TableCol from "./components/canvas-element/TableCol.vue";
+import Header from "./components/canvas-element/Header.vue";
+import Footer from "./components/canvas-element/Footer.vue";
+import Article from "./components/canvas-element/Article.vue";
+import Section from "./components/canvas-element/Section.vue";
+import Aside from "./components/canvas-element/Aside.vue";
+import Heading1 from "./components/canvas-element/Heading1.vue";
+import Heading2 from "./components/canvas-element/Heading2.vue";
+import Heading3 from "./components/canvas-element/Heading3.vue";
+import Heading4 from "./components/canvas-element/Heading4.vue";
+import Heading5 from "./components/canvas-element/Heading5.vue";
+import Heading6 from "./components/canvas-element/Heading6.vue";
 import type { InjectionKey, Ref } from 'vue';
 import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";
@@ -38,6 +62,30 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.FORM]: Form,
     [CanvasElementTypeEnum.SPAN]: Span,
     [CanvasElementTypeEnum.TEXT]: Text,
+    [CanvasElementTypeEnum.UNORDERED_LIST]: UnorderedList,
+    [CanvasElementTypeEnum.ORDERED_LIST]: OrderedList,
+    [CanvasElementTypeEnum.LIST_ITEM]: ListItem,
+    [CanvasElementTypeEnum.TABLE]: Table,
+    [CanvasElementTypeEnum.TABLE_HEAD]: TableHead,
+    [CanvasElementTypeEnum.TABLE_BODY]: TableBody,
+    [CanvasElementTypeEnum.TABLE_FOOT]: TableFoot,
+    [CanvasElementTypeEnum.TABLE_ROW]: TableRow,
+    [CanvasElementTypeEnum.TABLE_DATA]: TableData,
+    [CanvasElementTypeEnum.TABLE_HEADER_CELL]: TableHeaderCell,
+    [CanvasElementTypeEnum.TABLE_CAPTION]: TableCaption,
+    [CanvasElementTypeEnum.TABLE_COL_GROUP]: TableColGroup,
+    [CanvasElementTypeEnum.TABLE_COL]: TableCol,
+    [CanvasElementTypeEnum.HEADER]: Header,
+    [CanvasElementTypeEnum.FOOTER]: Footer,
+    [CanvasElementTypeEnum.ARTICLE]: Article,
+    [CanvasElementTypeEnum.SECTION]: Section,
+    [CanvasElementTypeEnum.ASIDE]: Aside,
+    [CanvasElementTypeEnum.HEADING_1]: Heading1,
+    [CanvasElementTypeEnum.HEADING_2]: Heading2,
+    [CanvasElementTypeEnum.HEADING_3]: Heading3,
+    [CanvasElementTypeEnum.HEADING_4]: Heading4,
+    [CanvasElementTypeEnum.HEADING_5]: Heading5,
+    [CanvasElementTypeEnum.HEADING_6]: Heading6,
 };
 
 /** 展开的元素id列表 */

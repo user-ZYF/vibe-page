@@ -57,6 +57,16 @@
       </div>
     </div>
 
+    <!-- Text indent -->
+    <div class="style-config-section">
+      <div class="style-config-label">Text indent</div>
+      <div class="style-config-input-group style-config-input-group--half">
+        <a-input v-model:value="model.textIndent" size="small" class="style-config-input" placeholder="0" @blur="handleUnitBlur('textIndent', 'textIndentUnit')" />
+        <span class="style-config-separator">-</span>
+        <a-select v-model:value="model.textIndentUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+      </div>
+    </div>
+
     <!-- Text align -->
     <div class="style-config-section">
       <div class="style-config-label">Text align</div>

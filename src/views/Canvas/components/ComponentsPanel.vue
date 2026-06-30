@@ -70,9 +70,45 @@ const componentGroups: ComponentGroup[] = [
     ],
   },
   {
-    key: 'structure',
-    header: 'Structure',
-    components: [],
+    key: 'list',
+    header: 'List',
+    components: [
+      CanvasElementTypeEnum.UNORDERED_LIST,
+      CanvasElementTypeEnum.ORDERED_LIST,
+    ],
+  },
+  {
+    key: 'table',
+    header: 'Table',
+    components: [
+      CanvasElementTypeEnum.TABLE,
+      CanvasElementTypeEnum.TABLE_HEAD,
+      CanvasElementTypeEnum.TABLE_BODY,
+      CanvasElementTypeEnum.TABLE_FOOT,
+      CanvasElementTypeEnum.TABLE_ROW,
+      CanvasElementTypeEnum.TABLE_DATA,
+      CanvasElementTypeEnum.TABLE_HEADER_CELL,
+      CanvasElementTypeEnum.TABLE_CAPTION,
+      CanvasElementTypeEnum.TABLE_COL_GROUP,
+      CanvasElementTypeEnum.TABLE_COL,
+    ],
+  },
+  {
+    key: 'semantic',
+    header: 'Semantic',
+    components: [
+      CanvasElementTypeEnum.HEADER,
+      CanvasElementTypeEnum.FOOTER,
+      CanvasElementTypeEnum.ARTICLE,
+      CanvasElementTypeEnum.SECTION,
+      CanvasElementTypeEnum.ASIDE,
+      CanvasElementTypeEnum.HEADING_1,
+      CanvasElementTypeEnum.HEADING_2,
+      CanvasElementTypeEnum.HEADING_3,
+      CanvasElementTypeEnum.HEADING_4,
+      CanvasElementTypeEnum.HEADING_5,
+      CanvasElementTypeEnum.HEADING_6,
+    ],
   },
 ];
 

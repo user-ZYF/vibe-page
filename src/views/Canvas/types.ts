@@ -213,6 +213,10 @@ export interface FontConfig {
   lineHeight?: string;
   /** 行高单位 */
   lineHeightUnit?: SizeUnitEnum;
+  /** 文本缩进值 */
+  textIndent?: string;
+  /** 文本缩进单位 */
+  textIndentUnit?: SizeUnitEnum;
   /** 文字对齐方式 */
   textAlign?: TextAlignEnum;
   /** 文字装饰 */
@@ -467,6 +471,198 @@ export interface CanvasTextElement extends CanvasElementBase {
   text: string;
 }
 
+/** 画布无序列表元素 */
+export interface CanvasUnorderedListElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.UNORDERED_LIST;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布有序列表元素 */
+export interface CanvasOrderedListElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.ORDERED_LIST;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布列表项元素 */
+export interface CanvasListItemElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.LIST_ITEM;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格元素 */
+export interface CanvasTableElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表头元素 */
+export interface CanvasTableHeadElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_HEAD;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表体元素 */
+export interface CanvasTableBodyElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_BODY;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表脚元素 */
+export interface CanvasTableFootElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_FOOT;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格行元素 */
+export interface CanvasTableRowElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_ROW;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格单元格元素 */
+export interface CanvasTableDataElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_DATA;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表头单元格元素 */
+export interface CanvasTableHeaderCellElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_HEADER_CELL;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格标题元素 */
+export interface CanvasTableCaptionElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_CAPTION;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格列组元素 */
+export interface CanvasTableColGroupElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_COL_GROUP;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布表格列元素 */
+export interface CanvasTableColElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TABLE_COL;
+  /** 跨列数 */
+  span: number;
+}
+
+/** 画布页头元素 */
+export interface CanvasHeaderElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADER;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布页脚元素 */
+export interface CanvasFooterElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.FOOTER;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布文章元素 */
+export interface CanvasArticleElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.ARTICLE;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布章节元素 */
+export interface CanvasSectionElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.SECTION;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布侧边栏元素 */
+export interface CanvasAsideElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.ASIDE;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布一级标题元素 */
+export interface CanvasHeading1Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_1;
+  /** 标题文本 */
+  text: string;
+}
+
+/** 画布二级标题元素 */
+export interface CanvasHeading2Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_2;
+  /** 标题文本 */
+  text: string;
+}
+
+/** 画布三级标题元素 */
+export interface CanvasHeading3Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_3;
+  /** 标题文本 */
+  text: string;
+}
+
+/** 画布四级标题元素 */
+export interface CanvasHeading4Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_4;
+  /** 标题文本 */
+  text: string;
+}
+
+/** 画布五级标题元素 */
+export interface CanvasHeading5Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_5;
+  /** 标题文本 */
+  text: string;
+}
+
+/** 画布六级标题元素 */
+export interface CanvasHeading6Element extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.HEADING_6;
+  /** 标题文本 */
+  text: string;
+}
+
 /** 画布根元素 */
 export interface CanvasRootElement extends CanvasElementBase {
   /** 元素类型 */
@@ -479,14 +675,14 @@ export interface CanvasRootElement extends CanvasElementBase {
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement;
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasTableColElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasHeading1Element | CanvasHeading2Element | CanvasHeading3Element | CanvasHeading4Element | CanvasHeading5Element | CanvasHeading6Element;
 
 /** 可包含子元素的画布元素 */
-export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement;
+export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement;
 
 /** 判断元素是否包含子元素 */
 export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
-  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN;
+  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN || el.type === CanvasElementTypeEnum.UNORDERED_LIST || el.type === CanvasElementTypeEnum.ORDERED_LIST || el.type === CanvasElementTypeEnum.LIST_ITEM || el.type === CanvasElementTypeEnum.TABLE || el.type === CanvasElementTypeEnum.TABLE_HEAD || el.type === CanvasElementTypeEnum.TABLE_BODY || el.type === CanvasElementTypeEnum.TABLE_FOOT || el.type === CanvasElementTypeEnum.TABLE_ROW || el.type === CanvasElementTypeEnum.TABLE_DATA || el.type === CanvasElementTypeEnum.TABLE_HEADER_CELL || el.type === CanvasElementTypeEnum.TABLE_CAPTION || el.type === CanvasElementTypeEnum.TABLE_COL_GROUP || el.type === CanvasElementTypeEnum.HEADER || el.type === CanvasElementTypeEnum.FOOTER || el.type === CanvasElementTypeEnum.ARTICLE || el.type === CanvasElementTypeEnum.SECTION || el.type === CanvasElementTypeEnum.ASIDE;
 }
 
 /**

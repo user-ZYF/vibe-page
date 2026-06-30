@@ -44,6 +44,54 @@ export enum CanvasElementTypeEnum {
   SPAN,
   /** 纯文本 */
   TEXT,
+  /** 无序列表 */
+  UNORDERED_LIST,
+  /** 有序列表 */
+  ORDERED_LIST,
+  /** 列表项 */
+  LIST_ITEM,
+  /** 表格 */
+  TABLE,
+  /** 表头 */
+  TABLE_HEAD,
+  /** 表体 */
+  TABLE_BODY,
+  /** 表脚 */
+  TABLE_FOOT,
+  /** 表格行 */
+  TABLE_ROW,
+  /** 表格单元格 */
+  TABLE_DATA,
+  /** 表头单元格 */
+  TABLE_HEADER_CELL,
+  /** 表格标题 */
+  TABLE_CAPTION,
+  /** 表格列组 */
+  TABLE_COL_GROUP,
+  /** 表格列 */
+  TABLE_COL,
+  /** 页头 */
+  HEADER,
+  /** 页脚 */
+  FOOTER,
+  /** 文章 */
+  ARTICLE,
+  /** 章节 */
+  SECTION,
+  /** 侧边栏 */
+  ASIDE,
+  /** 一级标题 */
+  HEADING_1,
+  /** 二级标题 */
+  HEADING_2,
+  /** 三级标题 */
+  HEADING_3,
+  /** 四级标题 */
+  HEADING_4,
+  /** 五级标题 */
+  HEADING_5,
+  /** 六级标题 */
+  HEADING_6,
 }
 
 /** 画布元素label */
@@ -52,7 +100,7 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.LINK]: "link",
   [CanvasElementTypeEnum.IMAGE]: "image",
   [CanvasElementTypeEnum.BUTTON]: "button",
-  [CanvasElementTypeEnum.PARAGRAPH]: "paragaph",
+  [CanvasElementTypeEnum.PARAGRAPH]: "paragraph",
   [CanvasElementTypeEnum.ROOT]: "root",
   [CanvasElementTypeEnum.INPUT]: "input",
   [CanvasElementTypeEnum.TEXTAREA]: "textarea",
@@ -64,6 +112,30 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.FORM]: "form",
   [CanvasElementTypeEnum.SPAN]: "span",
   [CanvasElementTypeEnum.TEXT]: "text",
+  [CanvasElementTypeEnum.UNORDERED_LIST]: "ul",
+  [CanvasElementTypeEnum.ORDERED_LIST]: "ol",
+  [CanvasElementTypeEnum.LIST_ITEM]: "li",
+  [CanvasElementTypeEnum.TABLE]: "table",
+  [CanvasElementTypeEnum.TABLE_HEAD]: "thead",
+  [CanvasElementTypeEnum.TABLE_BODY]: "tbody",
+  [CanvasElementTypeEnum.TABLE_FOOT]: "tfoot",
+  [CanvasElementTypeEnum.TABLE_ROW]: "tr",
+  [CanvasElementTypeEnum.TABLE_DATA]: "td",
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: "th",
+  [CanvasElementTypeEnum.TABLE_CAPTION]: "caption",
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: "colgroup",
+  [CanvasElementTypeEnum.TABLE_COL]: "col",
+  [CanvasElementTypeEnum.HEADER]: "header",
+  [CanvasElementTypeEnum.FOOTER]: "footer",
+  [CanvasElementTypeEnum.ARTICLE]: "article",
+  [CanvasElementTypeEnum.SECTION]: "section",
+  [CanvasElementTypeEnum.ASIDE]: "aside",
+  [CanvasElementTypeEnum.HEADING_1]: "h1",
+  [CanvasElementTypeEnum.HEADING_2]: "h2",
+  [CanvasElementTypeEnum.HEADING_3]: "h3",
+  [CanvasElementTypeEnum.HEADING_4]: "h4",
+  [CanvasElementTypeEnum.HEADING_5]: "h5",
+  [CanvasElementTypeEnum.HEADING_6]: "h6",
 }
 
 /** 按钮类型 */
@@ -163,6 +235,22 @@ export const FORM_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
 ];
 
 /**
+ * ul元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，ul 元素仅允许包含 li 子元素
+ */
+export const UL_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.LIST_ITEM,
+];
+
+/**
+ * ol元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，ol 元素仅允许包含 li 子元素
+ */
+export const OL_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.LIST_ITEM,
+];
+
+/**
  * span元素允许嵌套的子元素类型集合
  * 根据 HTML 规范，span 元素的内容模型为 phrasing content，
  * 仅允许包含 phrasing content 类型的子元素
@@ -180,4 +268,58 @@ export const SPAN_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
   CanvasElementTypeEnum.LABEL,
   CanvasElementTypeEnum.SPAN,
   CanvasElementTypeEnum.TEXT,
+];
+
+/**
+ * table元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，table 元素允许包含 caption、colgroup、thead、tbody、tfoot、tr
+ */
+export const TABLE_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_CAPTION,
+  CanvasElementTypeEnum.TABLE_COL_GROUP,
+  CanvasElementTypeEnum.TABLE_HEAD,
+  CanvasElementTypeEnum.TABLE_BODY,
+  CanvasElementTypeEnum.TABLE_FOOT,
+  CanvasElementTypeEnum.TABLE_ROW,
+];
+
+/**
+ * thead元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，thead 元素仅允许包含 tr
+ */
+export const THEAD_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_ROW,
+];
+
+/**
+ * tbody元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，tbody 元素仅允许包含 tr
+ */
+export const TBODY_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_ROW,
+];
+
+/**
+ * tfoot元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，tfoot 元素仅允许包含 tr
+ */
+export const TFOOT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_ROW,
+];
+
+/**
+ * tr元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，tr 元素允许包含 td 和 th
+ */
+export const TR_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_DATA,
+  CanvasElementTypeEnum.TABLE_HEADER_CELL,
+];
+
+/**
+ * colgroup元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，colgroup 元素仅允许包含 col
+ */
+export const COLGROUP_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.TABLE_COL,
 ];

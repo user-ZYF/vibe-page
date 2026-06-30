@@ -1,5 +1,5 @@
-import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, SPAN_INCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
+import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeading1Element, type CanvasHeading2Element, type CanvasHeading3Element, type CanvasHeading4Element, type CanvasHeading5Element, type CanvasHeading6Element, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, SPAN_INCLUDE_TYPES, UL_INCLUDE_TYPES, OL_INCLUDE_TYPES, TABLE_INCLUDE_TYPES, THEAD_INCLUDE_TYPES, TBODY_INCLUDE_TYPES, TFOOT_INCLUDE_TYPES, TR_INCLUDE_TYPES, COLGROUP_INCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
@@ -133,6 +133,54 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, text: '文本' } as CanvasTextElement;
         case CanvasElementTypeEnum.FORM:
           return { ...elBase, action: '', method: FormMethodEnum.GET, children: [], exclude: [...FORM_EXCLUDE_TYPES] } as CanvasFormElement;
+        case CanvasElementTypeEnum.UNORDERED_LIST:
+          return { ...elBase, children: [], include: [...UL_INCLUDE_TYPES] } as CanvasUnorderedListElement;
+        case CanvasElementTypeEnum.ORDERED_LIST:
+          return { ...elBase, children: [], include: [...OL_INCLUDE_TYPES] } as CanvasOrderedListElement;
+        case CanvasElementTypeEnum.LIST_ITEM:
+          return { ...elBase, children: [] } as CanvasListItemElement;
+        case CanvasElementTypeEnum.TABLE:
+          return { ...elBase, children: [], include: [...TABLE_INCLUDE_TYPES] } as CanvasTableElement;
+        case CanvasElementTypeEnum.TABLE_HEAD:
+          return { ...elBase, children: [], include: [...THEAD_INCLUDE_TYPES] } as CanvasTableHeadElement;
+        case CanvasElementTypeEnum.TABLE_BODY:
+          return { ...elBase, children: [], include: [...TBODY_INCLUDE_TYPES] } as CanvasTableBodyElement;
+        case CanvasElementTypeEnum.TABLE_FOOT:
+          return { ...elBase, children: [], include: [...TFOOT_INCLUDE_TYPES] } as CanvasTableFootElement;
+        case CanvasElementTypeEnum.TABLE_ROW:
+          return { ...elBase, children: [], include: [...TR_INCLUDE_TYPES] } as CanvasTableRowElement;
+        case CanvasElementTypeEnum.TABLE_DATA:
+          return { ...elBase, children: [] } as CanvasTableDataElement;
+        case CanvasElementTypeEnum.TABLE_HEADER_CELL:
+          return { ...elBase, children: [] } as CanvasTableHeaderCellElement;
+        case CanvasElementTypeEnum.TABLE_CAPTION:
+          return { ...elBase, children: [] } as CanvasTableCaptionElement;
+        case CanvasElementTypeEnum.TABLE_COL_GROUP:
+          return { ...elBase, children: [], include: [...COLGROUP_INCLUDE_TYPES] } as CanvasTableColGroupElement;
+        case CanvasElementTypeEnum.TABLE_COL:
+          return { ...elBase, span: 1 } as CanvasTableColElement;
+        case CanvasElementTypeEnum.HEADER:
+          return { ...elBase, children: [] } as CanvasHeaderElement;
+        case CanvasElementTypeEnum.FOOTER:
+          return { ...elBase, children: [] } as CanvasFooterElement;
+        case CanvasElementTypeEnum.ARTICLE:
+          return { ...elBase, children: [] } as CanvasArticleElement;
+        case CanvasElementTypeEnum.SECTION:
+          return { ...elBase, children: [] } as CanvasSectionElement;
+        case CanvasElementTypeEnum.ASIDE:
+          return { ...elBase, children: [] } as CanvasAsideElement;
+        case CanvasElementTypeEnum.HEADING_1:
+          return { ...elBase, text: '一级标题' } as CanvasHeading1Element;
+        case CanvasElementTypeEnum.HEADING_2:
+          return { ...elBase, text: '二级标题' } as CanvasHeading2Element;
+        case CanvasElementTypeEnum.HEADING_3:
+          return { ...elBase, text: '三级标题' } as CanvasHeading3Element;
+        case CanvasElementTypeEnum.HEADING_4:
+          return { ...elBase, text: '四级标题' } as CanvasHeading4Element;
+        case CanvasElementTypeEnum.HEADING_5:
+          return { ...elBase, text: '五级标题' } as CanvasHeading5Element;
+        case CanvasElementTypeEnum.HEADING_6:
+          return { ...elBase, text: '六级标题' } as CanvasHeading6Element;
       }
     },
     /** 添加元素到指定容器 */

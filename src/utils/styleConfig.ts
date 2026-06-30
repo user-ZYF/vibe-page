@@ -80,6 +80,7 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (isNotEmptyish(font.letterSpacing)) css['letterSpacing'] = font.letterSpacing === 'normal' ? 'normal' : `${font.letterSpacing}${safeUnit(font.letterSpacingUnit)}`;
   if (isNotEmptyish(font.color)) css['color'] = font.color;
   if (isNotEmptyish(font.lineHeight)) css['lineHeight'] = font.lineHeight === 'normal' ? 'normal' : `${font.lineHeight}${safeUnit(font.lineHeightUnit)}`;
+  if (isNotEmptyish(font.textIndent)) css['textIndent'] = `${font.textIndent}${safeUnit(font.textIndentUnit)}`;
   if (isNotEmptyish(font.textAlign)) css['textAlign'] = font.textAlign;
   if (isNotEmptyish(font.textDecoration)) css['textDecoration'] = font.textDecoration;
   if (isNotEmptyish(font.textShadows) && font.textShadows.length > 0) {

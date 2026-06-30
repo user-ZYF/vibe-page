@@ -631,6 +631,257 @@ export const DefaultTextStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
+/** 无序列表元素默认样式配置 */
+export const DefaultUnorderedListStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    paddingTop: 16,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 24,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 16,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 24,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+};
+
+/** 有序列表元素默认样式配置 */
+export const DefaultOrderedListStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    paddingTop: 16,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 24,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 16,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 24,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+};
+
+/** 列表项元素默认样式配置 */
+export const DefaultListItemStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表格元素默认样式配置 */
+export const DefaultTableStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    width: '100',
+    widthUnit: SizeUnitEnum.PERCENT,
+  },
+};
+
+/** 表头元素默认样式配置 */
+export const DefaultTableHeadStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表体元素默认样式配置 */
+export const DefaultTableBodyStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表脚元素默认样式配置 */
+export const DefaultTableFootStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表格行元素默认样式配置 */
+export const DefaultTableRowStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表格单元格元素默认样式配置 */
+export const DefaultTableDataStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    paddingTop: 8,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 12,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 8,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 12,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+};
+
+/** 表头单元格元素默认样式配置 */
+export const DefaultTableHeaderCellStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    paddingTop: 8,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 12,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 8,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 12,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 表格标题元素默认样式配置 */
+export const DefaultTableCaptionStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表格列组元素默认样式配置 */
+export const DefaultTableColGroupStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 表格列元素默认样式配置 */
+export const DefaultTableColStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 页头元素默认样式配置 */
+export const DefaultHeaderStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 页脚元素默认样式配置 */
+export const DefaultFooterStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 文章元素默认样式配置 */
+export const DefaultArticleStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 章节元素默认样式配置 */
+export const DefaultSectionStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 侧边栏元素默认样式配置 */
+export const DefaultAsideStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
+/** 一级标题元素默认样式配置 */
+export const DefaultHeading1StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '24',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '12',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 32,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 二级标题元素默认样式配置 */
+export const DefaultHeading2StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '20',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '10',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 26,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 三级标题元素默认样式配置 */
+export const DefaultHeading3StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '18',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '8',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 22,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 四级标题元素默认样式配置 */
+export const DefaultHeading4StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '16',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '8',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 18,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 五级标题元素默认样式配置 */
+export const DefaultHeading5StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '14',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '6',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 16,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
+/** 六级标题元素默认样式配置 */
+export const DefaultHeading6StyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    marginTop: '12',
+    marginTopUnit: SizeUnitEnum.PX,
+    marginBottom: '6',
+    marginBottomUnit: SizeUnitEnum.PX,
+  },
+  font: {
+    ...cloneDeep(DefaultGeneralStyleConfig.font),
+    fontSize: 14,
+    fontSizeUnit: SizeUnitEnum.PX,
+    fontWeight: FontWeightEnum.BOLD,
+  },
+};
+
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig)
@@ -654,6 +905,30 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.FORM]: DefaultFormStyleConfig,
   [CanvasElementTypeEnum.SPAN]: DefaultSpanStyleConfig,
   [CanvasElementTypeEnum.TEXT]: DefaultTextStyleConfig,
+  [CanvasElementTypeEnum.UNORDERED_LIST]: DefaultUnorderedListStyleConfig,
+  [CanvasElementTypeEnum.ORDERED_LIST]: DefaultOrderedListStyleConfig,
+  [CanvasElementTypeEnum.LIST_ITEM]: DefaultListItemStyleConfig,
+  [CanvasElementTypeEnum.TABLE]: DefaultTableStyleConfig,
+  [CanvasElementTypeEnum.TABLE_HEAD]: DefaultTableHeadStyleConfig,
+  [CanvasElementTypeEnum.TABLE_BODY]: DefaultTableBodyStyleConfig,
+  [CanvasElementTypeEnum.TABLE_FOOT]: DefaultTableFootStyleConfig,
+  [CanvasElementTypeEnum.TABLE_ROW]: DefaultTableRowStyleConfig,
+  [CanvasElementTypeEnum.TABLE_DATA]: DefaultTableDataStyleConfig,
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: DefaultTableHeaderCellStyleConfig,
+  [CanvasElementTypeEnum.TABLE_CAPTION]: DefaultTableCaptionStyleConfig,
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: DefaultTableColGroupStyleConfig,
+  [CanvasElementTypeEnum.TABLE_COL]: DefaultTableColStyleConfig,
+  [CanvasElementTypeEnum.HEADER]: DefaultHeaderStyleConfig,
+  [CanvasElementTypeEnum.FOOTER]: DefaultFooterStyleConfig,
+  [CanvasElementTypeEnum.ARTICLE]: DefaultArticleStyleConfig,
+  [CanvasElementTypeEnum.SECTION]: DefaultSectionStyleConfig,
+  [CanvasElementTypeEnum.ASIDE]: DefaultAsideStyleConfig,
+  [CanvasElementTypeEnum.HEADING_1]: DefaultHeading1StyleConfig,
+  [CanvasElementTypeEnum.HEADING_2]: DefaultHeading2StyleConfig,
+  [CanvasElementTypeEnum.HEADING_3]: DefaultHeading3StyleConfig,
+  [CanvasElementTypeEnum.HEADING_4]: DefaultHeading4StyleConfig,
+  [CanvasElementTypeEnum.HEADING_5]: DefaultHeading5StyleConfig,
+  [CanvasElementTypeEnum.HEADING_6]: DefaultHeading6StyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

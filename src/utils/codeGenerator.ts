@@ -17,6 +17,13 @@ import {
   CanvasLabelElement,
   CanvasFormElement,
   CanvasTextElement,
+  CanvasTableColElement,
+  CanvasHeading1Element,
+  CanvasHeading2Element,
+  CanvasHeading3Element,
+  CanvasHeading4Element,
+  CanvasHeading5Element,
+  CanvasHeading6Element,
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
@@ -40,10 +47,34 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.FORM]: 'form',
   [CanvasElementTypeEnum.SPAN]: 'span',
   [CanvasElementTypeEnum.TEXT]: '',
+  [CanvasElementTypeEnum.UNORDERED_LIST]: 'ul',
+  [CanvasElementTypeEnum.ORDERED_LIST]: 'ol',
+  [CanvasElementTypeEnum.LIST_ITEM]: 'li',
+  [CanvasElementTypeEnum.TABLE]: 'table',
+  [CanvasElementTypeEnum.TABLE_HEAD]: 'thead',
+  [CanvasElementTypeEnum.TABLE_BODY]: 'tbody',
+  [CanvasElementTypeEnum.TABLE_FOOT]: 'tfoot',
+  [CanvasElementTypeEnum.TABLE_ROW]: 'tr',
+  [CanvasElementTypeEnum.TABLE_DATA]: 'td',
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: 'th',
+  [CanvasElementTypeEnum.TABLE_CAPTION]: 'caption',
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: 'colgroup',
+  [CanvasElementTypeEnum.TABLE_COL]: 'col',
+  [CanvasElementTypeEnum.HEADER]: 'header',
+  [CanvasElementTypeEnum.FOOTER]: 'footer',
+  [CanvasElementTypeEnum.ARTICLE]: 'article',
+  [CanvasElementTypeEnum.SECTION]: 'section',
+  [CanvasElementTypeEnum.ASIDE]: 'aside',
+  [CanvasElementTypeEnum.HEADING_1]: 'h1',
+  [CanvasElementTypeEnum.HEADING_2]: 'h2',
+  [CanvasElementTypeEnum.HEADING_3]: 'h3',
+  [CanvasElementTypeEnum.HEADING_4]: 'h4',
+  [CanvasElementTypeEnum.HEADING_5]: 'h5',
+  [CanvasElementTypeEnum.HEADING_6]: 'h6',
 };
 
 /** 自闭合标签集合 */
-const VOID_TAGS = new Set(['img', 'input']);
+const VOID_TAGS = new Set(['img', 'input', 'col']);
 
 /**
  * 将 camelCase 的 CSS 属性名转换为 kebab-case
@@ -165,6 +196,11 @@ function buildAttributes(element: CanvasElement): string {
       attrs.push(`method="${escapeAttrValue(form.method)}"`);
       break;
     }
+    case CanvasElementTypeEnum.TABLE_COL: {
+      const col = element as CanvasTableColElement;
+      if (col.span > 1) attrs.push(`span="${col.span}"`);
+      break;
+    }
   }
 
   return attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
@@ -185,6 +221,18 @@ function getElementContent(element: CanvasElement): string {
       return escapeAttrValue((element as CanvasLabelElement).text);
     case CanvasElementTypeEnum.TEXT:
       return escapeAttrValue((element as CanvasTextElement).text);
+    case CanvasElementTypeEnum.HEADING_1:
+      return escapeAttrValue((element as CanvasHeading1Element).text);
+    case CanvasElementTypeEnum.HEADING_2:
+      return escapeAttrValue((element as CanvasHeading2Element).text);
+    case CanvasElementTypeEnum.HEADING_3:
+      return escapeAttrValue((element as CanvasHeading3Element).text);
+    case CanvasElementTypeEnum.HEADING_4:
+      return escapeAttrValue((element as CanvasHeading4Element).text);
+    case CanvasElementTypeEnum.HEADING_5:
+      return escapeAttrValue((element as CanvasHeading5Element).text);
+    case CanvasElementTypeEnum.HEADING_6:
+      return escapeAttrValue((element as CanvasHeading6Element).text);
     default:
       return '';
   }

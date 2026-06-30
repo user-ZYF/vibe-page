@@ -6,7 +6,7 @@ export interface EditableBinding {
   /** 元素 ID，用于选中元素 */
   id: string;
   /** 是否处于预览模式 */
-  isPreview: Readonly<Ref<boolean>>;
+  isPreview: boolean;
   /** 获取当前文本 */
   getText: () => string;
   /** 保存文本 */
@@ -46,7 +46,7 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
       binding: binding.value,
       dblclickHandler: () => {
         const opts = state.binding;
-        if (opts.isPreview.value) return;
+        if (opts.isPreview) return;
         state.isEditing = true;
         el.setAttribute('contenteditable', 'true');
         canvasStore.selectElement(opts.id);

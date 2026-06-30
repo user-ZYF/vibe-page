@@ -16,6 +16,7 @@ import {
   CanvasAudioElement,
   CanvasLabelElement,
   CanvasFormElement,
+  CanvasTextElement,
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
@@ -37,6 +38,8 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.AUDIO]: 'audio',
   [CanvasElementTypeEnum.LABEL]: 'label',
   [CanvasElementTypeEnum.FORM]: 'form',
+  [CanvasElementTypeEnum.SPAN]: 'span',
+  [CanvasElementTypeEnum.TEXT]: '',
 };
 
 /** 自闭合标签集合 */
@@ -180,6 +183,8 @@ function getElementContent(element: CanvasElement): string {
       return escapeAttrValue((element as CanvasTextareaElement).value);
     case CanvasElementTypeEnum.LABEL:
       return escapeAttrValue((element as CanvasLabelElement).text);
+    case CanvasElementTypeEnum.TEXT:
+      return escapeAttrValue((element as CanvasTextElement).text);
     default:
       return '';
   }
@@ -189,9 +194,16 @@ function getElementContent(element: CanvasElement): string {
  * 递归生成单个元素的 HTML 字符串
  */
 function elementToHtml(element: CanvasElement, indent: number = 0): string {
+  const pad = '  '.repeat(indent);
+
+  /** 纯文本元素：无标签无属性，直接输出文本内容 */
+  if (element.type === CanvasElementTypeEnum.TEXT) {
+    const content = getElementContent(element);
+    return `${pad}${content}`;
+  }
+
   const tag = TAG_MAP[element.type];
   const attrs = buildAttributes(element);
-  const pad = '  '.repeat(indent);
 
   /** 自闭合标签 */
   if (VOID_TAGS.has(tag)) {
@@ -231,6 +243,9 @@ function collectCssRules(root: CanvasRootElement, classStyles: Record<string, St
 
   /** 各元素的 id 选择器规则 */
   function collect(el: CanvasInnerElement) {
+    /** 纯文本元素在生成的代码中无标签无属性，跳过 CSS 规则生成 */
+    if (el.type === CanvasElementTypeEnum.TEXT) return;
+
     const styleObj = convertStyleConfig(el.styleConfig);
     const styleStr = styleObjectToCss(styleObj);
     if (styleStr) {

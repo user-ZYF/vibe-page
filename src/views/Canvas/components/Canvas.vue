@@ -26,21 +26,24 @@ import Root from './canvas-element/Root.vue';
 import { IS_PREVIEW_KEY } from '../constants.ts';
 
 const canvasStore = useCanvasStore();
-const { root, classStyles } = storeToRefs(canvasStore);
+const { root, classStyles, selectedElementId } = storeToRefs(canvasStore);
 
 /** 是否处于预览模式 */
 const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 
 /** 撤销/重做功能 */
-const { recordHistory, debouncedRecord } = useCanvasHistory({
+const { debouncedRecord } = useCanvasHistory({
   snapshot: () => ({
     root: canvasStore.root,
     classStyles: canvasStore.classStyles,
+    selectedElementId: canvasStore.selectedElementId
   }),
   restore: (state) => {
     root.value = state.root;
     classStyles.value = state.classStyles;
+    selectedElementId.value = state.selectedElementId;
   },
+  debounceMs: 100
 });
 
 /** Shadow DOM 宿主元素引用 */
@@ -54,7 +57,7 @@ const teleportTarget = computed(() => shadowRoot.value as unknown as HTMLElement
 
 /** 监听画布元素变化，自动记录历史快照 */
 watch(
-  [() => canvasStore.root, () => canvasStore.classStyles],
+  [() => canvasStore.root, () => canvasStore.classStyles, () => canvasStore.selectedElementId],
   () => {
     debouncedRecord();
   },
@@ -87,13 +90,15 @@ onMounted(() => {
         outline: 1px dashed #ccc;
         outline-offset: -1px;
       }
+
+      .canvas-text {
+        display: inline !important;
+      }
     `;
     shadow.appendChild(style);
 
     shadowRoot.value = shadow;
   }
-
-  // recordHistory();
 });
 </script>
 

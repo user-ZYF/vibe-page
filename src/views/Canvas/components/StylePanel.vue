@@ -5,7 +5,7 @@
     <template v-else>
       <!-- class 管理栏 -->
       <div class="style-panel-classes">
-        <template v-if="!isRootElement">
+        <template v-if="!isRootElement && !isTextElement">
           <div class="style-panel-classes-title">Classes</div>
           <div class="style-panel-classes-bar">
             <div
@@ -48,27 +48,27 @@
         </a-collapse-panel>
 
         <!-- 常规配置 -->
-        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
+        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" />
         </a-collapse-panel>
 
         <!-- 尺寸配置 -->
-        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
+        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
           <SizeConfig v-model="activeStyleConfig!.size" />
         </a-collapse-panel>
 
         <!-- 字体配置 -->
-        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
+        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
           <FontConfig v-model="activeStyleConfig!.font" />
         </a-collapse-panel>
 
         <!-- 视觉配置 -->
-        <a-collapse-panel :key="StyleConfigTypeEnum.VISUAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.VISUAL]">
+        <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.VISUAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.VISUAL]">
           <VisualConfig v-model="activeStyleConfig!.visual" :only-background="isRootElement" />
         </a-collapse-panel>
 
         <!-- 弹性盒配置 -->
-        <a-collapse-panel v-if="!isRootElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
+        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
           <FlexConfig v-model="activeStyleConfig!.flex" />
         </a-collapse-panel>
       </a-collapse>
@@ -135,6 +135,9 @@ const activeClassName = ref<string | null>(null);
 
 /** 当前选中的是否为根元素 */
 const isRootElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.ROOT);
+
+/** 当前选中的是否为纯文本元素 */
+const isTextElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.TEXT);
 
 /** 当前实际编辑的 StyleConfig */
 const activeStyleConfig = computed(() => {

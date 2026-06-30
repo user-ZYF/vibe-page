@@ -40,6 +40,10 @@ export enum CanvasElementTypeEnum {
   LABEL,
   /** 表单 */
   FORM,
+  /** 行内容器 */
+  SPAN,
+  /** 纯文本 */
+  TEXT,
 }
 
 /** 画布元素label */
@@ -58,6 +62,8 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.AUDIO]: "audio",
   [CanvasElementTypeEnum.LABEL]: "label",
   [CanvasElementTypeEnum.FORM]: "form",
+  [CanvasElementTypeEnum.SPAN]: "span",
+  [CanvasElementTypeEnum.TEXT]: "text",
 }
 
 /** 按钮类型 */
@@ -154,4 +160,24 @@ export const LINK_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTyp
  */
 export const FORM_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
   CanvasElementTypeEnum.FORM,
+];
+
+/**
+ * span元素允许嵌套的子元素类型集合
+ * 根据 HTML 规范，span 元素的内容模型为 phrasing content，
+ * 仅允许包含 phrasing content 类型的子元素
+ */
+export const SPAN_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
+  CanvasElementTypeEnum.LINK,
+  CanvasElementTypeEnum.IMAGE,
+  CanvasElementTypeEnum.BUTTON,
+  CanvasElementTypeEnum.INPUT,
+  CanvasElementTypeEnum.TEXTAREA,
+  CanvasElementTypeEnum.RADIO,
+  CanvasElementTypeEnum.CHECKBOX,
+  CanvasElementTypeEnum.VIDEO,
+  CanvasElementTypeEnum.AUDIO,
+  CanvasElementTypeEnum.LABEL,
+  CanvasElementTypeEnum.SPAN,
+  CanvasElementTypeEnum.TEXT,
 ];

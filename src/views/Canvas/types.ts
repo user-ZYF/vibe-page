@@ -451,6 +451,22 @@ export interface CanvasFormElement extends CanvasElementBase {
   children: CanvasInnerElement[];
 }
 
+/** 画布行内容器元素 */
+export interface CanvasSpanElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.SPAN;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
+/** 画布纯文本元素 */
+export interface CanvasTextElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.TEXT;
+  /** 文本内容 */
+  text: string;
+}
+
 /** 画布根元素 */
 export interface CanvasRootElement extends CanvasElementBase {
   /** 元素类型 */
@@ -463,14 +479,14 @@ export interface CanvasRootElement extends CanvasElementBase {
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement;
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement;
 
 /** 可包含子元素的画布元素 */
-export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement;
+export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement;
 
 /** 判断元素是否包含子元素 */
 export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
-  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM;
+  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN;
 }
 
 /**

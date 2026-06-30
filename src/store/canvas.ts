@@ -1,5 +1,5 @@
-import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
-import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
+import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
+import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_EXCLUDE_TYPES, FORM_EXCLUDE_TYPES, SPAN_INCLUDE_TYPES, FormMethodEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { nanoid } from "nanoid";
@@ -78,6 +78,20 @@ export const useCanvasStore = defineStore("canvas", {
     getElementById (id: string): CanvasElement | null {
       return findElementInTree(this.root, id);
     },
+    /** 获取指定id元素的父元素id */
+    getParentElementId(id: string): string | null {
+      const findParentId = (list: CanvasInnerElement[], parentId: string): string | null => {
+        for (const el of list) {
+          if (el.id === id) return parentId;
+          if (isParentElement(el)) {
+            const found = findParentId(el.children, el.id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      return findParentId(this.root.children, this.root.id);
+    },
     /** 生成一个元素 */
     generateElement(type: CanvasInnerElementTypeEnum): CanvasInnerElement {
       const elBase = { 
@@ -113,6 +127,10 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, src: '', controls: true } as CanvasAudioElement;
         case CanvasElementTypeEnum.LABEL:
           return { ...elBase, text: '标签', for: '' } as CanvasLabelElement;
+        case CanvasElementTypeEnum.SPAN:
+          return { ...elBase, children: [], include: [...SPAN_INCLUDE_TYPES] } as CanvasSpanElement;
+        case CanvasElementTypeEnum.TEXT:
+          return { ...elBase, text: '文本' } as CanvasTextElement;
         case CanvasElementTypeEnum.FORM:
           return { ...elBase, action: '', method: FormMethodEnum.GET, children: [], exclude: [...FORM_EXCLUDE_TYPES] } as CanvasFormElement;
       }
@@ -134,6 +152,7 @@ export const useCanvasStore = defineStore("canvas", {
       if (container && isParentElement(container)) {
         container.children.push(element);
       }
+      this.mergeAdjacentTextElements();
     },
     /** 选中元素 */
     selectElement(id: string | null = null) {
@@ -248,6 +267,7 @@ export const useCanvasStore = defineStore("canvas", {
         this.root.children = insertInList(this.root.children);
       }
       this.removeElement(tempId);
+      this.mergeAdjacentTextElements();
     },
     /** 在指定容器的 index 位置添加元素 */
     addElementToContainerAt(type: CanvasInnerElementTypeEnum, containerId: string, index: number) {
@@ -255,6 +275,7 @@ export const useCanvasStore = defineStore("canvas", {
       if(containerId === this.root.id){
         const clampedIndex = Math.min(index, this.root.children.length);
         this.root.children.splice(clampedIndex, 0, element);
+        this.mergeAdjacentTextElements();
         return;
       }
       const insertInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
@@ -272,6 +293,7 @@ export const useCanvasStore = defineStore("canvas", {
         });
       };
       this.root.children = insertInList(this.root.children);
+      this.mergeAdjacentTextElements();
     },
     /** 选中元素的父节点 */
     selectParentElement() {
@@ -288,6 +310,34 @@ export const useCanvasStore = defineStore("canvas", {
       const { found, parentId } = findParentId(this.root.children, this.root.id);
       if (found) {
         this.selectElement(parentId);
+      }
+    },
+    /** 合并相邻的纯文本兄弟元素 */
+    mergeAdjacentTextElements() {
+      /** 合并后选中元素应映射到的 id */
+      let mergedSelectedId: string | null = null;
+      const mergeInList = (list: CanvasInnerElement[]): CanvasInnerElement[] => {
+        const result: CanvasInnerElement[] = [];
+        for (const el of list) {
+          if (isParentElement(el)) {
+            result.push({ ...el, children: mergeInList(el.children) });
+            continue;
+          }
+          const prev = result[result.length - 1];
+          if (prev && prev.type === CanvasElementTypeEnum.TEXT && el.type === CanvasElementTypeEnum.TEXT) {
+            (prev as CanvasTextElement).text += (el as CanvasTextElement).text;
+            if (el.id === this.selectedElementId) {
+              mergedSelectedId = prev.id;
+            }
+          } else {
+            result.push(el);
+          }
+        }
+        return result;
+      };
+      this.root.children = mergeInList(this.root.children);
+      if (mergedSelectedId) {
+        this.selectElement(mergedSelectedId);
       }
     },
     /** 加载默认画布内容 */

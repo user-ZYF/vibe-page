@@ -10,7 +10,6 @@
         @undo="handleUndo"
         @redo="handleRedo"
         @code="handleCode"
-        @import="handleImport"
         @clear="handleClear"
         @cleanup-classes="handleCleanupClasses"
       />
@@ -25,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, provide } from 'vue';
-import { Modal, message } from 'ant-design-vue';
+import { Modal } from 'ant-design-vue';
 import EditorHeader from './components/Header.vue';
 import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
@@ -166,11 +165,6 @@ function handleCleanupClasses() {
       canvasStore.cleanupUnusedClassStyles();
     },
   });
-}
-
-/** 源码导入 */
-function handleImport(){
-  message.info('源码导入功能正在开发中，敬请期待');
 }
 
 provide(HIDDEN_KEYS, hiddenKeys);

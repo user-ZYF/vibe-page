@@ -1,8 +1,8 @@
 <!-- ? 元素设置配置面板 -->
 <template>
   <div>
-    <!-- 元素 ID -->
-    <div class="style-config-section">
+    <!-- 元素 ID（纯文本元素在生成代码中无属性，不显示 ID 设置） -->
+    <div v-if="model.type !== CanvasElementTypeEnum.TEXT" class="style-config-section">
       <div class="style-config-label">ID</div>
       <a-input
         :value="model.id"
@@ -184,6 +184,14 @@
         <a-select v-model:value="(model as CanvasFormElement).method" size="small" class="style-config-select" :options="FORM_METHOD_OPTIONS" />
       </div>
     </template>
+
+    <!-- 纯文本 -->
+    <template v-else-if="model.type === CanvasElementTypeEnum.TEXT">
+      <div class="style-config-section">
+        <div class="style-config-label">文本内容</div>
+        <a-textarea v-model:value="pendingText" :rows="3" size="small" @blur="commitText" />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -208,6 +216,7 @@ import {
   type CanvasAudioElement,
   type CanvasLabelElement,
   type CanvasFormElement,
+  type CanvasTextElement,
   isParentElement,
 } from '@/views/Canvas/types';
 
@@ -241,6 +250,7 @@ watch(
     if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
     else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
+    else if (el.type === CanvasElementTypeEnum.TEXT) pendingText.value = (el as CanvasTextElement).text;
   },
   { immediate: true, deep: true },
 );
@@ -252,6 +262,7 @@ function commitText() {
   if (el.type === CanvasElementTypeEnum.BUTTON) (el as CanvasButtonElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.PARAGRAPH) (el as CanvasParagraphElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
+  else if (el.type === CanvasElementTypeEnum.TEXT) (el as CanvasTextElement).text = pendingText.value;
 }
 
 /** id 输入框聚焦时保存原值 */

@@ -606,6 +606,31 @@ export const DefaultFormStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
+/** 行内容器元素默认样式配置 */
+export const DefaultSpanStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  general: {
+    ...cloneDeep(DefaultGeneralStyleConfig.general),
+    display: DisplayStyleEnum.INLINE_BLOCK,
+  },
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    paddingTop: 16,
+    paddingTopUnit: SizeUnitEnum.PX,
+    paddingRight: 24,
+    paddingRightUnit: SizeUnitEnum.PX,
+    paddingBottom: 16,
+    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingLeft: 24,
+    paddingLeftUnit: SizeUnitEnum.PX,
+  },
+};
+
+/** 纯文本元素默认样式配置 */
+export const DefaultTextStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig)
@@ -627,6 +652,8 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.AUDIO]: DefaultAudioStyleConfig,
   [CanvasElementTypeEnum.LABEL]: DefaultLabelStyleConfig,
   [CanvasElementTypeEnum.FORM]: DefaultFormStyleConfig,
+  [CanvasElementTypeEnum.SPAN]: DefaultSpanStyleConfig,
+  [CanvasElementTypeEnum.TEXT]: DefaultTextStyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

@@ -49,7 +49,6 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
         if (opts.isPreview.value) return;
         state.isEditing = true;
         el.setAttribute('contenteditable', 'true');
-        el.setAttribute('is-editing', 'true');
         canvasStore.selectElement(opts.id);
         nextTick(() => {
           el.focus();
@@ -64,7 +63,6 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
         if (!state.isEditing) return;
         state.isEditing = false;
         el.setAttribute('contenteditable', 'false');
-        el.setAttribute('is-editing', 'false');
         const newText = el.innerText.trim();
         if (!newText && state.binding.onEmpty) {
           state.binding.onEmpty();
@@ -86,7 +84,6 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
     editableStateMap.set(el, state);
 
     el.setAttribute('contenteditable', 'false');
-    el.setAttribute('is-editing', 'false');
     el.addEventListener('dblclick', state.dblclickHandler);
     el.addEventListener('blur', state.blurHandler);
     el.addEventListener('keydown', state.keydownHandler);
@@ -96,6 +93,13 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
     const state = editableStateMap.get(el);
     if (state) {
       state.binding = binding.value;
+      /** 非编辑状态下，强制同步 DOM 文本与数据，修复 contenteditable 导致的 VNode/DOM 不同步问题（如撤销/重做后 DOM 残留 <br>） */
+      if (!state.isEditing) {
+        const expectedText = state.binding.getText();
+        if (el.innerText !== expectedText) {
+          el.innerText = expectedText;
+        }
+      }
     }
   },
 

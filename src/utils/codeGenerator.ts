@@ -123,7 +123,7 @@ function buildAttributes(element: CanvasElement): string {
   switch (element.type) {
     case CanvasElementTypeEnum.BUTTON: {
       const btn = element as CanvasButtonElement;
-      attrs.push(`type="${escapeAttrValue(btn.buttonType)}"`);
+      if (btn.buttonType) attrs.push(`type="${escapeAttrValue(btn.buttonType)}"`);
       break;
     }
     case CanvasElementTypeEnum.IMAGE: {
@@ -139,8 +139,10 @@ function buildAttributes(element: CanvasElement): string {
         [LinkTargetEnum.SELF]: '_self',
         [LinkTargetEnum.BLANK]: '_blank',
       };
-      const targetAttr = TARGET_ATTR_MAP[link.target];
-      if (targetAttr) attrs.push(`target="${targetAttr}"`);
+      if (link.target) {
+        const targetAttr = TARGET_ATTR_MAP[link.target];
+        if (targetAttr) attrs.push(`target="${targetAttr}"`);
+      }
       break;
     }
     case CanvasElementTypeEnum.INPUT: {
@@ -196,7 +198,7 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.FORM: {
       const form = element as CanvasFormElement;
       if (form.action) attrs.push(`action="${escapeAttrValue(form.action)}"`);
-      attrs.push(`method="${escapeAttrValue(form.method)}"`);
+      if (form.method) attrs.push(`method="${escapeAttrValue(form.method)}"`);
       break;
     }
     case CanvasElementTypeEnum.TABLE_COL: {
@@ -214,8 +216,10 @@ function buildAttributes(element: CanvasElement): string {
       const th = element as CanvasTableHeaderCellElement;
       if (th.colspan > 1) attrs.push(`colspan="${th.colspan}"`);
       if (th.rowspan > 1) attrs.push(`rowspan="${th.rowspan}"`);
-      const scopeAttr = TABLE_SCOPE_ATTR_MAP[th.scope];
-      if (scopeAttr) attrs.push(`scope="${scopeAttr}"`);
+      if (th.scope) {
+        const scopeAttr = TABLE_SCOPE_ATTR_MAP[th.scope];
+        if (scopeAttr) attrs.push(`scope="${scopeAttr}"`);
+      }
       break;
     }
     case CanvasElementTypeEnum.TABLE_COL_GROUP: {

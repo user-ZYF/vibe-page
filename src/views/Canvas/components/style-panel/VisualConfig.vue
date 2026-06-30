@@ -49,21 +49,21 @@
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
-              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" placeholder="repeat" />
+              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" placeholder="repeat" allow-clear />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Position</div>
-              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" placeholder="center" />
+              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" placeholder="center" allow-clear />
             </div>
           </div>
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Attachment</div>
-              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" placeholder="scroll" />
+              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" placeholder="scroll" allow-clear />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Size</div>
-              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" placeholder="auto" />
+              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" placeholder="auto" allow-clear />
             </div>
           </div>
         </template>
@@ -98,7 +98,7 @@
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Style</div>
-          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" />
+          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
         </div>
       </div>
       <div class="style-config-label">Color</div>

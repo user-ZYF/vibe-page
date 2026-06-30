@@ -333,7 +333,7 @@ export interface CanvasButtonElement extends CanvasElementBase {
   /** 按钮文本 */
   text: string;
   /** 按钮类型 */
-  buttonType: ButtonTypeEnum;
+  buttonType?: ButtonTypeEnum;
 }
 
 /** 画布段落元素 */
@@ -361,7 +361,7 @@ export interface CanvasLinkElement extends CanvasElementBase {
   /** 连接地址 */
   href: string;
   /** 打开方式 */
-  target: LinkTargetEnum;
+  target?: LinkTargetEnum;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -457,7 +457,7 @@ export interface CanvasFormElement extends CanvasElementBase {
   /** 提交地址 */
   action: string;
   /** 提交方式 */
-  method: FormMethodEnum;
+  method?: FormMethodEnum;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -563,7 +563,7 @@ export interface CanvasTableHeaderCellElement extends CanvasElementBase {
   /** 跨行数 */
   rowspan: number;
   /** 表头范围 */
-  scope: TableScopeEnum;
+  scope?: TableScopeEnum;
   /** 子元素 */
   children: CanvasInnerElement[];
 }

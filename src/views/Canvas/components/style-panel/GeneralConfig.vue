@@ -15,18 +15,18 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Display</div>
-        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="displayOptions" placeholder="block" />
+        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="displayOptions" placeholder="block" allow-clear />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Position</div>
-        <a-select v-model:value="model.position" size="small" class="style-config-select" :options="POSITION_OPTIONS" placeholder="static" />
+        <a-select v-model:value="model.position" size="small" class="style-config-select" :options="POSITION_OPTIONS" placeholder="static" allow-clear />
       </div>
     </div>
 
     <!-- Overflow -->
     <div class="style-config-section">
       <div class="style-config-label">Overflow</div>
-      <a-select v-model:value="model.overflow" size="small" class="style-config-select" :options="OVERFLOW_OPTIONS" placeholder="visible" />
+      <a-select v-model:value="model.overflow" size="small" class="style-config-select" :options="OVERFLOW_OPTIONS" placeholder="visible" allow-clear />
     </div>
 
     <!-- Top & Right -->

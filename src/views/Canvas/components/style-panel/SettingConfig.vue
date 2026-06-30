@@ -26,7 +26,7 @@
       </div>
       <div class="style-config-section">
         <div class="style-config-label">按钮类型</div>
-        <a-select v-model:value="(model as CanvasButtonElement).buttonType" size="small" class="style-config-select" :options="BUTTON_TYPE_OPTIONS" />
+        <a-select v-model:value="(model as CanvasButtonElement).buttonType" size="small" class="style-config-select" :options="BUTTON_TYPE_OPTIONS" allow-clear />
       </div>
     </template>
 
@@ -58,7 +58,7 @@
       </div>
       <div class="style-config-section">
         <div class="style-config-label">打开方式</div>
-        <a-select v-model:value="(model as CanvasLinkElement).target" size="small" class="style-config-select" :options="LINK_TARGET_OPTIONS" />
+        <a-select v-model:value="(model as CanvasLinkElement).target" size="small" class="style-config-select" :options="LINK_TARGET_OPTIONS" allow-clear />
       </div>
     </template>
 
@@ -181,7 +181,7 @@
       </div>
       <div class="style-config-section">
         <div class="style-config-label">提交方式</div>
-        <a-select v-model:value="(model as CanvasFormElement).method" size="small" class="style-config-select" :options="FORM_METHOD_OPTIONS" />
+        <a-select v-model:value="(model as CanvasFormElement).method" size="small" class="style-config-select" :options="FORM_METHOD_OPTIONS" allow-clear />
       </div>
     </template>
 

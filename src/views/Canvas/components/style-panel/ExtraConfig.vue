@@ -11,6 +11,7 @@
           class="style-config-select"
           :options="BORDER_COLLAPSE_OPTIONS"
           placeholder="separate"
+          allow-clear
         />
       </div>
     </template>
@@ -39,7 +40,7 @@
       </div>
       <div class="style-config-section">
         <div class="style-config-label">表头范围（scope）</div>
-        <a-select v-model:value="(model as CanvasTableHeaderCellElement).scope" size="small" class="style-config-select" :options="TABLE_SCOPE_OPTIONS" />
+        <a-select v-model:value="(model as CanvasTableHeaderCellElement).scope" size="small" class="style-config-select" :options="TABLE_SCOPE_OPTIONS" allow-clear />
       </div>
     </template>
 

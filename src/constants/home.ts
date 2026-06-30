@@ -349,7 +349,6 @@ export const TABLE_SCOPE_ATTR_MAP: Record<TableScopeEnum, string> = {
 
 /** 表头单元格 scope 属性选项 */
 export const TABLE_SCOPE_OPTIONS = [
-  { label: '未设置', value: TableScopeEnum.UNDEFINED },
   { label: 'row', value: TableScopeEnum.ROW },
   { label: 'col', value: TableScopeEnum.COL },
   { label: 'rowgroup', value: TableScopeEnum.ROWGROUP },

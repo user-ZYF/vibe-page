@@ -5,7 +5,7 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font family</div>
-        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" placeholder="inherit" />
+        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" placeholder="inherit" allow-clear />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Font size</div>
@@ -20,7 +20,7 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font weight</div>
-        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" placeholder="normal" />
+        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" placeholder="normal" allow-clear />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Letter spacing</div>

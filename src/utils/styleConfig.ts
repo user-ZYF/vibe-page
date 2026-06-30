@@ -22,7 +22,11 @@ function convertBackgroundItem(item: BackgroundItem): string {
   }
   if (item.type === BackgroundTypeEnum.IMAGE) {
     const safeUrl = sanitizeUrl(item.imageUrl ?? '');
-    return `url("${safeUrl}") ${item.position} / ${item.size} ${item.repeat} ${item.attachment}`;
+    const position = item.position ?? 'center';
+    const size = item.size ?? 'auto';
+    const repeat = item.repeat ?? 'repeat';
+    const attachment = item.attachment ?? 'scroll';
+    return `url("${safeUrl}") ${position} / ${size} ${repeat} ${attachment}`;
   }
   return '';
 }

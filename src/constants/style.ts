@@ -626,6 +626,13 @@ export const DefaultLabelStyleConfig: StyleConfig = {
 /** 表单元素默认样式配置 */
 export const DefaultFormStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: SizeUnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: SizeUnitEnum.PX,
+  }
 };
 
 /** 行内容器元素默认样式配置 */
@@ -662,14 +669,10 @@ export const DefaultUnorderedListStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    paddingTop: 16,
-    paddingTopUnit: SizeUnitEnum.PX,
-    paddingRight: 24,
-    paddingRightUnit: SizeUnitEnum.PX,
-    paddingBottom: 16,
-    paddingBottomUnit: SizeUnitEnum.PX,
-    paddingLeft: 24,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    minWidth: '80',
+    minWidthUnit: SizeUnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: SizeUnitEnum.PX,
   },
 };
 
@@ -677,15 +680,10 @@ export const DefaultUnorderedListStyleConfig: StyleConfig = {
 export const DefaultOrderedListStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    paddingTop: 16,
-    paddingTopUnit: SizeUnitEnum.PX,
-    paddingRight: 24,
-    paddingRightUnit: SizeUnitEnum.PX,
-    paddingBottom: 16,
-    paddingBottomUnit: SizeUnitEnum.PX,
-    paddingLeft: 24,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    ...cloneDeep(DefaultGeneralStyleConfig.size),    minWidth: '80',
+    minWidthUnit: SizeUnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: SizeUnitEnum.PX,
   },
 };
 
@@ -703,8 +701,10 @@ export const DefaultTableStyleConfig: StyleConfig = {
   },
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    width: '100',
-    widthUnit: SizeUnitEnum.PERCENT,
+    minWidth: '80',
+    minWidthUnit: SizeUnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: SizeUnitEnum.PX,
   },
 };
 
@@ -807,109 +807,31 @@ export const DefaultAsideStyleConfig: StyleConfig = {
 /** 一级标题元素默认样式配置 */
 export const DefaultHeading1StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '24',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '12',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 32,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** 二级标题元素默认样式配置 */
 export const DefaultHeading2StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '20',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '10',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 26,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** 三级标题元素默认样式配置 */
 export const DefaultHeading3StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '18',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '8',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 22,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** 四级标题元素默认样式配置 */
 export const DefaultHeading4StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '16',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '8',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 18,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** 五级标题元素默认样式配置 */
 export const DefaultHeading5StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '14',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '6',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 16,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** 六级标题元素默认样式配置 */
 export const DefaultHeading6StyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    marginTop: '12',
-    marginTopUnit: SizeUnitEnum.PX,
-    marginBottom: '6',
-    marginBottomUnit: SizeUnitEnum.PX,
-  },
-  font: {
-    ...cloneDeep(DefaultGeneralStyleConfig.font),
-    fontSize: 14,
-    fontSizeUnit: SizeUnitEnum.PX,
-    fontWeight: FontWeightEnum.BOLD,
-  },
 };
 
 /** Class 默认样式配置（空白样式，所有属性均未设置） */

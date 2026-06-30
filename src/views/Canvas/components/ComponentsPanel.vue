@@ -75,6 +75,7 @@ const componentGroups: ComponentGroup[] = [
     components: [
       CanvasElementTypeEnum.UNORDERED_LIST,
       CanvasElementTypeEnum.ORDERED_LIST,
+      CanvasElementTypeEnum.LIST_ITEM,
     ],
   },
   {

@@ -73,6 +73,22 @@ export const editable: Directive<HTMLElement, EditableBinding> = {
         }
       },
       keydownHandler: (e: KeyboardEvent) => {
+        /** 拦截所有能产生不受控内联格式化或样式修改的快捷键 */
+        if (e.ctrlKey || e.metaKey) {
+          const key = e.key.toLowerCase();
+          /** 加粗 / 斜体 / 下划线 */
+          if (key === 'b' || key === 'i' || key === 'u') {
+            e.preventDefault();
+            return;
+          }
+          if (e.shiftKey) {
+            /** 删除线 / 文本对齐 */
+            if (key === 's' || key === 'k' || key === 'l' || key === 'e' || key === 'r' || key === 'j') {
+              e.preventDefault();
+              return;
+            }
+          }
+        }
         if (e.shiftKey) return;
         if (e.key === 'Enter') {
           e.preventDefault();

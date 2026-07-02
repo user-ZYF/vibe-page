@@ -184,6 +184,7 @@ onUnmounted(() => {
 .editor-layout {
   height: 100%;
   width: 100%;
+  background: var(--editor-bg);
 }
 
 .editor-left {
@@ -191,10 +192,11 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--editor-bg-canvas);
 }
 
 .editor-canvas {
+  background: var(--editor-bg-canvas);
   transition: background 0.3s ease;
 }
-
 </style>

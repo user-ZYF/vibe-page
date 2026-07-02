@@ -14,7 +14,10 @@
             :key="comp"
             :ref="(el) => bindCreateConnector(el as HTMLElement, comp)"
             :data-element-type="comp"
-          >{{ CanvasElementLabelMap[comp] }}</div>
+          >
+            <component :is="CanvasElementIconMap[comp]" class="component-item-icon" />
+            <span>{{ CanvasElementLabelMap[comp] }}</span>
+          </div>
         </div>
       </a-collapse-panel>
     </a-collapse>
@@ -22,17 +25,95 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, type Component } from 'vue'
 import { CanvasElementLabelMap, CanvasElementTypeEnum } from '@/constants/home';
 import { dragEngine } from '../drag/DragEngine';
 import { CanvasInnerElementTypeEnum, ComponentGroup } from '../types';
+import {
+  AlignLeftOutlined,
+  AppstoreOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  BorderBottomOutlined,
+  BorderHorizontalOutlined,
+  BorderOuterOutlined,
+  BorderOutlined,
+  BorderRightOutlined,
+  BorderTopOutlined,
+  BorderVerticleOutlined,
+  CheckCircleOutlined,
+  CheckSquareOutlined,
+  ColumnHeightOutlined,
+  ColumnWidthOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  FontSizeOutlined,
+  FormOutlined,
+  HighlightOutlined,
+  LayoutOutlined,
+  LinkOutlined,
+  OrderedListOutlined,
+  PictureOutlined,
+  PlayCircleOutlined,
+  ProfileOutlined,
+  ReadOutlined,
+  RightOutlined,
+  SoundOutlined,
+  TableOutlined,
+  TagOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons-vue';
 
 defineOptions({
   name: 'ComponentsPanel',
-})
+});
+
+/** 画布元素图标映射 */
+const CanvasElementIconMap: Record<CanvasElementTypeEnum, Component> = {
+  [CanvasElementTypeEnum.CONTAINER]: BorderOuterOutlined,
+  [CanvasElementTypeEnum.SPAN]: FontSizeOutlined,
+  [CanvasElementTypeEnum.TEXT]: FileTextOutlined,
+  [CanvasElementTypeEnum.PARAGRAPH]: AlignLeftOutlined,
+  [CanvasElementTypeEnum.LINK]: LinkOutlined,
+  [CanvasElementTypeEnum.BUTTON]: AppstoreOutlined,
+  [CanvasElementTypeEnum.LABEL]: TagOutlined,
+  [CanvasElementTypeEnum.FORM]: FormOutlined,
+  [CanvasElementTypeEnum.INPUT]: EditOutlined,
+  [CanvasElementTypeEnum.TEXTAREA]: ProfileOutlined,
+  [CanvasElementTypeEnum.RADIO]: CheckCircleOutlined,
+  [CanvasElementTypeEnum.CHECKBOX]: CheckSquareOutlined,
+  [CanvasElementTypeEnum.IMAGE]: PictureOutlined,
+  [CanvasElementTypeEnum.VIDEO]: PlayCircleOutlined,
+  [CanvasElementTypeEnum.AUDIO]: SoundOutlined,
+  [CanvasElementTypeEnum.UNORDERED_LIST]: UnorderedListOutlined,
+  [CanvasElementTypeEnum.ORDERED_LIST]: OrderedListOutlined,
+  [CanvasElementTypeEnum.LIST_ITEM]: RightOutlined,
+  [CanvasElementTypeEnum.TABLE]: TableOutlined,
+  [CanvasElementTypeEnum.TABLE_HEAD]: ArrowUpOutlined,
+  [CanvasElementTypeEnum.TABLE_BODY]: BorderHorizontalOutlined,
+  [CanvasElementTypeEnum.TABLE_FOOT]: ArrowDownOutlined,
+  [CanvasElementTypeEnum.TABLE_ROW]: ColumnHeightOutlined,
+  [CanvasElementTypeEnum.TABLE_DATA]: BorderOutlined,
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: HighlightOutlined,
+  [CanvasElementTypeEnum.TABLE_CAPTION]: TagOutlined,
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: ColumnWidthOutlined,
+  [CanvasElementTypeEnum.TABLE_COL]: BorderVerticleOutlined,
+  [CanvasElementTypeEnum.HEADER]: BorderTopOutlined,
+  [CanvasElementTypeEnum.FOOTER]: BorderBottomOutlined,
+  [CanvasElementTypeEnum.ARTICLE]: ReadOutlined,
+  [CanvasElementTypeEnum.SECTION]: LayoutOutlined,
+  [CanvasElementTypeEnum.ASIDE]: BorderRightOutlined,
+  [CanvasElementTypeEnum.HEADING_1]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING_2]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING_3]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING_4]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING_5]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING_6]: FontSizeOutlined,
+  [CanvasElementTypeEnum.ROOT]: BorderOuterOutlined,
+};
 
 /** 当前展开的折叠面板 */
-const activeKeys = ref<string>('basic')
+const activeKeys = ref<string>('basic');
 
 /** 组件分组列表 */
 const componentGroups: ComponentGroup[] = [
@@ -145,11 +226,11 @@ onUnmounted(() => {
   overflow-y: auto;
 
   :deep(.ant-collapse) {
-    color: #ccc;
+    color: var(--editor-text-secondary);
   }
 
   :deep(.ant-collapse-header) {
-    color: #ccc !important;
+    color: var(--editor-text) !important;
     font-size: 13px;
     padding: 10px 12px !important;
   }
@@ -159,7 +240,7 @@ onUnmounted(() => {
   }
 
   :deep(.ant-collapse-expand-icon) {
-    color: #ccc;
+    color: var(--editor-text-secondary);
   }
 }
 
@@ -176,18 +257,25 @@ onUnmounted(() => {
   justify-content: center;
   gap: 10px;
   padding: 16px 8px;
-  background-color: #2e2b2e;
-  border-radius: 6px;
+  background-color: var(--editor-bg-item);
+  border-radius: var(--editor-radius);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, border-color 0.2s;
   font-size: 11px;
   text-align: center;
-  color: #fff;
+  color: var(--editor-text);
   line-height: 1.3;
   user-select: none;
+  border: 1px solid var(--editor-border);
 
   &:hover {
-    background-color: #3d383d;
+    background-color: var(--editor-bg-item-hover);
+    border-color: var(--editor-border-strong);
   }
+}
+
+.component-item-icon {
+  font-size: 20px;
+  color: var(--editor-text-secondary);
 }
 </style>

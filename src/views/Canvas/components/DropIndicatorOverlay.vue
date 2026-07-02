@@ -37,12 +37,12 @@ const indicatorStyle = computed(() => {
 .drop-indicator-overlay {
   position: fixed;
   z-index: 9999;
-  background-color: #1677ff;
+  background-color: var(--app-color-primary);
   pointer-events: none;
   border-radius: 1px;
 
   &.is-error {
-    background-color: #ff4d4f;
+    background-color: var(--app-color-error);
   }
 }
 </style>

@@ -711,10 +711,6 @@ export const DefaultImageStyleConfig: StyleConfig = {
 /** 根元素默认样式配置 */
 export const DefaultRootStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig),
- general: {
-  ...cloneDeep(DefaultGeneralStyleConfig.general),
-  position: PositionStyleEnum.RELATIVE
- }
 };
 
 /** 单行文本框元素默认样式配置 */

@@ -300,7 +300,7 @@ onBeforeUnmount(() => {
   left: v-bind('elRect.marginLeft + "px"');
   right: v-bind('elRect.marginRight + "px"');
   bottom: v-bind('elRect.marginBottom + "px"');
-  outline: 2px solid #4096ff;
+  outline: 2px solid var(--editor-accent);
   outline-offset: -2px;
 }
 
@@ -314,7 +314,8 @@ onBeforeUnmount(() => {
   gap: 2px;
   height: 28px;
   padding: 0 4px;
-  background: #4096ff;
+  background: var(--editor-accent);
+  border-radius: var(--editor-radius-sm);
   pointer-events: auto;
   white-space: nowrap;
 }
@@ -327,7 +328,7 @@ onBeforeUnmount(() => {
   width: 22px;
   height: 22px;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--editor-radius-sm);
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -340,7 +341,7 @@ onBeforeUnmount(() => {
 
   &--danger {
     &:hover {
-      background: rgba(255, 77, 79, 0.8);
+      background: var(--app-color-error);
     }
   }
 }
@@ -349,7 +350,8 @@ onBeforeUnmount(() => {
 .etb-resize-handle {
   position: absolute;
   background: #fff;
-  border: 1px solid #4096ff;
+  border: 1px solid var(--editor-accent);
+  border-radius: 2px;
   pointer-events: auto;
   touch-action: none;
   z-index: 101;

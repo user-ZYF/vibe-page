@@ -241,27 +241,28 @@ watch(selectedElementId, () => {
 
 <style scoped lang="less">
 :deep(.ant-collapse-header-text) {
-  color: #fff;
+  color: var(--editor-text);
   font-weight: 500;
 }
 
 :deep(.ant-collapse-expand-icon) {
-  color: #fff;
+  color: var(--editor-text-secondary);
 }
 
 .style-panel {
   &-empty {
-    color: #fff;
+    color: var(--editor-text-tertiary);
     text-align: center;
-    padding: 20px;
+    padding: 40px 16px;
+    font-size: 13px;
   }
 
   &-classes {
     padding: 12px 12px 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--editor-border);
 
     &-title {
-      color: #fff;
+      color: var(--editor-text-secondary);
       font-size: 13px;
       margin-bottom: 8px;
     }
@@ -278,58 +279,59 @@ watch(selectedElementId, () => {
       align-items: center;
       gap: 4px;
       padding: 3px 8px;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
+      background: var(--editor-bg-item);
+      border-radius: var(--editor-radius-sm);
       cursor: pointer;
       border: 1px solid transparent;
       transition: background 0.2s, border-color 0.2s;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--editor-bg-item-hover);
       }
 
       &.is-active {
-        background: rgba(130, 80, 180, 0.5);
-        border-color: rgba(160, 100, 220, 0.8);
+        background: var(--editor-accent-bg);
+        border-color: var(--editor-border-active);
       }
 
       &-name {
-        color: #fff;
+        color: var(--editor-text);
         font-size: 12px;
       }
 
       &-remove {
-        color: rgba(255, 255, 255, 0.6);
+        color: var(--editor-text-tertiary);
         font-size: 10px;
         cursor: pointer;
         transition: color 0.2s;
 
         &:hover {
-          color: #fff;
+          color: var(--editor-text);
         }
       }
     }
 
     &-add {
-      background: rgba(255, 255, 255, 0.15) !important;
+      background: var(--editor-bg-item) !important;
       border-color: transparent !important;
-      color: #fff !important;
+      color: var(--editor-text-secondary) !important;
       padding: 2px 6px;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.25) !important;
+        background: var(--editor-bg-item-hover) !important;
+        color: var(--editor-text) !important;
       }
     }
 
     &-selected {
       margin-top: 8px;
-      color: rgba(255, 255, 255, 0.55);
+      color: var(--editor-text-tertiary);
       font-size: 12px;
     }
 
     &-error {
       margin-top: 6px;
-      color: #ff4d4f;
+      color: var(--app-color-error);
       font-size: 12px;
     }
   }

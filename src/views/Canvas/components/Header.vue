@@ -110,9 +110,10 @@ const emit = defineEmits<{
   height: 48px;
   line-height: 48px;
   padding: 0 16px;
-  background: #3a3a3a;
-  color: #fff;
+  background: var(--editor-bg-header);
+  color: var(--editor-text);
   overflow: hidden;
+  border-bottom: 1px solid var(--editor-border);
   transition: opacity 0.3s ease;
 
   .editor-header-wrapper.is-preview & {
@@ -120,31 +121,33 @@ const emit = defineEmits<{
   }
 
   :deep(.ant-btn-text) {
-    color: #fff;
+    color: var(--editor-text-secondary);
 
     &:hover {
-      color: rgba(255, 255, 255, 0.75);
+      color: var(--editor-text);
+      background: var(--editor-bg-item-hover);
     }
 
     &.is-disabled,
     &:disabled {
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--editor-text-disabled);
       cursor: not-allowed;
 
       &:hover {
-        color: rgba(255, 255, 255, 0.3);
+        color: var(--editor-text-disabled);
+        background: transparent;
       }
     }
   }
 
   :deep(.ant-divider-vertical) {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: var(--editor-border-strong);
   }
 }
 
 :deep(.editor-tooltip-white) {
   .ant-tooltip-inner {
-    color: #333;
+    color: var(--app-color-text);
   }
 
   .ant-tooltip-arrow-content {
@@ -157,7 +160,7 @@ const emit = defineEmits<{
   top: 12px;
   left: 12px;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--editor-shadow);
 }
 
 .preview-btn-enter-active,

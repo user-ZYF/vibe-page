@@ -87,8 +87,9 @@ function handlePanelSwitch(panel: SiderPanelEnum) {
 
 <style scoped lang="less">
 .editor-sider-right {
-  background: #3a3a3a !important;
-  color: #fff;
+  background: var(--editor-bg-sider) !important;
+  color: var(--editor-text);
+  border-left: 1px solid var(--editor-border);
 
   :deep(.ant-layout-sider-children) {
     overflow: hidden;
@@ -106,21 +107,22 @@ function handlePanelSwitch(panel: SiderPanelEnum) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--editor-border);
 
   :deep(.ant-btn-text) {
-    color: #fff;
+    color: var(--editor-text-secondary);
 
     &:hover {
-      color: rgba(255, 255, 255, 0.75);
+      color: var(--editor-text);
+      background: var(--editor-bg-item-hover);
     }
   }
 }
 
 :deep(.editor-tooltip-white) {
   .ant-tooltip-inner {
-    color: #333;
+    color: var(--app-color-text);
   }
 
   .ant-tooltip-arrow-content {
@@ -143,17 +145,18 @@ function handlePanelSwitch(panel: SiderPanelEnum) {
   padding: 12px 16px;
   font-size: 14px;
   font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  border-bottom: 1px solid var(--editor-border);
+  color: var(--editor-text);
 }
 
 .panel-body {
   flex: 1;
   padding: 16px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--editor-text);
 }
 
 .is-active {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: var(--editor-accent-bg) !important;
+  color: var(--editor-accent) !important;
 }
 </style>

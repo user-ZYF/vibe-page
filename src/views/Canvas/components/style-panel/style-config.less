@@ -5,7 +5,7 @@
 .style-config-label {
   font-size: 12px;
   margin-bottom: 4px;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--editor-text-secondary);
 
   &--margin {
     margin-top: 4px;
@@ -66,7 +66,7 @@
 
 .style-config-separator {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--editor-text-tertiary);
   flex-shrink: 0;
   padding: 0 2px;
 }
@@ -77,8 +77,8 @@
 }
 
 .style-config-box {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  border: 1px solid var(--editor-border);
+  border-radius: var(--editor-radius-sm);
   padding: 8px;
 
   &--shadow {
@@ -97,7 +97,7 @@
   height: 28px;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--editor-radius-sm);
   cursor: pointer;
   flex-shrink: 0;
   background: none;
@@ -108,8 +108,8 @@
   }
 
   &::-webkit-color-swatch {
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 4px;
+    border: 1px solid var(--editor-border-strong);
+    border-radius: var(--editor-radius-sm);
   }
 }
 
@@ -138,7 +138,7 @@
   gap: 6px;
   margin-bottom: 8px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--editor-text-secondary);
 }
 
 .style-config-drag-icon {
@@ -177,11 +177,11 @@
 
 .style-config-checkbox-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--editor-text-secondary);
 }
 
 .style-config-error {
   margin-top: 4px;
-  color: #ff4d4f;
+  color: var(--app-color-error);
   font-size: 12px;
 }

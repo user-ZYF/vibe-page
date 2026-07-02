@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
   left: v-bind('elRect.marginLeft + "px"');
   right: v-bind('elRect.marginRight + "px"');
   bottom: v-bind('elRect.marginBottom + "px"');
-  outline: 1px solid #4096ff;
+  outline: 1px solid var(--editor-accent);
   outline-offset: -1px;
   z-index: 1;
 }
@@ -307,11 +307,12 @@ onBeforeUnmount(() => {
   position: absolute;
   z-index: 1;
   left: v-bind('labelLeft + "px"');
-  background: #4096ff;
+  background: var(--editor-accent);
   color: #fff;
   font-size: 12px;
   font-family: monospace;
-  padding: 0 2px;
+  padding: 0 4px;
+  border-radius: 2px;
   white-space: nowrap;
   line-height: 1.5;
   top: v-bind('labelTop + "px"');

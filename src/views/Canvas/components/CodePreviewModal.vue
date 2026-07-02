@@ -96,8 +96,8 @@ function handleClose() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--app-border-radius);
   overflow: hidden;
 }
 
@@ -106,21 +106,21 @@ function handleClose() {
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #e8e8e8;
+  background: var(--app-color-bg-layout);
+  border-bottom: 1px solid var(--app-color-border);
 }
 
 .code-preview-panel-title {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--app-color-text);
 }
 
 .code-preview-panel-copy {
-  color: #999;
+  color: var(--app-color-text-tertiary);
 
   &:hover {
-    color: #333;
+    color: var(--app-color-text);
   }
 }
 

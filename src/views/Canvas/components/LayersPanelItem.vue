@@ -383,7 +383,7 @@ onUnmounted(() => {
   position: absolute;
   right: 0;
   height: 2px;
-  background: #52c41a;
+  background: var(--app-color-success);
   z-index: 10;
   pointer-events: none;
 }
@@ -408,26 +408,26 @@ onUnmounted(() => {
   border-left: 2px solid transparent;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--editor-bg-item-hover);
   }
 
   &.is-selected {
-    background: #ccc;
-    color: #fff;
+    background: var(--editor-accent-bg);
+    border-left-color: var(--editor-accent);
 
     .comp-layer-item-delete {
       opacity: 1;
-      color: rgba(255, 255, 255, 0.75);
+      color: var(--editor-text-secondary);
 
       &:hover {
-        color: #fff;
+        color: var(--editor-text);
       }
     }
   }
 
   &.is-drop-inside {
-    background: rgba(22, 119, 255, 0.15);
-    outline: 1px solid #1677ff;
+    background: var(--editor-accent-bg);
+    outline: 1px solid var(--editor-border-active);
     outline-offset: -1px;
   }
 }
@@ -450,11 +450,11 @@ onUnmounted(() => {
   svg {
     width: 10px;
     height: 10px;
-    fill: rgba(255, 255, 255, 0.55);
+    fill: var(--editor-text-tertiary);
   }
 
   .is-selected & svg {
-    fill: rgba(255, 255, 255, 0.85);
+    fill: var(--editor-text);
   }
 }
 
@@ -484,11 +484,11 @@ onUnmounted(() => {
   svg {
     width: 14px;
     height: 14px;
-    fill: rgba(255, 255, 255, 0.55);
+    fill: var(--editor-text-tertiary);
   }
 
   .is-selected & svg {
-    fill: rgba(255, 255, 255, 0.85);
+    fill: var(--editor-text);
   }
 }
 
@@ -504,11 +504,11 @@ onUnmounted(() => {
   svg {
     width: 14px;
     height: 14px;
-    fill: rgba(255, 255, 255, 0.45);
+    fill: var(--editor-text-disabled);
   }
 
   .is-selected & svg {
-    fill: rgba(255, 255, 255, 0.75);
+    fill: var(--editor-text-secondary);
   }
 }
 
@@ -524,7 +524,7 @@ onUnmounted(() => {
 
 .comp-layer-item-type {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--editor-text-disabled);
   margin-left: 6px;
   flex-shrink: 0;
 }
@@ -543,13 +543,13 @@ onUnmounted(() => {
   transition: opacity 0.15s, background 0.15s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--editor-bg-item-hover);
   }
 
   svg {
     width: 12px;
     height: 12px;
-    fill: rgba(255, 255, 255, 0.45);
+    fill: var(--editor-text-tertiary);
   }
 
   .comp-layer-item-header:hover & {

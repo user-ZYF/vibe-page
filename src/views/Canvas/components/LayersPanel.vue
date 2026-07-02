@@ -113,7 +113,7 @@ provide(EXECUTE_MOVE_KEY, executeMove);
 
 .comp-layers-panel-empty {
   padding: 24px 16px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--editor-text-tertiary);
   text-align: center;
   font-size: 13px;
 }

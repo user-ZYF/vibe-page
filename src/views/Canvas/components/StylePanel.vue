@@ -240,13 +240,47 @@ watch(selectedElementId, () => {
 </script>
 
 <style scoped lang="less">
+:deep(.ant-collapse) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.ant-collapse-item) {
+  border-bottom: 1px solid var(--editor-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+:deep(.ant-collapse-header) {
+  padding: 8px 12px !important;
+  align-items: center;
+  transition: background 0.2s;
+
+  &:hover {
+    background: var(--editor-bg-item);
+  }
+}
+
 :deep(.ant-collapse-header-text) {
   color: var(--editor-text);
   font-weight: 500;
+  font-size: 13px;
 }
 
 :deep(.ant-collapse-expand-icon) {
   color: var(--editor-text-secondary);
+  font-size: 12px;
+}
+
+:deep(.ant-collapse-content) {
+  background: transparent;
+  border-top: 1px solid var(--editor-border);
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 12px 12px 4px !important;
 }
 
 .style-panel {
@@ -316,6 +350,7 @@ watch(selectedElementId, () => {
       border-color: transparent !important;
       color: var(--editor-text-secondary) !important;
       padding: 2px 6px;
+      transition: all 0.2s;
 
       &:hover {
         background: var(--editor-bg-item-hover) !important;

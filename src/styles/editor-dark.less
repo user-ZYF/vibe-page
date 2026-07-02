@@ -1,0 +1,138 @@
+/* ========== antd 组件暗色主题覆盖 ========== */
+
+/* Input 输入框 */
+.ant-input {
+  background: var(--editor-bg-input);
+  border-color: var(--editor-border);
+  color: var(--editor-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: var(--editor-text-tertiary);
+  }
+
+  &:hover {
+    border-color: var(--editor-border-strong);
+  }
+
+  &:focus,
+  &-focused {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px var(--editor-accent-bg);
+  }
+}
+
+/* InputNumber 数字输入框 */
+.ant-input-number {
+  background: var(--editor-bg-input);
+  border-color: var(--editor-border);
+  color: var(--editor-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    border-color: var(--editor-border-strong);
+  }
+
+  &-focused {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px var(--editor-accent-bg);
+  }
+
+  .ant-input-number-input {
+    color: var(--editor-text);
+
+    &::placeholder {
+      color: var(--editor-text-tertiary);
+    }
+  }
+}
+
+/* Select 选择器 */
+.ant-select {
+  .ant-select-selector {
+    background: var(--editor-bg-input) !important;
+    border-color: var(--editor-border) !important;
+    color: var(--editor-text) !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .ant-select-selection-placeholder {
+    color: var(--editor-text-tertiary) !important;
+  }
+
+  .ant-select-arrow {
+    color: var(--editor-text-tertiary);
+  }
+
+  &:hover .ant-select-selector {
+    border-color: var(--editor-border-strong) !important;
+  }
+
+  &.ant-select-focused .ant-select-selector {
+    border-color: var(--editor-accent) !important;
+    box-shadow: 0 0 0 2px var(--editor-accent-bg) !important;
+  }
+}
+
+/* Textarea 文本域 */
+.ant-input-affix-wrapper-textarea-with-clear-btn,
+textarea.ant-input {
+  background: var(--editor-bg-input);
+  border-color: var(--editor-border);
+  color: var(--editor-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: var(--editor-text-tertiary);
+  }
+
+  &:hover {
+    border-color: var(--editor-border-strong);
+  }
+
+  &:focus {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px var(--editor-accent-bg);
+  }
+}
+
+/* Checkbox 复选框 */
+.ant-checkbox-wrapper {
+  color: var(--editor-text-secondary);
+
+  .ant-checkbox-inner {
+    background: var(--editor-bg-input);
+    border-color: var(--editor-border-strong);
+    transition: all 0.2s;
+  }
+
+  &:hover .ant-checkbox-inner {
+    border-color: var(--editor-accent);
+  }
+
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background: var(--editor-accent);
+    border-color: var(--editor-accent);
+  }
+}
+
+/* Slider 滑块 */
+.ant-slider {
+  .ant-slider-rail {
+    background: var(--editor-bg-item-hover);
+  }
+
+  .ant-slider-track {
+    background: var(--editor-accent);
+  }
+
+  &:hover {
+    .ant-slider-track {
+      background: var(--editor-accent-hover);
+    }
+  }
+
+  .ant-slider-handle::after {
+    box-shadow: 0 0 0 2px var(--editor-accent);
+  }
+}

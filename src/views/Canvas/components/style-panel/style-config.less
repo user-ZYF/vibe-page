@@ -4,8 +4,9 @@
 
 .style-config-label {
   font-size: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   color: var(--editor-text-secondary);
+  transition: color 0.2s;
 
   &--margin {
     margin-top: 4px;
@@ -17,21 +18,52 @@
     align-items: center;
     justify-content: space-between;
   }
+
+  &--padding {
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
 }
 
 .style-config-radio-group {
   width: 100%;
+  display: flex;
 
   :deep(.ant-radio-button-wrapper) {
     flex: 1;
     text-align: center;
+    background: var(--editor-bg-input);
+    border-color: var(--editor-border);
+    color: var(--editor-text-secondary);
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--editor-bg-item-hover);
+      color: var(--editor-text);
+    }
+
+    &-checked:not(.ant-radio-button-wrapper-disabled) {
+      background: var(--editor-accent);
+      border-color: var(--editor-accent);
+      color: #fff;
+
+      &:hover {
+        background: var(--editor-accent-hover);
+        border-color: var(--editor-accent-hover);
+        color: #fff;
+      }
+    }
+
+    &:not(:first-child)::before {
+      background: var(--editor-border);
+    }
   }
 }
 
 .style-config-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .style-config-col {
@@ -46,7 +78,7 @@
 .style-config-input-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .style-config-input {
@@ -60,7 +92,7 @@
   width: 100%;
 
   :deep(.ant-input-number-input) {
-    padding: 0 4px;
+    padding: 0 6px;
   }
 }
 
@@ -68,7 +100,7 @@
   font-size: 12px;
   color: var(--editor-text-tertiary);
   flex-shrink: 0;
-  padding: 0 2px;
+  padding: 0 1px;
 }
 
 .style-config-unit {
@@ -79,7 +111,13 @@
 .style-config-box {
   border: 1px solid var(--editor-border);
   border-radius: var(--editor-radius-sm);
-  padding: 8px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--editor-border-strong);
+  }
 
   &--shadow {
     margin-bottom: 8px;
@@ -93,8 +131,8 @@
 }
 
 .style-config-color-picker {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 24px;
   padding: 0;
   border: none;
   border-radius: var(--editor-radius-sm);
@@ -102,6 +140,11 @@
   flex-shrink: 0;
   background: none;
   overflow: hidden;
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: scale(1.08);
+  }
 
   &::-webkit-color-swatch-wrapper {
     padding: 0;
@@ -185,3 +228,4 @@
   color: var(--app-color-error);
   font-size: 12px;
 }
+

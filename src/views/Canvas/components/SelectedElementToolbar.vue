@@ -315,7 +315,6 @@ onBeforeUnmount(() => {
   height: 28px;
   padding: 0 4px;
   background: var(--editor-accent);
-  border-radius: var(--editor-radius-sm);
   pointer-events: auto;
   white-space: nowrap;
 }
@@ -351,7 +350,6 @@ onBeforeUnmount(() => {
   position: absolute;
   background: #fff;
   border: 1px solid var(--editor-accent);
-  border-radius: 2px;
   pointer-events: auto;
   touch-action: none;
   z-index: 101;

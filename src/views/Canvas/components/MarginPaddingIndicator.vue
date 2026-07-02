@@ -312,7 +312,6 @@ onBeforeUnmount(() => {
   font-size: 12px;
   font-family: monospace;
   padding: 0 4px;
-  border-radius: 2px;
   white-space: nowrap;
   line-height: 1.5;
   top: v-bind('labelTop + "px"');

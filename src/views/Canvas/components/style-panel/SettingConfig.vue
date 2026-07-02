@@ -14,7 +14,7 @@
         @blur="handleIdBlur"
       />
       <div v-if="pendingId && !isIdNameValid" class="style-config-error">
-        ID 名称须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符
+        ID 名称须以字母、下划线开头，仅包含字母、数字、下划线和短横线
       </div>
     </div>
 

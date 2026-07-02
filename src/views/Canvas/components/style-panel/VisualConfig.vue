@@ -88,59 +88,93 @@
     <!-- Border -->
     <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Border</div>
-      <div class="style-config-row">
-        <div class="style-config-col">
-          <div class="style-config-label">Width</div>
-          <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderWidth', 'borderWidthUnit')" />
-            <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+      <div class="style-config-box">
+        <div class="style-config-row">
+          <div class="style-config-col">
+            <div class="style-config-label">Width</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderWidth', 'borderWidthUnit')" />
+              <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
+          </div>
+          <div class="style-config-col">
+            <div class="style-config-label">Style</div>
+            <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
           </div>
         </div>
-        <div class="style-config-col">
-          <div class="style-config-label">Style</div>
-          <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
+        <div class="style-config-label">Color</div>
+        <div class="style-config-color-row">
+          <a-input v-model:value="model.borderColor" size="small" class="style-config-input" placeholder="#000000" />
+          <input type="color" v-model="model.borderColor" class="style-config-color-picker" />
         </div>
-      </div>
-      <div class="style-config-label">Color</div>
-      <div class="style-config-color-row">
-        <a-input v-model:value="model.borderColor" size="small" class="style-config-input" placeholder="#000000" />
-        <input type="color" v-model="model.borderColor" class="style-config-color-picker" />
       </div>
     </div>
 
     <!-- Border radius -->
     <div v-if="!onlyBackground" class="style-config-section">
       <div class="style-config-label">Border radius</div>
-      <div class="style-config-row">
-        <div class="style-config-col">
-          <div class="style-config-label">TL</div>
-          <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+      <div class="style-config-box">
+        <div class="style-config-row">
+          <div class="style-config-col">
+            <div class="style-config-label">TL</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
+              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
+          </div>
+          <div class="style-config-col">
+            <div class="style-config-label">TR</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
+              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
           </div>
         </div>
-        <div class="style-config-col">
-          <div class="style-config-label">TR</div>
-          <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+        <div class="style-config-row">
+          <div class="style-config-col">
+            <div class="style-config-label">BL</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
+              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
+          </div>
+          <div class="style-config-col">
+            <div class="style-config-label">BR</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
+              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
           </div>
         </div>
       </div>
-      <div class="style-config-row">
-        <div class="style-config-col">
-          <div class="style-config-label">BL</div>
-          <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+    </div>
+
+    <!-- Outline -->
+    <div v-if="!onlyBackground" class="style-config-section">
+      <div class="style-config-label">Outline</div>
+      <div class="style-config-box">
+        <div class="style-config-row">
+          <div class="style-config-col">
+            <div class="style-config-label">Width</div>
+            <div class="style-config-input-group">
+              <a-input-number v-model:value="model.outlineWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('outlineWidth', 'outlineWidthUnit')" />
+              <a-select v-model:value="model.outlineWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            </div>
+          </div>
+          <div class="style-config-col">
+            <div class="style-config-label">Style</div>
+            <a-select v-model:value="model.outlineStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
           </div>
         </div>
-        <div class="style-config-col">
-          <div class="style-config-label">BR</div>
-          <div class="style-config-input-group">
-            <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-            <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
-          </div>
+        <div class="style-config-label">Color</div>
+        <div class="style-config-color-row">
+          <a-input v-model:value="model.outlineColor" size="small" class="style-config-input" placeholder="#000000" />
+          <input type="color" v-model="model.outlineColor" class="style-config-color-picker" />
+        </div>
+        <div class="style-config-label">Offset</div>
+        <div class="style-config-input-group">
+          <a-input-number v-model:value="model.outlineOffset" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('outlineOffset', 'outlineOffsetUnit')" />
+          <a-select v-model:value="model.outlineOffsetUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
         </div>
       </div>
     </div>

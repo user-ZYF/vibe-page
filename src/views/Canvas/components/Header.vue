@@ -1,7 +1,7 @@
 <!-- ? 编辑器顶栏工具栏 -->
 <template>
-  <div class="editor-header-wrapper" :class="{ 'is-preview': isPreview }">
-    <a-layout-header class="editor-header">
+  <div class="editor-header-wrapper">
+    <a-layout-header class="editor-header" :class="{ 'is-preview': isPreview }">
       <a-space>
         <a-tooltip title="效果预览" overlay-class-name="editor-tooltip-white">
           <a-button type="text" size="small" @click="emit('toggle-preview')">
@@ -98,12 +98,6 @@ const emit = defineEmits<{
 <style scoped lang="less">
 .editor-header-wrapper {
   position: relative;
-  max-height: 48px;
-  transition: max-height 0.3s ease;
-
-  &.is-preview {
-    max-height: 0;
-  }
 }
 
 .editor-header {
@@ -114,10 +108,11 @@ const emit = defineEmits<{
   color: var(--editor-text);
   overflow: hidden;
   border-bottom: 1px solid var(--editor-border);
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, height 0.3s ease;
 
-  .editor-header-wrapper.is-preview & {
+  &.is-preview {
     opacity: 0;
+    height: 0;
   }
 
   :deep(.ant-btn-text) {

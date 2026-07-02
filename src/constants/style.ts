@@ -56,9 +56,9 @@ export enum SizeUnitEnum {
   /** em */
   EM = "em",
   /** vw */
-  VW = "vw",
+  // VW = "vw",
   /** vh */
-  VH = "vh",
+  // VH = "vh",
 }
 
 /** 尺寸&位置单位选项 */
@@ -67,8 +67,8 @@ export const SIZE_UNIT_OPTIONS = [
   { label: '%', value: SizeUnitEnum.PERCENT },
   { label: 'rem', value: SizeUnitEnum.REM },
   { label: 'em', value: SizeUnitEnum.EM },
-  { label: 'vw', value: SizeUnitEnum.VW },
-  { label: 'vh', value: SizeUnitEnum.VH },
+  // { label: 'vw', value: SizeUnitEnum.VW },
+  // { label: 'vh', value: SizeUnitEnum.VH },
 ];
 
 /** font-family枚举 */
@@ -1030,5 +1030,5 @@ export const enum ResizeDirEnum {
   SW = 8,
 }
 
-/** CSS class/id 名称合法性校验正则（须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符） */
-export const CSS_NAME_REGEX = /^-?[_a-zA-Z][_a-zA-Z0-9-]*$/;
+/** CSS class/id 名称合法性校验正则（须以字母或下划线开头，仅包含字母、数字、下划线和短横线） */
+export const CSS_NAME_REGEX = /^[_a-zA-Z][_a-zA-Z0-9-]*$/;

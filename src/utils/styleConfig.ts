@@ -118,6 +118,10 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
     const bl = visual.borderRadiusBL ?? 0;
     css['borderRadius'] = `${tl}${safeUnit(visual.borderRadiusUnit)} ${tr}${safeUnit(visual.borderRadiusUnit)} ${br}${safeUnit(visual.borderRadiusUnit)} ${bl}${safeUnit(visual.borderRadiusUnit)}`;
   }
+  if (isNotEmptyish(visual.outlineWidth)) css['outlineWidth'] = `${visual.outlineWidth}${safeUnit(visual.outlineWidthUnit)}`;
+  if (isNotEmptyish(visual.outlineStyle)) css['outlineStyle'] = visual.outlineStyle;
+  if (isNotEmptyish(visual.outlineColor)) css['outlineColor'] = visual.outlineColor;
+  if (isNotEmptyish(visual.outlineOffset)) css['outlineOffset'] = `${visual.outlineOffset}${safeUnit(visual.outlineOffsetUnit)}`;
   if (isNotEmptyish(visual.opacity)) css['opacity'] = String(visual.opacity);
   if (isNotEmptyish(visual.boxShadows) && visual.boxShadows.length > 0) {
     css['boxShadow'] = visual.boxShadows.map(convertBoxShadowItem).join(', ');

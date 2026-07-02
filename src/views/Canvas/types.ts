@@ -252,6 +252,18 @@ export interface VisualConfig {
   borderRadiusBR?: number;
   /** 圆角单位 */
   borderRadiusUnit?: SizeUnitEnum;
+  /** outline 宽度 */
+  outlineWidth?: number;
+  /** outline 宽度单位 */
+  outlineWidthUnit?: SizeUnitEnum;
+  /** outline 样式 */
+  outlineStyle?: BorderStyleEnum;
+  /** outline 颜色 */
+  outlineColor?: string;
+  /** outline 偏移值 */
+  outlineOffset?: number;
+  /** outline 偏移单位 */
+  outlineOffsetUnit?: SizeUnitEnum;
   /** 不透明度 */
   opacity?: number;
   /** 盒阴影列表 */

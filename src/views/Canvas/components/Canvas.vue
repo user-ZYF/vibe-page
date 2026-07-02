@@ -86,6 +86,7 @@ onMounted(() => {
         overflow: auto;
         position: relative;
         background: #fff;
+        z-index: 0;
       }
 
       .canvas-root:not(.is-preview), .canvas-root:not(.is-preview) [data-canvas-id] {

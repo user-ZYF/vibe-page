@@ -233,7 +233,27 @@ export class Positioner {
         switch (style.display) {
           case DisplayStyleEnum.BLOCK:
           case DisplayStyleEnum.FLEX:
+          /** 列表项纵向排列 */
+          case DisplayStyleEnum.LIST_ITEM:
+          /** 表格为块级元素，纵向排列 */
+          case DisplayStyleEnum.TABLE:
+          /** 表格行在表组内纵向排列 */
+          case DisplayStyleEnum.TABLE_ROW:
+          /** 表头/表体/表脚组在表格内纵向排列 */
+          case DisplayStyleEnum.TABLE_HEADER_GROUP:
+          case DisplayStyleEnum.TABLE_ROW_GROUP:
+          case DisplayStyleEnum.TABLE_FOOTER_GROUP:
+          /** 表格标题纵向排列 */
+          case DisplayStyleEnum.TABLE_CAPTION:
             return true;
+          /** 表格单元格在行内横向排列，类似横向 flex */
+          case DisplayStyleEnum.TABLE_CELL:
+          /** 列定义不参与视觉流 */
+          case DisplayStyleEnum.TABLE_COLUMN:
+          case DisplayStyleEnum.TABLE_COLUMN_GROUP:
+          /** 行内表格非纵向流 */
+          case DisplayStyleEnum.INLINE_TABLE:
+            return false;
         }
 
         return false;

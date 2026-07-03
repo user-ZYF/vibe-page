@@ -2,6 +2,8 @@
  * 项目 CSS 变量定义
  * 与 antd Design Token 保持同步，供全局样式使用
  * 使用方式: color: var(--app-color-primary);
+ *
+ * 亮色主题变量定义在 :root 中，暗色主题通过 [data-theme="dark"] 覆盖
  */
 
 :root {
@@ -34,6 +36,64 @@
   /* 字体大小 */
   --app-font-size: 14px;
 
+  /* ========== 编辑器亮色主题 ========== */
+
+  /* 编辑器背景 */
+  --editor-bg: #ffffff;
+  --editor-bg-header: #ffffff;
+  --editor-bg-sider: #ffffff;
+  --editor-bg-panel: #ffffff;
+  --editor-bg-canvas: #f5f5f5;
+  --editor-bg-item: #f0f0f0;
+  --editor-bg-item-hover: #e8e8e8;
+  --editor-bg-input: #ffffff;
+  --editor-bg-active: rgba(22, 119, 255, 0.06);
+
+  /* 编辑器边框 */
+  --editor-border: rgba(0, 0, 0, 0.08);
+  --editor-border-strong: rgba(0, 0, 0, 0.15);
+  --editor-border-active: rgba(22, 119, 255, 0.6);
+
+  /* 编辑器文字 */
+  --editor-text: rgba(0, 0, 0, 0.88);
+  --editor-text-secondary: rgba(0, 0, 0, 0.65);
+  --editor-text-tertiary: rgba(0, 0, 0, 0.45);
+  --editor-text-disabled: rgba(0, 0, 0, 0.25);
+
+  /* 编辑器强调色 */
+  --editor-accent: #1677ff;
+  --editor-accent-hover: #4096ff;
+  --editor-accent-bg: rgba(22, 119, 255, 0.06);
+  --editor-accent-bg-hover: rgba(22, 119, 255, 0.1);
+
+  /* 编辑器圆角 */
+  --editor-radius: 6px;
+  --editor-radius-sm: 4px;
+
+  /* 编辑器阴影 */
+  --editor-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --editor-shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== 暗色主题覆盖 ========== */
+[data-theme="dark"] {
+  /* 品牌色保持不变 */
+
+  /* 文字色 */
+  --app-color-text: rgba(255, 255, 255, 0.9);
+  --app-color-text-secondary: rgba(255, 255, 255, 0.72);
+  --app-color-text-tertiary: rgba(255, 255, 255, 0.52);
+  --app-color-text-quaternary: rgba(255, 255, 255, 0.3);
+
+  /* 背景色 */
+  --app-color-bg-container: #1f1f1f;
+  --app-color-bg-layout: #141414;
+  --app-color-bg-container-hover: rgba(255, 255, 255, 0.04);
+
+  /* 边框色 */
+  --app-color-border: rgba(255, 255, 255, 0.1);
+  --app-color-border-secondary: rgba(255, 255, 255, 0.06);
+
   /* ========== 编辑器暗色主题 ========== */
 
   /* 编辑器背景 */
@@ -64,7 +124,7 @@
   --editor-accent-bg: rgba(22, 119, 255, 0.12);
   --editor-accent-bg-hover: rgba(22, 119, 255, 0.2);
 
-  /* 编辑器圆角 */
+  /* 编辑器圆角（与亮色一致） */
   --editor-radius: 6px;
   --editor-radius-sm: 4px;
 

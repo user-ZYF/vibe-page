@@ -5,6 +5,14 @@
     <link rel="icon" href="/favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vibe Page</title>
+    <script>
+      // 在css加载前设置主题，避免闪屏
+      (function () {
+        var stored = localStorage.getItem('vibepage__theme__');
+        var mode = stored ? JSON.parse(stored) : 1;
+        document.documentElement.dataset.theme = mode === 1 ? 'dark' : 'light';
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

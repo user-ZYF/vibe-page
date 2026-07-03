@@ -36,6 +36,18 @@
           </a-button>
         </a-tooltip>
       </a-space>
+      <div class="editor-header-theme">
+        <a-tooltip :title="themeStore.isDark ? '切换到亮色主题' : '切换到暗色主题'" overlay-class-name="editor-tooltip-white">
+          <a-switch
+            :checked="!themeStore.isDark"
+            size="small"
+            @change="themeStore.toggleTheme"
+          >
+            <template #checkedChildren><BulbFilled /></template>
+            <template #unCheckedChildren><BulbOutlined /></template>
+          </a-switch>
+        </a-tooltip>
+      </div>
     </a-layout-header>
     <Transition name="preview-btn">
       <a-float-button 
@@ -61,11 +73,16 @@ import {
   CodeOutlined,
   DeleteOutlined,
   ClearOutlined,
+  BulbFilled,
+  BulbOutlined,
 } from '@ant-design/icons-vue'
+import { useThemeStore } from '@/store/theme';
 
 defineOptions({
   name: 'EditorHeader',
 })
+
+const themeStore = useThemeStore();
 
 defineProps({
   /** 是否处于预览模式 */
@@ -109,6 +126,9 @@ const emit = defineEmits<{
   overflow: hidden;
   border-bottom: 1px solid var(--editor-border);
   transition: opacity 0.3s ease, height 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   &.is-preview {
     opacity: 0;
@@ -138,6 +158,12 @@ const emit = defineEmits<{
   :deep(.ant-divider-vertical) {
     border-color: var(--editor-border-strong);
   }
+}
+
+.editor-header-theme {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
 }
 
 :deep(.editor-tooltip-white) {

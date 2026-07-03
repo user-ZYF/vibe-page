@@ -1,11 +1,12 @@
 import type { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
+import { theme as antdTheme } from 'ant-design-vue';
 
 /**
- * 项目主题色 Token 定义
+ * 项目品牌色 Token（暗色/亮色共用）
  * 基于 Ant Design Vue 4.x 的 Design Token 系统
  * 这些值既用于 antd 组件主题，也同步映射为 CSS 变量供全局使用
  */
-export const projectTokens = {
+export const brandTokens = {
   /** 主色 */
   colorPrimary: '#1677ff',
   /** 成功色 */
@@ -16,6 +17,17 @@ export const projectTokens = {
   colorError: '#ff4d4f',
   /** 信息色 */
   colorInfo: '#1677ff',
+  /** 圆角 */
+  borderRadius: 6,
+  /** 字体大小 */
+  fontSize: 14,
+} as const;
+
+/**
+ * 亮色主题额外 Token 覆盖
+ */
+export const lightTokens = {
+  ...brandTokens,
   /** 主要文字色 */
   colorText: 'rgba(0, 0, 0, 0.88)',
   /** 次要文字色 */
@@ -34,16 +46,41 @@ export const projectTokens = {
   colorBorder: '#d9d9d9',
   /** 次级边框色 */
   colorBorderSecondary: '#f0f0f0',
-  /** 圆角 */
-  borderRadius: 6,
-  /** 字体大小 */
-  fontSize: 14,
 } as const;
 
 /**
- * antd ConfigProvider 主题配置
+ * 暗色主题额外 Token 覆盖
  */
-export const themeConfig: ThemeConfig = {
-  token: projectTokens,
-  hashed: true,
-};
+export const darkTokens = {
+  ...brandTokens,
+  /** 主要文字色 */
+  colorText: 'rgba(255, 255, 255, 0.9)',
+  /** 次要文字色 */
+  colorTextSecondary: 'rgba(255, 255, 255, 0.72)',
+  /** 占位文字色 */
+  colorTextTertiary: 'rgba(255, 255, 255, 0.52)',
+  /** 禁用文字色 */
+  colorTextQuaternary: 'rgba(255, 255, 255, 0.3)',
+  /** 组件背景色 */
+  colorBgContainer: '#1f1f1f',
+  /** 布局背景色 */
+  colorBgLayout: '#141414',
+  /** 悬浮背景色 */
+  colorBgContainerHover: 'rgba(255, 255, 255, 0.04)',
+  /** 边框色 */
+  colorBorder: 'rgba(255, 255, 255, 0.1)',
+  /** 次级边框色 */
+  colorBorderSecondary: 'rgba(255, 255, 255, 0.06)',
+} as const;
+
+/**
+ * 获取 antd ConfigProvider 主题配置
+ * @param isDark - 是否为暗色主题
+ */
+export function getThemeConfig(isDark: boolean): ThemeConfig {
+  return {
+    algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    token: isDark ? darkTokens : lightTokens,
+    hashed: true,
+  };
+}

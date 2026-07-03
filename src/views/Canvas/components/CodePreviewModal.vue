@@ -48,7 +48,6 @@ import { CopyOutlined } from '@ant-design/icons-vue'
 import hljs from 'highlight.js/lib/core'
 import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
-import 'highlight.js/styles/github.css'
 import { useCodeGenerator } from '@/composables/useCodeGenerator'
 
 defineOptions({
@@ -131,7 +130,7 @@ function handleClose() {
   overflow: auto;
   font-size: 13px;
   line-height: 1.6;
-  background: #ffffff;
+  background: var(--app-color-bg-container);
 
   code {
     font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;

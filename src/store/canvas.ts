@@ -1383,22 +1383,6 @@ export const useCanvasStore = defineStore("canvas", {
         if (data.version !== 1) return false;
         if (!data.children || !Array.isArray(data.children)) return false;
 
-        /** 递归校验元素基本结构 */
-        const validateElement = (el: unknown): boolean => {
-          if (!el || typeof el !== 'object') return false;
-          const obj = el as Record<string, unknown>;
-          if (typeof obj.id !== 'string' || typeof obj.type !== 'string') return false;
-          if (!obj.styleConfig || typeof obj.styleConfig !== 'object') return false;
-          const children = obj.children;
-          if (children !== undefined && children !== null) {
-            if (!Array.isArray(children)) return false;
-            if (!children.every(validateElement)) return false;
-          }
-          return true;
-        };
-
-        if (!data.children.every(validateElement)) return false;
-
         this.root.children = data.children;
         this.classStyles = data.classStyles ?? {};
         this.selectedElementId = null;

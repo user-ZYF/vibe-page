@@ -1,6 +1,6 @@
 <!-- ? 画布超链接元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="safeHref" :style="style" @click.stop="handleClick">
+    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="data.classes" :href="isPreview ? safeHref : undefined" :style="style" @click.stop.prevent="handleSelect">
         <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
     </a>
 </template>
@@ -36,16 +36,4 @@ useElementVisibility(data.value.id, data);
 
 const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(linkEl, data.value.id, { isCanvas: true });
-
-/** 点击处理：编辑模式下阻止跳转并选中元素，预览模式下固定在新窗口打开 */
-function handleClick(e: MouseEvent) {
-  e.preventDefault();
-  if (!isPreview.value) {
-    handleSelect();
-    return;
-  }
-  if (data.value.href && isSafeUrl(data.value.href)) {
-    window.open(data.value.href, '_blank');
-  }
-}
 </script>

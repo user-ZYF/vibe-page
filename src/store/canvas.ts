@@ -1,6 +1,7 @@
 import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeading1Element, type CanvasHeading2Element, type CanvasHeading3Element, type CanvasHeading4Element, type CanvasHeading5Element, type CanvasHeading6Element, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, isParentElement } from "@/views/Canvas/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, LinkTargetEnum, SiderPanelEnum, LINK_DESCENDANT_EXCLUDE_TYPES, FORM_DESCENDANT_EXCLUDE_TYPES, SPAN_DESCENDANT_INCLUDE_TYPES, UL_DIRECT_INCLUDE_TYPES, OL_DIRECT_INCLUDE_TYPES, TABLE_DIRECT_INCLUDE_TYPES, THEAD_DIRECT_INCLUDE_TYPES, TBODY_DIRECT_INCLUDE_TYPES, TFOOT_DIRECT_INCLUDE_TYPES, TR_DIRECT_INCLUDE_TYPES, COLGROUP_DIRECT_INCLUDE_TYPES, FormMethodEnum, TableScopeEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, SizeUnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum, BorderStyleEnum, BorderCollapseEnum, TextDecorationEnum, FontStyleEnum, FontFamilyEnum, PositionStyleEnum, OverflowStyleEnum } from "@/constants/style";
+import { StorageKeyEnum } from "@/constants/storage-key";
 import { defineStore } from "pinia";
 import { customAlphabet } from "nanoid";
 import { cloneDeep } from "lodash";
@@ -1358,6 +1359,58 @@ export const useCanvasStore = defineStore("canvas", {
       );
 
       this.root.children = [headerEl, hero, features, articleSection, formSection, listSection, tableSection, mediaSection, footerEl];
+    },
+    /** 将画布数据保存到 LocalStorage */
+    saveCanvasToStorage() {
+      try {
+        const data = JSON.stringify({
+          version: 1,
+          children: this.root.children,
+          classStyles: this.classStyles,
+        });
+        localStorage.setItem(StorageKeyEnum.CANVAS_DATA, data);
+      } catch (error) {
+        console.error('[VibePage] 保存画布数据到 LocalStorage 失败:', error);
+      }
+    },
+    /** 从 LocalStorage 加载画布数据，成功返回 true */
+    loadCanvasFromStorage(): boolean {
+      try {
+        const raw = localStorage.getItem(StorageKeyEnum.CANVAS_DATA);
+        if (!raw) return false;
+        const data = JSON.parse(raw) as { version?: number; children: CanvasInnerElement[]; classStyles: Record<string, StyleConfig> };
+        /** 版本不匹配则放弃加载，避免不兼容数据导致渲染崩溃 */
+        if (data.version !== 1) return false;
+        if (!data.children || !Array.isArray(data.children)) return false;
+
+        /** 递归校验元素基本结构 */
+        const validateElement = (el: unknown): boolean => {
+          if (!el || typeof el !== 'object') return false;
+          const obj = el as Record<string, unknown>;
+          if (typeof obj.id !== 'string' || typeof obj.type !== 'string') return false;
+          if (!obj.styleConfig || typeof obj.styleConfig !== 'object') return false;
+          const children = obj.children;
+          if (children !== undefined && children !== null) {
+            if (!Array.isArray(children)) return false;
+            if (!children.every(validateElement)) return false;
+          }
+          return true;
+        };
+
+        if (!data.children.every(validateElement)) return false;
+
+        this.root.children = data.children;
+        this.classStyles = data.classStyles ?? {};
+        this.selectedElementId = null;
+        return true;
+      } catch (error) {
+        console.error('[VibePage] 从 LocalStorage 加载画布数据失败:', error);
+        return false;
+      }
+    },
+    /** 清除 LocalStorage 中的画布数据 */
+    clearCanvasStorage() {
+      localStorage.removeItem(StorageKeyEnum.CANVAS_DATA);
     },
   }
 });

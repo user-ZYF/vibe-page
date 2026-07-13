@@ -15,10 +15,11 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, onMounted, inject, ref, computed } from "vue";
+import { watch, onMounted, inject, ref, computed, nextTick } from "vue";
 import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
+import { useDebounceFn } from "@vueuse/core";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
 import DropIndicatorOverlay from "./DropIndicatorOverlay.vue";
@@ -64,11 +65,35 @@ watch(
   { deep: true },
 );
 
+/** 是否已完成初始加载（避免加载后立即触发冗余保存） */
+const isInitialized = ref(false);
+
+/** 防抖保存画布数据到 LocalStorage（500ms） */
+const debouncedSaveToStorage = useDebounceFn(() => {
+  if (!isInitialized.value) return;
+  canvasStore.saveCanvasToStorage();
+}, 500);
+
+/** 监听画布数据变化，自动保存到 LocalStorage */
+watch(
+  [() => canvasStore.root, () => canvasStore.classStyles],
+  () => {
+    debouncedSaveToStorage();
+  },
+  { deep: true },
+);
+
 onMounted(() => {
-  /** 加载默认画布内容 */
-  if (canvasStore.root.children.length === 0) {
+  /** 优先从 LocalStorage 恢复画布数据，无数据时加载默认内容 */
+  const loaded = canvasStore.loadCanvasFromStorage();
+  if (!loaded && canvasStore.root.children.length === 0) {
     canvasStore.loadDefaultContent();
   }
+
+  /** 延迟标记初始化完成，避免加载/默认内容引起的数据变化触发冗余保存 */
+  nextTick(() => {
+    isInitialized.value = true;
+  });
 
   if (shadowHostRef.value) {
     const shadow = shadowHostRef.value.attachShadow({ mode: 'open' });

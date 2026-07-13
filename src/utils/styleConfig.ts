@@ -96,11 +96,15 @@ export function convertStyleConfig(styleConfig: StyleConfig): Record<string, str
   if (isNotEmptyish(visual.backgrounds) && visual.backgrounds.length > 0) {
     const colorBgs = visual.backgrounds.filter((b) => b.type === BackgroundTypeEnum.COLOR);
     const imageBgs = visual.backgrounds.filter((b) => b.type !== BackgroundTypeEnum.COLOR);
-    if (colorBgs.length > 0) {
-      css['backgroundColor'] = colorBgs[colorBgs.length - 1].color || 'revert';
-    }
     if (imageBgs.length > 0) {
-      css['backgroundImage'] = imageBgs.map(convertBackgroundItem).join(', ');
+      /** background 简写会重置 background-color，因此将颜色作为最后一层拼入简写 */
+      const layers = imageBgs.map(convertBackgroundItem);
+      if (colorBgs.length > 0) {
+        layers.push(colorBgs[colorBgs.length - 1].color || 'revert');
+      }
+      css['background'] = layers.join(', ');
+    } else if (colorBgs.length > 0) {
+      css['backgroundColor'] = colorBgs[colorBgs.length - 1].color || 'revert';
     }
   }
   if (isNotEmptyish(visual.borderWidth)) css['borderWidth'] = `${visual.borderWidth}${safeUnit(visual.borderWidthUnit)}`;

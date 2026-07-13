@@ -45,7 +45,7 @@
         <!-- Image 类型 -->
         <template v-if="bg.type === BackgroundTypeEnum.IMAGE">
           <div class="style-config-label">Image</div>
-          <a-input v-model:value="bg.imageUrl" size="small" placeholder="url(...)" class="style-config-mb" />
+          <a-input v-model:value="bg.imageUrl" size="small" placeholder="https://" class="style-config-mb" @blur="handleBgImageUrlBlur(bg)" />
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
@@ -80,7 +80,7 @@
         <!-- Gradient 类型 -->
         <template v-else>
           <div class="style-config-label">Gradient</div>
-          <a-input v-model:value="bg.gradient" size="small" placeholder="linear-gradient(...)" />
+          <a-input v-model:value="bg.gradient" size="small" placeholder="linear-gradient(...)" @blur="handleBgGradientBlur(bg)" />
         </template>
       </div>
     </div>
@@ -277,8 +277,10 @@ import {
   BackgroundTypeEnum,
   SizeUnitEnum,
 } from '@/constants/style';
-import type { VisualConfig, BoxShadowItem } from '@/views/Canvas/types';
+import type { VisualConfig, BoxShadowItem, BackgroundItem } from '@/views/Canvas/types';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
+import { isSafeUrl, sanitizeCssUrl } from '@/utils/sanitize';
+import { message } from 'ant-design-vue';
 import { computed } from 'vue';
 
 defineOptions({
@@ -331,6 +333,29 @@ function handleAddBoxShadow() {
     color: '#000000',
     inset: false,
   });
+}
+
+/** 背景图地址失焦时校验协议安全性 */
+function handleBgImageUrlBlur(bg: BackgroundItem) {
+  const url = bg.imageUrl?.trim() ?? '';
+  if (!url) return;
+  if (!isSafeUrl(url)) {
+    bg.imageUrl = '';
+    message.warning('背景图地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    return;
+  }
+  bg.imageUrl = url;
+}
+
+/** 背景渐变失焦时校验 url() 注入 */
+function handleBgGradientBlur(bg: BackgroundItem) {
+  const gradient = bg.gradient?.trim() ?? '';
+  if (!gradient) return;
+  const sanitized = sanitizeCssUrl(gradient);
+  if (sanitized !== gradient) {
+    bg.gradient = sanitized;
+    message.warning('渐变中包含不安全的 url()，已自动净化');
+  }
 }
 </script>
 

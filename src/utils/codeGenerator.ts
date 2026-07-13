@@ -30,6 +30,7 @@ import {
 } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP } from '@/constants/home';
 import { convertStyleConfig } from './styleConfig';
+import { sanitizeUrl } from '@/utils/sanitize';
 import type { StyleConfig } from '@/views/Canvas/types';
 
 /** 元素类型到 HTML 标签的映射 */
@@ -102,7 +103,7 @@ function styleObjectToCss(style: Record<string, string>): string {
  * 转义 HTML 属性值中的特殊字符
  */
 function escapeAttrValue(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
@@ -128,13 +129,15 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.IMAGE: {
       const img = element as CanvasImageElement;
-      if (img.src) attrs.push(`src="${escapeAttrValue(img.src)}"`);
+      const safeSrc = sanitizeUrl(img.src ?? '');
+      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
       if (img.title) attrs.push(`alt="${escapeAttrValue(img.title)}"`);
       break;
     }
     case CanvasElementTypeEnum.LINK: {
       const link = element as CanvasLinkElement;
-      if (link.href) attrs.push(`href="${escapeAttrValue(link.href)}"`);
+      const safeHref = sanitizeUrl(link.href ?? '');
+      if (safeHref) attrs.push(`href="${escapeAttrValue(safeHref)}"`);
       const TARGET_ATTR_MAP: Record<LinkTargetEnum, string> = {
         [LinkTargetEnum.SELF]: '_self',
         [LinkTargetEnum.BLANK]: '_blank',
@@ -180,13 +183,15 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.VIDEO: {
       const video = element as CanvasVideoElement;
-      if (video.src) attrs.push(`src="${escapeAttrValue(video.src)}"`);
+      const safeSrc = sanitizeUrl(video.src ?? '');
+      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
       if (video.controls) attrs.push(`controls`);
       break;
     }
     case CanvasElementTypeEnum.AUDIO: {
       const audio = element as CanvasAudioElement;
-      if (audio.src) attrs.push(`src="${escapeAttrValue(audio.src)}"`);
+      const safeSrc = sanitizeUrl(audio.src ?? '');
+      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
       if (audio.controls) attrs.push(`controls`);
       break;
     }
@@ -197,7 +202,8 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.FORM: {
       const form = element as CanvasFormElement;
-      if (form.action) attrs.push(`action="${escapeAttrValue(form.action)}"`);
+      const safeAction = sanitizeUrl(form.action ?? '');
+      if (safeAction) attrs.push(`action="${escapeAttrValue(safeAction)}"`);
       if (form.method) attrs.push(`method="${escapeAttrValue(form.method)}"`);
       break;
     }
@@ -311,7 +317,7 @@ function collectCssRules(root: CanvasRootElement, classStyles: Record<string, St
   for (const [className, styleConfig] of Object.entries(classStyles)) {
     const styleStr = styleObjectToCss(convertStyleConfig(styleConfig));
     if (styleStr) {
-      rules.push(`.${className} {\n${styleStr}\n}`);
+      rules.push(`.${CSS.escape(className)} {\n${styleStr}\n}`);
     }
   }
 

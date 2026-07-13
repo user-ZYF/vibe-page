@@ -1,45 +1,62 @@
-import { Component } from "vue";
-import Container from "./components/canvas-element/Container.vue";
-import Link from "./components/canvas-element/Link.vue";
-import Image from "./components/canvas-element/Image.vue";
-import Button from "./components/canvas-element/Button.vue";
-import { CanvasElementTypeEnum } from "@/constants/home.ts";
-import Paragraph from "./components/canvas-element/Paragraph.vue";
+import { Component, defineAsyncComponent, h, defineComponent } from "vue";
 import Root from "./components/canvas-element/Root.vue";
-import Input from "./components/canvas-element/Input.vue";
-import Textarea from "./components/canvas-element/Textarea.vue";
-import Radio from "./components/canvas-element/Radio.vue";
-import Checkbox from "./components/canvas-element/Checkbox.vue";
-import Video from "./components/canvas-element/Video.vue";
-import Audio from "./components/canvas-element/Audio.vue";
-import Label from "./components/canvas-element/Label.vue";
-import Form from "./components/canvas-element/Form.vue";
-import Span from "./components/canvas-element/Span.vue";
-import Text from "./components/canvas-element/Text.vue";
-import UnorderedList from "./components/canvas-element/UnorderedList.vue";
-import OrderedList from "./components/canvas-element/OrderedList.vue";
-import ListItem from "./components/canvas-element/ListItem.vue";
-import Table from "./components/canvas-element/Table.vue";
-import TableHead from "./components/canvas-element/TableHead.vue";
-import TableBody from "./components/canvas-element/TableBody.vue";
-import TableFoot from "./components/canvas-element/TableFoot.vue";
-import TableRow from "./components/canvas-element/TableRow.vue";
-import TableData from "./components/canvas-element/TableData.vue";
-import TableHeaderCell from "./components/canvas-element/TableHeaderCell.vue";
-import TableCaption from "./components/canvas-element/TableCaption.vue";
-import TableColGroup from "./components/canvas-element/TableColGroup.vue";
-import TableCol from "./components/canvas-element/TableCol.vue";
-import Header from "./components/canvas-element/Header.vue";
-import Footer from "./components/canvas-element/Footer.vue";
-import Article from "./components/canvas-element/Article.vue";
-import Section from "./components/canvas-element/Section.vue";
-import Aside from "./components/canvas-element/Aside.vue";
-import Heading1 from "./components/canvas-element/Heading1.vue";
-import Heading2 from "./components/canvas-element/Heading2.vue";
-import Heading3 from "./components/canvas-element/Heading3.vue";
-import Heading4 from "./components/canvas-element/Heading4.vue";
-import Heading5 from "./components/canvas-element/Heading5.vue";
-import Heading6 from "./components/canvas-element/Heading6.vue";
+import { CanvasElementTypeEnum } from "@/constants/home.ts";
+
+/** 异步组件加载失败时的回退组件 */
+const AsyncErrorFallback = defineComponent({
+  name: 'AsyncErrorFallback',
+  render() {
+    return h('div', { style: 'color: #ff4d4f; padding: 4px; font-size: 12px;' }, '组件加载失败');
+  },
+});
+
+/** 创建带错误回退的异步组件 */
+function lazy(loader: () => Promise<Component | { default: Component }>) {
+  return defineAsyncComponent({
+    loader,
+    errorComponent: AsyncErrorFallback,
+  });
+}
+
+const Container = lazy(() => import("./components/canvas-element/Container.vue"));
+const Link = lazy(() => import("./components/canvas-element/Link.vue"));
+const Image = lazy(() => import("./components/canvas-element/Image.vue"));
+const Button = lazy(() => import("./components/canvas-element/Button.vue"));
+const Paragraph = lazy(() => import("./components/canvas-element/Paragraph.vue"));
+const Input = lazy(() => import("./components/canvas-element/Input.vue"));
+const Textarea = lazy(() => import("./components/canvas-element/Textarea.vue"));
+const Radio = lazy(() => import("./components/canvas-element/Radio.vue"));
+const Checkbox = lazy(() => import("./components/canvas-element/Checkbox.vue"));
+const Video = lazy(() => import("./components/canvas-element/Video.vue"));
+const Audio = lazy(() => import("./components/canvas-element/Audio.vue"));
+const Label = lazy(() => import("./components/canvas-element/Label.vue"));
+const Form = lazy(() => import("./components/canvas-element/Form.vue"));
+const Span = lazy(() => import("./components/canvas-element/Span.vue"));
+const Text = lazy(() => import("./components/canvas-element/Text.vue"));
+const UnorderedList = lazy(() => import("./components/canvas-element/UnorderedList.vue"));
+const OrderedList = lazy(() => import("./components/canvas-element/OrderedList.vue"));
+const ListItem = lazy(() => import("./components/canvas-element/ListItem.vue"));
+const Table = lazy(() => import("./components/canvas-element/Table.vue"));
+const TableHead = lazy(() => import("./components/canvas-element/TableHead.vue"));
+const TableBody = lazy(() => import("./components/canvas-element/TableBody.vue"));
+const TableFoot = lazy(() => import("./components/canvas-element/TableFoot.vue"));
+const TableRow = lazy(() => import("./components/canvas-element/TableRow.vue"));
+const TableData = lazy(() => import("./components/canvas-element/TableData.vue"));
+const TableHeaderCell = lazy(() => import("./components/canvas-element/TableHeaderCell.vue"));
+const TableCaption = lazy(() => import("./components/canvas-element/TableCaption.vue"));
+const TableColGroup = lazy(() => import("./components/canvas-element/TableColGroup.vue"));
+const TableCol = lazy(() => import("./components/canvas-element/TableCol.vue"));
+const Header = lazy(() => import("./components/canvas-element/Header.vue"));
+const Footer = lazy(() => import("./components/canvas-element/Footer.vue"));
+const Article = lazy(() => import("./components/canvas-element/Article.vue"));
+const Section = lazy(() => import("./components/canvas-element/Section.vue"));
+const Aside = lazy(() => import("./components/canvas-element/Aside.vue"));
+const Heading1 = lazy(() => import("./components/canvas-element/Heading1.vue"));
+const Heading2 = lazy(() => import("./components/canvas-element/Heading2.vue"));
+const Heading3 = lazy(() => import("./components/canvas-element/Heading3.vue"));
+const Heading4 = lazy(() => import("./components/canvas-element/Heading4.vue"));
+const Heading5 = lazy(() => import("./components/canvas-element/Heading5.vue"));
+const Heading6 = lazy(() => import("./components/canvas-element/Heading6.vue"));
 import type { InjectionKey, Ref } from 'vue';
 import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";

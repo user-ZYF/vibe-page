@@ -42,7 +42,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.IMAGE">
       <div class="style-config-section">
         <div class="style-config-label">图片地址</div>
-        <a-input v-model:value="(model as CanvasImageElement).src" size="small" class="style-config-input" placeholder="https://" />
+        <a-input v-model:value="(model as CanvasImageElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">图片标题</div>
@@ -136,7 +136,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.VIDEO">
       <div class="style-config-section">
         <div class="style-config-label">视频地址</div>
-        <a-input v-model:value="(model as CanvasVideoElement).src" size="small" class="style-config-input" placeholder="https://" />
+        <a-input v-model:value="(model as CanvasVideoElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <a-checkbox v-model:checked="(model as CanvasVideoElement).controls">显示控件</a-checkbox>
@@ -147,7 +147,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.AUDIO">
       <div class="style-config-section">
         <div class="style-config-label">音频地址</div>
-        <a-input v-model:value="(model as CanvasAudioElement).src" size="small" class="style-config-input" placeholder="https://" />
+        <a-input v-model:value="(model as CanvasAudioElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <a-checkbox v-model:checked="(model as CanvasAudioElement).controls">显示控件</a-checkbox>
@@ -308,10 +308,13 @@ function handleHrefBlur() {
   const el = model.value as CanvasLinkElement;
   if (!el || el.type !== CanvasElementTypeEnum.LINK) return;
   const href = el.href?.trim() ?? '';
-  if (href && !isSafeUrl(href)) {
+  if (!href) return;
+  if (!isSafeUrl(href)) {
     el.href = '';
     message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    return;
   }
+  el.href = href;
 }
 
 /** 表单提交地址失焦时校验协议安全性 */
@@ -326,6 +329,20 @@ function handleActionBlur() {
     return;
   }
   el.action = action;
+}
+
+/** 媒体资源地址失焦时校验协议安全性（Image/Video/Audio） */
+function handleSrcBlur() {
+  const el = model.value as CanvasImageElement | CanvasVideoElement | CanvasAudioElement;
+  if (!el) return;
+  const src = el.src?.trim() ?? '';
+  if (!src) return;
+  if (!isSafeUrl(src)) {
+    el.src = '';
+    message.warning('资源地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    return;
+  }
+  el.src = src;
 }
 
 /** 递归收集所有表单元素，生成下拉选项 */

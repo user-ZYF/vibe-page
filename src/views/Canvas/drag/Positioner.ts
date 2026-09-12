@@ -8,30 +8,60 @@ import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum 
 
 /**
  * 纯函数：根据子元素维度数组和鼠标坐标计算插入位置
+ *
+ * 核心思路：遍历容器内所有子元素，用鼠标坐标与每个元素的中心点比较，
+ * 找到鼠标最接近的元素，并判断鼠标在该元素的上半/下半（纵向流）
+ * 或左半/右半（横向排列），从而决定插入到该元素的前面还是后面。
+ *
+ * - 文档流元素（inFlow = true）：纵向堆叠，用 Y 轴中心点判断，确定后立即 break
+ * - 非文档流元素（inFlow = false，如 float/absolute）：横向排列，用 X 轴中心点判断，
+ *   需要处理多行换行的情况，不能提前退出
  */
 export function findDropPosition(
+  /** 子元素维度数组（包含位置、尺寸、是否在文档流中） */
   dims: NodeInfo[],
+  /** 鼠标 X 坐标（视口坐标） */
   posX: number,
+  /** 鼠标 Y 坐标（视口坐标） */
   posY: number
 ): { index: number; where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER } {
+  /** 默认结果：插入到第一个元素之前 */
   let result = { index: 0, where: DropPositionEnum.BEFORE as DropPositionEnum.BEFORE | DropPositionEnum.AFTER };
 
+  /**
+   * 三个"限制线"用于多行横排场景的优化跳过：
+   * - leftLimit：已确定鼠标在某元素右侧（AFTER）后，右边缘还不到此线的元素可跳过
+   * - xLimit：已确定鼠标在某元素左侧（BEFORE）后，左边缘超过此线的元素可跳过
+   * - yLimit：已确定鼠标在某元素上方后，中心点低于此线的元素（下一行）可跳过
+   */
   let leftLimit = 0;
   let xLimit = 0;
-  let dimRight = 0;
   let yLimit = 0;
+
+  /** 当前元素的右边缘坐标 */
+  let dimRight = 0;
+  /** 当前元素的水平中心点 */
   let xCenter = 0;
+  /** 当前元素的垂直中心点 */
   let yCenter = 0;
+  /** 当前元素的下边缘坐标 */
   let dimDown = 0;
 
   for (let i = 0; i < dims.length; i++) {
     const dim = dims[i];
 
+    /** 计算当前元素的四个关键坐标 */
     dimRight = dim.left + dim.outerWidth;
     dimDown = dim.top + dim.outerHeight;
     xCenter = dim.left + dim.outerWidth / 2;
     yCenter = dim.top + dim.outerHeight / 2;
 
+    /**
+     * 跳过不可能匹配的元素（主要用于 float 横排多行场景）：
+     * 1. xLimit 已设置且当前元素左边缘超过 xLimit → 鼠标已确定在更左边，跳过更靠右的元素
+     * 2. yLimit 已设置且当前元素中心点 >= yLimit → 鼠标已确定在更上方，跳过下一行的元素
+     * 3. leftLimit 已设置且当前元素右边缘不到 leftLimit → 鼠标已确定在更右边，跳过更靠左的元素
+     */
     if (
       (xLimit && dim.left > xLimit) ||
       (yLimit && yCenter >= yLimit) ||
@@ -40,22 +70,37 @@ export function findDropPosition(
       continue;
     }
 
+    /** 更新当前匹配到的元素索引 */
     result.index = i;
 
     if (!dim.inFlow) {
+      /**
+       * 非文档流元素（float/absolute 等）：横向排列，用 X 轴中心点判断
+       */
+
+      /** 鼠标还在当前元素上方（未超出下边缘），设置 yLimit 排除下一行的元素 */
       if (posY < dimDown) yLimit = dimDown;
+
       if (posX < xCenter) {
+        /** 鼠标在水平中心左侧 → 插入到该元素前面，设置 xLimit 排除更靠右的元素 */
         xLimit = xCenter;
         result.where = DropPositionEnum.BEFORE;
       } else {
+        /** 鼠标在水平中心右侧 → 插入到该元素后面，设置 leftLimit 排除更靠左的元素 */
         leftLimit = xCenter;
         result.where = DropPositionEnum.AFTER;
       }
     } else {
+      /**
+       * 文档流元素：纵向堆叠，用 Y 轴中心点判断
+       */
+
       if (posY < yCenter) {
+        /** 鼠标在垂直中心上方 → 插入到该元素前面，后续元素更靠下，不可能匹配，直接退出 */
         result.where = DropPositionEnum.BEFORE;
         break;
       } else {
+        /** 鼠标在垂直中心下方 → 插入到该元素后面，继续检查下一个元素是否更接近 */
         result.where = DropPositionEnum.AFTER;
       }
     }
@@ -78,6 +123,8 @@ export class Positioner {
    * @param elements 全量 CanvasElement 树
    * @param registry DOM 注册表
    * @param draggingId 当前被拖拽的元素 id（null = 新组件）
+   * @param dragType 当前被拖拽的元素类型（null = 新组件）
+   * @param dragElement 当前被拖拽的元素（null = 新组件）
    */
   compute(
     dropTargetId: string,

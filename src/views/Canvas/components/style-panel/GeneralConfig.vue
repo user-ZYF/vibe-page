@@ -4,29 +4,29 @@
     <!-- 浮动配置 -->
     <div class="style-config-section">
       <div class="style-config-label">Float</div>
-      <a-radio-group v-model:value="model.float" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="FloatStyleEnum.NONE"><CloseOutlined /></a-radio-button>
-        <a-radio-button :value="FloatStyleEnum.LEFT"><MenuFoldOutlined /></a-radio-button>
-        <a-radio-button :value="FloatStyleEnum.RIGHT"><MenuUnfoldOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.float" class="style-config-radio-group">
+        <me-radio-button :value="FloatStyleEnum.NONE"><CloseOutlined /></me-radio-button>
+        <me-radio-button :value="FloatStyleEnum.LEFT"><MenuFoldOutlined /></me-radio-button>
+        <me-radio-button :value="FloatStyleEnum.RIGHT"><MenuUnfoldOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Display & Position -->
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Display</div>
-        <a-select v-model:value="model.display" size="small" class="style-config-select" :options="displayOptions" placeholder="block" allow-clear />
+        <me-select v-model="model.display" class="style-config-select" :options="displayOptions" placeholder="block" clearable />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Position</div>
-        <a-select v-model:value="model.position" size="small" class="style-config-select" :options="POSITION_OPTIONS" placeholder="static" allow-clear />
+        <me-select v-model="model.position" class="style-config-select" :options="POSITION_OPTIONS" placeholder="static" clearable />
       </div>
     </div>
 
     <!-- Overflow -->
     <div class="style-config-section">
       <div class="style-config-label">Overflow</div>
-      <a-select v-model:value="model.overflow" size="small" class="style-config-select" :options="OVERFLOW_OPTIONS" placeholder="visible" allow-clear />
+      <me-select v-model="model.overflow" class="style-config-select" :options="OVERFLOW_OPTIONS" placeholder="visible" clearable />
     </div>
 
     <!-- Top & Right -->
@@ -34,17 +34,15 @@
       <div class="style-config-col">
         <div class="style-config-label">Top</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.top" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('top', 'topUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.topUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.top" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('top', 'topUnit')" />
+          <me-select v-model="model.topUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Right</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.right" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('right', 'rightUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.rightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.right" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('right', 'rightUnit')" />
+          <me-select v-model="model.rightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -54,17 +52,15 @@
       <div class="style-config-col">
         <div class="style-config-label">Left</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.left" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('left', 'leftUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.leftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.left" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('left', 'leftUnit')" />
+          <me-select v-model="model.leftUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Bottom</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.bottom" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('bottom', 'bottomUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.bottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.bottom" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('bottom', 'bottomUnit')" />
+          <me-select v-model="model.bottomUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -72,7 +68,7 @@
     <!-- Z-Index -->
     <div class="style-config-section">
       <div class="style-config-label">Z-Index</div>
-      <a-input-number v-model:value="model.zIndex" size="small" class="style-config-input-number" placeholder="auto" :precision="0" />
+      <a-input-number v-model:value="model.zIndex" class="style-config-input-number" placeholder="auto" :precision="0" />
     </div>
   </div>
 </template>
@@ -80,6 +76,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
+import { MeInput, MeRadioButton, MeRadioGroup, MeSelect } from '@zyf_dsb/me-ui';
 import { DISPLAY_OPTIONS, DISPLAY_OPTIONS_MAP, FloatStyleEnum, OVERFLOW_OPTIONS, POSITION_OPTIONS, SIZE_UNIT_OPTIONS } from '@/constants/style';
 import { CanvasElementTypeEnum } from '@/constants/home';
 import { useUnitAutoFill } from '@/composables/useUnitAutoFill';

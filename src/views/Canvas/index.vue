@@ -11,9 +11,8 @@
         @redo="handleRedo"
         @code="handleCode"
         @clear="handleClear"
-        @cleanup-classes="handleCleanupClasses"
       />
-      <CodePreviewModal v-model:open="codeModalVisible" />
+      <CodeEditModal v-model:open="codeModalVisible" />
       <a-layout-content class="editor-canvas">
         <Canvas />
       </a-layout-content>
@@ -24,11 +23,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, provide } from 'vue';
-import { Modal } from 'ant-design-vue';
+import { MeModal } from '@zyf_dsb/me-ui';
 import EditorHeader from './components/Header.vue';
 import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
-import CodePreviewModal from './components/CodePreviewModal.vue';
+import CodeEditModal from './components/CodeEditModal.vue';
 import { canvasHistoryApi } from '@/composables/useCanvasHistory';
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './constants.ts';
 import { useCanvasStore } from '@/store/canvas.ts';
@@ -143,26 +142,13 @@ function handleCode() {
 
 /** 清空画布 */
 function handleClear(){
-  Modal.confirm({
+  MeModal.confirm({
     title: '确认清空画布？',
     content: '将删除画布中除根元素外的所有元素，此操作可通过撤销恢复。',
-    okText: '确认',
+    confirmText: '确认',
     cancelText: '取消',
-    onOk() {
+    onConfirm() {
       canvasStore.clearAllElements();
-    },
-  });
-}
-
-/** 清理未使用的 class */
-function handleCleanupClasses() {
-  Modal.confirm({
-    title: '确认清理未使用的 class？',
-    content: '将删除所有未被元素引用且样式内容为空的 class 样式，此操作可通过撤销恢复。',
-    okText: '确认',
-    cancelText: '取消',
-    onOk() {
-      canvasStore.cleanupUnusedClassStyles();
     },
   });
 }

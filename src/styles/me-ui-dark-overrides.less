@@ -1,0 +1,320 @@
+/* ========== me-ui 组件全局覆盖 ========== */
+/* 覆盖 me-ui 默认的 Element Plus 蓝色聚焦样式，统一使用项目编辑器强调色 */
+/* focus 状态的颜色在亮/暗主题下通过 --editor-accent / --editor-accent-bg 自适应 */
+/* 使用 :root 前缀提高选择器优先级，确保覆盖 me-ui 组件默认样式 */
+
+:root {
+  /* Input 输入框 - input 模式聚焦 */
+  .me-input.is-focus .me-input__wrapper {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px var(--editor-accent-bg);
+  }
+
+  /* Input 输入框 - textarea 模式聚焦 */
+  .me-input.is-textarea .me-input__inner:focus {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px var(--editor-accent-bg);
+  }
+
+  /* Select 选择器聚焦 */
+  .me-select .me-select__wrapper.is-focused {
+    box-shadow: 0 0 0 1px var(--editor-accent) inset;
+  }
+
+  /* Checkbox 复选框 hover/checked */
+  .me-checkbox:hover .me-checkbox__box {
+    border-color: var(--editor-accent);
+  }
+
+  .me-checkbox.is-checked .me-checkbox__box,
+  .me-checkbox.is-indeterminate .me-checkbox__box {
+    background-color: var(--editor-accent);
+    border-color: var(--editor-accent);
+  }
+
+  .me-checkbox.is-checked .me-checkbox__box:hover,
+  .me-checkbox.is-indeterminate .me-checkbox__box:hover {
+    background-color: var(--editor-accent);
+    border-color: var(--editor-accent);
+  }
+
+  /* Radio 单选框 hover/checked */
+  .me-radio:hover .me-radio__box {
+    border-color: var(--editor-accent);
+  }
+
+  .me-radio.is-checked .me-radio__box {
+    border-color: var(--editor-accent);
+  }
+
+  .me-radio.is-checked .me-radio__box:hover {
+    border-color: var(--editor-accent);
+  }
+
+  .me-radio__dot {
+    background-color: var(--editor-accent);
+  }
+
+  /* RadioButton 按钮样式单选框选中态 */
+  .me-radio-button.is-active:not(.is-disabled) {
+    background-color: var(--editor-accent);
+    border-color: var(--editor-accent);
+    color: #fff;
+  }
+
+  /* Tree 树组件 - 通用覆盖（亮/暗主题均生效） */
+  .me-tree {
+    background: transparent;
+  }
+}
+
+/* ========== me-ui 组件暗色主题覆盖 ========== */
+/* 仅在暗色主题下生效，将 me-ui 组件的硬编码白色背景替换为编辑器暗色背景 */
+[data-theme="dark"] {
+
+/* Input 输入框 */
+.me-input {
+  .me-input__wrapper {
+    background-color: var(--editor-bg-input);
+    border-color: var(--editor-border);
+
+    &:hover {
+      border-color: var(--editor-border-strong);
+    }
+  }
+
+  .me-input__inner {
+    color: var(--editor-text);
+
+    &::placeholder {
+      color: var(--editor-text-tertiary);
+    }
+  }
+
+  /* textarea 模式 */
+  &.is-textarea {
+    .me-input__inner {
+      background-color: var(--editor-bg-input);
+      border-color: var(--editor-border);
+      color: var(--editor-text);
+
+      &::placeholder {
+        color: var(--editor-text-tertiary);
+      }
+
+      &:hover {
+        border-color: var(--editor-border-strong);
+      }
+    }
+  }
+
+  /* 清除图标 */
+  .me-input__clear {
+    color: var(--editor-text-tertiary);
+
+    &:hover {
+      color: var(--editor-text-secondary);
+    }
+  }
+}
+
+/* Select 选择器 */
+.me-select {
+  .me-select__wrapper {
+    background-color: var(--editor-bg-input);
+    color: var(--editor-text);
+    box-shadow: 0 0 0 1px var(--editor-border) inset;
+
+    &.is-hovering:not(.is-focused) {
+      box-shadow: 0 0 0 1px var(--editor-border-strong) inset;
+    }
+
+    &.is-disabled {
+      background-color: var(--editor-bg-item);
+      color: var(--editor-text-disabled);
+    }
+  }
+
+  .me-select__placeholder {
+    color: var(--editor-text-tertiary);
+  }
+
+  .me-select__caret,
+  .me-select__prefix,
+  .me-select__suffix {
+    color: var(--editor-text-tertiary);
+  }
+
+  .me-select__clear {
+    color: var(--editor-text-tertiary);
+
+    &:hover {
+      color: var(--editor-text-secondary);
+    }
+  }
+}
+
+/* Tooltip 浅色主题（Select 下拉面板、Header/Sider 提示均使用 effect="light"） */
+/* 暗色主题下将白色背景和箭头统一改为暗色，避免箭头与面板颜色不一致 */
+.me-tooltip--light {
+  background-color: var(--editor-bg-panel);
+  border-color: var(--editor-border);
+  color: var(--editor-text);
+
+  .me-tooltip__arrow::before {
+    background-color: var(--editor-bg-panel);
+    border-color: var(--editor-border);
+  }
+}
+
+/* Select 下拉面板 */
+.me-select__popper {
+  background-color: var(--editor-bg-panel);
+  border-color: var(--editor-border);
+}
+
+.me-select-dropdown {
+  .me-select-dropdown__item {
+    color: var(--editor-text-secondary);
+
+    &:hover:not(.is-disabled) {
+      background-color: var(--editor-bg-item-hover);
+      color: var(--editor-text);
+    }
+
+    &.is-selected {
+      color: var(--editor-accent);
+    }
+
+    &.is-disabled {
+      color: var(--editor-text-disabled);
+    }
+  }
+
+  .me-select-dropdown__empty {
+    color: var(--editor-text-tertiary);
+  }
+}
+
+/* Checkbox 复选框 */
+.me-checkbox {
+  color: var(--editor-text-secondary);
+
+  .me-checkbox__box {
+    background-color: var(--editor-bg-input);
+    border-color: var(--editor-border-strong);
+  }
+}
+
+/* Radio 单选框 */
+.me-radio {
+  color: var(--editor-text-secondary);
+
+  .me-radio__box {
+    background-color: var(--editor-bg-input);
+    border-color: var(--editor-border-strong);
+  }
+}
+
+/* RadioButton 按钮样式单选框 */
+.me-radio-button {
+  background-color: var(--editor-bg-input);
+  border-color: var(--editor-border);
+  color: var(--editor-text-secondary);
+
+  &:hover {
+    background-color: var(--editor-bg-item-hover);
+    color: var(--editor-text);
+  }
+}
+
+/* Button 按钮 */
+.me-button {
+  background-color: var(--editor-bg-input);
+  border-color: var(--editor-border);
+  color: var(--editor-text-secondary);
+
+  &:hover {
+    color: var(--editor-accent);
+    border-color: var(--editor-accent);
+    background-color: var(--editor-bg-item-hover);
+  }
+
+  &--primary {
+    background-color: var(--editor-accent);
+    border-color: var(--editor-accent);
+    color: #fff;
+
+    &:hover {
+      background-color: var(--editor-accent-hover);
+      border-color: var(--editor-accent-hover);
+      color: #fff;
+    }
+  }
+}
+
+/* Modal 弹窗 */
+.me-modal {
+  background-color: var(--editor-bg-panel);
+
+  .me-modal__header {
+    .me-modal__title {
+      color: var(--editor-text);
+    }
+
+    .me-modal__close {
+      color: var(--editor-text-tertiary);
+
+      &:hover {
+        color: var(--editor-text);
+        background-color: var(--editor-bg-item-hover);
+      }
+    }
+  }
+
+  .me-modal__body {
+    color: var(--editor-text);
+  }
+}
+
+/* Tag 标签 */
+.me-tag {
+  background-color: var(--editor-bg-item);
+  border-color: var(--editor-border);
+  color: var(--editor-text-secondary);
+}
+
+/* Tree 树组件 */
+.me-tree {
+  background: transparent;
+  color: var(--editor-text);
+
+  .me-tree-node {
+    &__content {
+      color: var(--editor-text);
+
+      &:hover {
+        background-color: var(--editor-bg-item-hover);
+      }
+    }
+
+    &.is-current > .me-tree-node__content {
+      background-color: var(--editor-accent-bg);
+    }
+
+    &.is-drop-inner > .me-tree-node__content .me-tree-node__label {
+      background-color: var(--editor-accent);
+      color: #fff;
+    }
+  }
+
+  &__drop-indicator {
+    background-color: var(--editor-accent);
+  }
+
+  &__empty-text {
+    color: var(--editor-text-tertiary);
+  }
+}
+
+} /* end [data-theme="dark"] */

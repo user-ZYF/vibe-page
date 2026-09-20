@@ -4,42 +4,42 @@
     <!-- Direction -->
     <div class="style-config-section">
       <div class="style-config-label">Direction</div>
-      <a-radio-group v-model:value="model.flexDirection" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="FlexDirectionEnum.ROW" title="row"><LayoutOutlined /></a-radio-button>
-        <a-radio-button :value="FlexDirectionEnum.ROW_REVERSE" title="row-reverse"><LayoutOutlined class="icon-flip-x" /></a-radio-button>
-        <a-radio-button :value="FlexDirectionEnum.COLUMN" title="column"><ColumnHeightOutlined /></a-radio-button>
-        <a-radio-button :value="FlexDirectionEnum.COLUMN_REVERSE" title="column-reverse"><ColumnHeightOutlined class="icon-flip-y" /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.flexDirection" class="style-config-radio-group">
+        <me-radio-button :value="FlexDirectionEnum.ROW" title="row"><LayoutOutlined /></me-radio-button>
+        <me-radio-button :value="FlexDirectionEnum.ROW_REVERSE" title="row-reverse"><LayoutOutlined class="icon-flip-x" /></me-radio-button>
+        <me-radio-button :value="FlexDirectionEnum.COLUMN" title="column"><ColumnHeightOutlined /></me-radio-button>
+        <me-radio-button :value="FlexDirectionEnum.COLUMN_REVERSE" title="column-reverse"><ColumnHeightOutlined class="icon-flip-y" /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Justify -->
     <div class="style-config-section">
       <div class="style-config-label">Justify</div>
-      <a-radio-group v-model:value="model.justifyContent" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="JustifyContentEnum.FLEX_START" title="flex-start"><VerticalLeftOutlined /></a-radio-button>
-        <a-radio-button :value="JustifyContentEnum.CENTER" title="center"><ColumnWidthOutlined /></a-radio-button>
-        <a-radio-button :value="JustifyContentEnum.FLEX_END" title="flex-end"><VerticalRightOutlined /></a-radio-button>
-        <a-radio-button :value="JustifyContentEnum.SPACE_BETWEEN" title="space-between"><SplitCellsOutlined /></a-radio-button>
-        <a-radio-button :value="JustifyContentEnum.SPACE_AROUND" title="space-around"><ExpandOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.justifyContent" class="style-config-radio-group">
+        <me-radio-button :value="JustifyContentEnum.FLEX_START" title="flex-start"><VerticalLeftOutlined /></me-radio-button>
+        <me-radio-button :value="JustifyContentEnum.CENTER" title="center"><ColumnWidthOutlined /></me-radio-button>
+        <me-radio-button :value="JustifyContentEnum.FLEX_END" title="flex-end"><VerticalRightOutlined /></me-radio-button>
+        <me-radio-button :value="JustifyContentEnum.SPACE_BETWEEN" title="space-between"><SplitCellsOutlined /></me-radio-button>
+        <me-radio-button :value="JustifyContentEnum.SPACE_AROUND" title="space-around"><ExpandOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Align -->
     <div class="style-config-section">
       <div class="style-config-label">Align</div>
-      <a-radio-group v-model:value="model.alignItems" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="AlignItemsEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
-        <a-radio-button :value="AlignItemsEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></a-radio-button>
-        <a-radio-button :value="AlignItemsEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
-        <a-radio-button :value="AlignItemsEnum.STRETCH" title="stretch"><ExpandAltOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.alignItems" class="style-config-radio-group">
+        <me-radio-button :value="AlignItemsEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></me-radio-button>
+        <me-radio-button :value="AlignItemsEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></me-radio-button>
+        <me-radio-button :value="AlignItemsEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></me-radio-button>
+        <me-radio-button :value="AlignItemsEnum.STRETCH" title="stretch"><ExpandAltOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Order -->
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Order</div>
-        <a-input-number v-model:value="model.order" size="small" class="style-config-input-number" placeholder="0" />
+        <a-input-number v-model:value="model.order" class="style-config-input-number" placeholder="0" />
       </div>
     </div>
 
@@ -49,19 +49,18 @@
       <div class="style-config-row">
         <div class="style-config-col">
           <div class="style-config-label">Grow</div>
-          <a-input-number v-model:value="model.flexGrow" size="small" class="style-config-input-number" :min="0" placeholder="0" />
+          <a-input-number v-model:value="model.flexGrow" class="style-config-input-number" :min="0" placeholder="0" />
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Shrink</div>
-          <a-input-number v-model:value="model.flexShrink" size="small" class="style-config-input-number" :min="0" placeholder="1" />
+          <a-input-number v-model:value="model.flexShrink" class="style-config-input-number" :min="0" placeholder="1" />
         </div>
       </div>
       <div class="style-config-section">
         <div class="style-config-label">Basis</div>
         <div class="style-config-input-group style-config-input-group--basis">
-          <a-input v-model:value="model.flexBasis" size="small" class="style-config-input" placeholder="auto" @blur="handleBasisBlur('flexBasis', 'flexBasisUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.flexBasisUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.flexBasis" class="style-config-input" placeholder="auto" @blur="handleBasisBlur('flexBasis', 'flexBasisUnit')" />
+          <me-select v-model="model.flexBasisUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -69,13 +68,13 @@
     <!-- Align self -->
     <div class="style-config-section style-config-section--mt">
       <div class="style-config-label">Align Self</div>
-      <a-radio-group v-model:value="model.alignSelf" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="AlignSelfEnum.AUTO">Auto</a-radio-button>
-        <a-radio-button :value="AlignSelfEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></a-radio-button>
-        <a-radio-button :value="AlignSelfEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></a-radio-button>
-        <a-radio-button :value="AlignSelfEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></a-radio-button>
-        <a-radio-button :value="AlignSelfEnum.STRETCH" title="stretch"><ExpandAltOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.alignSelf" class="style-config-radio-group">
+        <me-radio-button :value="AlignSelfEnum.AUTO">Auto</me-radio-button>
+        <me-radio-button :value="AlignSelfEnum.FLEX_START" title="flex-start"><VerticalAlignTopOutlined /></me-radio-button>
+        <me-radio-button :value="AlignSelfEnum.CENTER" title="center"><VerticalAlignMiddleOutlined /></me-radio-button>
+        <me-radio-button :value="AlignSelfEnum.FLEX_END" title="flex-end"><VerticalAlignBottomOutlined /></me-radio-button>
+        <me-radio-button :value="AlignSelfEnum.STRETCH" title="stretch"><ExpandAltOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
   </div>
 </template>
@@ -94,6 +93,7 @@ import {
   VerticalAlignBottomOutlined,
   ExpandAltOutlined,
 } from '@ant-design/icons-vue';
+import { MeInput, MeRadioButton, MeRadioGroup, MeSelect } from '@zyf_dsb/me-ui';
 import { SIZE_UNIT_OPTIONS, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, AlignSelfEnum } from '@/constants/style';
 import { useAutoUnitBlur } from '@/composables/useUnitAutoFill';
 import type { FlexConfig } from '@/views/Canvas/types';

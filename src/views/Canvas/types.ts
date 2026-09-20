@@ -2,8 +2,8 @@
  * 样式面板各配置项的类型定义
  */
 
-import { CanvasElementTypeEnum } from '@/constants/home';
-import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, LinkTargetEnum, TableScopeEnum } from '@/constants/home';
+import { CanvasElementTypeEnum, ELEMENT_TYPE_CONSTRAINTS } from '@/constants/home';
+import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, HeadingLevelEnum, LinkTargetEnum, TableScopeEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
   BackgroundAttachmentEnum,
@@ -22,10 +22,11 @@ import type {
   AlignSelfEnum,
   OverflowStyleEnum,
   PositionStyleEnum,
-  SizeUnitEnum,
+  UnitEnum,
   TextAlignEnum,
   TextDecorationEnum,
   ResizeDirEnum,
+  StyleRuleTypeEnum,
 } from '@/constants/style';
 
 /**
@@ -35,15 +36,15 @@ export interface TextShadowItem {
   /** X 偏移值 */
   x?: number;
   /** X 偏移单位 */
-  xUnit?: SizeUnitEnum;
+  xUnit?: UnitEnum;
   /** Y 偏移值 */
   y?: number;
   /** Y 偏移单位 */
-  yUnit?: SizeUnitEnum;
+  yUnit?: UnitEnum;
   /** 模糊半径 */
   blur?: number;
   /** 模糊半径单位 */
-  blurUnit?: SizeUnitEnum;
+  blurUnit?: UnitEnum;
   /** 阴影颜色 */
   color?: string;
 }
@@ -55,19 +56,19 @@ export interface BoxShadowItem {
   /** X 偏移值 */
   x?: number;
   /** X 偏移单位 */
-  xUnit?: SizeUnitEnum;
+  xUnit?: UnitEnum;
   /** Y 偏移值 */
   y?: number;
   /** Y 偏移单位 */
-  yUnit?: SizeUnitEnum;
+  yUnit?: UnitEnum;
   /** 模糊半径 */
   blur?: number;
   /** 模糊半径单位 */
-  blurUnit?: SizeUnitEnum;
+  blurUnit?: UnitEnum;
   /** 扩展半径 */
   spread?: number;
   /** 扩展半径单位 */
-  spreadUnit?: SizeUnitEnum;
+  spreadUnit?: UnitEnum;
   /** 阴影颜色 */
   color?: string;
   /** 是否为内阴影 */
@@ -109,19 +110,19 @@ export interface GeneralConfig {
   /** 顶部偏移值 */
   top?: string;
   /** 顶部偏移单位 */
-  topUnit?: SizeUnitEnum;
+  topUnit?: UnitEnum;
   /** 右侧偏移值 */
   right?: string;
   /** 右侧偏移单位 */
-  rightUnit?: SizeUnitEnum;
+  rightUnit?: UnitEnum;
   /** 左侧偏移值 */
   left?: string;
   /** 左侧偏移单位 */
-  leftUnit?: SizeUnitEnum;
+  leftUnit?: UnitEnum;
   /** 底部偏移值 */
   bottom?: string;
   /** 底部偏移单位 */
-  bottomUnit?: SizeUnitEnum;
+  bottomUnit?: UnitEnum;
   /** 溢出处理方式 */
   overflow?: OverflowStyleEnum;
   /** 表格边框合并方式 */
@@ -137,59 +138,59 @@ export interface SizeConfig {
   /** 宽度值 */
   width?: string;
   /** 宽度单位 */
-  widthUnit?: SizeUnitEnum;
+  widthUnit?: UnitEnum;
   /** 高度值 */
   height?: string;
   /** 高度单位 */
-  heightUnit?: SizeUnitEnum;
+  heightUnit?: UnitEnum;
   /** 最大宽度值 */
   maxWidth?: string;
   /** 最大宽度单位 */
-  maxWidthUnit?: SizeUnitEnum;
+  maxWidthUnit?: UnitEnum;
   /** 最小宽度值 */
   minWidth?: string;
   /** 最小宽度单位 */
-  minWidthUnit?: SizeUnitEnum;
+  minWidthUnit?: UnitEnum;
   /** 最大高度值 */
   maxHeight?: string;
   /** 最大高度单位 */
-  maxHeightUnit?: SizeUnitEnum;
+  maxHeightUnit?: UnitEnum;
   /** 最小高度值 */
   minHeight?: string;
   /** 最小高度单位 */
-  minHeightUnit?: SizeUnitEnum;
+  minHeightUnit?: UnitEnum;
   /** 上外边距 */
   marginTop?: string;
   /** 上外边距单位 */
-  marginTopUnit?: SizeUnitEnum;
+  marginTopUnit?: UnitEnum;
   /** 右外边距 */
   marginRight?: string;
   /** 右外边距单位 */
-  marginRightUnit?: SizeUnitEnum;
+  marginRightUnit?: UnitEnum;
   /** 下外边距 */
   marginBottom?: string;
   /** 下外边距单位 */
-  marginBottomUnit?: SizeUnitEnum;
+  marginBottomUnit?: UnitEnum;
   /** 左外边距 */
   marginLeft?: string;
   /** 左外边距单位 */
-  marginLeftUnit?: SizeUnitEnum;
+  marginLeftUnit?: UnitEnum;
   /** 上内边距 */
   paddingTop?: number;
   /** 上内边距单位 */
-  paddingTopUnit?: SizeUnitEnum;
+  paddingTopUnit?: UnitEnum;
   /** 右内边距 */
   paddingRight?: number;
   /** 右内边距单位 */
-  paddingRightUnit?: SizeUnitEnum;
+  paddingRightUnit?: UnitEnum;
   /** 下内边距 */
   paddingBottom?: number;
   /** 下内边距单位 */
-  paddingBottomUnit?: SizeUnitEnum;
+  paddingBottomUnit?: UnitEnum;
   /** 左内边距 */
   paddingLeft?: number;
   /** 左内边距单位 */
-  paddingLeftUnit?: SizeUnitEnum;
+  paddingLeftUnit?: UnitEnum;
 }
 
 /**
@@ -201,7 +202,7 @@ export interface FontConfig {
   /** 字体大小 */
   fontSize?: number;
   /** 字体大小单位 */
-  fontSizeUnit?: SizeUnitEnum;
+  fontSizeUnit?: UnitEnum;
   /** 字体粗细 */
   fontWeight?: FontWeightEnum;
   /** 字体倾斜 */
@@ -209,17 +210,17 @@ export interface FontConfig {
   /** 字母间距值 */
   letterSpacing?: string;
   /** 字母间距单位 */
-  letterSpacingUnit?: SizeUnitEnum;
+  letterSpacingUnit?: UnitEnum;
   /** 文字颜色 */
   color?: string;
   /** 行高值 */
   lineHeight?: string;
   /** 行高单位 */
-  lineHeightUnit?: SizeUnitEnum;
+  lineHeightUnit?: UnitEnum;
   /** 文本缩进值 */
   textIndent?: string;
   /** 文本缩进单位 */
-  textIndentUnit?: SizeUnitEnum;
+  textIndentUnit?: UnitEnum;
   /** 文字对齐方式 */
   textAlign?: TextAlignEnum;
   /** 文字装饰 */
@@ -237,25 +238,31 @@ export interface VisualConfig {
   /** 边框宽度 */
   borderWidth?: number;
   /** 边框宽度单位 */
-  borderWidthUnit?: SizeUnitEnum;
+  borderWidthUnit?: UnitEnum;
   /** 边框样式 */
   borderStyle?: BorderStyleEnum;
   /** 边框颜色 */
   borderColor?: string;
   /** 左上圆角 */
   borderRadiusTL?: number;
+  /** 左上圆角单位 */
+  borderRadiusTLUnit?: UnitEnum;
   /** 右上圆角 */
   borderRadiusTR?: number;
+  /** 右上圆角单位 */
+  borderRadiusTRUnit?: UnitEnum;
   /** 左下圆角 */
   borderRadiusBL?: number;
+  /** 左下圆角单位 */
+  borderRadiusBLUnit?: UnitEnum;
   /** 右下圆角 */
   borderRadiusBR?: number;
-  /** 圆角单位 */
-  borderRadiusUnit?: SizeUnitEnum;
+  /** 右下圆角单位 */
+  borderRadiusBRUnit?: UnitEnum;
   /** outline 宽度 */
   outlineWidth?: number;
   /** outline 宽度单位 */
-  outlineWidthUnit?: SizeUnitEnum;
+  outlineWidthUnit?: UnitEnum;
   /** outline 样式 */
   outlineStyle?: BorderStyleEnum;
   /** outline 颜色 */
@@ -263,7 +270,7 @@ export interface VisualConfig {
   /** outline 偏移值 */
   outlineOffset?: number;
   /** outline 偏移单位 */
-  outlineOffsetUnit?: SizeUnitEnum;
+  outlineOffsetUnit?: UnitEnum;
   /** 不透明度 */
   opacity?: number;
   /** 盒阴影列表 */
@@ -289,7 +296,7 @@ export interface FlexConfig {
   /** 基准尺寸值 */
   flexBasis?: string;
   /** 基准尺寸单位 */
-  flexBasisUnit?: SizeUnitEnum;
+  flexBasisUnit?: UnitEnum;
   /** 自身对齐方式 */
   alignSelf?: AlignSelfEnum;
 }
@@ -308,26 +315,67 @@ export interface StyleConfig {
   flex: FlexConfig;
 }
 
+
+/** 解析后的 CSS 规则描述 */
+export interface ParsedCssRule {
+  /** 选择器文本（atRuleCssText 规则为空字符串） */
+  selector: string;
+  /** 
+   * 样式声明原始内容键值对（EDITABLE，RAW时使用）
+   * @remarks
+   * - 只包含展开的 longhand 属性
+   * - kebab-case 键名
+   * - 包含 !important 标记
+   * - 不包含非法样式或样式值的键值对
+   */
+  style: Record<string, string>;
+  /** 完整 at-rule 文本（AT_RULE时使用） */
+  atRuleCssText?: string;
+}
+
+/**
+ * 画布样式规则项，按用户输入顺序排列，type 区分可编辑与透传规则。
+ * style 承载全量声明（kebab-case，含 !important），是输出的事实来源；
+ * 面板编辑使用选择器级 StyleConfig（getStyleConfig），由同名 EDITABLE 规则的 style 合并派生，
+ * 不随规则存储，修改后按属性 diff 写回同名规则集
+ */
+export interface CanvasStyleRule extends ParsedCssRule {
+  /** 规则类型 */
+  type: StyleRuleTypeEnum;
+}
+
+/** 元素 class 项 */
+export interface ElementClass {
+  /** class 名称 */
+  name: string;
+  /** 是否启用（应用到 DOM） */
+  enabled: boolean;
+}
+
+/** class 引用项（引用该 class 的元素 id 及启用状态） */
+export interface ClassRef {
+  /** 引用元素的 id */
+  id: string;
+  /** 该 class 在此元素上是否启用 */
+  enabled: boolean;
+}
+
+/** 全局 class 列表项（含引用元素信息），供全局 class 管理面板使用 */
+export interface ClassListItem {
+  /** class 名称 */
+  name: string;
+  /** 引用该 class 的元素列表 */
+  refs: ClassRef[];
+}
+
 /** 画布元素通用属性 */
 export interface CanvasElementBase {
   /** 元素id */
   id: string;
-  /** 元素样式配置 */
-  styleConfig: StyleConfig;
-  /** 元素已启用的类名列表（实际应用到 DOM 的 class） */
-  classes: string[];
-  /** 元素管理的所有类名列表（包含启用和禁用的 class） */
-  classNames: string[];
+  /** 元素管理的 class 列表（含启用/禁用状态） */
+  classes: ElementClass[];
   /** 元素别名 */
   alias?: string;
-  /** 允许的直接子元素类型列表（仅约束直接子元素，为空或不设置表示不限制） */
-  directInclude?: CanvasInnerElementTypeEnum[];
-  /** 不允许的直接子元素类型列表（仅约束直接子元素，为空或不设置表示不限制） */
-  directExclude?: CanvasInnerElementTypeEnum[];
-  /** 允许的后代元素类型列表（约束所有后代含直接子元素，为空或不设置表示不限制） */
-  descendantInclude?: CanvasInnerElementTypeEnum[];
-  /** 不允许的后代元素类型列表（约束所有后代含直接子元素，为空或不设置表示不限制） */
-  descendantExclude?: CanvasInnerElementTypeEnum[];
 }
 
 /** 画布容器元素 */
@@ -398,8 +446,8 @@ export interface CanvasTextareaElement extends CanvasElementBase {
   placeholder: string;
   /** 当前值 */
   value: string;
-  /** 行数 */
-  rows: number;
+  /** 行数（缺省时由浏览器默认） */
+  rows?: number;
   /** 是否必填 */
   required: boolean;
 }
@@ -458,8 +506,8 @@ export interface CanvasLabelElement extends CanvasElementBase {
   type: CanvasElementTypeEnum.LABEL;
   /** 标签文本 */
   text: string;
-  /** 关联的表单元素 id（为空表示未绑定） */
-  for: string;
+  /** 关联的表单元素 id（缺省表示未绑定） */
+  for?: string;
 }
 
 /** 画布表单元素 */
@@ -558,10 +606,10 @@ export interface CanvasTableRowElement extends CanvasElementBase {
 export interface CanvasTableDataElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_DATA;
-  /** 跨列数 */
-  colspan: number;
-  /** 跨行数 */
-  rowspan: number;
+  /** 跨列数（缺省为 1） */
+  colspan?: number;
+  /** 跨行数（缺省为 1） */
+  rowspan?: number;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -570,10 +618,10 @@ export interface CanvasTableDataElement extends CanvasElementBase {
 export interface CanvasTableHeaderCellElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_HEADER_CELL;
-  /** 跨列数 */
-  colspan: number;
-  /** 跨行数 */
-  rowspan: number;
+  /** 跨列数（缺省为 1） */
+  colspan?: number;
+  /** 跨行数（缺省为 1） */
+  rowspan?: number;
   /** 表头范围 */
   scope?: TableScopeEnum;
   /** 子元素 */
@@ -592,8 +640,8 @@ export interface CanvasTableCaptionElement extends CanvasElementBase {
 export interface CanvasTableColGroupElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_COL_GROUP;
-  /** 跨列数 */
-  span: number;
+  /** 跨列数（缺省为 1） */
+  span?: number;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -602,8 +650,8 @@ export interface CanvasTableColGroupElement extends CanvasElementBase {
 export interface CanvasTableColElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.TABLE_COL;
-  /** 跨列数 */
-  span: number;
+  /** 跨列数（缺省为 1） */
+  span?: number;
 }
 
 /** 画布页头元素 */
@@ -646,50 +694,12 @@ export interface CanvasAsideElement extends CanvasElementBase {
   children: CanvasInnerElement[];
 }
 
-/** 画布一级标题元素 */
-export interface CanvasHeading1Element extends CanvasElementBase {
+/** 画布标题元素 */
+export interface CanvasHeadingElement extends CanvasElementBase {
   /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_1;
-  /** 标题文本 */
-  text: string;
-}
-
-/** 画布二级标题元素 */
-export interface CanvasHeading2Element extends CanvasElementBase {
-  /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_2;
-  /** 标题文本 */
-  text: string;
-}
-
-/** 画布三级标题元素 */
-export interface CanvasHeading3Element extends CanvasElementBase {
-  /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_3;
-  /** 标题文本 */
-  text: string;
-}
-
-/** 画布四级标题元素 */
-export interface CanvasHeading4Element extends CanvasElementBase {
-  /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_4;
-  /** 标题文本 */
-  text: string;
-}
-
-/** 画布五级标题元素 */
-export interface CanvasHeading5Element extends CanvasElementBase {
-  /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_5;
-  /** 标题文本 */
-  text: string;
-}
-
-/** 画布六级标题元素 */
-export interface CanvasHeading6Element extends CanvasElementBase {
-  /** 元素类型 */
-  type: CanvasElementTypeEnum.HEADING_6;
+  type: CanvasElementTypeEnum.HEADING;
+  /** 标题级别（未定义时按一级标题处理） */
+  level?: HeadingLevelEnum;
   /** 标题文本 */
   text: string;
 }
@@ -706,7 +716,7 @@ export interface CanvasRootElement extends CanvasElementBase {
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasTableColElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasHeading1Element | CanvasHeading2Element | CanvasHeading3Element | CanvasHeading4Element | CanvasHeading5Element | CanvasHeading6Element;
+export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasTableColElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasHeadingElement;
 
 /** 可包含子元素的画布元素 */
 export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement;
@@ -733,8 +743,8 @@ export function isParentElement(el: CanvasInnerElement): el is CanvasParentEleme
  * @param parent 父元素模型数据
  * @param childType 待放入的子元素类型
  */
-export function isChildTypeAllowed(parent: CanvasElementBase, childType: CanvasInnerElementTypeEnum): boolean {
-  const { directInclude, directExclude, descendantInclude, descendantExclude } = parent;
+export function isChildTypeAllowed(parent: CanvasElement, childType: CanvasInnerElementTypeEnum): boolean {
+  const { directInclude, directExclude, descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
   if (directInclude && directInclude.length > 0 && !directInclude.includes(childType)) return false;
   if (directExclude && directExclude.length > 0 && directExclude.includes(childType)) return false;
   if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(childType)) return false;
@@ -745,7 +755,7 @@ export function isChildTypeAllowed(parent: CanvasElementBase, childType: CanvasI
 /**
  * 判断拖拽元素及其所有后代是否均允许作为指定父元素的子元素
  *
- * 校验规则基于父元素的四个约束字段，按作用范围分为两组：
+ * 校验规则基于父元素类型对应的固定结构约束（ELEMENT_TYPE_CONSTRAINTS），按作用范围分为两组：
  *
  * **直接子元素约束**（仅检查待放入元素本身）：
  * - `directInclude`：白名单，列表不为空时，直接子元素类型必须在列表中
@@ -774,8 +784,8 @@ export function isChildTypeAllowed(parent: CanvasElementBase, childType: CanvasI
  * @param parent 目标父元素模型数据
  * @param child 待放入的子元素（含其后代子树）
  */
-export function isSubtreeAllowed(parent: CanvasElementBase, child: CanvasInnerElement): boolean {
-  const { directInclude, directExclude, descendantInclude, descendantExclude } = parent;
+export function isSubtreeAllowed(parent: CanvasElement, child: CanvasInnerElement): boolean {
+  const { directInclude, directExclude, descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
   const hasDirectInclude = !!directInclude && directInclude.length > 0;
   const hasDirectExclude = !!directExclude && directExclude.length > 0;
   const hasDescendantInclude = !!descendantInclude && descendantInclude.length > 0;
@@ -815,8 +825,8 @@ export function isSubtreeAllowed(parent: CanvasElementBase, child: CanvasInnerEl
  * @param parent 目标父元素模型数据
  * @param descendant 待检查的后代元素
  */
-function isDescendantAllowed(parent: CanvasElementBase, descendant: CanvasInnerElement): boolean {
-  const { descendantInclude, descendantExclude } = parent;
+function isDescendantAllowed(parent: CanvasElement, descendant: CanvasInnerElement): boolean {
+  const { descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
   const descendantType = descendant.type as CanvasInnerElementTypeEnum;
 
   if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(descendantType)) return false;
@@ -868,4 +878,28 @@ export interface ComponentGroup {
   header: string;
   /** 分组内组件列表 */
   components: CanvasInnerElementTypeEnum[];
+}
+
+/** LocalStorage 中持久化的画布数据结构 */
+export interface CanvasStorageData {
+  /** 数据结构版本号，与 CANVAS_DATA_VERSION 不匹配时数据作废 */
+  version?: number;
+  /** 画布元素列表 */
+  children: CanvasInnerElement[];
+  /** 样式规则清单 */
+  styleRules?: CanvasStyleRule[];
+}
+
+/** 层级树节点数据（LayersPanel 使用） */
+export interface LayerTreeNodeData {
+  /** 元素id */
+  id: string;
+  /** 元素类型 */
+  type: CanvasElementTypeEnum;
+  /** 元素别名 */
+  alias?: string;
+  /** 标题级别（仅标题元素） */
+  level?: HeadingLevelEnum;
+  /** 子节点 */
+  children: LayerTreeNodeData[];
 }

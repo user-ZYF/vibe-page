@@ -8,6 +8,8 @@ export enum SiderPanelEnum {
   COMPONENTS,
   /** 交互逻辑 */
   LOGIC,
+  /** 全局 class 管理 */
+  CLASS_MANAGER,
 }
 
 /** 画布元素类型 */
@@ -80,18 +82,8 @@ export enum CanvasElementTypeEnum {
   SECTION,
   /** 侧边栏 */
   ASIDE,
-  /** 一级标题 */
-  HEADING_1,
-  /** 二级标题 */
-  HEADING_2,
-  /** 三级标题 */
-  HEADING_3,
-  /** 四级标题 */
-  HEADING_4,
-  /** 五级标题 */
-  HEADING_5,
-  /** 六级标题 */
-  HEADING_6,
+  /** 标题 */
+  HEADING,
 }
 
 /** 画布元素label */
@@ -130,12 +122,7 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.ARTICLE]: "article",
   [CanvasElementTypeEnum.SECTION]: "section",
   [CanvasElementTypeEnum.ASIDE]: "aside",
-  [CanvasElementTypeEnum.HEADING_1]: "h1",
-  [CanvasElementTypeEnum.HEADING_2]: "h2",
-  [CanvasElementTypeEnum.HEADING_3]: "h3",
-  [CanvasElementTypeEnum.HEADING_4]: "h4",
-  [CanvasElementTypeEnum.HEADING_5]: "h5",
-  [CanvasElementTypeEnum.HEADING_6]: "h6",
+  [CanvasElementTypeEnum.HEADING]: "heading",
 }
 
 /** 按钮类型 */
@@ -324,10 +311,42 @@ export const COLGROUP_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, Canva
   CanvasElementTypeEnum.TABLE_COL,
 ];
 
+/**
+ * 元素类型结构约束（字段对应 CanvasElementBase 的同名约束字段）
+ * 全部为只读，禁止修改
+ */
+export interface ElementTypeConstraints {
+  /** 允许的直接子元素类型（仅约束直接子元素） */
+  readonly directInclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
+  /** 不允许的直接子元素类型（仅约束直接子元素） */
+  readonly directExclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
+  /** 允许的后代元素类型（约束所有后代） */
+  readonly descendantInclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
+  /** 不允许的后代元素类型（约束所有后代） */
+  readonly descendantExclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
+}
+
+/**
+ * 元素类型的固定 HTML 结构约束
+ * 元素嵌套校验（isChildTypeAllowed / isSubtreeAllowed）的唯一来源，按元素类型直接查表；
+ * 内容为只读，共享引用无需克隆
+ */
+export const ELEMENT_TYPE_CONSTRAINTS: Partial<Record<CanvasElementTypeEnum, ElementTypeConstraints>> = {
+  [CanvasElementTypeEnum.LINK]: { descendantExclude: LINK_DESCENDANT_EXCLUDE_TYPES },
+  [CanvasElementTypeEnum.FORM]: { descendantExclude: FORM_DESCENDANT_EXCLUDE_TYPES },
+  [CanvasElementTypeEnum.SPAN]: { descendantInclude: SPAN_DESCENDANT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.UNORDERED_LIST]: { directInclude: UL_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.ORDERED_LIST]: { directInclude: OL_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE]: { directInclude: TABLE_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE_HEAD]: { directInclude: THEAD_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE_BODY]: { directInclude: TBODY_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE_FOOT]: { directInclude: TFOOT_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE_ROW]: { directInclude: TR_DIRECT_INCLUDE_TYPES },
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: { directInclude: COLGROUP_DIRECT_INCLUDE_TYPES },
+};
+
 /** 表头单元格 scope 属性枚举 */
 export enum TableScopeEnum {
-  /** 未定义 */
-  UNDEFINED = 0,
   /** 行 */
   ROW = 1,
   /** 列 */
@@ -340,7 +359,6 @@ export enum TableScopeEnum {
 
 /** 表头单元格 scope 属性值到 HTML 属性值的映射 */
 export const TABLE_SCOPE_ATTR_MAP: Record<TableScopeEnum, string> = {
-  [TableScopeEnum.UNDEFINED]: '',
   [TableScopeEnum.ROW]: 'row',
   [TableScopeEnum.COL]: 'col',
   [TableScopeEnum.ROWGROUP]: 'rowgroup',
@@ -354,3 +372,57 @@ export const TABLE_SCOPE_OPTIONS = [
   { label: 'rowgroup', value: TableScopeEnum.ROWGROUP },
   { label: 'colgroup', value: TableScopeEnum.COLGROUP },
 ];
+
+/** 标题级别枚举 */
+export enum HeadingLevelEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 一级标题 */
+  H1 = 1,
+  /** 二级标题 */
+  H2 = 2,
+  /** 三级标题 */
+  H3 = 3,
+  /** 四级标题 */
+  H4 = 4,
+  /** 五级标题 */
+  H5 = 5,
+  /** 六级标题 */
+  H6 = 6,
+}
+
+/** 标题级别选项 */
+export const HEADING_LEVEL_OPTIONS = [
+  { label: 'h1', value: HeadingLevelEnum.H1 },
+  { label: 'h2', value: HeadingLevelEnum.H2 },
+  { label: 'h3', value: HeadingLevelEnum.H3 },
+  { label: 'h4', value: HeadingLevelEnum.H4 },
+  { label: 'h5', value: HeadingLevelEnum.H5 },
+  { label: 'h6', value: HeadingLevelEnum.H6 },
+];
+
+/**
+ * 将标题级别收敛到 1~6 的合法范围
+ * @param level 标题级别（可能为脏数据）
+ * @returns 非法值（非整数、越界、未定义）回退为一级标题
+ */
+export function normalizeHeadingLevel(level: HeadingLevelEnum | number | undefined): HeadingLevelEnum {
+  const n = Number(level);
+  if (!Number.isInteger(n) || n < HeadingLevelEnum.H1 || n > HeadingLevelEnum.H6) {
+    return HeadingLevelEnum.H1;
+  }
+  return n;
+}
+
+/**
+ * 获取元素显示名称
+ * 优先使用元素别名；标题元素按级别显示 h1~h6；其余查类型标签映射
+ * @param el 含 type/alias/level 的元素描述
+ */
+export function getElementDisplayName(el: { alias?: string; type: CanvasElementTypeEnum; level?: HeadingLevelEnum }): string {
+  if (el.alias) return el.alias;
+  if (el.type === CanvasElementTypeEnum.HEADING) {
+    return `h${normalizeHeadingLevel(el.level)}`;
+  }
+  return CanvasElementLabelMap[el.type];
+}

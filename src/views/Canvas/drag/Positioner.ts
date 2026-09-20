@@ -164,7 +164,7 @@ export class Positioner {
       error = "不允许插入到自身";
     }
 
-    /** 检查子元素类型是否被父元素的 directInclude/directExclude/descendantInclude/descendantExclude 规则允许 */
+    /** 检查子元素类型是否被父元素类型的结构约束（directInclude/directExclude/descendantInclude/descendantExclude）允许 */
     if(!error && dragType !== null){
       const parentElement = findElementInTree(root, parentId);
       if(parentElement){

@@ -2,100 +2,190 @@
 <template>
   <div class="comp-layers-panel">
     <div class="comp-layers-panel-body">
-        <LayersPanelItem
-          :element="root"
-          :depth="0"
-          :index="0"
-          :ancestor-ids="[]"
-          is-root
-        />
+      <me-tree
+        :data="treeData"
+        node-key="id"
+        :props="treePropsConfig"
+        :indent="16"
+        draggable
+        :allow-drag="allowDrag"
+        :allow-drop="allowDrop"
+        v-model:expanded-keys="expandedKeys"
+        v-model:current-node-key="currentNodeKey"
+        @node-drop="handleNodeDrop"
+      >
+        <template #default="{ data }">
+          <span
+            class="comp-layer-node"
+            :class="{ 'is-hidden': isHidden(data.id) }"
+          >
+            <span
+              class="comp-layer-node-visibility"
+              @click.stop="toggleShow(data.id)"
+            >
+              <EyeOutlined v-if="!isHidden(data.id)" />
+              <EyeInvisibleOutlined v-else />
+            </span>
+            <span class="comp-layer-node-label">{{ getNodeLabel(data) }}</span>
+            <DeleteOutlined
+              v-if="data.id !== rootId"
+              class="comp-layer-node-delete"
+              @click.stop="deleteElement(data.id)"
+            />
+          </span>
+        </template>
+      </me-tree>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, provide } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
-import LayersPanelItem from './LayersPanelItem.vue';
-import { DropPositionEnum } from '@/constants/home.ts';
-import { EXPANDED_KEYS, TOGGLE_EXPAND_KEY, EXPAND_CONTAINER_KEY, DRAGGING_ID_KEY, DROP_TARGET_KEY, SET_DRAGGING_ID_KEY, SET_DROP_TARGET_KEY, EXECUTE_MOVE_KEY } from '../constants.ts';
-import { LayersDropTarget } from '../types.ts';
+import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
+import { isParentElement, isSubtreeAllowed } from '@/views/Canvas/types';
+import type { CanvasElement, CanvasHeadingElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement, LayerTreeNodeData } from '@/views/Canvas/types';
+import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from '../constants.ts';
+import { DeleteOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
+import { MeTree } from '@zyf_dsb/me-ui';
+import type { AllowDragFunction, AllowDropFunction, AllowDropType, NodeDropType, TreeNodeData, TreeNodeModel } from '@zyf_dsb/me-ui/tree';
 
 defineOptions({
   name: 'LayersPanel',
 });
 
 const canvasStore = useCanvasStore();
-const { root } = storeToRefs(canvasStore);
+const { root, selectedElementId } = storeToRefs(canvasStore);
 
-/** 展开元素id列表 */
-const expandedKeys = ref<string[]>([]);
+/** 根元素id（代码编辑可能改写根元素 id，使用 computed 保持同步） */
+const rootId = computed(() => root.value.id);
 
-/** 当前拖拽元素id */
-const draggingId = ref<string | null>(null);
+/** 隐藏元素id列表 */
+const hiddenKeys = inject(HIDDEN_KEYS)!;
+/** 切换元素显示/隐藏 */
+const toggleShow = inject(TOGGLE_SHOW_KEY)!;
 
-/** 拖拽落点目标 */
-const dropTarget = ref<LayersDropTarget | null>(null);
+/** 将画布元素映射为层级树节点数据 */
+function toLayerTreeNode(el: CanvasElement): LayerTreeNodeData {
+  const isContainer = el.type === CanvasElementTypeEnum.ROOT || isParentElement(el as CanvasInnerElement);
+  const children = isContainer
+    ? (el as CanvasRootElement | CanvasParentElement).children.map(toLayerTreeNode)
+    : [];
+  return {
+    id: el.id,
+    type: el.type,
+    alias: el.alias,
+    level: el.type === CanvasElementTypeEnum.HEADING ? (el as CanvasHeadingElement).level : undefined,
+    children,
+  };
+}
 
-/** 切换展开/折叠 */
-function toggleExpand(id: string) {
-  const found = expandedKeys.value.includes(id);
-  if(found){
-    collapseContainer(id);
-  }else {
-    expandContainer(id);
+/** 树数据（以根元素为顶层节点） */
+const treeData = computed<LayerTreeNodeData[]>(() => [toLayerTreeNode(root.value)]);
+
+/** 树节点显示名称（标题元素按级别显示 h1~h6） */
+function getNodeLabel(data: TreeNodeData): string {
+  return getElementDisplayName(data as LayerTreeNodeData);
+}
+
+/** 树属性映射配置 */
+const treePropsConfig = {
+  children: 'children',
+  label: getNodeLabel,
+};
+
+/** 展开元素id列表（默认展开根元素） */
+const expandedKeys = ref<string[]>([rootId.value]);
+
+/** 当前选中节点 key（双向绑定 canvasStore.selectedElementId） */
+const currentNodeKey = computed<string | undefined>({
+  get: () => selectedElementId.value ?? undefined,
+  set: (val) => canvasStore.selectElement(val ?? null),
+});
+
+/** 判断元素是否隐藏 */
+function isHidden(id: string): boolean {
+  return hiddenKeys.value.includes(id);
+}
+
+/** 删除元素 */
+function deleteElement(id: string) {
+  canvasStore.removeElement(id);
+}
+
+/** 允许拖拽判断（根元素不可拖拽） */
+const allowDrag: AllowDragFunction = (node: TreeNodeModel) => {
+  return node.data.id !== rootId.value;
+};
+
+/** 允许放置判断（基于元素嵌套规则 isSubtreeAllowed） */
+const allowDrop: AllowDropFunction = (
+  draggingNode: TreeNodeModel,
+  dropNode: TreeNodeModel,
+  type: AllowDropType,
+) => {
+  const draggedId = draggingNode.data.id as string;
+  const dropId = dropNode.data.id as string;
+  const draggedEl = canvasStore.getElementById(draggedId);
+  if (!draggedEl || draggedEl.type === CanvasElementTypeEnum.ROOT) return false;
+  const dragElement = draggedEl as CanvasInnerElement;
+
+  if (type === 'inner') {
+    /** 放入容器内部：检查目标容器是否允许接收该子树 */
+    const dropEl = canvasStore.getElementById(dropId);
+    if (!dropEl) return false;
+    if (dropEl.type !== CanvasElementTypeEnum.ROOT && !isParentElement(dropEl as CanvasInnerElement)) return false;
+    return isSubtreeAllowed(dropEl, dragElement);
+  }
+
+  /** before / after：检查目标元素的父容器是否允许接收该子树 */
+  const parentId = canvasStore.getParentElementId(dropId);
+  if (!parentId) return false;
+  const parentEl = canvasStore.getElementById(parentId);
+  if (!parentEl) return false;
+  return isSubtreeAllowed(parentEl, dragElement);
+};
+
+/** 获取元素在父容器 children 中的索引 */
+function getElementIndex(id: string, parent: CanvasRootElement | CanvasParentElement): number {
+  return parent.children.findIndex((c) => c.id === id);
+}
+
+/** 拖拽放置成功，同步移动到 canvasStore */
+function handleNodeDrop(
+  draggingNode: TreeNodeModel,
+  dropNode: TreeNodeModel,
+  dropType: Exclude<NodeDropType, 'none'>,
+) {
+  const id = draggingNode.data.id as string;
+  let targetParentId: string;
+  let index: number;
+
+  if (dropType === 'inner') {
+    /** 放入容器内部：追加到末尾 */
+    targetParentId = dropNode.data.id as string;
+    const target = canvasStore.getElementById(targetParentId);
+    if (!target) return;
+    if (target.type !== CanvasElementTypeEnum.ROOT && !isParentElement(target as CanvasInnerElement)) return;
+    index = (target as CanvasRootElement | CanvasParentElement).children.length;
+  } else {
+    /** before / after：插入到目标元素前/后 */
+    const dropId = dropNode.data.id as string;
+    targetParentId = canvasStore.getParentElementId(dropId) ?? rootId.value;
+    const parent = canvasStore.getElementById(targetParentId);
+    if (!parent) return;
+    const dropIndex = getElementIndex(dropId, parent as CanvasRootElement | CanvasParentElement);
+    if (dropIndex < 0) return;
+    index = dropType === 'after' ? dropIndex + 1 : dropIndex;
+  }
+
+  canvasStore.moveElement(id, targetParentId, index);
+  /** 拖入容器内部时自动展开目标节点，让用户看到落点反馈 */
+  if (dropType === 'inner' && !expandedKeys.value.includes(targetParentId)) {
+    expandedKeys.value.push(targetParentId);
   }
 }
-
-/** 折叠容器 */
-function collapseContainer(id: string) {
-  expandedKeys.value = expandedKeys.value.filter((item)=>item !== id);
-}
-
-/** 展开容器 */
-function expandContainer(id: string) {
-  if(!expandedKeys.value.includes(id)){
-    expandedKeys.value.push(id);
-  }
-}
-
-/** 设置拖拽元素 id */
-function setDraggingId(id: string | null) {
-  draggingId.value = id;
-}
-
-/** 设置落点目标 */
-function setDropTarget(target: LayersDropTarget | null) {
-  dropTarget.value = target;
-}
-
-/** 执行移动 */
-function executeMove() {
-  const id = draggingId.value;
-  const target = dropTarget.value;
-  if (id && target) {
-    if (target.position === DropPositionEnum.INSIDE && target.parentId !== null) {
-      /** 插入到目标容器内部 */
-      canvasStore.moveElement(id, target.parentId, target.index);
-    } else {
-      /** 插入到目标元素前/后（同级） */
-      const insertIndex = target.position === DropPositionEnum.AFTER ? target.index + 1 : target.index;
-      canvasStore.moveElement(id, target.parentId, insertIndex);
-    }
-  }
-  draggingId.value = null;
-  dropTarget.value = null;
-}
-
-provide(EXPANDED_KEYS, expandedKeys);
-provide(TOGGLE_EXPAND_KEY, toggleExpand);
-provide(EXPAND_CONTAINER_KEY, expandContainer);
-provide(DRAGGING_ID_KEY, draggingId);
-provide(DROP_TARGET_KEY, dropTarget);
-provide(SET_DRAGGING_ID_KEY, setDraggingId);
-provide(SET_DROP_TARGET_KEY, setDropTarget);
-provide(EXECUTE_MOVE_KEY, executeMove);
 </script>
 
 <style scoped lang="less">
@@ -111,10 +201,44 @@ provide(EXECUTE_MOVE_KEY, executeMove);
   padding: 4px 0;
 }
 
-.comp-layers-panel-empty {
-  padding: 24px 16px;
-  color: var(--editor-text-tertiary);
-  text-align: center;
-  font-size: 13px;
+.comp-layer-node {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  align-self: stretch;
+  padding: 6px 8px 6px 0;
+
+  &.is-hidden {
+    opacity: 0.5;
+  }
+
+  &-visibility {
+    display: flex;
+    align-items: center;
+    margin-right: 4px;
+    color: var(--editor-text-tertiary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--editor-text-secondary);
+    }
+  }
+
+  &-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-delete {
+    margin-left: 4px;
+    color: var(--editor-text-tertiary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--editor-text-secondary);
+    }
+  }
 }
 </style>

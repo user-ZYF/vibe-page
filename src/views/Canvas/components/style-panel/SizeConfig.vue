@@ -6,17 +6,15 @@
       <div class="style-config-col">
         <div class="style-config-label">Width</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.width" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('width', 'widthUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.widthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.width" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('width', 'widthUnit')" />
+          <me-select v-model="model.widthUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Height</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.height" size="small" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('height', 'heightUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.heightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.height" class="style-config-input" placeholder="auto" @blur="handleUnitBlur('height', 'heightUnit')" />
+          <me-select v-model="model.heightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -26,17 +24,15 @@
       <div class="style-config-col">
         <div class="style-config-label">Max width</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.maxWidth" size="small" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxWidth', 'maxWidthUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.maxWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.maxWidth" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxWidth', 'maxWidthUnit')" />
+          <me-select v-model="model.maxWidthUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Min width</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.minWidth" size="small" class="style-config-input" placeholder="0" @blur="handleUnitBlur('minWidth', 'minWidthUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.minWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.minWidth" class="style-config-input" placeholder="0" @blur="handleUnitBlur('minWidth', 'minWidthUnit')" />
+          <me-select v-model="model.minWidthUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -46,17 +42,15 @@
       <div class="style-config-col">
         <div class="style-config-label">Max height</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.maxHeight" size="small" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxHeight', 'maxHeightUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.maxHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.maxHeight" class="style-config-input" placeholder="none" @blur="handleUnitBlur('maxHeight', 'maxHeightUnit')" />
+          <me-select v-model="model.maxHeightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Min height</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.minHeight" size="small" class="style-config-input" placeholder="0" @blur="handleUnitBlur('minHeight', 'minHeightUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.minHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.minHeight" class="style-config-input" placeholder="0" @blur="handleUnitBlur('minHeight', 'minHeightUnit')" />
+          <me-select v-model="model.minHeightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -69,15 +63,15 @@
         <div class="style-config-col">
           <div class="style-config-label">Top</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.paddingTop" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingTop', 'paddingTopUnit')" />
-            <a-select v-model:value="model.paddingTopUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <a-input-number v-model:value="model.paddingTop" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingTop', 'paddingTopUnit')" />
+            <me-select v-model="model.paddingTopUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Right</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.paddingRight" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingRight', 'paddingRightUnit')" />
-            <a-select v-model:value="model.paddingRightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <a-input-number v-model:value="model.paddingRight" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingRight', 'paddingRightUnit')" />
+            <me-select v-model="model.paddingRightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
       </div>
@@ -86,15 +80,15 @@
         <div class="style-config-col">
           <div class="style-config-label">Bottom</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.paddingBottom" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingBottom', 'paddingBottomUnit')" />
-            <a-select v-model:value="model.paddingBottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <a-input-number v-model:value="model.paddingBottom" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingBottom', 'paddingBottomUnit')" />
+            <me-select v-model="model.paddingBottomUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Left</div>
           <div class="style-config-input-group">
-            <a-input-number v-model:value="model.paddingLeft" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingLeft', 'paddingLeftUnit')" />
-            <a-select v-model:value="model.paddingLeftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <a-input-number v-model:value="model.paddingLeft" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('paddingLeft', 'paddingLeftUnit')" />
+            <me-select v-model="model.paddingLeftUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
       </div>
@@ -108,17 +102,15 @@
         <div class="style-config-col">
           <div class="style-config-label">Top</div>
           <div class="style-config-input-group">
-            <a-input v-model:value="model.marginTop" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginTop', 'marginTopUnit')" />
-            <span class="style-config-separator">-</span>
-            <a-select v-model:value="model.marginTopUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <me-input v-model="model.marginTop" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginTop', 'marginTopUnit')" />
+              <me-select v-model="model.marginTopUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Right</div>
           <div class="style-config-input-group">
-            <a-input v-model:value="model.marginRight" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginRight', 'marginRightUnit')" />
-            <span class="style-config-separator">-</span>
-            <a-select v-model:value="model.marginRightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <me-input v-model="model.marginRight" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginRight', 'marginRightUnit')" />
+              <me-select v-model="model.marginRightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
       </div>
@@ -127,17 +119,15 @@
         <div class="style-config-col">
           <div class="style-config-label">Bottom</div>
           <div class="style-config-input-group">
-            <a-input v-model:value="model.marginBottom" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginBottom', 'marginBottomUnit')" />
-            <span class="style-config-separator">-</span>
-            <a-select v-model:value="model.marginBottomUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <me-input v-model="model.marginBottom" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginBottom', 'marginBottomUnit')" />
+              <me-select v-model="model.marginBottomUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
         <div class="style-config-col">
           <div class="style-config-label">Left</div>
           <div class="style-config-input-group">
-            <a-input v-model:value="model.marginLeft" size="small" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginLeft', 'marginLeftUnit')" />
-            <span class="style-config-separator">-</span>
-            <a-select v-model:value="model.marginLeftUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <me-input v-model="model.marginLeft" class="style-config-input" placeholder="auto" @blur="handleMarginBlur('marginLeft', 'marginLeftUnit')" />
+              <me-select v-model="model.marginLeftUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
       </div>
@@ -146,6 +136,7 @@
 </template>
 
 <script lang="ts" setup>
+import { MeInput, MeSelect } from '@zyf_dsb/me-ui';
 import { SIZE_UNIT_OPTIONS } from '@/constants/style';
 import { useUnitAutoFill, useAutoUnitBlur } from '@/composables/useUnitAutoFill';
 import type { SizeConfig } from '@/views/Canvas/types';

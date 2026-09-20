@@ -1,5 +1,6 @@
 import type { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
 import { theme as antdTheme } from 'ant-design-vue';
+import type { ThemeTokens } from '@zyf_dsb/me-ui/config-provider';
 
 /**
  * 项目品牌色 Token（暗色/亮色共用）
@@ -82,5 +83,30 @@ export function getThemeConfig(isDark: boolean): ThemeConfig {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
     token: isDark ? darkTokens : lightTokens,
     hashed: true,
+  };
+}
+
+/**
+ * 获取 me-ui ConfigProvider 主题 Token 配置
+ * @param isDark - 是否为暗色主题
+ */
+export function getMeThemeConfig(isDark: boolean): ThemeTokens {
+  const tokens = isDark ? darkTokens : lightTokens;
+  return {
+    colorPrimary: tokens.colorPrimary,
+    colorSuccess: tokens.colorSuccess,
+    colorWarning: tokens.colorWarning,
+    colorDanger: tokens.colorError,
+    colorInfo: tokens.colorInfo,
+    textColorPrimary: tokens.colorText,
+    textColorRegular: tokens.colorTextSecondary,
+    textColorSecondary: tokens.colorTextTertiary,
+    textColorPlaceholder: tokens.colorTextQuaternary,
+    textColorDisabled: tokens.colorTextQuaternary,
+    borderColor: tokens.colorBorder,
+    borderColorLight: tokens.colorBorderSecondary,
+    borderRadiusBase: `${brandTokens.borderRadius}px`,
+    borderRadiusSmall: `${brandTokens.borderRadius - 2}px`,
+    fontSizeBase: `${brandTokens.fontSize}px`,
   };
 }

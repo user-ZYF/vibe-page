@@ -5,13 +5,13 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font family</div>
-        <a-select v-model:value="model.fontFamily" size="small" class="style-config-select" :options="FONT_FAMILY_OPTIONS" placeholder="inherit" allow-clear />
+        <me-select v-model="model.fontFamily" class="style-config-select" :options="FONT_FAMILY_OPTIONS" placeholder="inherit" clearable />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Font size</div>
         <div class="style-config-input-group">
-          <a-input-number v-model:value="model.fontSize" size="small" class="style-config-input-number" placeholder="16" @blur="handleUnitBlur('fontSize', 'fontSizeUnit')" />
-          <a-select v-model:value="model.fontSizeUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <a-input-number v-model:value="model.fontSize" class="style-config-input-number" placeholder="16" @blur="handleUnitBlur('fontSize', 'fontSizeUnit')" />
+          <me-select v-model="model.fontSizeUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -20,14 +20,13 @@
     <div class="style-config-row">
       <div class="style-config-col">
         <div class="style-config-label">Font weight</div>
-        <a-select v-model:value="model.fontWeight" size="small" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" placeholder="normal" allow-clear />
+        <me-select v-model="model.fontWeight" class="style-config-select" :options="FONT_WEIGHT_OPTIONS" placeholder="normal" clearable />
       </div>
       <div class="style-config-col">
         <div class="style-config-label">Letter spacing</div>
         <div class="style-config-input-group">
-          <a-input v-model:value="model.letterSpacing" size="small" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('letterSpacing', 'letterSpacingUnit')" />
-          <span class="style-config-separator">-</span>
-          <a-select v-model:value="model.letterSpacingUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <me-input v-model="model.letterSpacing" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('letterSpacing', 'letterSpacingUnit')" />
+          <me-select v-model="model.letterSpacingUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -35,14 +34,14 @@
     <!-- Font style -->
     <div class="style-config-section">
       <div class="style-config-label">Font style</div>
-      <a-select v-model:value="model.fontStyle" size="small" class="style-config-select" :options="FONT_STYLE_OPTIONS" placeholder="normal" allow-clear />
+      <me-select v-model="model.fontStyle" class="style-config-select" :options="FONT_STYLE_OPTIONS" placeholder="normal" clearable />
     </div>
 
     <!-- Color -->
     <div class="style-config-section">
       <div class="style-config-label">Color</div>
       <div class="style-config-color-row">
-        <a-input v-model:value="model.color" size="small" class="style-config-input" placeholder="#000000" />
+        <me-input v-model="model.color" class="style-config-input" placeholder="#000000" />
         <input type="color" v-model="model.color" class="style-config-color-picker" />
       </div>
     </div>
@@ -51,9 +50,8 @@
     <div class="style-config-section">
       <div class="style-config-label">Line height</div>
       <div class="style-config-input-group style-config-input-group--half">
-        <a-input v-model:value="model.lineHeight" size="small" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('lineHeight', 'lineHeightUnit')" />
-        <span class="style-config-separator">-</span>
-        <a-select v-model:value="model.lineHeightUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+        <me-input v-model="model.lineHeight" class="style-config-input" placeholder="normal" @blur="handleUnitBlur('lineHeight', 'lineHeightUnit')" />
+        <me-select v-model="model.lineHeightUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
       </div>
     </div>
 
@@ -61,21 +59,20 @@
     <div class="style-config-section">
       <div class="style-config-label">Text indent</div>
       <div class="style-config-input-group style-config-input-group--half">
-        <a-input v-model:value="model.textIndent" size="small" class="style-config-input" placeholder="0" @blur="handleUnitBlur('textIndent', 'textIndentUnit')" />
-        <span class="style-config-separator">-</span>
-        <a-select v-model:value="model.textIndentUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+        <me-input v-model="model.textIndent" class="style-config-input" placeholder="0" @blur="handleUnitBlur('textIndent', 'textIndentUnit')" />
+        <me-select v-model="model.textIndentUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
       </div>
     </div>
 
     <!-- Text align -->
     <div class="style-config-section">
       <div class="style-config-label">Text align</div>
-      <a-radio-group v-model:value="model.textAlign" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="TextAlignEnum.LEFT"><AlignLeftOutlined /></a-radio-button>
-        <a-radio-button :value="TextAlignEnum.CENTER"><AlignCenterOutlined /></a-radio-button>
-        <a-radio-button :value="TextAlignEnum.RIGHT"><AlignRightOutlined /></a-radio-button>
-        <a-radio-button :value="TextAlignEnum.JUSTIFY"><MenuOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.textAlign" class="style-config-radio-group">
+        <me-radio-button :value="TextAlignEnum.LEFT"><AlignLeftOutlined /></me-radio-button>
+        <me-radio-button :value="TextAlignEnum.CENTER"><AlignCenterOutlined /></me-radio-button>
+        <me-radio-button :value="TextAlignEnum.RIGHT"><AlignRightOutlined /></me-radio-button>
+        <me-radio-button :value="TextAlignEnum.JUSTIFY"><MenuOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Text decoration -->
@@ -88,11 +85,11 @@
           @click="model.textDecoration = TextDecorationEnum.NONE"
         />
       </div>
-      <a-radio-group v-model:value="model.textDecoration" button-style="solid" size="small" class="style-config-radio-group">
-        <a-radio-button :value="TextDecorationEnum.NONE"><CloseOutlined /></a-radio-button>
-        <a-radio-button :value="TextDecorationEnum.UNDERLINE"><UnderlineOutlined /></a-radio-button>
-        <a-radio-button :value="TextDecorationEnum.LINE_THROUGH"><StrikethroughOutlined /></a-radio-button>
-      </a-radio-group>
+      <me-radio-group v-model="model.textDecoration" class="style-config-radio-group">
+        <me-radio-button :value="TextDecorationEnum.NONE"><CloseOutlined /></me-radio-button>
+        <me-radio-button :value="TextDecorationEnum.UNDERLINE"><UnderlineOutlined /></me-radio-button>
+        <me-radio-button :value="TextDecorationEnum.LINE_THROUGH"><StrikethroughOutlined /></me-radio-button>
+      </me-radio-group>
     </div>
 
     <!-- Text shadow -->
@@ -117,15 +114,15 @@
           <div class="style-config-col">
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'x', 'xUnit')" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.x" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'x', 'xUnit')" />
+              <me-select v-model="shadow.xUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'y', 'yUnit')" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.y" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'y', 'yUnit')" />
+              <me-select v-model="shadow.yUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
         </div>
@@ -133,15 +130,15 @@
         <div class="style-config-section">
           <div class="style-config-label">Blur</div>
           <div class="style-config-input-group style-config-input-group--half">
-            <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
-            <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+            <a-input-number v-model:value="shadow.blur" class="style-config-input-number" placeholder="0" @blur="handleTextShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
+            <me-select v-model="shadow.blurUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
           </div>
         </div>
         <!-- Shadow Color -->
         <div class="style-config-section">
           <div class="style-config-label">Color</div>
           <div class="style-config-color-row">
-            <a-input v-model:value="shadow.color" size="small" class="style-config-input" placeholder="#000000" />
+            <me-input v-model="shadow.color" class="style-config-input" placeholder="#000000" />
             <input type="color" v-model="shadow.color" class="style-config-color-picker" />
           </div>
         </div>
@@ -164,7 +161,8 @@ import {
   DragOutlined,
   BoldOutlined,
 } from '@ant-design/icons-vue';
-import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, FONT_STYLE_OPTIONS, TextAlignEnum, TextDecorationEnum, SizeUnitEnum } from '@/constants/style';
+import { MeInput, MeRadioButton, MeRadioGroup, MeSelect } from '@zyf_dsb/me-ui';
+import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, FONT_STYLE_OPTIONS, TextAlignEnum, TextDecorationEnum, UnitEnum } from '@/constants/style';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import type { FontConfig, TextShadowItem } from '@/views/Canvas/types';
 
@@ -189,9 +187,9 @@ function handleTextShadowUnitBlur(shadow: TextShadowItem, valueKey: keyof TextSh
 function handleAddTextShadow() {
   if (!model.value.textShadows) model.value.textShadows = [];
   model.value.textShadows.push({
-    x: 0, xUnit: SizeUnitEnum.PX,
-    y: 0, yUnit: SizeUnitEnum.PX,
-    blur: 0, blurUnit: SizeUnitEnum.PX,
+    x: 0, xUnit: UnitEnum.PX,
+    y: 0, yUnit: UnitEnum.PX,
+    blur: 0, blurUnit: UnitEnum.PX,
     color: '#000000',
   });
 }

@@ -4,11 +4,9 @@
     <!-- 元素 ID（纯文本元素在生成代码中无属性，不显示 ID 设置） -->
     <div v-if="model.type !== CanvasElementTypeEnum.TEXT" class="style-config-section">
       <div class="style-config-label">ID</div>
-      <a-input
-        :value="model.id"
-        size="small"
+      <me-input
+        :model-value="model.id"
         class="style-config-input"
-        :status="pendingId && !isIdNameValid ? 'error' : ''"
         @focus="handleIdFocus"
         @input="handleIdInput"
         @blur="handleIdBlur"
@@ -22,11 +20,11 @@
     <template v-if="model.type === CanvasElementTypeEnum.BUTTON">
       <div class="style-config-section">
         <div class="style-config-label">按钮文本</div>
-        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
+        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">按钮类型</div>
-        <a-select v-model:value="(model as CanvasButtonElement).buttonType" size="small" class="style-config-select" :options="BUTTON_TYPE_OPTIONS" allow-clear />
+        <me-select v-model="(model as CanvasButtonElement).buttonType" class="style-config-select" :options="BUTTON_TYPE_OPTIONS" clearable />
       </div>
     </template>
 
@@ -34,7 +32,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.PARAGRAPH">
       <div class="style-config-section">
         <div class="style-config-label">段落文本</div>
-        <a-textarea v-model:value="pendingText" :rows="3" size="small" @blur="commitText" />
+        <me-input type="textarea" v-model="pendingText" :rows="3" @blur="commitText" />
       </div>
     </template>
 
@@ -42,11 +40,11 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.IMAGE">
       <div class="style-config-section">
         <div class="style-config-label">图片地址</div>
-        <a-input v-model:value="(model as CanvasImageElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="(model as CanvasImageElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">图片标题</div>
-        <a-input v-model:value="(model as CanvasImageElement).title" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasImageElement).title" class="style-config-input" />
       </div>
     </template>
 
@@ -54,11 +52,11 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LINK">
       <div class="style-config-section">
         <div class="style-config-label">链接地址</div>
-        <a-input v-model:value="(model as CanvasLinkElement).href" size="small" class="style-config-input" placeholder="https://" @blur="handleHrefBlur" />
+        <me-input v-model="(model as CanvasLinkElement).href" class="style-config-input" placeholder="https://" @blur="handleHrefBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">打开方式</div>
-        <a-select v-model:value="(model as CanvasLinkElement).target" size="small" class="style-config-select" :options="LINK_TARGET_OPTIONS" allow-clear />
+        <me-select v-model="(model as CanvasLinkElement).target" class="style-config-select" :options="LINK_TARGET_OPTIONS" clearable />
       </div>
     </template>
 
@@ -66,14 +64,14 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.INPUT">
       <div class="style-config-section">
         <div class="style-config-label">占位提示</div>
-        <a-input v-model:value="(model as CanvasInputElement).placeholder" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasInputElement).placeholder" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">默认值</div>
-        <a-input v-model:value="(model as CanvasInputElement).value" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasInputElement).value" class="style-config-input" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasInputElement).required">必填</a-checkbox>
+        <me-checkbox v-model="(model as CanvasInputElement).required">必填</me-checkbox>
       </div>
     </template>
 
@@ -81,18 +79,18 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.TEXTAREA">
       <div class="style-config-section">
         <div class="style-config-label">占位提示</div>
-        <a-input v-model:value="(model as CanvasTextareaElement).placeholder" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasTextareaElement).placeholder" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">默认值</div>
-        <a-input v-model:value="(model as CanvasTextareaElement).value" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasTextareaElement).value" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">行数</div>
-        <a-input-number v-model:value="(model as CanvasTextareaElement).rows" size="small" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(model as CanvasTextareaElement).rows" class="style-config-input-number" :min="1" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasTextareaElement).required">必填</a-checkbox>
+        <me-checkbox v-model="(model as CanvasTextareaElement).required">必填</me-checkbox>
       </div>
     </template>
 
@@ -100,17 +98,17 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.RADIO">
       <div class="style-config-section">
         <div class="style-config-label">单选组名称</div>
-        <a-input v-model:value="(model as CanvasRadioElement).name" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasRadioElement).name" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">选项值</div>
-        <a-input v-model:value="(model as CanvasRadioElement).value" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasRadioElement).value" class="style-config-input" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasRadioElement).checked">默认选中</a-checkbox>
+        <me-checkbox v-model="(model as CanvasRadioElement).checked">默认选中</me-checkbox>
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasRadioElement).required">必填</a-checkbox>
+        <me-checkbox v-model="(model as CanvasRadioElement).required">必填</me-checkbox>
       </div>
     </template>
 
@@ -118,17 +116,17 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.CHECKBOX">
       <div class="style-config-section">
         <div class="style-config-label">多选组名称</div>
-        <a-input v-model:value="(model as CanvasCheckboxElement).name" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasCheckboxElement).name" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">选项值</div>
-        <a-input v-model:value="(model as CanvasCheckboxElement).value" size="small" class="style-config-input" />
+        <me-input v-model="(model as CanvasCheckboxElement).value" class="style-config-input" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasCheckboxElement).checked">默认选中</a-checkbox>
+        <me-checkbox v-model="(model as CanvasCheckboxElement).checked">默认选中</me-checkbox>
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasCheckboxElement).required">必填</a-checkbox>
+        <me-checkbox v-model="(model as CanvasCheckboxElement).required">必填</me-checkbox>
       </div>
     </template>
 
@@ -136,10 +134,10 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.VIDEO">
       <div class="style-config-section">
         <div class="style-config-label">视频地址</div>
-        <a-input v-model:value="(model as CanvasVideoElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="(model as CanvasVideoElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasVideoElement).controls">显示控件</a-checkbox>
+        <me-checkbox v-model="(model as CanvasVideoElement).controls">显示控件</me-checkbox>
       </div>
     </template>
 
@@ -147,10 +145,10 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.AUDIO">
       <div class="style-config-section">
         <div class="style-config-label">音频地址</div>
-        <a-input v-model:value="(model as CanvasAudioElement).src" size="small" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="(model as CanvasAudioElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
-        <a-checkbox v-model:checked="(model as CanvasAudioElement).controls">显示控件</a-checkbox>
+        <me-checkbox v-model="(model as CanvasAudioElement).controls">显示控件</me-checkbox>
       </div>
     </template>
 
@@ -158,17 +156,16 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LABEL">
       <div class="style-config-section">
         <div class="style-config-label">标签文本</div>
-        <a-input v-model:value="pendingText" size="small" class="style-config-input" @blur="commitText" />
+        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">关联表单元素</div>
-        <a-select
-          v-model:value="(model as CanvasLabelElement).for"
-          size="small"
+        <me-select
+          v-model="(model as CanvasLabelElement).for"
           class="style-config-select"
           :options="formElementOptions"
           placeholder="选择要绑定的表单元素"
-          allow-clear
+          clearable
         />
       </div>
     </template>
@@ -177,11 +174,23 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.FORM">
       <div class="style-config-section">
         <div class="style-config-label">提交地址</div>
-        <a-input v-model:value="(model as CanvasFormElement).action" size="small" class="style-config-input" placeholder="https://" @blur="handleActionBlur" />
+        <me-input v-model="(model as CanvasFormElement).action" class="style-config-input" placeholder="https://" @blur="handleActionBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">提交方式</div>
-        <a-select v-model:value="(model as CanvasFormElement).method" size="small" class="style-config-select" :options="FORM_METHOD_OPTIONS" allow-clear />
+        <me-select v-model="(model as CanvasFormElement).method" class="style-config-select" :options="FORM_METHOD_OPTIONS" clearable />
+      </div>
+    </template>
+
+    <!-- 标题 -->
+    <template v-else-if="model.type === CanvasElementTypeEnum.HEADING">
+      <div class="style-config-section">
+        <div class="style-config-label">标题文本</div>
+        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
+      </div>
+      <div class="style-config-section">
+        <div class="style-config-label">标题级别</div>
+        <me-select v-model="(model as CanvasHeadingElement).level" class="style-config-select" :options="HEADING_LEVEL_OPTIONS" />
       </div>
     </template>
 
@@ -189,7 +198,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.TEXT">
       <div class="style-config-section">
         <div class="style-config-label">文本内容</div>
-        <a-textarea v-model:value="pendingText" :rows="3" size="small" @blur="commitText" />
+        <me-input type="textarea" v-model="pendingText" :rows="3" @blur="commitText" />
       </div>
     </template>
   </div>
@@ -198,7 +207,8 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
-import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES, FORM_METHOD_OPTIONS } from '@/constants/home';
+import { MeCheckbox, MeInput, MeSelect } from '@zyf_dsb/me-ui';
+import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES, FORM_METHOD_OPTIONS, HEADING_LEVEL_OPTIONS } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import { isSafeUrl } from '@/utils/sanitize';
@@ -217,6 +227,7 @@ import {
   type CanvasLabelElement,
   type CanvasFormElement,
   type CanvasTextElement,
+  type CanvasHeadingElement,
   isParentElement,
 } from '@/views/Canvas/types';
 
@@ -250,6 +261,7 @@ watch(
     if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
     else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
+    else if (el.type === CanvasElementTypeEnum.HEADING) pendingText.value = (el as CanvasHeadingElement).text;
     else if (el.type === CanvasElementTypeEnum.TEXT) pendingText.value = (el as CanvasTextElement).text;
   },
   { immediate: true, deep: true },
@@ -262,6 +274,7 @@ function commitText() {
   if (el.type === CanvasElementTypeEnum.BUTTON) (el as CanvasButtonElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.PARAGRAPH) (el as CanvasParagraphElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
+  else if (el.type === CanvasElementTypeEnum.HEADING) (el as CanvasHeadingElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.TEXT) (el as CanvasTextElement).text = pendingText.value;
 }
 
@@ -272,8 +285,8 @@ function handleIdFocus() {
 }
 
 /** id 输入框输入时同步到 pendingId */
-function handleIdInput(e: Event) {
-  pendingId.value = (e.target as HTMLInputElement).value;
+function handleIdInput(value: string) {
+  pendingId.value = value;
 }
 
 /** id 输入框失焦时校验格式与唯一性 */
@@ -297,6 +310,8 @@ function handleIdBlur(e: FocusEvent) {
     message.warning('该 ID 已被其他元素使用');
   } else {
     model.value.id = newId;
+    /** 同步重命名 #id 样式规则，避免规则失配导致元素样式丢失 */
+    canvasStore.renameElementIdRules(oldId.value, newId);
     if (canvasStore.selectedElementId === oldId.value) {
       canvasStore.selectElement(newId);
     }

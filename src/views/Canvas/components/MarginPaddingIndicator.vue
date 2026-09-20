@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, shallowRef, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
@@ -70,7 +70,7 @@ const { isDragging } = storeToRefs(dragStore);
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
 /** 当前悬停的画布 DOM 元素 */
-const currentTarget = ref<Element | null>(null);
+const currentTarget = shallowRef<Element | null>(null);
 
 /** 名称标签 DOM 引用 */
 const labelRef = ref<HTMLElement | null>(null);
@@ -233,10 +233,10 @@ onBeforeUnmount(() => {
 /* padding + content 的包裹层 */
 .sei-padding-wrapper {
   position: absolute;
-  top: v-bind('elRect.borderTop + "px"');
-  left: v-bind('elRect.borderLeft + "px"');
-  right: v-bind('elRect.borderRight + "px"');
-  bottom: v-bind('elRect.borderBottom + "px"');
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* padding 层 */

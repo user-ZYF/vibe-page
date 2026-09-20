@@ -1,6 +1,7 @@
 import { ref, shallowRef, computed, watch } from 'vue';
 import { cloneDeep } from 'lodash';
 import { useDebounceFn } from '@vueuse/core';
+import { create, type Delta } from 'jsondiffpatch';
 
 /** 历史记录最大长度 */
 const MAX_HISTORY_LENGTH = 50;
@@ -24,34 +25,65 @@ export const canvasHistoryApi = {
 
 /**
  * 画布撤销/重做功能
- * 通过快照机制实现历史记录管理，支持对任意数据进行监控
- * 优化：recordHistory中也需要判断isUndoRedoing状态，避免在使用watch+recordHistory时因撤销重做导致数据变化引起的状态记录
+ *
+ * 采用「增量 diff/patch」机制实现历史记录管理：
+ * - 仅存储相邻状态之间的差异（patch），而非全量快照，大幅减少冗余数据
+ * - 数组元素按 id 匹配（jsondiffpatch objectHash），元素移动/重排只产生极小 diff
+ *
+ * 优化：debouncedRecord 中判断 isUndoRedoing 状态，避免撤销重做引起的数据变化触发循环记录
  */
 export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
-  /** 历史记录快照列表 */
-  const history = shallowRef<T[]>([]);
-  /** 当前历史位置 */
-  const historyIndex = ref(-1);
-  /** 是否正在执行撤销/重做（防止循环记录） */
+  // jsondiffpatch 实例，按元素 id 匹配数组节点，开启移动检测
+  const diffpatcher = create({
+    objectHash: (obj) => (obj as { id?: string }).id,
+    arrays: { detectMove: true, includeValueOnMove: false },
+  });
+
+  // patch 链：patches[i] 为状态 i -> 状态 i+1 的差异
+  const patches = shallowRef<Delta[]>([]);
+  // 当前状态索引（0 表示初始基线状态）
+  const historyIndex = ref(0);
+  // 当前状态快照（非响应式深拷贝，作为 patch 的基准）
+  let currentSnapshot: T | null = null;
+  // 是否正在执行撤销/重做（防止循环记录）
   const _isUndoRedoing = ref(false);
-  /** 是否有待记录的防抖快照 */
+  // 是否有待记录的防抖快照
   const _isRecordPending = ref(false);
 
-  /** 是否可撤销 */
+  // 是否可撤销
   const canUndo = computed(() => historyIndex.value > 0);
-  /** 是否可重做 */
-  const canRedo = computed(() => historyIndex.value < history.value.length - 1);
+  // 是否可重做
+  const canRedo = computed(() => historyIndex.value < patches.value.length);
 
   /** 记录当前状态到历史 */
   function recordHistory() {
-    const newHistory = history.value.slice(0, historyIndex.value + 1);
-    newHistory.push(cloneDeep(options.snapshot()));
-    if (newHistory.length > MAX_HISTORY_LENGTH) {
-      newHistory.shift();
-    } else {
-      historyIndex.value = newHistory.length - 1;
+    const newSnapshot = cloneDeep(options.snapshot());
+    // 首次记录：以当前状态建立初始基线，不产生可撤销的变更
+    if (currentSnapshot === null) {
+      currentSnapshot = newSnapshot;
+      patches.value = [];
+      historyIndex.value = 0;
+      return;
     }
-    history.value = newHistory;
+
+    const delta = diffpatcher.diff(currentSnapshot, newSnapshot);
+    // 无变化则跳过
+    if (delta === undefined) return;
+
+    // 截断未来历史（undo 后再次编辑，丢弃 redo 分支）
+    patches.value = patches.value.slice(0, historyIndex.value);
+
+    // 追加新 patch
+    patches.value = [...patches.value, delta];
+    historyIndex.value++;
+    currentSnapshot = newSnapshot;
+
+    // 限制最大历史长度
+    while (patches.value.length > MAX_HISTORY_LENGTH) {
+      // 先进先出，弹出最早记录的一次patch，使用slice保证响应式触发
+      patches.value = patches.value.slice(1);
+      historyIndex.value--;
+    }
   }
 
   /** 刷新待记录的防抖快照，确保最新状态已入历史 */
@@ -81,19 +113,23 @@ export function useCanvasHistory<T>(options: UseCanvasHistoryOptions<T>) {
   /** 撤销 */
   function undo() {
     flushPendingRecord();
-    if (!canUndo.value) return;
+    if (!canUndo.value || currentSnapshot === null) return;
     _isUndoRedoing.value = true;
     historyIndex.value--;
-    options.restore(cloneDeep(history.value[historyIndex.value]));
+    const delta = patches.value[historyIndex.value];
+    currentSnapshot = diffpatcher.unpatch(currentSnapshot, delta) as T;
+    options.restore(cloneDeep(currentSnapshot));
   }
 
   /** 重做 */
   function redo() {
     flushPendingRecord();
-    if (!canRedo.value) return;
+    if (!canRedo.value || currentSnapshot === null) return;
     _isUndoRedoing.value = true;
+    const delta = patches.value[historyIndex.value];
+    currentSnapshot = diffpatcher.patch(currentSnapshot, delta) as T;
     historyIndex.value++;
-    options.restore(cloneDeep(history.value[historyIndex.value]));
+    options.restore(cloneDeep(currentSnapshot));
   }
 
   /** 同步到模块级 API，供其他组件调用 */

@@ -3,50 +3,44 @@
   <div class="editor-header-wrapper">
     <a-layout-header class="editor-header" :class="{ 'is-preview': isPreview }">
       <a-space>
-        <a-tooltip title="效果预览" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('toggle-preview')">
-            <template #icon><EyeOutlined /></template>
-          </a-button>
-        </a-tooltip>
+        <me-tooltip content="效果预览" effect="light">
+          <me-button @click="emit('toggle-preview')">
+            <EyeOutlined />
+          </me-button>
+        </me-tooltip>
         <a-divider type="vertical" />
-        <a-tooltip title="撤销" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" :disabled="!canUndo" @click="emit('undo')">
-            <template #icon><UndoOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip title="重做" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" :disabled="!canRedo" @click="emit('redo')">
-            <template #icon><RedoOutlined /></template>
-          </a-button>
-        </a-tooltip>
+        <me-tooltip content="撤销" effect="light">
+          <me-button :disabled="!canUndo" @click="emit('undo')">
+            <UndoOutlined />
+          </me-button>
+        </me-tooltip>
+        <me-tooltip content="重做" effect="light">
+          <me-button :disabled="!canRedo" @click="emit('redo')">
+            <RedoOutlined />
+          </me-button>
+        </me-tooltip>
         <a-divider type="vertical" />
-        <a-tooltip title="预览源码" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('code')">
-            <template #icon><CodeOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip title="清空画布" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('clear')">
-            <template #icon><DeleteOutlined /></template>
-          </a-button>
-        </a-tooltip>
-        <a-tooltip title="清理未使用的 class" overlay-class-name="editor-tooltip-white">
-          <a-button type="text" size="small" @click="emit('cleanup-classes')">
-            <template #icon><ClearOutlined /></template>
-          </a-button>
-        </a-tooltip>
+        <me-tooltip content="编辑源码" effect="light">
+          <me-button @click="emit('code')">
+            <CodeOutlined />
+          </me-button>
+        </me-tooltip>
+        <me-tooltip content="清空画布" effect="light">
+          <me-button @click="emit('clear')">
+            <DeleteOutlined />
+          </me-button>
+        </me-tooltip>
       </a-space>
       <div class="editor-header-theme">
-        <a-tooltip :title="themeStore.isDark ? '切换到亮色主题' : '切换到暗色主题'" overlay-class-name="editor-tooltip-white">
+        <me-tooltip :content="themeStore.isDark ? '切换到亮色主题' : '切换到暗色主题'" effect="light">
           <a-switch
             :checked="!themeStore.isDark"
-            size="small"
             @change="themeStore.toggleTheme"
           >
             <template #checkedChildren><BulbFilled /></template>
             <template #unCheckedChildren><BulbOutlined /></template>
           </a-switch>
-        </a-tooltip>
+        </me-tooltip>
       </div>
     </a-layout-header>
     <Transition name="preview-btn">
@@ -55,7 +49,6 @@
         shape="square"
         class="editor-header-preview-exit"
         type="default"
-        size="small"
         tooltip="退出效果预览"
         @click="emit('toggle-preview')">
         <template #icon><EyeInvisibleOutlined /></template>
@@ -72,10 +65,10 @@ import {
   RedoOutlined,
   CodeOutlined,
   DeleteOutlined,
-  ClearOutlined,
   BulbFilled,
   BulbOutlined,
 } from '@ant-design/icons-vue'
+import { MeButton, MeTooltip } from '@zyf_dsb/me-ui'
 import { useThemeStore } from '@/store/theme';
 
 defineOptions({
@@ -108,7 +101,6 @@ const emit = defineEmits<{
   (e: 'redo'): void
   (e: 'code'): void
   (e: 'clear'): void
-  (e: 'cleanup-classes'): void
 }>()
 </script>
 
@@ -124,7 +116,6 @@ const emit = defineEmits<{
   background: var(--editor-bg-header);
   color: var(--editor-text);
   overflow: hidden;
-  border-bottom: 1px solid var(--editor-border);
   transition: opacity 0.3s ease, height 0.3s ease;
   display: flex;
   align-items: center;
@@ -135,12 +126,15 @@ const emit = defineEmits<{
     height: 0;
   }
 
-  :deep(.ant-btn-text) {
+  :deep(.me-button) {
     color: var(--editor-text-secondary);
+    background: transparent;
+    border-color: transparent;
 
     &:hover {
       color: var(--editor-text);
       background: var(--editor-bg-item-hover);
+      border-color: transparent;
     }
 
     &.is-disabled,
@@ -151,6 +145,7 @@ const emit = defineEmits<{
       &:hover {
         color: var(--editor-text-disabled);
         background: transparent;
+        border-color: transparent;
       }
     }
   }
@@ -164,16 +159,6 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   margin-left: 16px;
-}
-
-:deep(.editor-tooltip-white) {
-  .ant-tooltip-inner {
-    color: var(--app-color-text);
-  }
-
-  .ant-tooltip-arrow-content {
-    --antd-arrow-background-color: #ffffff;
-  }
 }
 
 .editor-header-preview-exit {

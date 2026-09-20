@@ -21,17 +21,13 @@ import {
   CanvasTableDataElement,
   CanvasTableHeaderCellElement,
   CanvasTableColGroupElement,
-  CanvasHeading1Element,
-  CanvasHeading2Element,
-  CanvasHeading3Element,
-  CanvasHeading4Element,
-  CanvasHeading5Element,
-  CanvasHeading6Element,
+  CanvasHeadingElement,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP } from '@/constants/home';
-import { convertStyleConfig } from './styleConfig';
+import { CanvasElementTypeEnum, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP, normalizeHeadingLevel } from '@/constants/home';
+import { StyleRuleTypeEnum } from '@/constants/style';
+
+import type { CanvasStyleRule } from '@/views/Canvas/types';
 import { sanitizeUrl } from '@/utils/sanitize';
-import type { StyleConfig } from '@/views/Canvas/types';
 
 /** 元素类型到 HTML 标签的映射 */
 const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
@@ -69,40 +65,16 @@ const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.ARTICLE]: 'article',
   [CanvasElementTypeEnum.SECTION]: 'section',
   [CanvasElementTypeEnum.ASIDE]: 'aside',
-  [CanvasElementTypeEnum.HEADING_1]: 'h1',
-  [CanvasElementTypeEnum.HEADING_2]: 'h2',
-  [CanvasElementTypeEnum.HEADING_3]: 'h3',
-  [CanvasElementTypeEnum.HEADING_4]: 'h4',
-  [CanvasElementTypeEnum.HEADING_5]: 'h5',
-  [CanvasElementTypeEnum.HEADING_6]: 'h6',
+  [CanvasElementTypeEnum.HEADING]: 'h1',
 };
 
 /** 自闭合标签集合 */
 const VOID_TAGS = new Set(['img', 'input', 'col']);
 
 /**
- * 将 camelCase 的 CSS 属性名转换为 kebab-case
- * @example fontSize → font-size
+ * 转义 HTML 特殊字符（属性值与文本内容通用）
  */
-function camelToKebab(str: string): string {
-  return str.replace(/([A-Z])/g, '-$1').toLowerCase();
-}
-
-/**
- * 将 style 对象转换为格式化后的 CSS 声明块内容
- * @example { color: 'red', fontSize: '16px' } → "  color: red;\n  font-size: 16px;"
- */
-function styleObjectToCss(style: Record<string, string>): string {
-  return Object.entries(style)
-    .filter(([, value]) => value !== '' && value !== undefined)
-    .map(([prop, value]) => `  ${camelToKebab(prop)}: ${value};`)
-    .join('\n');
-}
-
-/**
- * 转义 HTML 属性值中的特殊字符
- */
-function escapeAttrValue(value: string): string {
+function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
@@ -113,31 +85,32 @@ function buildAttributes(element: CanvasElement): string {
   const attrs: string[] = [];
 
   /** id */
-  attrs.push(`id="${escapeAttrValue(element.id)}"`);
+  attrs.push(`id="${escapeHtml(element.id)}"`);
 
   /** class */
-  if (element.classes.length > 0) {
-    attrs.push(`class="${escapeAttrValue(element.classes.join(' '))}"`);
+  const enabledClasses = element.classes.filter((c) => c.enabled).map((c) => c.name);
+  if (enabledClasses.length > 0) {
+    attrs.push(`class="${escapeHtml(enabledClasses.join(' '))}"`);
   }
 
   /** 类型特有属性 */
   switch (element.type) {
     case CanvasElementTypeEnum.BUTTON: {
       const btn = element as CanvasButtonElement;
-      if (btn.buttonType) attrs.push(`type="${escapeAttrValue(btn.buttonType)}"`);
+      if (btn.buttonType) attrs.push(`type="${escapeHtml(btn.buttonType)}"`);
       break;
     }
     case CanvasElementTypeEnum.IMAGE: {
       const img = element as CanvasImageElement;
       const safeSrc = sanitizeUrl(img.src ?? '');
-      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
-      if (img.title) attrs.push(`alt="${escapeAttrValue(img.title)}"`);
+      if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
+      if (img.title) attrs.push(`alt="${escapeHtml(img.title)}"`);
       break;
     }
     case CanvasElementTypeEnum.LINK: {
       const link = element as CanvasLinkElement;
       const safeHref = sanitizeUrl(link.href ?? '');
-      if (safeHref) attrs.push(`href="${escapeAttrValue(safeHref)}"`);
+      if (safeHref) attrs.push(`href="${escapeHtml(safeHref)}"`);
       const TARGET_ATTR_MAP: Record<LinkTargetEnum, string> = {
         [LinkTargetEnum.SELF]: '_self',
         [LinkTargetEnum.BLANK]: '_blank',
@@ -150,33 +123,33 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.INPUT: {
       const input = element as CanvasInputElement;
-      attrs.push(`type="text"`);
-      if (input.placeholder) attrs.push(`placeholder="${escapeAttrValue(input.placeholder)}"`);
-      if (input.value) attrs.push(`value="${escapeAttrValue(input.value)}"`);
+      attrs.push('type="text"');
+      if (input.placeholder) attrs.push(`placeholder="${escapeHtml(input.placeholder)}"`);
+      if (input.value) attrs.push(`value="${escapeHtml(input.value)}"`);
       if (input.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.TEXTAREA: {
       const textarea = element as CanvasTextareaElement;
-      if (textarea.placeholder) attrs.push(`placeholder="${escapeAttrValue(textarea.placeholder)}"`);
+      if (textarea.placeholder) attrs.push(`placeholder="${escapeHtml(textarea.placeholder)}"`);
       if (textarea.rows) attrs.push(`rows="${textarea.rows}"`);
       if (textarea.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.RADIO: {
       const radio = element as CanvasRadioElement;
-      attrs.push(`type="radio"`);
-      if (radio.name) attrs.push(`name="${escapeAttrValue(radio.name)}"`);
-      if (radio.value) attrs.push(`value="${escapeAttrValue(radio.value)}"`);
+      attrs.push('type="radio"');
+      if (radio.name) attrs.push(`name="${escapeHtml(radio.name)}"`);
+      if (radio.value) attrs.push(`value="${escapeHtml(radio.value)}"`);
       if (radio.checked) attrs.push(`checked`);
       if (radio.required) attrs.push(`required`);
       break;
     }
     case CanvasElementTypeEnum.CHECKBOX: {
       const checkbox = element as CanvasCheckboxElement;
-      attrs.push(`type="checkbox"`);
-      if (checkbox.name) attrs.push(`name="${escapeAttrValue(checkbox.name)}"`);
-      if (checkbox.value) attrs.push(`value="${escapeAttrValue(checkbox.value)}"`);
+      attrs.push('type="checkbox"');
+      if (checkbox.name) attrs.push(`name="${escapeHtml(checkbox.name)}"`);
+      if (checkbox.value) attrs.push(`value="${escapeHtml(checkbox.value)}"`);
       if (checkbox.checked) attrs.push(`checked`);
       if (checkbox.required) attrs.push(`required`);
       break;
@@ -184,44 +157,44 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.VIDEO: {
       const video = element as CanvasVideoElement;
       const safeSrc = sanitizeUrl(video.src ?? '');
-      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
+      if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (video.controls) attrs.push(`controls`);
       break;
     }
     case CanvasElementTypeEnum.AUDIO: {
       const audio = element as CanvasAudioElement;
       const safeSrc = sanitizeUrl(audio.src ?? '');
-      if (safeSrc) attrs.push(`src="${escapeAttrValue(safeSrc)}"`);
+      if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (audio.controls) attrs.push(`controls`);
       break;
     }
     case CanvasElementTypeEnum.LABEL: {
       const label = element as CanvasLabelElement;
-      if (label.for) attrs.push(`for="${escapeAttrValue(label.for)}"`);
+      if (label.for) attrs.push(`for="${escapeHtml(label.for)}"`);
       break;
     }
     case CanvasElementTypeEnum.FORM: {
       const form = element as CanvasFormElement;
       const safeAction = sanitizeUrl(form.action ?? '');
-      if (safeAction) attrs.push(`action="${escapeAttrValue(safeAction)}"`);
-      if (form.method) attrs.push(`method="${escapeAttrValue(form.method)}"`);
+      if (safeAction) attrs.push(`action="${escapeHtml(safeAction)}"`);
+      if (form.method) attrs.push(`method="${escapeHtml(form.method)}"`);
       break;
     }
     case CanvasElementTypeEnum.TABLE_COL: {
       const col = element as CanvasTableColElement;
-      if (col.span > 1) attrs.push(`span="${col.span}"`);
+      if (col.span !== undefined && col.span > 1) attrs.push(`span="${col.span}"`);
       break;
     }
     case CanvasElementTypeEnum.TABLE_DATA: {
       const td = element as CanvasTableDataElement;
-      if (td.colspan > 1) attrs.push(`colspan="${td.colspan}"`);
-      if (td.rowspan > 1) attrs.push(`rowspan="${td.rowspan}"`);
+      if (td.colspan !== undefined && td.colspan > 1) attrs.push(`colspan="${td.colspan}"`);
+      if (td.rowspan !== undefined && td.rowspan > 1) attrs.push(`rowspan="${td.rowspan}"`);
       break;
     }
     case CanvasElementTypeEnum.TABLE_HEADER_CELL: {
       const th = element as CanvasTableHeaderCellElement;
-      if (th.colspan > 1) attrs.push(`colspan="${th.colspan}"`);
-      if (th.rowspan > 1) attrs.push(`rowspan="${th.rowspan}"`);
+      if (th.colspan !== undefined && th.colspan > 1) attrs.push(`colspan="${th.colspan}"`);
+      if (th.rowspan !== undefined && th.rowspan > 1) attrs.push(`rowspan="${th.rowspan}"`);
       if (th.scope) {
         const scopeAttr = TABLE_SCOPE_ATTR_MAP[th.scope];
         if (scopeAttr) attrs.push(`scope="${scopeAttr}"`);
@@ -230,7 +203,7 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.TABLE_COL_GROUP: {
       const colgroup = element as CanvasTableColGroupElement;
-      if (colgroup.span > 1) attrs.push(`span="${colgroup.span}"`);
+      if (colgroup.span !== undefined && colgroup.span > 1) attrs.push(`span="${colgroup.span}"`);
       break;
     }
   }
@@ -244,30 +217,31 @@ function buildAttributes(element: CanvasElement): string {
 function getElementContent(element: CanvasElement): string {
   switch (element.type) {
     case CanvasElementTypeEnum.BUTTON:
-      return escapeAttrValue((element as CanvasButtonElement).text);
+      return escapeHtml((element as CanvasButtonElement).text);
     case CanvasElementTypeEnum.PARAGRAPH:
-      return escapeAttrValue((element as CanvasParagraphElement).text);
+      return escapeHtml((element as CanvasParagraphElement).text);
     case CanvasElementTypeEnum.TEXTAREA:
-      return escapeAttrValue((element as CanvasTextareaElement).value);
+      return escapeHtml((element as CanvasTextareaElement).value);
     case CanvasElementTypeEnum.LABEL:
-      return escapeAttrValue((element as CanvasLabelElement).text);
+      return escapeHtml((element as CanvasLabelElement).text);
     case CanvasElementTypeEnum.TEXT:
-      return escapeAttrValue((element as CanvasTextElement).text);
-    case CanvasElementTypeEnum.HEADING_1:
-      return escapeAttrValue((element as CanvasHeading1Element).text);
-    case CanvasElementTypeEnum.HEADING_2:
-      return escapeAttrValue((element as CanvasHeading2Element).text);
-    case CanvasElementTypeEnum.HEADING_3:
-      return escapeAttrValue((element as CanvasHeading3Element).text);
-    case CanvasElementTypeEnum.HEADING_4:
-      return escapeAttrValue((element as CanvasHeading4Element).text);
-    case CanvasElementTypeEnum.HEADING_5:
-      return escapeAttrValue((element as CanvasHeading5Element).text);
-    case CanvasElementTypeEnum.HEADING_6:
-      return escapeAttrValue((element as CanvasHeading6Element).text);
+      return escapeHtml((element as CanvasTextElement).text);
+    case CanvasElementTypeEnum.HEADING:
+      return escapeHtml((element as CanvasHeadingElement).text);
     default:
       return '';
   }
+}
+
+/**
+ * 解析元素对应的 HTML 标签（标题元素按 level 生成 h1-h6，未设置时默认 h1）
+ */
+function resolveTag(element: CanvasElement): string {
+  if (element.type === CanvasElementTypeEnum.HEADING) {
+    // level 收敛到 1~6，避免脏数据生成非法标签
+    return `h${normalizeHeadingLevel((element as CanvasHeadingElement).level)}`;
+  }
+  return TAG_MAP[element.type];
 }
 
 /**
@@ -282,7 +256,7 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
     return `${pad}${content}`;
   }
 
-  const tag = TAG_MAP[element.type];
+  const tag = resolveTag(element);
   const attrs = buildAttributes(element);
 
   /** 自闭合标签 */
@@ -307,37 +281,29 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
 
 /**
  * 递归收集所有元素的样式，生成 CSS 规则字符串
- * 1. 先生成全局 class 选择器规则（按定义顺序，模拟 CSS 源码顺序）
- * 2. 再生成各元素的 #id 选择器规则（id 特殊性高于 class，自然覆盖）
  */
-function collectCssRules(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): string {
-  const rules: string[] = [`* {\n  box-sizing: border-box;\n}`];
+function collectCssRules(styleRules: CanvasStyleRule[] = []): string {
+  const rules: string[] = [];
 
-  /** 全局 class 选择器规则（按定义顺序） */
-  for (const [className, styleConfig] of Object.entries(classStyles)) {
-    const styleStr = styleObjectToCss(convertStyleConfig(styleConfig));
-    if (styleStr) {
-      rules.push(`.${CSS.escape(className)} {\n${styleStr}\n}`);
+  // 按 styleRules 原始顺序输出（style 为事实来源，面板修改已即时写回；at-rule 透传完整文本）
+  for (const rule of styleRules) {
+    const { selector, style, atRuleCssText } = rule;
+    if (rule.type === StyleRuleTypeEnum.AT_RULE && atRuleCssText) {
+      rules.push(atRuleCssText);
+    } else {
+      const declarations = Object.entries(style)
+        .map(([prop, value]) => `  ${prop}: ${value};`)
+        .join('\n');
+      if (declarations) rules.push(`${selector} {\n${declarations}\n}`);
     }
   }
 
-  /** 各元素的 id 选择器规则 */
-  function collect(el: CanvasInnerElement) {
-    /** 纯文本元素在生成的代码中无标签无属性，跳过 CSS 规则生成 */
-    if (el.type === CanvasElementTypeEnum.TEXT) return;
-
-    const styleObj = convertStyleConfig(el.styleConfig);
-    const styleStr = styleObjectToCss(styleObj);
-    if (styleStr) {
-      rules.push(`#${el.id} {\n${styleStr}\n}`);
-    }
-
-    if (isParentElement(el)) {
-      el.children.forEach(collect);
-    }
+  // box-sizing: border-box 是画布元素正常渲染和编辑的默认前提；
+  const hasBoxSizing = styleRules.some((r) => r.selector.trim() === '*' && 'box-sizing' in r.style);
+  if (!hasBoxSizing) {
+    rules.unshift('* {\n  box-sizing: border-box;\n}');
   }
 
-  root.children.forEach(collect);
   return rules.join('\n\n');
 }
 
@@ -353,22 +319,22 @@ export function generateHtml(root: CanvasRootElement): string {
 /**
  * 从画布元素列表生成 CSS 字符串
  * @param root 画布根元素
- * @param classStyles 全局 class 样式配置映射
+ * @param styleRules 样式规则有序清单（可编辑简单单层 class 规则 + 透传 raw 规则）
  * @returns CSS 规则字符串
  */
-export function generateCss(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): string {
-  return collectCssRules(root, classStyles);
+export function generateCss(styleRules: CanvasStyleRule[] = []): string {
+  return collectCssRules(styleRules);
 }
 
 /**
  * 从画布元素列表同时生成 HTML、CSS
  * @param root 画布根元素
- * @param classStyles 全局 class 样式配置映射
+ * @param styleRules 样式规则有序清单
  * @returns { html: string, css: string }
  */
-export function generateCode(root: CanvasRootElement, classStyles: Record<string, StyleConfig>): { html: string; css: string; } {
+export function generateCode(root: CanvasRootElement, styleRules: CanvasStyleRule[] = []): { html: string; css: string; } {
   return {
     html: generateHtml(root),
-    css: generateCss(root, classStyles),
+    css: generateCss(styleRules),
   };
 }

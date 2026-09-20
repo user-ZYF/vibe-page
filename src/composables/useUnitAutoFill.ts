@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import { SizeUnitEnum } from '@/constants/style';
+import { UnitEnum } from '@/constants/style';
 
 /** 判断值是否不为 null、undefined 和空字符串 */
 function isNotEmptyish<T>(value: T | null | undefined): value is T {
@@ -24,7 +24,7 @@ export function autoFillUnit<T extends Record<string, any>>(
   const hasValue = keys.some((k) => isNotEmptyish(obj[k]));
 
   if (hasValue && !isNotEmptyish(obj[unitKey])) {
-    obj[unitKey] = SizeUnitEnum.PX as T[keyof T];
+    obj[unitKey] = UnitEnum.PX as T[keyof T];
   }
 }
 

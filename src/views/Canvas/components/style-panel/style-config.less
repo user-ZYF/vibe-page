@@ -29,7 +29,7 @@
   width: 100%;
   display: flex;
 
-  :deep(.ant-radio-button-wrapper) {
+  :deep(.me-radio-button) {
     flex: 1;
     text-align: center;
     background: var(--editor-bg-input);
@@ -42,7 +42,7 @@
       color: var(--editor-text);
     }
 
-    &-checked:not(.ant-radio-button-wrapper-disabled) {
+    &.is-active:not(.is-disabled) {
       background: var(--editor-accent);
       border-color: var(--editor-accent);
       color: #fff;
@@ -96,15 +96,8 @@
   }
 }
 
-.style-config-separator {
-  font-size: 12px;
-  color: var(--editor-text-tertiary);
-  flex-shrink: 0;
-  padding: 0 1px;
-}
-
 .style-config-unit {
-  width: 56px;
+  width: 72px;
   flex-shrink: 0;
 }
 

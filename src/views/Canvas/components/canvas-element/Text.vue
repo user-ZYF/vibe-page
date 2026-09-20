@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { CanvasTextElement } from '../../types';
+import type { CanvasTextElement } from '../../types';
 import { useCanvasStore } from '@/store/canvas';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
@@ -31,5 +31,5 @@ const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 
 useDragConnector(textEl, data.value.id);
 
-useElementVisibility(data.value.id, data);
+useElementVisibility(data.value.id);
 </script>

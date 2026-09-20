@@ -14,6 +14,18 @@ export const enum BackgroundTypeEnum {
   GRADIENT,
 }
 
+/** 样式规则类型枚举 */
+export enum StyleRuleTypeEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 可编辑的规则（id或单一class选择器，支持可视化编辑） */
+  EDITABLE = 1,
+  /** 原样透传的声明规则（其他选择器，不支持可视化编辑） */
+  RAW = 2,
+  /** 原样透传的 at-rule */
+  AT_RULE = 3,
+}
+
 /** 样式配置类型枚举 */
 export enum StyleConfigTypeEnum {
   /** 未定义 */
@@ -45,8 +57,8 @@ export const STYLE_CONFIG_TYPE_NAME = {
   [StyleConfigTypeEnum.SETTING]: '设置',
 };
 
-/** 尺寸&位置单位 */
-export enum SizeUnitEnum {
+/** 单位 */
+export enum UnitEnum {
   /** px */
   PX = "px",
   /** 百分比 */
@@ -56,19 +68,19 @@ export enum SizeUnitEnum {
   /** em */
   EM = "em",
   /** vw */
-  // VW = "vw",
+  VW = "vw",
   /** vh */
-  // VH = "vh",
+  VH = "vh",
 }
 
 /** 尺寸&位置单位选项 */
 export const SIZE_UNIT_OPTIONS = [
-  { label: 'px', value: SizeUnitEnum.PX },
-  { label: '%', value: SizeUnitEnum.PERCENT },
-  { label: 'rem', value: SizeUnitEnum.REM },
-  { label: 'em', value: SizeUnitEnum.EM },
-  // { label: 'vw', value: SizeUnitEnum.VW },
-  // { label: 'vh', value: SizeUnitEnum.VH },
+  { label: 'px', value: UnitEnum.PX },
+  { label: '%', value: UnitEnum.PERCENT },
+  { label: 'rem', value: UnitEnum.REM },
+  { label: 'em', value: UnitEnum.EM },
+  { label: 'vw', value: UnitEnum.VW },
+  { label: 'vh', value: UnitEnum.VH },
 ];
 
 /** font-family枚举 */
@@ -654,23 +666,23 @@ export const DefaultContainerStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minHeight: '100',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
     paddingTop: 8,
-    paddingTopUnit: SizeUnitEnum.PX,
+    paddingTopUnit: UnitEnum.PX,
     paddingRight: 12,
-    paddingRightUnit: SizeUnitEnum.PX,
+    paddingRightUnit: UnitEnum.PX,
     paddingBottom: 8,
-    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingBottomUnit: UnitEnum.PX,
     paddingLeft: 12,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    paddingLeftUnit: UnitEnum.PX,
     marginTop: '8',
-    marginTopUnit: SizeUnitEnum.PX,
+    marginTopUnit: UnitEnum.PX,
     marginRight: '12',
-    marginRightUnit: SizeUnitEnum.PX,
+    marginRightUnit: UnitEnum.PX,
     marginBottom: '8',
-    marginBottomUnit: SizeUnitEnum.PX,
+    marginBottomUnit: UnitEnum.PX,
     marginLeft: '12',
-    marginLeftUnit: SizeUnitEnum.PX,
+    marginLeftUnit: UnitEnum.PX,
   },
 };
 
@@ -689,17 +701,17 @@ export const DefaultLinkStyleConfig: StyleConfig = {
  size: {
   ...cloneDeep(DefaultGeneralStyleConfig.size),
   minWidth: '80',
-  minWidthUnit: SizeUnitEnum.PX,
+  minWidthUnit: UnitEnum.PX,
   minHeight: '40',
-  minHeightUnit: SizeUnitEnum.PX,
+  minHeightUnit: UnitEnum.PX,
   paddingTop: 8,
-  paddingTopUnit: SizeUnitEnum.PX,
+  paddingTopUnit: UnitEnum.PX,
   paddingRight: 12,
-  paddingRightUnit: SizeUnitEnum.PX,
+  paddingRightUnit: UnitEnum.PX,
   paddingBottom: 8,
-  paddingBottomUnit: SizeUnitEnum.PX,
+  paddingBottomUnit: UnitEnum.PX,
   paddingLeft: 12,
-  paddingLeftUnit: SizeUnitEnum.PX,
+  paddingLeftUnit: UnitEnum.PX,
  },
 };
 
@@ -754,9 +766,9 @@ export const DefaultFormStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minWidth: '80',
-    minWidthUnit: SizeUnitEnum.PX,
+    minWidthUnit: UnitEnum.PX,
     minHeight: '40',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
   }
 };
 
@@ -770,17 +782,17 @@ export const DefaultSpanStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minWidth: '80',
-    minWidthUnit: SizeUnitEnum.PX,
+    minWidthUnit: UnitEnum.PX,
     minHeight: '40',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
     paddingTop: 8,
-    paddingTopUnit: SizeUnitEnum.PX,
+    paddingTopUnit: UnitEnum.PX,
     paddingRight: 12,
-    paddingRightUnit: SizeUnitEnum.PX,
+    paddingRightUnit: UnitEnum.PX,
     paddingBottom: 8,
-    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingBottomUnit: UnitEnum.PX,
     paddingLeft: 12,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    paddingLeftUnit: UnitEnum.PX,
   },
 };
 
@@ -795,9 +807,9 @@ export const DefaultUnorderedListStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minWidth: '80',
-    minWidthUnit: SizeUnitEnum.PX,
+    minWidthUnit: UnitEnum.PX,
     minHeight: '40',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
   },
 };
 
@@ -805,10 +817,11 @@ export const DefaultUnorderedListStyleConfig: StyleConfig = {
 export const DefaultOrderedListStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),    minWidth: '80',
-    minWidthUnit: SizeUnitEnum.PX,
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
     minHeight: '40',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
   },
 };
 
@@ -827,9 +840,9 @@ export const DefaultTableStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     minWidth: '80',
-    minWidthUnit: SizeUnitEnum.PX,
+    minWidthUnit: UnitEnum.PX,
     minHeight: '40',
-    minHeightUnit: SizeUnitEnum.PX,
+    minHeightUnit: UnitEnum.PX,
   },
 };
 
@@ -859,13 +872,13 @@ export const DefaultTableDataStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     paddingTop: 8,
-    paddingTopUnit: SizeUnitEnum.PX,
+    paddingTopUnit: UnitEnum.PX,
     paddingRight: 12,
-    paddingRightUnit: SizeUnitEnum.PX,
+    paddingRightUnit: UnitEnum.PX,
     paddingBottom: 8,
-    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingBottomUnit: UnitEnum.PX,
     paddingLeft: 12,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    paddingLeftUnit: UnitEnum.PX,
   },
 };
 
@@ -875,13 +888,13 @@ export const DefaultTableHeaderCellStyleConfig: StyleConfig = {
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
     paddingTop: 8,
-    paddingTopUnit: SizeUnitEnum.PX,
+    paddingTopUnit: UnitEnum.PX,
     paddingRight: 12,
-    paddingRightUnit: SizeUnitEnum.PX,
+    paddingRightUnit: UnitEnum.PX,
     paddingBottom: 8,
-    paddingBottomUnit: SizeUnitEnum.PX,
+    paddingBottomUnit: UnitEnum.PX,
     paddingLeft: 12,
-    paddingLeftUnit: SizeUnitEnum.PX,
+    paddingLeftUnit: UnitEnum.PX,
   },
   font: {
     ...cloneDeep(DefaultGeneralStyleConfig.font),
@@ -929,33 +942,8 @@ export const DefaultAsideStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
-/** 一级标题元素默认样式配置 */
-export const DefaultHeading1StyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig),
-};
-
-/** 二级标题元素默认样式配置 */
-export const DefaultHeading2StyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig),
-};
-
-/** 三级标题元素默认样式配置 */
-export const DefaultHeading3StyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig),
-};
-
-/** 四级标题元素默认样式配置 */
-export const DefaultHeading4StyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig),
-};
-
-/** 五级标题元素默认样式配置 */
-export const DefaultHeading5StyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig),
-};
-
-/** 六级标题元素默认样式配置 */
-export const DefaultHeading6StyleConfig: StyleConfig = {
+/** 标题元素默认样式配置 */
+export const DefaultHeadingStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
@@ -1000,12 +988,7 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.ARTICLE]: DefaultArticleStyleConfig,
   [CanvasElementTypeEnum.SECTION]: DefaultSectionStyleConfig,
   [CanvasElementTypeEnum.ASIDE]: DefaultAsideStyleConfig,
-  [CanvasElementTypeEnum.HEADING_1]: DefaultHeading1StyleConfig,
-  [CanvasElementTypeEnum.HEADING_2]: DefaultHeading2StyleConfig,
-  [CanvasElementTypeEnum.HEADING_3]: DefaultHeading3StyleConfig,
-  [CanvasElementTypeEnum.HEADING_4]: DefaultHeading4StyleConfig,
-  [CanvasElementTypeEnum.HEADING_5]: DefaultHeading5StyleConfig,
-  [CanvasElementTypeEnum.HEADING_6]: DefaultHeading6StyleConfig,
+  [CanvasElementTypeEnum.HEADING]: DefaultHeadingStyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

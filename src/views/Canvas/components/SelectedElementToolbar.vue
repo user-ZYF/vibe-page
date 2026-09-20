@@ -5,21 +5,21 @@
     <div class="etb-border-area">
       <!-- 操作工具栏 -->
       <div v-if="showToolbar" ref="toolbarRef" class="etb-bar">
-        <a-tooltip title="选中父元素" placement="top">
+        <me-tooltip content="选中父元素" placement="top">
           <button class="etb-btn" @click.stop="canvasStore.selectParentElement">
             <ArrowUpOutlined />
           </button>
-        </a-tooltip>
-        <a-tooltip title="复制" placement="top">
+        </me-tooltip>
+        <me-tooltip content="复制" placement="top">
           <button class="etb-btn" @click.stop="canvasStore.duplicateElement(selectedElementId!)">
             <CopyOutlined />
           </button>
-        </a-tooltip>
-        <a-tooltip title="删除" placement="top">
+        </me-tooltip>
+        <me-tooltip content="删除" placement="top">
           <button class="etb-btn etb-btn--danger" @click.stop="handleDelete">
             <DeleteOutlined />
           </button>
-        </a-tooltip>
+        </me-tooltip>
       </div>
       <!-- 调整尺寸手柄 -->
       <template v-if="showResizer">
@@ -36,15 +36,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, type Ref } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
+import { MeTooltip } from '@zyf_dsb/me-ui';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
-import { useElementStyle } from '@/composables/useElementStyle';
-import { type CanvasInnerElement, isParentElement, type CanvasElementBase, type ResizeStartState } from '@/views/Canvas/types';
-import { SizeUnitEnum } from '@/constants/style';
+import { type CanvasInnerElement, isParentElement, type ResizeStartState } from '@/views/Canvas/types';
+import { UnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../constants';
 import { CanvasElementTypeEnum } from '@/constants/home';
@@ -94,14 +94,8 @@ const selectedElement = computed(() => {
   return canvasStore.getElementById(selectedElementId.value);
 });
 
-/** 选中元素最终样式 */
-const selectedElementStyle = useElementStyle(selectedElement as Ref<CanvasElementBase>);
-
-/** 选中元素是否可见（display 不为 none，基于画布数据判断） */
-const isElementDisplayed = computed(() => {
-  if (!selectedElement.value) return true;
-  return selectedElementStyle.value.display !== 'none';
-});
+/** 选中元素是否可见（display 不为 none，直接读取 DOM 计算样式，反映真实 CSS 渲染状态） */
+const isElementDisplayed = ref(true);
 
 /** 是否显示（含蓝色边框） */
 const visible = computed(() => !!selectedElementId.value && !isDragging.value && isElementDisplayed.value);
@@ -199,11 +193,13 @@ function handleResizeMove(e: PointerEvent) {
   newWidth = Math.max(20, Math.round(newWidth));
   newHeight = Math.max(20, Math.round(newHeight));
 
-  const sizeConfig = selectedElement.value.styleConfig.size;
-  sizeConfig.width = String(newWidth);
-  sizeConfig.widthUnit = SizeUnitEnum.PX;
-  sizeConfig.height = String(newHeight);
-  sizeConfig.heightUnit = SizeUnitEnum.PX;
+  const selector = `#${selectedElement.value.id}`;
+  const config = canvasStore.getOrCreateStyleConfig(selector);
+  config.size.width = String(newWidth);
+  config.size.widthUnit = UnitEnum.PX;
+  config.size.height = String(newHeight);
+  config.size.heightUnit = UnitEnum.PX;
+  canvasStore.syncStyle(selector, config);
 
   nextTick(updatePos);
 }
@@ -227,7 +223,10 @@ function getSelectedEl(): Element | null {
 /** 更新工具栏位置 */
 function updatePos() {
   const el = getSelectedEl();
-  if (el && isElementDisplayed.value) {
+  if (!el) return;
+  /** 直接读取 DOM 计算样式，反映真实 CSS 渲染状态（含后代选择器、伪类等影响） */
+  isElementDisplayed.value = getComputedStyle(el).display !== 'none';
+  if (isElementDisplayed.value) {
     updateBox(el);
     nextTick(() => {
       toolbarWidth.value = toolbarRef.value?.offsetWidth ?? 0;

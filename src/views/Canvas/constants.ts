@@ -51,14 +51,9 @@ const Footer = lazy(() => import("./components/canvas-element/Footer.vue"));
 const Article = lazy(() => import("./components/canvas-element/Article.vue"));
 const Section = lazy(() => import("./components/canvas-element/Section.vue"));
 const Aside = lazy(() => import("./components/canvas-element/Aside.vue"));
-const Heading1 = lazy(() => import("./components/canvas-element/Heading1.vue"));
-const Heading2 = lazy(() => import("./components/canvas-element/Heading2.vue"));
-const Heading3 = lazy(() => import("./components/canvas-element/Heading3.vue"));
-const Heading4 = lazy(() => import("./components/canvas-element/Heading4.vue"));
-const Heading5 = lazy(() => import("./components/canvas-element/Heading5.vue"));
-const Heading6 = lazy(() => import("./components/canvas-element/Heading6.vue"));
+const Heading = lazy(() => import("./components/canvas-element/Heading.vue"));
 import type { InjectionKey, Ref } from 'vue';
-import { LayersDropTarget, ValidResizeDirEnum } from "./types.ts";
+import { ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";
 
 /** 组件映射 */
@@ -97,37 +92,8 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.ARTICLE]: Article,
     [CanvasElementTypeEnum.SECTION]: Section,
     [CanvasElementTypeEnum.ASIDE]: Aside,
-    [CanvasElementTypeEnum.HEADING_1]: Heading1,
-    [CanvasElementTypeEnum.HEADING_2]: Heading2,
-    [CanvasElementTypeEnum.HEADING_3]: Heading3,
-    [CanvasElementTypeEnum.HEADING_4]: Heading4,
-    [CanvasElementTypeEnum.HEADING_5]: Heading5,
-    [CanvasElementTypeEnum.HEADING_6]: Heading6,
+    [CanvasElementTypeEnum.HEADING]: Heading,
 };
-
-/** 展开的元素id列表 */
-export const EXPANDED_KEYS: InjectionKey<Ref<string[]>> = Symbol('expandedKeys');
-
-/** 切换容器展开/收起 */
-export const TOGGLE_EXPAND_KEY: InjectionKey<(id: string) => void> = Symbol('toggleExpand');
-
-/** 展开元素 */
-export const EXPAND_CONTAINER_KEY: InjectionKey<(id: string) => void> = Symbol('expandContainer');
-
-/** 拖拽中的元素id */
-export const DRAGGING_ID_KEY: InjectionKey<Ref<string | null>> = Symbol('draggingId');
-
-/** 落点元素id */
-export const DROP_TARGET_KEY: InjectionKey<Ref<LayersDropTarget | null>> = Symbol('dropTarget');
-
-/** 设置拖拽中的元素id */
-export const SET_DRAGGING_ID_KEY: InjectionKey<(id: string | null) => void> = Symbol('setDraggingId');
-
-/** 设置落点元素id */
-export const SET_DROP_TARGET_KEY: InjectionKey<(target: LayersDropTarget | null) => void> = Symbol('setDropTarget');
-
-/** 执行移动 */
-export const EXECUTE_MOVE_KEY: InjectionKey<() => void> = Symbol('executeMove');
 
 /** 隐藏的元素id列表 */
 export const HIDDEN_KEYS: InjectionKey<Ref<string[]>> = Symbol('hiddenKeys');
@@ -137,9 +103,6 @@ export const TOGGLE_SHOW_KEY: InjectionKey<(id: string) => void> = Symbol('toggl
 
 /** 是否处于预览模式 */
 export const IS_PREVIEW_KEY: InjectionKey<Readonly<Ref<boolean>>> = Symbol('isPreview');
-
-/** 边缘检测阈值（px） */
-export const EDGE_THRESHOLD = 8;
 
 /** 调整尺寸方向列表 */
 export const RESIZE_DIRS: ValidResizeDirEnum[] = [

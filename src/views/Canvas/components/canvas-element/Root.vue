@@ -1,14 +1,14 @@
 <!-- ? 根组件 -->
 <template>
-  <div ref="rootEl" class="canvas-root" :class="[data.classes, { 'is-preview': isPreview }]" :id="data.id" :data-canvas-id="data.id" :style="style" @click.stop="handleSelect">
+  <div ref="rootEl" class="canvas-root" :class="[classes, { 'is-preview': isPreview }]" :id="data.id" :data-canvas-id="data.id" @click.stop="handleSelect">
     <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
   </div>
 </template> 
 
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { CanvasRootElement } from '../../types';
-import { useElementStyle } from '@/composables/useElementStyle';
+import type { CanvasRootElement } from '../../types';
+import { useElementClasses } from '@/composables/useElementClasses';
 import { CanvasElementComponentMap } from '../../constants';
 import { dragEngine } from '../../drag/DragEngine';
 import { nodeRegistry } from '../../drag/NodeRegistry';
@@ -22,10 +22,10 @@ const data = defineModel<CanvasRootElement>("data", {
 /** 根 DOM 引用 */
 const rootEl = ref<HTMLElement>();
 
-useElementVisibility(data.value.id, data);
+useElementVisibility(data.value.id);
 
-/** 样式对象（合并 class 选择器与 id 选择器样式） */
-const style = useElementStyle(data);
+/** 已启用的 class 名称列表 */
+const classes = useElementClasses(data);
 
 const { handleSelect, guard, isPreview } = useCanvasInteraction(data.value.id);
 

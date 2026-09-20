@@ -7,7 +7,7 @@
         <span>
           Background
           <CloseCircleOutlined
-            v-if="(model.backgrounds?.length ?? 0) > 0"
+            v-if="model.backgrounds?.length"
             class="style-config-clear"
             @click="model.backgrounds = []"
           />
@@ -36,34 +36,34 @@
         </div>
 
         <!-- 类型切换 -->
-        <a-radio-group v-model:value="bg.type" button-style="solid" size="small" class="style-config-radio-group style-config-radio-group--mb">
-          <a-radio-button :value="BackgroundTypeEnum.IMAGE"><PictureOutlined /></a-radio-button>
-          <a-radio-button :value="BackgroundTypeEnum.COLOR"><BgColorsOutlined /></a-radio-button>
-          <a-radio-button :value="BackgroundTypeEnum.GRADIENT"><GatewayOutlined /></a-radio-button>
-        </a-radio-group>
+        <me-radio-group v-model="bg.type" class="style-config-radio-group style-config-radio-group--mb">
+          <me-radio-button :value="BackgroundTypeEnum.IMAGE"><PictureOutlined /></me-radio-button>
+          <me-radio-button :value="BackgroundTypeEnum.COLOR"><BgColorsOutlined /></me-radio-button>
+          <me-radio-button :value="BackgroundTypeEnum.GRADIENT"><GatewayOutlined /></me-radio-button>
+        </me-radio-group>
 
         <!-- Image 类型 -->
         <template v-if="bg.type === BackgroundTypeEnum.IMAGE">
           <div class="style-config-label">Image</div>
-          <a-input v-model:value="bg.imageUrl" size="small" placeholder="https://" class="style-config-mb" @blur="handleBgImageUrlBlur(bg)" />
+          <me-input v-model="bg.imageUrl" placeholder="https://" class="style-config-mb" @blur="handleBgImageUrlBlur(bg)" />
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
-              <a-select v-model:value="bg.repeat" size="small" class="style-config-select" :options="BG_REPEAT_OPTIONS" placeholder="repeat" allow-clear />
+              <me-select v-model="bg.repeat" class="style-config-select" :options="BG_REPEAT_OPTIONS" placeholder="repeat" clearable />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Position</div>
-              <a-select v-model:value="bg.position" size="small" class="style-config-select" :options="BG_POSITION_OPTIONS" placeholder="center" allow-clear />
+              <me-select v-model="bg.position" class="style-config-select" :options="BG_POSITION_OPTIONS" placeholder="center" clearable />
             </div>
           </div>
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Attachment</div>
-              <a-select v-model:value="bg.attachment" size="small" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" placeholder="scroll" allow-clear />
+              <me-select v-model="bg.attachment" class="style-config-select" :options="BG_ATTACHMENT_OPTIONS" placeholder="scroll" clearable />
             </div>
             <div class="style-config-col">
               <div class="style-config-label">Size</div>
-              <a-select v-model:value="bg.size" size="small" class="style-config-select" :options="BG_SIZE_OPTIONS" placeholder="auto" allow-clear />
+              <me-select v-model="bg.size" class="style-config-select" :options="BG_SIZE_OPTIONS" placeholder="auto" clearable />
             </div>
           </div>
         </template>
@@ -72,7 +72,7 @@
         <template v-else-if="bg.type === BackgroundTypeEnum.COLOR">
           <div class="style-config-label">Color</div>
           <div class="style-config-color-row">
-            <a-input v-model:value="bg.color" size="small" class="style-config-input" placeholder="#ffffff" />
+            <me-input v-model="bg.color" class="style-config-input" placeholder="#ffffff" />
             <input type="color" v-model="bg.color" class="style-config-color-picker" />
           </div>
         </template>
@@ -80,7 +80,7 @@
         <!-- Gradient 类型 -->
         <template v-else>
           <div class="style-config-label">Gradient</div>
-          <a-input v-model:value="bg.gradient" size="small" placeholder="linear-gradient(...)" @blur="handleBgGradientBlur(bg)" />
+          <me-input v-model="bg.gradient" placeholder="linear-gradient(...)" @blur="handleBgGradientBlur(bg)" />
         </template>
       </div>
     </div>
@@ -93,18 +93,18 @@
           <div class="style-config-col">
             <div class="style-config-label">Width</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.borderWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderWidth', 'borderWidthUnit')" />
-              <a-select v-model:value="model.borderWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.borderWidth" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderWidth', 'borderWidthUnit')" />
+              <me-select v-model="model.borderWidthUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Style</div>
-            <a-select v-model:value="model.borderStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
+            <me-select v-model="model.borderStyle" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" clearable />
           </div>
         </div>
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row">
-          <a-input v-model:value="model.borderColor" size="small" class="style-config-input" placeholder="#000000" />
+          <me-input v-model="model.borderColor" class="style-config-input" placeholder="#000000" />
           <input type="color" v-model="model.borderColor" class="style-config-color-picker" />
         </div>
       </div>
@@ -118,15 +118,15 @@
           <div class="style-config-col">
             <div class="style-config-label">TL</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.borderRadiusTL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.borderRadiusTL" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderRadiusTL', 'borderRadiusTLUnit')" />
+              <me-select v-model="model.borderRadiusTLUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">TR</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.borderRadiusTR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.borderRadiusTR" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderRadiusTR', 'borderRadiusTRUnit')" />
+              <me-select v-model="model.borderRadiusTRUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
         </div>
@@ -134,15 +134,15 @@
           <div class="style-config-col">
             <div class="style-config-label">BL</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.borderRadiusBL" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.borderRadiusBL" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderRadiusBL', 'borderRadiusBLUnit')" />
+              <me-select v-model="model.borderRadiusBLUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">BR</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.borderRadiusBR" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur(['borderRadiusTL', 'borderRadiusTR', 'borderRadiusBL', 'borderRadiusBR'], 'borderRadiusUnit')" />
-              <a-select v-model:value="model.borderRadiusUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.borderRadiusBR" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('borderRadiusBR', 'borderRadiusBRUnit')" />
+              <me-select v-model="model.borderRadiusBRUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
         </div>
@@ -157,24 +157,24 @@
           <div class="style-config-col">
             <div class="style-config-label">Width</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="model.outlineWidth" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('outlineWidth', 'outlineWidthUnit')" />
-              <a-select v-model:value="model.outlineWidthUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="model.outlineWidth" class="style-config-input-number" :min="0" placeholder="0" @blur="handleUnitBlur('outlineWidth', 'outlineWidthUnit')" />
+              <me-select v-model="model.outlineWidthUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Style</div>
-            <a-select v-model:value="model.outlineStyle" size="small" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" allow-clear />
+            <me-select v-model="model.outlineStyle" class="style-config-select" :options="BORDER_STYLE_OPTIONS" placeholder="none" clearable />
           </div>
         </div>
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row">
-          <a-input v-model:value="model.outlineColor" size="small" class="style-config-input" placeholder="#000000" />
+          <me-input v-model="model.outlineColor" class="style-config-input" placeholder="#000000" />
           <input type="color" v-model="model.outlineColor" class="style-config-color-picker" />
         </div>
         <div class="style-config-label">Offset</div>
         <div class="style-config-input-group">
-          <a-input-number v-model:value="model.outlineOffset" size="small" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('outlineOffset', 'outlineOffsetUnit')" />
-          <a-select v-model:value="model.outlineOffsetUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+          <a-input-number v-model:value="model.outlineOffset" class="style-config-input-number" placeholder="0" @blur="handleUnitBlur('outlineOffset', 'outlineOffsetUnit')" />
+          <me-select v-model="model.outlineOffsetUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
         </div>
       </div>
     </div>
@@ -186,7 +186,6 @@
         <a-slider v-model:value="opacity" :min="0" :max="1" :step="0.01" class="style-config-slider" />
         <a-input-number
           v-model:value="model.opacity"
-          size="small"
           :min="0"
           :max="1"
           :step="0.01"
@@ -216,15 +215,15 @@
           <div class="style-config-col">
             <div class="style-config-label">X</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.x" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'x', 'xUnit')" />
-              <a-select v-model:value="shadow.xUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.x" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'x', 'xUnit')" />
+              <me-select v-model="shadow.xUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Y</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.y" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'y', 'yUnit')" />
-              <a-select v-model:value="shadow.yUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.y" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'y', 'yUnit')" />
+              <me-select v-model="shadow.yUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
         </div>
@@ -232,26 +231,26 @@
           <div class="style-config-col">
             <div class="style-config-label">Blur</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.blur" size="small" class="style-config-input-number" :min="0" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
-              <a-select v-model:value="shadow.blurUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.blur" class="style-config-input-number" :min="0" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'blur', 'blurUnit')" />
+              <me-select v-model="shadow.blurUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
           <div class="style-config-col">
             <div class="style-config-label">Spread</div>
             <div class="style-config-input-group">
-              <a-input-number v-model:value="shadow.spread" size="small" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'spread', 'spreadUnit')" />
-              <a-select v-model:value="shadow.spreadUnit" size="small" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" allow-clear />
+              <a-input-number v-model:value="shadow.spread" class="style-config-input-number" placeholder="0" @blur="handleBoxShadowUnitBlur(shadow, 'spread', 'spreadUnit')" />
+              <me-select v-model="shadow.spreadUnit" class="style-config-unit" :options="SIZE_UNIT_OPTIONS" placeholder="px" clearable />
             </div>
           </div>
         </div>
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row style-config-color-row--mb">
-          <a-input v-model:value="shadow.color" size="small" class="style-config-input" placeholder="#000000" />
+          <me-input v-model="shadow.color" class="style-config-input" placeholder="#000000" />
           <input type="color" v-model="shadow.color" class="style-config-color-picker" />
         </div>
-        <a-checkbox v-model:checked="shadow.inset" size="small">
+        <me-checkbox v-model="shadow.inset">
           <span class="style-config-checkbox-label">Inset</span>
-        </a-checkbox>
+        </me-checkbox>
       </div>
     </div>
   </div>
@@ -267,6 +266,7 @@ import {
   BgColorsOutlined,
   GatewayOutlined,
 } from '@ant-design/icons-vue';
+import { MeCheckbox, MeInput, MeRadioButton, MeRadioGroup, MeSelect } from '@zyf_dsb/me-ui';
 import {
   SIZE_UNIT_OPTIONS,
   BORDER_STYLE_OPTIONS,
@@ -275,7 +275,7 @@ import {
   BG_SIZE_OPTIONS,
   BG_POSITION_OPTIONS,
   BackgroundTypeEnum,
-  SizeUnitEnum,
+  UnitEnum,
 } from '@/constants/style';
 import type { VisualConfig, BoxShadowItem, BackgroundItem } from '@/views/Canvas/types';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
@@ -326,10 +326,10 @@ function handleAddBackground() {
 function handleAddBoxShadow() {
   if (!model.value.boxShadows) model.value.boxShadows = [];
   model.value.boxShadows.push({
-    x: 0, xUnit: SizeUnitEnum.PX,
-    y: 0, yUnit: SizeUnitEnum.PX,
-    blur: 0, blurUnit: SizeUnitEnum.PX,
-    spread: 0, spreadUnit: SizeUnitEnum.PX,
+    x: 0, xUnit: UnitEnum.PX,
+    y: 0, yUnit: UnitEnum.PX,
+    blur: 0, blurUnit: UnitEnum.PX,
+    spread: 0, spreadUnit: UnitEnum.PX,
     color: '#000000',
     inset: false,
   });

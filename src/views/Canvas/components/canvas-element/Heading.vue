@@ -1,30 +1,34 @@
-<!-- ? 二级标题元素 -->
+<!-- ? 标题元素 -->
 <template>
-    <h2
+    <component
+        :is="headingTag"
         ref="headingEl"
         :id="data.id"
         :data-canvas-id="data.id"
-        :class="data.classes"
-        :style="style"
+        :class="classes"
         v-editable="{ id: data.id, isPreview, getText: () => data.text, onSave: (v: string) => data.text = v }"
         @click.stop="handleSelect"
-    >{{ data.text }}</h2>
+    >{{ data.text }}</component>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { CanvasHeading2Element } from '../../types';
-import { useElementStyle } from '@/composables/useElementStyle';
+import { computed, ref } from 'vue';
+import type { CanvasHeadingElement } from '../../types';
+import { normalizeHeadingLevel } from '@/constants/home';
+import { useElementClasses } from '@/composables/useElementClasses';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 
-const data = defineModel<CanvasHeading2Element>("data", {
+const data = defineModel<CanvasHeadingElement>("data", {
     required: true
 });
 
-/** 样式对象（合并 class 选择器与 id 选择器样式） */
-const style = useElementStyle(data);
+/** 已启用的 class 名称列表 */
+const classes = useElementClasses(data);
+
+/** 标题级别对应的标签名（level 收敛到 1~6，未设置时默认 h1） */
+const headingTag = computed(() => `h${normalizeHeadingLevel(data.value.level)}`);
 
 /** 标题 DOM 引用 */
 const headingEl = ref<HTMLElement>();
@@ -33,5 +37,5 @@ const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 
 useDragConnector(headingEl, data.value.id);
 
-useElementVisibility(data.value.id, data);
+useElementVisibility(data.value.id);
 </script>

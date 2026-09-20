@@ -103,12 +103,7 @@ const CanvasElementIconMap: Record<CanvasElementTypeEnum, Component> = {
   [CanvasElementTypeEnum.ARTICLE]: ReadOutlined,
   [CanvasElementTypeEnum.SECTION]: LayoutOutlined,
   [CanvasElementTypeEnum.ASIDE]: BorderRightOutlined,
-  [CanvasElementTypeEnum.HEADING_1]: FontSizeOutlined,
-  [CanvasElementTypeEnum.HEADING_2]: FontSizeOutlined,
-  [CanvasElementTypeEnum.HEADING_3]: FontSizeOutlined,
-  [CanvasElementTypeEnum.HEADING_4]: FontSizeOutlined,
-  [CanvasElementTypeEnum.HEADING_5]: FontSizeOutlined,
-  [CanvasElementTypeEnum.HEADING_6]: FontSizeOutlined,
+  [CanvasElementTypeEnum.HEADING]: FontSizeOutlined,
   [CanvasElementTypeEnum.ROOT]: BorderOuterOutlined,
 };
 
@@ -184,12 +179,7 @@ const componentGroups: ComponentGroup[] = [
       CanvasElementTypeEnum.ARTICLE,
       CanvasElementTypeEnum.SECTION,
       CanvasElementTypeEnum.ASIDE,
-      CanvasElementTypeEnum.HEADING_1,
-      CanvasElementTypeEnum.HEADING_2,
-      CanvasElementTypeEnum.HEADING_3,
-      CanvasElementTypeEnum.HEADING_4,
-      CanvasElementTypeEnum.HEADING_5,
-      CanvasElementTypeEnum.HEADING_6,
+      CanvasElementTypeEnum.HEADING,
     ],
   },
 ];

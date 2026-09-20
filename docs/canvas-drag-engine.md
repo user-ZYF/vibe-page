@@ -1,17 +1,17 @@
 # 自研画布拖拽引擎设计方案
 
-参考 Craft.js 架构，在保留现有嵌套数组数据结构的前提下，用原生 HTML5 Drag API 完全替换 vue-draggable-plus，实现精确占位线 + Connector 注册系统。
+在保留现有嵌套数组数据结构的前提下，用原生 HTML5 Drag API 实现拖拽，提供精确占位线 + Connector 注册系统。
 
 ---
 
 ## 整体分层
 
 ```
-DragEngine（事件协调，类比 DefaultEventHandlers）
-  └── Positioner（落点计算，类比 Positioner + findPosition）
-        └── Indicator（占位线渲染，类比 RenderEditorIndicator）
+DragEngine（事件协调）
+  └── Positioner（落点计算）
+        └── Indicator（占位线渲染）
   └── dragStore（Pinia，管理拖拽状态）
-  └── useDragConnector（Vue composable，替代 connect connector）
+  └── useDragConnector（Vue composable）
 ```
 
 ---
@@ -93,7 +93,7 @@ interface NodeRegistration {
 
 **文件**：`src/views/Canvas/drag/NodeRegistry.ts`
 
-替代 Craft.js 中 `store.actions.setDOM(id, el)` 的功能。
+维护元素 id 与 DOM 节点的映射关系。
 
 ```ts
 class NodeRegistry {
@@ -147,7 +147,7 @@ class Positioner {
 function findDropPosition(dims: NodeInfo[], x: number, y: number): { index: number; where: 'before' | 'after' }
 ```
 
-`findDropPosition` 逻辑（同 Craft.js / GrapesJS）：
+`findDropPosition` 逻辑：
 - 正常流元素：以 `yCenter` 为分界，鼠标在上半 = before，下半 = after
 - float 元素：以 `xCenter` 为分界
 
@@ -157,7 +157,7 @@ function findDropPosition(dims: NodeInfo[], x: number, y: number): { index: numb
 
 **文件**：`src/views/Canvas/drag/DragEngine.ts`
 
-类比 Craft.js 的 `DefaultEventHandlers`，管理所有 drag 事件的注册与清理。
+管理所有 drag 事件的注册与清理。
 
 ```ts
 class DragEngine {
@@ -199,7 +199,7 @@ export const dragEngine = new DragEngine()
 
 ## 六、createShadow（拖影）
 
-**文件**：`src/views/Canvas/drag/createShadow.ts`（直接参考 Craft.js 实现）
+**文件**：`src/views/Canvas/drag/createShadow.ts`
 
 ```ts
 function createShadow(e: DragEvent, el: HTMLElement): HTMLElement
@@ -214,7 +214,7 @@ function createShadow(e: DragEvent, el: HTMLElement): HTMLElement
 
 **文件**：`src/views/Canvas/drag/useDragConnector.ts`
 
-每个画布元素组件在 `onMounted` 调用，`onUnmounted` 清理，类比 Craft.js 的 `.connect()` connector。
+每个画布元素组件在 `onMounted` 调用，`onUnmounted` 清理。
 
 ```ts
 function useDragConnector(
@@ -256,7 +256,7 @@ function useDragConnector(
 </template>
 ```
 
-渲染规则（同 Craft.js `movePlaceholder`）：
+渲染规则：
 - 水平排列（非 inFlow）：竖线，`width: 2px, height: elHeight`
 - 垂直排列（inFlow）：横线，`height: 2px, width: elWidth`
 
@@ -293,7 +293,7 @@ moveElement(
 10. **改造** `Canvas.vue`：移除 `useDraggable`，调用 `connectDroppable(null)` + 渲染 `DropIndicatorOverlay`
 11. **改造** 每个画布元素组件（`Container.vue` / `Button.vue` 等）：移除 `useDraggable`，调用 `useDragConnector`
 12. **改造** `ComponentsPanel.vue`：移除 `VueDraggable`，调用 `connectCreate`
-13. 移除 `vue-draggable-plus` 依赖，删除 `CANVAS_DRAG_GROUP` / `PANEL_DRAG_GROUP`
+13. 移除旧版拖拽库依赖，删除 `CANVAS_DRAG_GROUP` / `PANEL_DRAG_GROUP`
 
 ---
 
@@ -302,7 +302,7 @@ moveElement(
 | 决策点 | 选择 | 原因 |
 |---|---|---|
 | 数据结构 | 保留嵌套数组 | 与现有 store 兼容，减少改动范围 |
-| 拖拽 API | 原生 HTML5 drag | 与 Craft.js 一致，有 setDragImage |
+| 拖拽 API | 原生 HTML5 drag | 支持 setDragImage 自定义拖影 |
 | DOM 注册 | 全局 NodeRegistry 单例 | 避免 provide/inject 层层传递 |
 | 落点计算 | Positioner 独立类 | 可单元测试，与 Vue 解耦 |
 | 占位线渲染 | `position: fixed` Vue 组件 | 不污染 DOM 树，Pinia 驱动重渲染 |

@@ -3,7 +3,7 @@ import type { CanvasInnerElement, CanvasParentElement } from "@/views/Canvas/typ
 import { isParentElement } from "@/views/Canvas/types";
 
 /**
- * DOM 节点注册表，替代 Craft.js 中 store.actions.setDOM(id, el) 的功能
+ * DOM 节点注册表，维护元素 id 与 DOM 节点的映射关系
  */
 export class NodeRegistry {
   private map: Map<string, NodeRegistration> = new Map();

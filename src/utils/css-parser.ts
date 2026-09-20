@@ -1,6 +1,6 @@
 /**
  * CSS 代码解析器
- * 参照 GrapesJS BrowserParserCss 的实现思路：创建临时 <style> 元素挂到 document.head，
+ * 创建临时 <style> 元素挂到 document.head，
  * 借助浏览器原生 CSSOM 解析 CSS，再读取 sheet.cssRules 转成与框架无关的规则对象。
  */
 

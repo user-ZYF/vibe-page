@@ -1,6 +1,6 @@
 /**
  * 代码渲染器
- * 参照 GrapesJS ComponentView 的实现思路：根据解析得到的元素描述对象树，
+ * 根据解析得到的元素描述对象树，
  * 递归创建真实 DOM 节点并挂载到预览容器；CSS 规则重建为字符串后注入 <style> 标签。
  */
 import type { ParsedElement } from '@/utils/html-parser';

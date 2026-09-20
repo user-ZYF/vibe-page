@@ -1,6 +1,6 @@
 /**
  * HTML 代码解析器
- * 参照 GrapesJS ParserHtml 的实现思路：借助浏览器原生 DOMParser 将 HTML 字符串解析为 DOM，
+ * 借助浏览器原生 DOMParser 将 HTML 字符串解析为 DOM，
  * 再递归遍历 DOM 树，生成与框架无关的元素描述对象树（ParsedElement[]）。
  * 已知取舍：纯空白文本节点会被丢弃、文本内容会去除首尾空白，
  */

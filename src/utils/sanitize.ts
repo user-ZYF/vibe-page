@@ -1,30 +1,28 @@
-/** 安全协议白名单 */
-const SAFE_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:', 'ftp:', 'ftps:'];
-
-/** 相对路径或锚点前缀（不需要协议校验） */
-const SAFE_URL_PREFIXES = ['#', './', '../', 'mailto:', 'tel:'];
+import {
+  SAFE_DATA_MIME_PREFIXES,
+  URL_ATTRIBUTES,
+  NAVIGATION_URL_ATTRIBUTES,
+  MULTI_URL_ATTRIBUTES,
+  SVG_ANIMATION_VALUE_ATTRIBUTES,
+} from '@/constants/sanitize';
+import { ATTR_NAME_REGEX } from '@/constants/html';
+import { sanitizeUrl as sanitizeUrlString } from '@braintree/sanitize-url';
+import { parseSrcset, stringifySrcset } from 'srcset';
 
 /**
  * 判断 URL 是否使用安全协议
- * 允许：http/https/mailto/tel/ftp/ftps、相对路径、锚点
- * 拒绝：javascript:/data:/vbscript:/file: 等危险协议
  */
 export function isSafeUrl(url: string): boolean {
-  if (!url) return true;
   const trimmed = url.trim();
   if (!trimmed) return true;
-
-  /** 相对路径或锚点直接放行 */
-  if (SAFE_URL_PREFIXES.some((prefix) => trimmed.startsWith(prefix))) return true;
-
-  /** 尝试解析协议 */
-  try {
-    const parsed = new URL(trimmed, window.location.origin);
-    return SAFE_PROTOCOLS.includes(parsed.protocol);
-  } catch {
-    /** 无法解析的 URL 视为不安全 */
-    return false;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('data:')) {
+    return SAFE_DATA_MIME_PREFIXES.some((prefix) => lower.startsWith(prefix));
   }
+  if (lower.startsWith('file:')) return false;
+  // about:blank 为合法空白页
+  if (lower === 'about:blank') return true;
+  return sanitizeUrlString(trimmed) !== 'about:blank';
 }
 
 /**
@@ -53,4 +51,50 @@ export function sanitizeCssUrl(cssValue: string): string {
     if (sq !== undefined) return `url('${url}')`;
     return `url(${url})`;
   });
+}
+
+/**
+ * 逐个校验 URL 协议，过滤不安全部分
+ */
+function sanitizeMultiUrl(value: string): string {
+  try {
+    const candidates = parseSrcset(value, { strict: false })
+      .map((candidate) => ({ ...candidate, url: sanitizeUrl(candidate.url) }))
+      .filter((candidate) => candidate.url !== '');
+    return stringifySrcset(candidates);
+  } catch {
+    return '';
+  }
+}
+
+/** 判断 SVG 动画取值中是否夹带危险协议 token */
+function hasDangerousAnimationValue(value: string): boolean {
+  return value.split(';').some((token) => /^\s*(javascript|vbscript|data:text\/html)\s*:/i.test(token));
+}
+
+/**
+ * 净化单个 HTML 属性值
+ * - 属性名含非法字符（空白/引号/斜杠/等号/大于号等）：返回 null，防止名字本身破坏标签结构
+ * - on* 事件属性：返回 null，整个属性丢弃
+ * - URL 类属性：协议白名单校验，不安全返回 null；其中导航类属性（href/action/formaction/xlink:href）不放行 data: URL
+ * - srcset/imagesrcset：逐候选 URL 校验，全部不安全返回 null
+ * - SVG 动画取值属性：含危险协议 token 时返回 null
+ */
+export function sanitizeAttributeValue(name: string, value: string): string | null {
+  const lowerName = name.toLowerCase();
+  if (!ATTR_NAME_REGEX.test(name)) return null;
+  if (/^on/i.test(lowerName)) return null;
+  if (MULTI_URL_ATTRIBUTES.has(lowerName)) {
+    const sanitized = sanitizeMultiUrl(value);
+    return sanitized || null;
+  }
+  if (URL_ATTRIBUTES.has(lowerName)) {
+    const safe = sanitizeUrl(value);
+    if (!safe) return null;
+    // 导航类属性不放行 data: URL（data:image/svg+xml 顶层导航时可执行内嵌脚本）
+    if (NAVIGATION_URL_ATTRIBUTES.has(lowerName) && safe.toLowerCase().startsWith('data:')) return null;
+    return safe;
+  }
+  if (SVG_ANIMATION_VALUE_ATTRIBUTES.has(lowerName) && hasDangerousAnimationValue(value)) return null;
+  return value;
 }

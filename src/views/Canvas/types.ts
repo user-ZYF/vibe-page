@@ -2,7 +2,8 @@
  * 样式面板各配置项的类型定义
  */
 
-import { CanvasElementTypeEnum, ELEMENT_TYPE_CONSTRAINTS } from '@/constants/home';
+import { CanvasElementTypeEnum, ELEMENT_TYPE_TAG_MAP, HEADING_TAGS, TAG_CONSTRAINTS, TEXT_NODE_TAG } from '@/constants/home';
+import { isVoidElement } from '@/utils/html-parser';
 import type { ButtonTypeEnum, DropPositionEnum, FormMethodEnum, HeadingLevelEnum, LinkTargetEnum, TableScopeEnum } from '@/constants/home';
 import type {
   BackgroundTypeEnum,
@@ -378,10 +379,10 @@ export interface CanvasElementBase {
   alias?: string;
 }
 
-/** 画布容器元素 */
-export interface CanvasContainerElement extends CanvasElementBase {
+/** 画布 div 元素 */
+export interface CanvasDivElement extends CanvasElementBase {
   /** 元素类型 */
-  type: CanvasElementTypeEnum.CONTAINER;
+  type: CanvasElementTypeEnum.DIV;
   /** 子元素 */
   children: CanvasInnerElement[];
 }
@@ -394,6 +395,8 @@ export interface CanvasButtonElement extends CanvasElementBase {
   text: string;
   /** 按钮类型 */
   buttonType?: ButtonTypeEnum;
+  /** 是否禁用 */
+  disabled: boolean;
 }
 
 /** 画布段落元素 */
@@ -436,6 +439,8 @@ export interface CanvasInputElement extends CanvasElementBase {
   value: string;
   /** 是否必填 */
   required: boolean;
+  /** 是否禁用 */
+  disabled: boolean;
 }
 
 /** 画布多行文本框元素 */
@@ -450,6 +455,8 @@ export interface CanvasTextareaElement extends CanvasElementBase {
   rows?: number;
   /** 是否必填 */
   required: boolean;
+  /** 是否禁用 */
+  disabled: boolean;
 }
 
 /** 画布单选框元素 */
@@ -464,6 +471,8 @@ export interface CanvasRadioElement extends CanvasElementBase {
   checked: boolean;
   /** 是否必填 */
   required: boolean;
+  /** 是否禁用 */
+  disabled: boolean;
 }
 
 /** 画布多选框元素 */
@@ -478,6 +487,8 @@ export interface CanvasCheckboxElement extends CanvasElementBase {
   checked: boolean;
   /** 是否必填 */
   required: boolean;
+  /** 是否禁用 */
+  disabled: boolean;
 }
 
 /** 画布视频元素 */
@@ -698,8 +709,8 @@ export interface CanvasAsideElement extends CanvasElementBase {
 export interface CanvasHeadingElement extends CanvasElementBase {
   /** 元素类型 */
   type: CanvasElementTypeEnum.HEADING;
-  /** 标题级别（未定义时按一级标题处理） */
-  level?: HeadingLevelEnum;
+  /** 标题级别 */
+  level: HeadingLevelEnum;
   /** 标题文本 */
   text: string;
 }
@@ -712,130 +723,135 @@ export interface CanvasRootElement extends CanvasElementBase {
   children: CanvasInnerElement[];
 }
 
+/** 画布通用元素（未在组件定义范围内的任意 HTML 标签，解析时保留原始标签与属性） */
+export interface CanvasGeneralElement extends CanvasElementBase {
+  /** 元素类型 */
+  type: CanvasElementTypeEnum.GENERAL;
+  /** 原始 HTML 标签名（小写） */
+  tagName: string;
+  /** 原始 HTML 属性（已剔除 id/class/style 与 on* 事件属性，URL 属性经协议校验） */
+  attributes: Record<string, string>;
+  /** 子元素 */
+  children: CanvasInnerElement[];
+}
+
 /** 画布内部元素枚举 */
 export type CanvasInnerElementTypeEnum = Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>;
 
 /** 画布内部元素 */
-export type CanvasInnerElement = CanvasContainerElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasTableColElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasHeadingElement;
+export type CanvasInnerElement = CanvasDivElement | CanvasButtonElement | CanvasParagraphElement | CanvasLinkElement | CanvasImageElement | CanvasInputElement | CanvasTextareaElement | CanvasRadioElement | CanvasCheckboxElement | CanvasVideoElement | CanvasAudioElement | CanvasLabelElement | CanvasFormElement | CanvasSpanElement | CanvasTextElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasTableColElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasHeadingElement | CanvasGeneralElement;
 
 /** 可包含子元素的画布元素 */
-export type CanvasParentElement = CanvasContainerElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement;
+export type CanvasParentElement = CanvasDivElement | CanvasLinkElement | CanvasFormElement | CanvasSpanElement | CanvasUnorderedListElement | CanvasOrderedListElement | CanvasListItemElement | CanvasTableElement | CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement | CanvasTableRowElement | CanvasTableDataElement | CanvasTableHeaderCellElement | CanvasTableCaptionElement | CanvasTableColGroupElement | CanvasHeaderElement | CanvasFooterElement | CanvasArticleElement | CanvasSectionElement | CanvasAsideElement | CanvasGeneralElement;
 
-/** 判断元素是否包含子元素 */
+/**
+ * 元素结构约束（按 HTML 标签名匹配，'#text' 伪标签表示文本节点）
+ * 直接子元素约束：
+ * - directIncludeTags：白名单，定义时表示仅允许的直接子元素标签
+ * - directExcludeTags：黑名单，定义时表示不允许的直接子元素标签
+ *
+ * 后代元素约束：
+ * - descendantIncludeTags：白名单，定义时表示仅允许的后代标签
+ * - descendantExcludeTags：黑名单，定义时表示不允许的后代标签
+ *
+ * include 与 exclude 组合：
+ * 1. 仅 include 定义：只接收 include 中的标签
+ * 2. 仅 exclude 定义：只忽略 exclude 中的标签
+ * 3. include、exclude 均定义：只接收存在于 include 且不存在于 exclude 中的标签
+ * 4. 均未定义：接收所有标签
+ */
+export interface TagConstraints {
+  /** 允许的直接子元素标签名（仅约束直接子元素） */
+  readonly directIncludeTags?: readonly string[];
+  /** 不允许的直接子元素标签名（仅约束直接子元素） */
+  readonly directExcludeTags?: readonly string[];
+  /** 允许的后代元素标签名（约束所有后代，含直接子元素） */
+  readonly descendantIncludeTags?: readonly string[];
+  /** 不允许的后代元素标签名（约束所有后代，含直接子元素） */
+  readonly descendantExcludeTags?: readonly string[];
+}
+
+/** 判断元素是否允许包含子元素 */
 export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
-  return el.type === CanvasElementTypeEnum.CONTAINER || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN || el.type === CanvasElementTypeEnum.UNORDERED_LIST || el.type === CanvasElementTypeEnum.ORDERED_LIST || el.type === CanvasElementTypeEnum.LIST_ITEM || el.type === CanvasElementTypeEnum.TABLE || el.type === CanvasElementTypeEnum.TABLE_HEAD || el.type === CanvasElementTypeEnum.TABLE_BODY || el.type === CanvasElementTypeEnum.TABLE_FOOT || el.type === CanvasElementTypeEnum.TABLE_ROW || el.type === CanvasElementTypeEnum.TABLE_DATA || el.type === CanvasElementTypeEnum.TABLE_HEADER_CELL || el.type === CanvasElementTypeEnum.TABLE_CAPTION || el.type === CanvasElementTypeEnum.TABLE_COL_GROUP || el.type === CanvasElementTypeEnum.HEADER || el.type === CanvasElementTypeEnum.FOOTER || el.type === CanvasElementTypeEnum.ARTICLE || el.type === CanvasElementTypeEnum.SECTION || el.type === CanvasElementTypeEnum.ASIDE;
+  /** 通用元素按标签判定：自闭合标签（br/hr 等）不可包含子元素 */
+  if (el.type === CanvasElementTypeEnum.GENERAL) return !isVoidElement(el.tagName);
+  return el.type === CanvasElementTypeEnum.DIV || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN || el.type === CanvasElementTypeEnum.UNORDERED_LIST || el.type === CanvasElementTypeEnum.ORDERED_LIST || el.type === CanvasElementTypeEnum.LIST_ITEM || el.type === CanvasElementTypeEnum.TABLE || el.type === CanvasElementTypeEnum.TABLE_HEAD || el.type === CanvasElementTypeEnum.TABLE_BODY || el.type === CanvasElementTypeEnum.TABLE_FOOT || el.type === CanvasElementTypeEnum.TABLE_ROW || el.type === CanvasElementTypeEnum.TABLE_DATA || el.type === CanvasElementTypeEnum.TABLE_HEADER_CELL || el.type === CanvasElementTypeEnum.TABLE_CAPTION || el.type === CanvasElementTypeEnum.TABLE_COL_GROUP || el.type === CanvasElementTypeEnum.HEADER || el.type === CanvasElementTypeEnum.FOOTER || el.type === CanvasElementTypeEnum.ARTICLE || el.type === CanvasElementTypeEnum.SECTION || el.type === CanvasElementTypeEnum.ASIDE;
+}
+
+/**
+ * 解析元素对应的有效 HTML 标签名
+ * @param el 元素模型数据
+ * @returns 有效标签名（纯文本为 '#text' 伪标签）
+ */
+export function resolveElementTag(el: CanvasElement): string {
+  if (el.type === CanvasElementTypeEnum.TEXT) return TEXT_NODE_TAG;
+  if (el.type === CanvasElementTypeEnum.GENERAL) return el.tagName;
+  if (el.type === CanvasElementTypeEnum.HEADING) return `h${el.level}`;
+  return ELEMENT_TYPE_TAG_MAP[el.type];
+}
+
+/** 按标签名 include/exclude 规则校验 */
+function isTagInList(tag: string, include?: readonly string[], exclude?: readonly string[]): boolean {
+  if (include !== undefined && !include.includes(tag)) return false;
+  if (exclude !== undefined && exclude.includes(tag)) return false;
+  return true;
+}
+
+/** 判断子元素是否满足父元素的子代和后代约束 */
+function isChildTagAllowed(constraints: TagConstraints, tag: string): boolean {
+  return isTagInList(tag, constraints.directIncludeTags, constraints.directExcludeTags)
+    && isTagInList(tag, constraints.descendantIncludeTags, constraints.descendantExcludeTags);
 }
 
 /**
  * 判断元素类型是否允许作为指定父元素的直接子元素
  *
  * 仅检查类型本身，不递归检查后代子树。适用于新元素拖入时仅知道类型、不知道子树的场景。
+ * 所有父元素统一按 resolveParentTag 解析出的标签名查 TAG_CONSTRAINTS；
+ * GENERAL 子类型无法解析标签名，放行交给 isSubtreeAllowed 按实际 tagName 精确校验；
+ * HEADING 子类型标签随 level 变化，h1~h6 任一通过即放行。
  *
- * 校验时直接子元素同时受两组约束限制，每组约束的 include 与 exclude 组合规则如下：
- * 1. include 不为空且 exclude 为空：只接收 include 中的元素
- * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
- * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
- * 4. include、exclude 均为空：接收所有元素
- *
- * 直接子元素约束（`directInclude` / `directExclude`）和后代元素约束（`descendantInclude` / `descendantExclude`）
- * 均适用上述规则，且直接子元素需同时满足两组约束。
+ * 直接子元素约束（`directIncludeTags` / `directExcludeTags`）和后代元素约束
+ * （`descendantIncludeTags` / `descendantExcludeTags`）均按 include/exclude 组合规则判定，
+ * 且直接子元素需同时满足两组约束。
  *
  * @param parent 父元素模型数据
  * @param childType 待放入的子元素类型
  */
 export function isChildTypeAllowed(parent: CanvasElement, childType: CanvasInnerElementTypeEnum): boolean {
-  const { directInclude, directExclude, descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
-  if (directInclude && directInclude.length > 0 && !directInclude.includes(childType)) return false;
-  if (directExclude && directExclude.length > 0 && directExclude.includes(childType)) return false;
-  if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(childType)) return false;
-  if (descendantExclude && descendantExclude.length > 0 && descendantExclude.includes(childType)) return false;
-  return true;
+  const constraints = TAG_CONSTRAINTS[resolveElementTag(parent)];
+  if (!constraints) return true;
+  if (childType === CanvasElementTypeEnum.GENERAL) return true;
+  if (childType === CanvasElementTypeEnum.HEADING) {
+    return HEADING_TAGS.some((tag) => isChildTagAllowed(constraints, tag));
+  }
+  const tag = childType === CanvasElementTypeEnum.TEXT ? TEXT_NODE_TAG : ELEMENT_TYPE_TAG_MAP[childType];
+  return isChildTagAllowed(constraints, tag);
 }
 
 /**
  * 判断拖拽元素及其所有后代是否均允许作为指定父元素的子元素
- *
- * 校验规则基于父元素类型对应的固定结构约束（ELEMENT_TYPE_CONSTRAINTS），按作用范围分为两组：
- *
- * **直接子元素约束**（仅检查待放入元素本身）：
- * - `directInclude`：白名单，列表不为空时，直接子元素类型必须在列表中
- * - `directExclude`：黑名单，列表不为空时，直接子元素类型不得在列表中
- *
- * **后代元素约束**（检查待放入元素及其所有递归后代，含直接子元素）：
- * - `descendantInclude`：白名单，列表不为空时，所有后代类型必须在列表中
- * - `descendantExclude`：黑名单，列表不为空时，所有后代类型不得在列表中
- *
- * 每组约束的 include 与 exclude 组合规则：
- * 1. include 不为空且 exclude 为空：只接收 include 中的元素
- * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
- * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
- * 4. include、exclude 均为空：接收所有元素
- *
- * 校验流程：
- * - 直接子元素：同时检查直接子元素约束和后代元素约束（因为直接子元素也是后代）
- * - 更深层后代：仅检查后代元素约束（通过 isDescendantAllowed 递归）
- * - 仅当存在后代元素约束时才需要递归；仅有直接子元素约束时不递归
- *
- * 典型场景：
- * - `ul`：`directInclude=[li]` → 直接子元素只能是 li，li 内部不限制
- * - `span`：`descendantInclude=[link, image, text, ...]` → 所有后代必须是 phrasing content
- * - `a`：`descendantExclude=[link, button, input, ...]` → 所有后代不允许交互式内容
- * - `form`：`descendantExclude=[form]` → 所有后代不允许嵌套 form
  * @param parent 目标父元素模型数据
  * @param child 待放入的子元素（含其后代子树）
  */
 export function isSubtreeAllowed(parent: CanvasElement, child: CanvasInnerElement): boolean {
-  const { directInclude, directExclude, descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
-  const hasDirectInclude = !!directInclude && directInclude.length > 0;
-  const hasDirectExclude = !!directExclude && directExclude.length > 0;
-  const hasDescendantInclude = !!descendantInclude && descendantInclude.length > 0;
-  const hasDescendantExclude = !!descendantExclude && descendantExclude.length > 0;
-  const childType = child.type as CanvasInnerElementTypeEnum;
-
-  /** 检查直接子元素约束 */
-  if (hasDirectInclude && !directInclude!.includes(childType)) return false;
-  if (hasDirectExclude && directExclude!.includes(childType)) return false;
-
-  /** 检查后代约束（直接子元素也是后代，需要检查） */
-  if (hasDescendantInclude && !descendantInclude!.includes(childType)) return false;
-  if (hasDescendantExclude && descendantExclude!.includes(childType)) return false;
-
-  /** 若存在后代约束，需要递归检查所有更深层后代 */
-  if ((hasDescendantInclude || hasDescendantExclude) && isParentElement(child)) {
-    for (const descendant of child.children) {
-      if (!isDescendantAllowed(parent, descendant)) return false;
-    }
+  const constraints = TAG_CONSTRAINTS[resolveElementTag(parent)];
+  if (!constraints) return true;
+  if (!isChildTagAllowed(constraints, resolveElementTag(child))) return false;
+  /** 存在后代约束时递归检查更深层后代 */
+  const hasDescendantRules = constraints.descendantIncludeTags !== undefined || constraints.descendantExcludeTags !== undefined;
+  if (hasDescendantRules && isParentElement(child)) {
+    return child.children.every((descendant) => isDescendantTagAllowed(constraints, descendant));
   }
-
   return true;
 }
 
-/**
- * 递归检查后代元素是否满足父元素的后代约束
- *
- * 仅检查 `descendantInclude` 和 `descendantExclude`，不检查直接子元素约束
- * （因为更深层后代不受直接子元素约束的限制）。
- *
- * include 与 exclude 组合规则：
- * 1. include 不为空且 exclude 为空：只接收 include 中的元素
- * 2. exclude 不为空且 include 为空：只忽略 exclude 中的元素
- * 3. include、exclude 均不为空：只接收存在于 include 且不存在于 exclude 中的元素
- * 4. include、exclude 均为空：接收所有元素
- *
- * @param parent 目标父元素模型数据
- * @param descendant 待检查的后代元素
- */
-function isDescendantAllowed(parent: CanvasElement, descendant: CanvasInnerElement): boolean {
-  const { descendantInclude, descendantExclude } = ELEMENT_TYPE_CONSTRAINTS[parent.type] ?? {};
-  const descendantType = descendant.type as CanvasInnerElementTypeEnum;
-
-  if (descendantInclude && descendantInclude.length > 0 && !descendantInclude.includes(descendantType)) return false;
-  if (descendantExclude && descendantExclude.length > 0 && descendantExclude.includes(descendantType)) return false;
-
+/** 递归检查后代元素是否满足父元素的后代标签约束（不检查直接子元素约束） */
+function isDescendantTagAllowed(constraints: TagConstraints, descendant: CanvasInnerElement): boolean {
+  const tag = resolveElementTag(descendant);
+  if (!isTagInList(tag, constraints.descendantIncludeTags, constraints.descendantExcludeTags)) return false;
   if (isParentElement(descendant)) {
-    for (const child of descendant.children) {
-      if (!isDescendantAllowed(parent, child)) return false;
-    }
+    return descendant.children.every((child) => isDescendantTagAllowed(constraints, child));
   }
   return true;
 }
@@ -868,6 +884,10 @@ export interface ResizeStartState {
   startWidth: number;
   /** 起始高度（border-box） */
   startHeight: number;
+  /** 最近一次拖拽出的宽度（border-box） */
+  lastWidth: number;
+  /** 最近一次拖拽出的高度（border-box） */
+  lastHeight: number;
 }
 
 /** 组件分组配置 */
@@ -894,12 +914,8 @@ export interface CanvasStorageData {
 export interface LayerTreeNodeData {
   /** 元素id */
   id: string;
-  /** 元素类型 */
-  type: CanvasElementTypeEnum;
-  /** 元素别名 */
-  alias?: string;
-  /** 标题级别（仅标题元素） */
-  level?: HeadingLevelEnum;
+  /** 源画布元素 */
+  element: CanvasElement;
   /** 子节点 */
   children: LayerTreeNodeData[];
 }

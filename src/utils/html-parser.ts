@@ -5,11 +5,15 @@
  * 已知取舍：纯空白文本节点会被丢弃、文本内容会去除首尾空白，
  */
 
+import { VOID_ELEMENTS, RAW_TEXT_ELEMENTS, BLOCKED_TAGS, GENERAL_FALLBACK_TAG_NAME, TAG_NAME_REGEX } from '@/constants/html';
+
 /** 解析后的元素节点描述 */
 export interface ParsedElement {
   /** 标签名（小写，文本节点为空字符串） */
   tagName: string;
-  /** 普通属性键值对（已剔除 style/class） */
+  /** 元素 id（未声明为空字符串） */
+  id: string;
+  /** 普通属性键值对（已剔除 id/style/class） */
   attributes: Record<string, string>;
   /** 行内样式键值对 */
   style: Record<string, string>;
@@ -23,27 +27,34 @@ export interface ParsedElement {
   children: ParsedElement[];
 }
 
-/** 自闭合/空元素集合，渲染时不需要子节点 */
-const VOID_ELEMENTS = new Set([
-  'area',
-  'base',
-  'br',
-  'col',
-  'embed',
-  'hr',
-  'img',
-  'input',
-  'link',
-  'meta',
-  'param',
-  'source',
-  'track',
-  'wbr',
-]);
-
 /** 判断标签是否为自闭合元素 */
 export function isVoidElement(tagName: string): boolean {
   return VOID_ELEMENTS.has(tagName.toLowerCase());
+}
+
+/** 判断字符串是否为合法 HTML 标签名 */
+export function isValidTagName(tagName: string): boolean {
+  return TAG_NAME_REGEX.test(tagName);
+}
+
+/** 判断标签名是否允许出现在画布（大小写不敏感，统一按小写判定；危险标签与原始文本标签不允许） */
+export function isAllowedTagName(tagName: string): boolean {
+  const tag = tagName.toLowerCase();
+  return isValidTagName(tag) && !BLOCKED_TAGS.has(tag) && !RAW_TEXT_ELEMENTS.has(tag);
+}
+
+/** 解析可用于渲染/生成的标签名：不允许的标签名回退为通用兜底标签，返回值一律为小写 */
+export function resolveSafeTagName(tagName: string): string {
+  const tag = tagName.toLowerCase();
+  return isAllowedTagName(tag) ? tag : GENERAL_FALLBACK_TAG_NAME;
+}
+
+/** 文档内 style 元素的样式内容描述 */
+export interface ParsedStyleBlock {
+  /** CSS 文本内容 */
+  css: string;
+  /** media 属性值（未声明为空字符串） */
+  media: string;
 }
 
 /** 解析后的文档描述 */
@@ -52,6 +63,8 @@ export interface ParsedDocument {
   body: ParsedElement;
   /** body 的子元素（顶层元素列表） */
   children: ParsedElement[];
+  /** 文档内全部 style 元素的样式内容（含 head 与 body，按文档顺序） */
+  styleBlocks: ParsedStyleBlock[];
 }
 
 /**
@@ -64,7 +77,12 @@ export function parseHtmlDocument(input: string): ParsedDocument {
   // 使用 text/html 让浏览器自动修正 HTML 语法错误
   const doc = parser.parseFromString(input, 'text/html');
   const body = parseElementNode(doc.body);
-  return { body, children: body.children };
+  // querySelectorAll 按文档顺序返回结果，且不会深入 template 的 content 文档片段
+  const styleBlocks = Array.from(doc.querySelectorAll('style')).map((styleEl) => ({
+    css: styleEl.textContent ?? '',
+    media: styleEl.getAttribute('media') ?? '',
+  }));
+  return { body, children: body.children, styleBlocks };
 }
 
 /**
@@ -102,12 +120,15 @@ function parseElementNode(el: Element): ParsedElement {
   const attributes: Record<string, string> = {};
   const style: Record<string, string> = {};
   let classes: string[] = [];
+  let id = '';
 
   Array.from(el.attributes).forEach((attr) => {
     if (attr.name === 'style') {
       Object.assign(style, parseInlineStyle(attr.value));
     } else if (attr.name === 'class') {
       classes = attr.value.split(/\s+/).filter(Boolean);
+    } else if (attr.name === 'id') {
+      id = attr.value;
     } else {
       attributes[attr.name] = attr.value;
     }
@@ -115,12 +136,16 @@ function parseElementNode(el: Element): ParsedElement {
 
   return {
     tagName: el.tagName.toLowerCase(),
+    id,
     attributes,
     style,
     classes,
     textContent: '',
     isText: false,
-    children: parseNodeList(el.childNodes),
+    // template 的子节点存放在 content 文档片段
+    children: parseNodeList(
+      el.tagName === 'TEMPLATE' ? (el as HTMLTemplateElement).content.childNodes : el.childNodes
+    ),
   };
 }
 
@@ -130,6 +155,7 @@ function parseTextNode(textNode: Text): ParsedElement | null {
   if (!text.trim()) return null;
   return {
     tagName: '',
+    id: '',
     attributes: {},
     style: {},
     classes: [],

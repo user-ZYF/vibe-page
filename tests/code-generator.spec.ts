@@ -4,11 +4,13 @@ import { ButtonTypeEnum, CanvasElementTypeEnum, HeadingLevelEnum } from '@/const
 import { StyleRuleTypeEnum } from '@/constants/style';
 import type {
   CanvasButtonElement,
+  CanvasGeneralElement,
   CanvasHeadingElement,
   CanvasImageElement,
   CanvasInnerElement,
   CanvasRootElement,
   CanvasStyleRule,
+  CanvasTextElement,
 } from '@/views/Canvas/types';
 
 /** 构造根元素 */
@@ -18,17 +20,27 @@ function mkRoot(children: CanvasInnerElement[] = []): CanvasRootElement {
 
 /** 构造按钮元素 */
 function mkButton(id: string, text: string): CanvasButtonElement {
-  return { id, type: CanvasElementTypeEnum.BUTTON, classes: [], text, buttonType: ButtonTypeEnum.BUTTON };
+  return { id, type: CanvasElementTypeEnum.BUTTON, classes: [], text, buttonType: ButtonTypeEnum.BUTTON, disabled: false };
 }
 
 /** 构造标题元素 */
-function mkHeading(id: string, level: HeadingLevelEnum | undefined): CanvasHeadingElement {
+function mkHeading(id: string, level: HeadingLevelEnum): CanvasHeadingElement {
   return { id, type: CanvasElementTypeEnum.HEADING, classes: [], text: '标题', level };
 }
 
 /** 构造图片元素 */
 function mkImage(id: string): CanvasImageElement {
   return { id, type: CanvasElementTypeEnum.IMAGE, classes: [], src: 'a.png', title: '图' };
+}
+
+/** 构造通用元素 */
+function mkGeneral(id: string, tagName: string, children: CanvasInnerElement[] = []): CanvasGeneralElement {
+  return { id, type: CanvasElementTypeEnum.GENERAL, classes: [], tagName, attributes: {}, children };
+}
+
+/** 构造纯文本元素 */
+function mkText(id: string, text: string): CanvasTextElement {
+  return { id, type: CanvasElementTypeEnum.TEXT, classes: [], text };
 }
 
 describe('generateHtml', () => {
@@ -41,10 +53,9 @@ describe('generateHtml', () => {
     expect(html).toBe('<body id="root1">\n  <button id="b1" type="button">按钮</button>\n</body>');
   });
 
-  it('标题按 level 渲染 h1~h6，脏数据回退 h1', () => {
+  it('标题按 level 渲染 h1~h6', () => {
     expect(generateHtml(mkRoot([mkHeading('h2', HeadingLevelEnum.H2)]))).toContain('<h2 id="h2">');
-    expect(generateHtml(mkRoot([mkHeading('h7', 7 as HeadingLevelEnum)]))).toContain('<h1 id="h7">');
-    expect(generateHtml(mkRoot([mkHeading('h0', undefined)]))).toContain('<h1 id="h0">');
+    expect(generateHtml(mkRoot([mkHeading('h6', HeadingLevelEnum.H6)]))).toContain('<h6 id="h6">');
   });
 
   it('文本内容做 HTML 转义', () => {
@@ -65,6 +76,25 @@ describe('generateHtml', () => {
   it('img 等空元素自闭合', () => {
     const html = generateHtml(mkRoot([mkImage('i1')]));
     expect(html).toContain('<img id="i1" src="a.png" alt="图" />');
+  });
+
+  it('通用元素原样输出存储的标签名（合法性由解析入库与改名时保证）', () => {
+    const el = mkGeneral('g1', 'marquee', [mkText('t1', '<b>raw</b>')]);
+    const html = generateHtml(mkRoot([el]));
+    expect(html).toContain('<marquee id="g1">');
+  });
+
+  it('通用元素内的文本内容照常转义', () => {
+    const el = mkGeneral('g1', 'marquee', [mkText('t1', 'a</marquee>b')]);
+    const html = generateHtml(mkRoot([el]));
+    expect(html).toContain('a&lt;/marquee&gt;b');
+  });
+  it('通用元素脏数据标签名回退兜底标签（大小写不敏感）', () => {
+    const html = generateHtml(mkRoot([mkGeneral('g1', 'script'), mkGeneral('g2', 'IFRAME')]));
+    expect(html).toContain('<div id="g1"');
+    expect(html).toContain('<div id="g2"');
+    expect(html).not.toContain('<script');
+    expect(html).not.toContain('<iframe');
   });
 });
 

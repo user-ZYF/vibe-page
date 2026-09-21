@@ -1,5 +1,4 @@
 import {
-  CanvasInnerElement,
   CanvasButtonElement,
   CanvasParagraphElement,
   CanvasImageElement,
@@ -22,54 +21,14 @@ import {
   CanvasTableHeaderCellElement,
   CanvasTableColGroupElement,
   CanvasHeadingElement,
+  CanvasGeneralElement,
 } from '@/views/Canvas/types';
-import { CanvasElementTypeEnum, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP, normalizeHeadingLevel } from '@/constants/home';
+import { CanvasElementTypeEnum, ELEMENT_TYPE_TAG_MAP, LinkTargetEnum, TABLE_SCOPE_ATTR_MAP } from '@/constants/home';
 import { StyleRuleTypeEnum } from '@/constants/style';
 
 import type { CanvasStyleRule } from '@/views/Canvas/types';
-import { sanitizeUrl } from '@/utils/sanitize';
-
-/** 元素类型到 HTML 标签的映射 */
-const TAG_MAP: Record<CanvasElementTypeEnum, string> = {
-  [CanvasElementTypeEnum.CONTAINER]: 'div',
-  [CanvasElementTypeEnum.BUTTON]: 'button',
-  [CanvasElementTypeEnum.PARAGRAPH]: 'p',
-  [CanvasElementTypeEnum.IMAGE]: 'img',
-  [CanvasElementTypeEnum.LINK]: 'a',
-  [CanvasElementTypeEnum.ROOT]: 'body',
-  [CanvasElementTypeEnum.INPUT]: 'input',
-  [CanvasElementTypeEnum.TEXTAREA]: 'textarea',
-  [CanvasElementTypeEnum.RADIO]: 'input',
-  [CanvasElementTypeEnum.CHECKBOX]: 'input',
-  [CanvasElementTypeEnum.VIDEO]: 'video',
-  [CanvasElementTypeEnum.AUDIO]: 'audio',
-  [CanvasElementTypeEnum.LABEL]: 'label',
-  [CanvasElementTypeEnum.FORM]: 'form',
-  [CanvasElementTypeEnum.SPAN]: 'span',
-  [CanvasElementTypeEnum.TEXT]: '',
-  [CanvasElementTypeEnum.UNORDERED_LIST]: 'ul',
-  [CanvasElementTypeEnum.ORDERED_LIST]: 'ol',
-  [CanvasElementTypeEnum.LIST_ITEM]: 'li',
-  [CanvasElementTypeEnum.TABLE]: 'table',
-  [CanvasElementTypeEnum.TABLE_HEAD]: 'thead',
-  [CanvasElementTypeEnum.TABLE_BODY]: 'tbody',
-  [CanvasElementTypeEnum.TABLE_FOOT]: 'tfoot',
-  [CanvasElementTypeEnum.TABLE_ROW]: 'tr',
-  [CanvasElementTypeEnum.TABLE_DATA]: 'td',
-  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: 'th',
-  [CanvasElementTypeEnum.TABLE_CAPTION]: 'caption',
-  [CanvasElementTypeEnum.TABLE_COL_GROUP]: 'colgroup',
-  [CanvasElementTypeEnum.TABLE_COL]: 'col',
-  [CanvasElementTypeEnum.HEADER]: 'header',
-  [CanvasElementTypeEnum.FOOTER]: 'footer',
-  [CanvasElementTypeEnum.ARTICLE]: 'article',
-  [CanvasElementTypeEnum.SECTION]: 'section',
-  [CanvasElementTypeEnum.ASIDE]: 'aside',
-  [CanvasElementTypeEnum.HEADING]: 'h1',
-};
-
-/** 自闭合标签集合 */
-const VOID_TAGS = new Set(['img', 'input', 'col']);
+import { sanitizeUrl, sanitizeAttributeValue } from '@/utils/sanitize';
+import { isVoidElement, resolveSafeTagName } from '@/utils/html-parser';
 
 /**
  * 转义 HTML 特殊字符（属性值与文本内容通用）
@@ -98,6 +57,7 @@ function buildAttributes(element: CanvasElement): string {
     case CanvasElementTypeEnum.BUTTON: {
       const btn = element as CanvasButtonElement;
       if (btn.buttonType) attrs.push(`type="${escapeHtml(btn.buttonType)}"`);
+      if (btn.disabled) attrs.push(`disabled`);
       break;
     }
     case CanvasElementTypeEnum.IMAGE: {
@@ -127,6 +87,7 @@ function buildAttributes(element: CanvasElement): string {
       if (input.placeholder) attrs.push(`placeholder="${escapeHtml(input.placeholder)}"`);
       if (input.value) attrs.push(`value="${escapeHtml(input.value)}"`);
       if (input.required) attrs.push(`required`);
+      if (input.disabled) attrs.push(`disabled`);
       break;
     }
     case CanvasElementTypeEnum.TEXTAREA: {
@@ -134,6 +95,7 @@ function buildAttributes(element: CanvasElement): string {
       if (textarea.placeholder) attrs.push(`placeholder="${escapeHtml(textarea.placeholder)}"`);
       if (textarea.rows) attrs.push(`rows="${textarea.rows}"`);
       if (textarea.required) attrs.push(`required`);
+      if (textarea.disabled) attrs.push(`disabled`);
       break;
     }
     case CanvasElementTypeEnum.RADIO: {
@@ -143,6 +105,7 @@ function buildAttributes(element: CanvasElement): string {
       if (radio.value) attrs.push(`value="${escapeHtml(radio.value)}"`);
       if (radio.checked) attrs.push(`checked`);
       if (radio.required) attrs.push(`required`);
+      if (radio.disabled) attrs.push(`disabled`);
       break;
     }
     case CanvasElementTypeEnum.CHECKBOX: {
@@ -152,6 +115,7 @@ function buildAttributes(element: CanvasElement): string {
       if (checkbox.value) attrs.push(`value="${escapeHtml(checkbox.value)}"`);
       if (checkbox.checked) attrs.push(`checked`);
       if (checkbox.required) attrs.push(`required`);
+      if (checkbox.disabled) attrs.push(`disabled`);
       break;
     }
     case CanvasElementTypeEnum.VIDEO: {
@@ -206,6 +170,15 @@ function buildAttributes(element: CanvasElement): string {
       if (colgroup.span !== undefined && colgroup.span > 1) attrs.push(`span="${colgroup.span}"`);
       break;
     }
+    case CanvasElementTypeEnum.GENERAL: {
+      /** 通用元素原样输出存储的属性 */
+      const general = element as CanvasGeneralElement;
+      Object.entries(general.attributes).forEach(([name, value]) => {
+        const safeValue = sanitizeAttributeValue(name, value);
+        if (safeValue !== null) attrs.push(`${name}="${escapeHtml(safeValue)}"`);
+      });
+      break;
+    }
   }
 
   return attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
@@ -234,14 +207,17 @@ function getElementContent(element: CanvasElement): string {
 }
 
 /**
- * 解析元素对应的 HTML 标签（标题元素按 level 生成 h1-h6，未设置时默认 h1）
+ * 解析元素对应的 HTML 标签
  */
 function resolveTag(element: CanvasElement): string {
   if (element.type === CanvasElementTypeEnum.HEADING) {
-    // level 收敛到 1~6，避免脏数据生成非法标签
-    return `h${normalizeHeadingLevel((element as CanvasHeadingElement).level)}`;
+    return `h${(element as CanvasHeadingElement).level}`;
   }
-  return TAG_MAP[element.type];
+  if (element.type === CanvasElementTypeEnum.GENERAL) {
+    // 通用元素按存储的原始标签名生成（解析入库与改名时均已校验，此处兜底防脏数据生成危险标签）
+    return resolveSafeTagName((element as CanvasGeneralElement).tagName);
+  }
+  return ELEMENT_TYPE_TAG_MAP[element.type];
 }
 
 /**
@@ -260,7 +236,7 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
   const attrs = buildAttributes(element);
 
   /** 自闭合标签 */
-  if (VOID_TAGS.has(tag)) {
+  if (isVoidElement(tag)) {
     return `${pad}<${tag}${attrs} />`;
   }
 

@@ -104,7 +104,7 @@ const visible = computed(() => !!selectedElementId.value && !isDragging.value &&
 const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
 
 /** 是否显示resizer（只有选中非根容器元素或链接元素才会出现） */
-const showResizer = computed(() => showToolbar && !!selectedElement.value && selectedElement.value.type !== CanvasElementTypeEnum.ROOT && isParentElement(selectedElement.value as CanvasInnerElement));
+const showResizer = computed(() => showToolbar.value && !!selectedElement.value && selectedElement.value.type !== CanvasElementTypeEnum.ROOT && isParentElement(selectedElement.value as CanvasInnerElement));
 
 /** 工具栏自然 top 偏移（位于边框区域上方） */
 const NATURAL_TOP = -28;
@@ -155,6 +155,18 @@ function getBorderBoxSize(): { width: number; height: number } {
   };
 }
 
+/** 工具栏位置更新的 rAF 句柄 */
+let posRafId: number | null = null;
+
+/** 帧节流更新工具栏位置 */
+function scheduleUpdatePos() {
+  if (posRafId !== null) return;
+  posRafId = requestAnimationFrame(() => {
+    posRafId = null;
+    updatePos();
+  });
+}
+
 /** 开始调整尺寸 */
 function handleResizeStart(e: PointerEvent, dir: ResizeDirEnum) {
   if (!selectedElement.value) return;
@@ -167,6 +179,8 @@ function handleResizeStart(e: PointerEvent, dir: ResizeDirEnum) {
     startY: e.clientY,
     startWidth: width,
     startHeight: height,
+    lastWidth: width,
+    lastHeight: height,
   };
 
   isResizing.value = true;
@@ -193,25 +207,50 @@ function handleResizeMove(e: PointerEvent) {
   newWidth = Math.max(20, Math.round(newWidth));
   newHeight = Math.max(20, Math.round(newHeight));
 
-  const selector = `#${selectedElement.value.id}`;
-  const config = canvasStore.getOrCreateStyleConfig(selector);
-  config.size.width = String(newWidth);
-  config.size.widthUnit = UnitEnum.PX;
-  config.size.height = String(newHeight);
-  config.size.heightUnit = UnitEnum.PX;
-  canvasStore.syncStyle(selector, config);
+  resizeState.lastWidth = newWidth;
+  resizeState.lastHeight = newHeight;
 
-  nextTick(updatePos);
+  // 直接操作内联样式，避免走响应式更新styleConfig→更新styleRule→更新元素尺寸的复杂路径，导致拖拽卡顿
+  const el = getSelectedEl();
+  if (el instanceof HTMLElement) {
+    el.style.width = `${newWidth}px`;
+    el.style.height = `${newHeight}px`;
+  }
+
+  scheduleUpdatePos();
 }
 
 /** 结束调整尺寸 */
 function handleResizeEnd() {
+  const state = resizeState;
   resizeState = null;
   isResizing.value = false;
   window.removeEventListener('pointermove', handleResizeMove);
   window.removeEventListener('pointerup', handleResizeEnd);
 
-  updatePos();
+  if (!state || !selectedElement.value) {
+    updatePos();
+    return;
+  }
+
+  // 拖拽结束，整体更新styleConfig
+  const selector = `#${selectedElement.value.id}`;
+  const config = canvasStore.getOrCreateStyleConfig(selector);
+  config.size.width = String(state.lastWidth);
+  config.size.widthUnit = UnitEnum.PX;
+  config.size.height = String(state.lastHeight);
+  config.size.heightUnit = UnitEnum.PX;
+  canvasStore.syncStyle(selector, config);
+
+  const el = getSelectedEl();
+  nextTick(() => {
+    // 待样式规则生效后删除拖拽期间设置的内联样式，避免其覆盖掉宽高配置
+    if (el instanceof HTMLElement) {
+      el.style.width = '';
+      el.style.height = '';
+    }
+    updatePos();
+  });
 }
 
 /** 获取选中元素的 DOM */
@@ -282,6 +321,10 @@ onBeforeUnmount(() => {
 
   window.removeEventListener('pointermove', handleResizeMove);
   window.removeEventListener('pointerup', handleResizeEnd);
+  if (posRafId !== null) {
+    cancelAnimationFrame(posRafId);
+    posRafId = null;
+  }
 });
 </script>
 

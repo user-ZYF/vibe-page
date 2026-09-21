@@ -53,7 +53,7 @@ defineOptions({
   name: 'MarginPaddingIndicator',
 });
 
-const props = defineProps({
+defineProps({
   /** 是否显示边距尺寸标签 */
   showBoxLabels: {
     type: Boolean,

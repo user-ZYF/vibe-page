@@ -45,7 +45,7 @@ import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
 import { isParentElement, isSubtreeAllowed } from '@/views/Canvas/types';
-import type { CanvasElement, CanvasHeadingElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement, LayerTreeNodeData } from '@/views/Canvas/types';
+import type { CanvasElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement, LayerTreeNodeData } from '@/views/Canvas/types';
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from '../constants.ts';
 import { DeleteOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
 import { MeTree } from '@zyf_dsb/me-ui';
@@ -74,9 +74,7 @@ function toLayerTreeNode(el: CanvasElement): LayerTreeNodeData {
     : [];
   return {
     id: el.id,
-    type: el.type,
-    alias: el.alias,
-    level: el.type === CanvasElementTypeEnum.HEADING ? (el as CanvasHeadingElement).level : undefined,
+    element: el,
     children,
   };
 }
@@ -84,9 +82,9 @@ function toLayerTreeNode(el: CanvasElement): LayerTreeNodeData {
 /** 树数据（以根元素为顶层节点） */
 const treeData = computed<LayerTreeNodeData[]>(() => [toLayerTreeNode(root.value)]);
 
-/** 树节点显示名称（标题元素按级别显示 h1~h6） */
+/** 树节点显示名称（标题元素按级别显示 h1~h6，通用元素显示原始标签名） */
 function getNodeLabel(data: TreeNodeData): string {
-  return getElementDisplayName(data as LayerTreeNodeData);
+  return getElementDisplayName((data as LayerTreeNodeData).element);
 }
 
 /** 树属性映射配置 */

@@ -26,6 +26,9 @@
         <div class="style-config-label">按钮类型</div>
         <me-select v-model="(model as CanvasButtonElement).buttonType" class="style-config-select" :options="BUTTON_TYPE_OPTIONS" clearable />
       </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasButtonElement).disabled">禁用</me-checkbox>
+      </div>
     </template>
 
     <!-- 段落 -->
@@ -73,6 +76,9 @@
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasInputElement).required">必填</me-checkbox>
       </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasInputElement).disabled">禁用</me-checkbox>
+      </div>
     </template>
 
     <!-- 多行文本框 -->
@@ -92,6 +98,9 @@
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasTextareaElement).required">必填</me-checkbox>
       </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasTextareaElement).disabled">禁用</me-checkbox>
+      </div>
     </template>
 
     <!-- 单选框 -->
@@ -110,6 +119,9 @@
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasRadioElement).required">必填</me-checkbox>
       </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasRadioElement).disabled">禁用</me-checkbox>
+      </div>
     </template>
 
     <!-- 多选框 -->
@@ -127,6 +139,9 @@
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasCheckboxElement).required">必填</me-checkbox>
+      </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasCheckboxElement).disabled">禁用</me-checkbox>
       </div>
     </template>
 
@@ -194,6 +209,14 @@
       </div>
     </template>
 
+    <!-- 通用元素 -->
+    <template v-else-if="model.type === CanvasElementTypeEnum.GENERAL">
+      <div class="style-config-section">
+        <div class="style-config-label">标签名</div>
+        <me-input v-model="pendingTagName" class="style-config-input" @blur="commitTagName" />
+      </div>
+    </template>
+
     <!-- 纯文本 -->
     <template v-else-if="model.type === CanvasElementTypeEnum.TEXT">
       <div class="style-config-section">
@@ -228,8 +251,11 @@ import {
   type CanvasFormElement,
   type CanvasTextElement,
   type CanvasHeadingElement,
+  type CanvasGeneralElement,
   isParentElement,
+  isSubtreeAllowed,
 } from '@/views/Canvas/types';
+import { isAllowedTagName, isVoidElement } from '@/utils/html-parser';
 
 defineOptions({
   name: 'SettingConfig',
@@ -252,6 +278,9 @@ const isIdNameValid = computed(() => CSS_NAME_REGEX.test(pendingId.value.trim())
 /** 文本内容编辑的临时值（blur 后才同步到 model，避免输入过程中频繁触发元素尺寸重算） */
 const pendingText = ref('');
 
+/** 通用元素标签名编辑的临时值（blur 校验后才同步到 model） */
+const pendingTagName = ref('');
+
 /** 同步 model 文本到临时值 */
 watch(
   () => model.value,
@@ -263,6 +292,7 @@ watch(
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
     else if (el.type === CanvasElementTypeEnum.HEADING) pendingText.value = (el as CanvasHeadingElement).text;
     else if (el.type === CanvasElementTypeEnum.TEXT) pendingText.value = (el as CanvasTextElement).text;
+    if (el.type === CanvasElementTypeEnum.GENERAL) pendingTagName.value = (el as CanvasGeneralElement).tagName;
   },
   { immediate: true, deep: true },
 );
@@ -276,6 +306,42 @@ function commitText() {
   else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.HEADING) (el as CanvasHeadingElement).text = pendingText.value;
   else if (el.type === CanvasElementTypeEnum.TEXT) (el as CanvasTextElement).text = pendingText.value;
+}
+
+/** blur 时将临时标签名同步到 model（非法值回退并提示） */
+function commitTagName() {
+  const el = model.value;
+  if (!el || el.type !== CanvasElementTypeEnum.GENERAL) return;
+  const tagName = pendingTagName.value.trim().toLowerCase();
+  if (!tagName || tagName === (el as CanvasGeneralElement).tagName) {
+    pendingTagName.value = (el as CanvasGeneralElement).tagName;
+    return;
+  }
+  // 禁用危险标签与原始文本标签
+  if (!isAllowedTagName(tagName)) {
+    pendingTagName.value = (el as CanvasGeneralElement).tagName;
+    message.warning('标签名不合法或不允许使用');
+    return;
+  }
+  const generalEl = el as CanvasGeneralElement;
+  // 目标标签为自闭合元素且当前存在子节点时拒绝改名，避免子元素在生成时被静默丢弃
+  if (isVoidElement(tagName) && generalEl.children.length > 0) {
+    pendingTagName.value = generalEl.tagName;
+    message.warning('目标标签不允许包含子元素');
+    return;
+  }
+  // 目标标签存在结构约束时，逐个校验现有子元素子树是否仍被允许，避免改名后生成非法嵌套结构
+  const renamed = { ...generalEl, tagName };
+  if (generalEl.children.some((child) => !isSubtreeAllowed(renamed, child))) {
+    pendingTagName.value = generalEl.tagName;
+    message.warning('目标标签不允许包含当前子元素');
+    return;
+  }
+  // 别名仍为旧标签名（解析入库时自动生成）时同步更新，保证图层显示跟随新标签名
+  if (generalEl.alias === generalEl.tagName) {
+    generalEl.alias = tagName;
+  }
+  generalEl.tagName = tagName;
 }
 
 /** id 输入框聚焦时保存原值 */

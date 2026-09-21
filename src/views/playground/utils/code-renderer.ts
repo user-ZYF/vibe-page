@@ -4,9 +4,11 @@
  * 递归创建真实 DOM 节点并挂载到预览容器；CSS 规则重建为字符串后注入 <style> 标签。
  */
 import type { ParsedElement } from '@/utils/html-parser';
-import { isVoidElement } from '@/utils/html-parser';
+import { isVoidElement, resolveSafeTagName } from '@/utils/html-parser';
+import { BLOCKED_TAGS } from '@/constants/html';
 import { buildCssString } from '@/utils/css-parser';
 import type { ParsedCssRule } from '@/views/Canvas/types';
+import { sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize';
 
 /**
  * 渲染容器所需的最小结构化类型
@@ -38,12 +40,18 @@ function renderElement(el: ParsedElement, doc: Document): Node | null {
     return doc.createTextNode(el.textContent);
   }
 
-  const node = doc.createElement(el.tagName);
+  // 黑名单标签整棵子树跳过，避免预览中执行脚本或加载外部资源
+  if (BLOCKED_TAGS.has(el.tagName)) return null;
 
-  // 普通属性（剥离 on* 事件属性，避免预览中执行任意内联脚本）
+  // 非法标签名回退为兜底标签，避免 createElement 抛错（与画布渲染、代码生成行为一致）
+  const node = doc.createElement(resolveSafeTagName(el.tagName));
+
+  if (el.id) node.setAttribute('id', el.id);
+
+  // 普通属性（剥离 on* 事件属性、校验 URL 类属性与 SVG 动画取值协议，避免预览中执行任意内联脚本）
   Object.entries(el.attributes).forEach(([name, value]) => {
-    if (/^on/i.test(name)) return;
-    node.setAttribute(name, value);
+    const safeValue = sanitizeAttributeValue(name, value);
+    if (safeValue !== null) node.setAttribute(name, safeValue);
   });
 
   // 类名
@@ -51,9 +59,9 @@ function renderElement(el: ParsedElement, doc: Document): Node | null {
     node.setAttribute('class', el.classes.join(' '));
   }
 
-  // 行内样式
+  // 行内样式（url() 地址经协议校验，不安全协议替换为空 url()）
   const styleStr = Object.entries(el.style)
-    .map(([prop, value]) => `${prop}: ${value}`)
+    .map(([prop, value]) => `${prop}: ${sanitizeCssUrl(value)}`)
     .join('; ');
   if (styleStr) {
     node.setAttribute('style', styleStr);
@@ -71,6 +79,21 @@ function renderElement(el: ParsedElement, doc: Document): Node | null {
 }
 
 /**
+ * 净化 CSS 规则中的 url() 地址
+ * @param rules 解析后的 CSS 规则
+ * @returns 净化后的规则副本（不修改入参）
+ */
+function sanitizeRules(rules: ParsedCssRule[]): ParsedCssRule[] {
+  return rules.map((rule) => ({
+    ...rule,
+    atRuleCssText: rule.atRuleCssText ? sanitizeCssUrl(rule.atRuleCssText) : rule.atRuleCssText,
+    style: Object.fromEntries(
+      Object.entries(rule.style).map(([prop, value]) => [prop, sanitizeCssUrl(value)])
+    ),
+  }));
+}
+
+/**
  * 渲染 HTML + CSS 到指定容器
  * @param container 容器元素
  * @param elements 解析后的元素树
@@ -85,8 +108,8 @@ export function renderToContainer(
 ): void {
   // 清空容器
   container.innerHTML = '';
-  // 注入 CSS
-  styleEl.textContent = buildCssString(rules);
+  // 注入 CSS（url() 地址经协议校验，与画布管线行为一致）
+  styleEl.textContent = buildCssString(sanitizeRules(rules));
   // 挂载生成的 DOM 节点（ownerDocument 使用断言，因跨模块 DOM lib 类型可能不一致）
   const doc = container.ownerDocument as Document;
   renderElements(elements, doc).forEach((node) => {

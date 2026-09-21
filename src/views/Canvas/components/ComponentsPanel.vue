@@ -43,6 +43,7 @@ import {
   BorderVerticleOutlined,
   CheckCircleOutlined,
   CheckSquareOutlined,
+  CodeOutlined,
   ColumnHeightOutlined,
   ColumnWidthOutlined,
   EditOutlined,
@@ -70,7 +71,7 @@ defineOptions({
 
 /** 画布元素图标映射 */
 const CanvasElementIconMap: Record<CanvasElementTypeEnum, Component> = {
-  [CanvasElementTypeEnum.CONTAINER]: BorderOuterOutlined,
+  [CanvasElementTypeEnum.DIV]: BorderOuterOutlined,
   [CanvasElementTypeEnum.SPAN]: FontSizeOutlined,
   [CanvasElementTypeEnum.TEXT]: FileTextOutlined,
   [CanvasElementTypeEnum.PARAGRAPH]: AlignLeftOutlined,
@@ -105,6 +106,7 @@ const CanvasElementIconMap: Record<CanvasElementTypeEnum, Component> = {
   [CanvasElementTypeEnum.ASIDE]: BorderRightOutlined,
   [CanvasElementTypeEnum.HEADING]: FontSizeOutlined,
   [CanvasElementTypeEnum.ROOT]: BorderOuterOutlined,
+  [CanvasElementTypeEnum.GENERAL]: CodeOutlined,
 };
 
 /** 当前展开的折叠面板 */
@@ -116,7 +118,8 @@ const componentGroups: ComponentGroup[] = [
     key: 'basic',
     header: 'Basic',
     components: [
-      CanvasElementTypeEnum.CONTAINER,
+      CanvasElementTypeEnum.DIV,
+      CanvasElementTypeEnum.GENERAL,
       CanvasElementTypeEnum.SPAN,
       CanvasElementTypeEnum.TEXT,
       CanvasElementTypeEnum.PARAGRAPH,

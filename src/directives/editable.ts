@@ -1,4 +1,4 @@
-import { type Directive, type Ref, nextTick } from 'vue';
+import { type Directive, nextTick } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
 
 /** v-editable 指令参数 */

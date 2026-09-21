@@ -11,12 +11,9 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { useStyleTag } from '@vueuse/core';
 import { MeConfigProvider } from '@zyf_dsb/me-ui';
 import { getThemeConfig, getMeThemeConfig } from '@/config/theme';
 import { useThemeStore } from '@/store/theme';
-import githubLightCss from 'highlight.js/styles/github.css?raw';
-import githubDarkCss from 'highlight.js/styles/github-dark.css?raw';
 import { storeToRefs } from 'pinia';
 
 const themeStore = useThemeStore();
@@ -27,10 +24,6 @@ const themeConfig = computed(() => getThemeConfig(isDark.value));
 
 /** 响应式 me-ui 主题 Token 配置 */
 const meThemeConfig = computed(() => getMeThemeConfig(isDark.value));
-
-/** 根据主题切换 highlight.js 高亮样式 */
-const highlightCss = computed(() => (isDark.value ? githubDarkCss : githubLightCss));
-useStyleTag(highlightCss, { id: 'hljs-theme' });
 
 /** 监听主题变化，同步 data-theme 属性到 documentElement */
 watch(

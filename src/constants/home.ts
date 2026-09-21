@@ -1,3 +1,5 @@
+import type { CanvasElement, TagConstraints } from '@/views/Canvas/types';
+
 /** Sider 面板类型枚举 */
 export enum SiderPanelEnum {
   /** 编辑样式 */
@@ -14,8 +16,8 @@ export enum SiderPanelEnum {
 
 /** 画布元素类型 */
 export enum CanvasElementTypeEnum {
-  /** 容器 */
-  CONTAINER,
+  /** div 容器 */
+  DIV,
   /** 超链接 */
   LINK,
   /** 图片 */
@@ -84,11 +86,13 @@ export enum CanvasElementTypeEnum {
   ASIDE,
   /** 标题 */
   HEADING,
+  /** 通用元素（未在组件定义范围内的任意 HTML 标签） */
+  GENERAL,
 }
 
 /** 画布元素label */
 export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
-  [CanvasElementTypeEnum.CONTAINER]: "container",
+  [CanvasElementTypeEnum.DIV]: "div",
   [CanvasElementTypeEnum.LINK]: "link",
   [CanvasElementTypeEnum.IMAGE]: "image",
   [CanvasElementTypeEnum.BUTTON]: "button",
@@ -123,6 +127,7 @@ export const CanvasElementLabelMap: Record<CanvasElementTypeEnum, string> = {
   [CanvasElementTypeEnum.SECTION]: "section",
   [CanvasElementTypeEnum.ASIDE]: "aside",
   [CanvasElementTypeEnum.HEADING]: "heading",
+  [CanvasElementTypeEnum.GENERAL]: "general",
 }
 
 /** 按钮类型 */
@@ -196,153 +201,143 @@ export const FORM_ELEMENT_TYPES = [
   CanvasElementTypeEnum.CHECKBOX,
 ];
 
-/**
- * a元素不允许嵌套的后代元素类型集合
- * 根据 HTML 规范，a 元素（带 href）的内容模型为透明模型，
- * 但不得包含交互式内容（interactive content）后代
- */
-export const LINK_DESCENDANT_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.LINK,
-  CanvasElementTypeEnum.BUTTON,
-  CanvasElementTypeEnum.INPUT,
-  CanvasElementTypeEnum.TEXTAREA,
-  CanvasElementTypeEnum.RADIO,
-  CanvasElementTypeEnum.CHECKBOX,
-  CanvasElementTypeEnum.VIDEO,
-  CanvasElementTypeEnum.AUDIO,
-  CanvasElementTypeEnum.LABEL,
+/** 文本节点伪标签 */
+export const TEXT_NODE_TAG = '#text';
+
+/** 元素类型到 HTML 标签的映射 */
+export const ELEMENT_TYPE_TAG_MAP: Record<CanvasElementTypeEnum, string> = {
+  [CanvasElementTypeEnum.DIV]: 'div',
+  [CanvasElementTypeEnum.BUTTON]: 'button',
+  [CanvasElementTypeEnum.PARAGRAPH]: 'p',
+  [CanvasElementTypeEnum.IMAGE]: 'img',
+  [CanvasElementTypeEnum.LINK]: 'a',
+  [CanvasElementTypeEnum.ROOT]: 'body',
+  [CanvasElementTypeEnum.INPUT]: 'input',
+  [CanvasElementTypeEnum.TEXTAREA]: 'textarea',
+  [CanvasElementTypeEnum.RADIO]: 'input',
+  [CanvasElementTypeEnum.CHECKBOX]: 'input',
+  [CanvasElementTypeEnum.VIDEO]: 'video',
+  [CanvasElementTypeEnum.AUDIO]: 'audio',
+  [CanvasElementTypeEnum.LABEL]: 'label',
+  [CanvasElementTypeEnum.FORM]: 'form',
+  [CanvasElementTypeEnum.SPAN]: 'span',
+  [CanvasElementTypeEnum.TEXT]: '',
+  [CanvasElementTypeEnum.UNORDERED_LIST]: 'ul',
+  [CanvasElementTypeEnum.ORDERED_LIST]: 'ol',
+  [CanvasElementTypeEnum.LIST_ITEM]: 'li',
+  [CanvasElementTypeEnum.TABLE]: 'table',
+  [CanvasElementTypeEnum.TABLE_HEAD]: 'thead',
+  [CanvasElementTypeEnum.TABLE_BODY]: 'tbody',
+  [CanvasElementTypeEnum.TABLE_FOOT]: 'tfoot',
+  [CanvasElementTypeEnum.TABLE_ROW]: 'tr',
+  [CanvasElementTypeEnum.TABLE_DATA]: 'td',
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: 'th',
+  [CanvasElementTypeEnum.TABLE_CAPTION]: 'caption',
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: 'colgroup',
+  [CanvasElementTypeEnum.TABLE_COL]: 'col',
+  [CanvasElementTypeEnum.HEADER]: 'header',
+  [CanvasElementTypeEnum.FOOTER]: 'footer',
+  [CanvasElementTypeEnum.ARTICLE]: 'article',
+  [CanvasElementTypeEnum.SECTION]: 'section',
+  [CanvasElementTypeEnum.ASIDE]: 'aside',
+  [CanvasElementTypeEnum.HEADING]: 'h1',
+  [CanvasElementTypeEnum.GENERAL]: '',
+};
+
+/** phrasing content 标签名集合（HTML 规范行内内容，'#text' 表示文本节点） */
+export const PHRASING_CONTENT_TAGS: readonly string[] = [
+  TEXT_NODE_TAG,
+  'a', 'abbr', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite', 'code', 'data',
+  'datalist', 'del', 'dfn', 'em', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'mark',
+  'math', 'meter', 'noscript', 'output', 'picture', 'progress', 'q', 'ruby', 's', 'samp',
+  'select', 'slot', 'small', 'span', 'strong', 'sub', 'sup', 'svg', 'template', 'textarea',
+  'time', 'u', 'var', 'video', 'wbr',
+];
+
+/** a 元素内不允许出现的后代标签（交互式内容 + 媒体元素） */
+const LINK_DESCENDANT_EXCLUDE_TAGS: readonly string[] = [
+  'a', 'audio', 'button', 'details', 'embed', 'iframe', 'input', 'label', 'object', 'select', 'textarea', 'video',
+];
+
+/** header/footer 元素内不允许出现的后代标签 */
+const HEADER_FOOTER_DESCENDANT_EXCLUDE_TAGS: readonly string[] = ['header', 'footer'];
+
+/** 标题标签名（用于约束白名单匹配及 h1~h6 类型级校验） */
+export const HEADING_TAGS: readonly string[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
+/** 仅允许文本子节点的约束（白名单仅含 '#text'，等价于禁止任何元素子节点） */
+const TEXT_ONLY_CONSTRAINTS: TagConstraints = { directIncludeTags: [TEXT_NODE_TAG] };
+
+/** 分节内容标签名集合（address/dt 等元素不允许的后代） */
+const SECTIONING_TAGS: readonly string[] = ['article', 'aside', 'nav', 'section'];
+
+/** address/dt 元素内不允许出现的标签（标题内容 + 分节内容 + header/footer） */
+const ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS: readonly string[] = [
+  ...HEADING_TAGS, 'hgroup', ...SECTIONING_TAGS, 'header', 'footer',
 ];
 
 /**
- * form元素不允许嵌套的后代元素类型集合
- * 根据 HTML 规范，form 元素不得包含另一个 form 元素
+ * 元素结构约束（按 HTML 标签名索引）
  */
-export const FORM_DESCENDANT_EXCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.FORM,
-];
+export const TAG_CONSTRAINTS: Readonly<Record<string, TagConstraints>> = {
+  /** 直接子元素结构约束 */
+  colgroup: { directIncludeTags: ['col'] },
+  datalist: { directIncludeTags: ['option', ...PHRASING_CONTENT_TAGS] },
+  dl: { directIncludeTags: ['dt', 'dd', 'div', 'template'] },
+  ol: { directIncludeTags: ['li'] },
+  optgroup: { directIncludeTags: ['option', 'template'] },
+  option: TEXT_ONLY_CONSTRAINTS,
+  picture: { directIncludeTags: ['source', 'img', 'template'] },
+  select: { directIncludeTags: ['option', 'optgroup', 'hr', 'template'] },
+  table: { directIncludeTags: ['caption', 'colgroup', 'tbody', 'tfoot', 'thead', 'tr'] },
+  tbody: { directIncludeTags: ['tr'] },
+  tfoot: { directIncludeTags: ['tr'] },
+  thead: { directIncludeTags: ['tr'] },
+  tr: { directIncludeTags: ['td', 'th'] },
+  ul: { directIncludeTags: ['li'] },
 
-/**
- * ul元素允许的直接子元素类型集合
- * 根据 HTML 规范，ul 元素仅允许包含 li 作为直接子元素
- */
-export const UL_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.LIST_ITEM,
-];
+  /** 后代元素结构约束 */
+  a: { descendantExcludeTags: LINK_DESCENDANT_EXCLUDE_TAGS },
+  address: { descendantExcludeTags: ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS },
+  caption: { descendantExcludeTags: ['table'] },
+  dt: { descendantExcludeTags: ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS },
+  footer: { descendantExcludeTags: HEADER_FOOTER_DESCENDANT_EXCLUDE_TAGS },
+  form: { descendantExcludeTags: ['form'] },
+  header: { descendantExcludeTags: HEADER_FOOTER_DESCENDANT_EXCLUDE_TAGS },
+  hgroup: { descendantIncludeTags: [...HEADING_TAGS, 'p', TEXT_NODE_TAG] },
+  legend: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS] },
+  meter: { descendantIncludeTags: PHRASING_CONTENT_TAGS, descendantExcludeTags: ['meter'] },
+  progress: { descendantIncludeTags: PHRASING_CONTENT_TAGS, descendantExcludeTags: ['progress'] },
+  ruby: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, 'rt', 'rp'] },
+  span: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  summary: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS] },
 
-/**
- * ol元素允许的直接子元素类型集合
- * 根据 HTML 规范，ol 元素仅允许包含 li 作为直接子元素
- */
-export const OL_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.LIST_ITEM,
-];
-
-/**
- * span元素允许的后代元素类型集合
- * 根据 HTML 规范，span 元素的内容模型为 phrasing content，
- * 所有后代必须是 phrasing content 类型
- */
-export const SPAN_DESCENDANT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.LINK,
-  CanvasElementTypeEnum.IMAGE,
-  CanvasElementTypeEnum.BUTTON,
-  CanvasElementTypeEnum.INPUT,
-  CanvasElementTypeEnum.TEXTAREA,
-  CanvasElementTypeEnum.RADIO,
-  CanvasElementTypeEnum.CHECKBOX,
-  CanvasElementTypeEnum.VIDEO,
-  CanvasElementTypeEnum.AUDIO,
-  CanvasElementTypeEnum.LABEL,
-  CanvasElementTypeEnum.SPAN,
-  CanvasElementTypeEnum.TEXT,
-];
-
-/**
- * table元素允许的直接子元素类型集合
- * 根据 HTML 规范，table 元素允许包含 caption、colgroup、thead、tbody、tfoot、tr 作为直接子元素
- */
-export const TABLE_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_CAPTION,
-  CanvasElementTypeEnum.TABLE_COL_GROUP,
-  CanvasElementTypeEnum.TABLE_HEAD,
-  CanvasElementTypeEnum.TABLE_BODY,
-  CanvasElementTypeEnum.TABLE_FOOT,
-  CanvasElementTypeEnum.TABLE_ROW,
-];
-
-/**
- * thead元素允许的直接子元素类型集合
- * 根据 HTML 规范，thead 元素仅允许包含 tr 作为直接子元素
- */
-export const THEAD_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_ROW,
-];
-
-/**
- * tbody元素允许的直接子元素类型集合
- * 根据 HTML 规范，tbody 元素仅允许包含 tr 作为直接子元素
- */
-export const TBODY_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_ROW,
-];
-
-/**
- * tfoot元素允许的直接子元素类型集合
- * 根据 HTML 规范，tfoot 元素仅允许包含 tr 作为直接子元素
- */
-export const TFOOT_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_ROW,
-];
-
-/**
- * tr元素允许的直接子元素类型集合
- * 根据 HTML 规范，tr 元素允许包含 td 和 th 作为直接子元素
- */
-export const TR_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_DATA,
-  CanvasElementTypeEnum.TABLE_HEADER_CELL,
-];
-
-/**
- * colgroup元素允许的直接子元素类型集合
- * 根据 HTML 规范，colgroup 元素仅允许包含 col 作为直接子元素
- */
-export const COLGROUP_DIRECT_INCLUDE_TYPES: Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[] = [
-  CanvasElementTypeEnum.TABLE_COL,
-];
-
-/**
- * 元素类型结构约束（字段对应 CanvasElementBase 的同名约束字段）
- * 全部为只读，禁止修改
- */
-export interface ElementTypeConstraints {
-  /** 允许的直接子元素类型（仅约束直接子元素） */
-  readonly directInclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
-  /** 不允许的直接子元素类型（仅约束直接子元素） */
-  readonly directExclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
-  /** 允许的后代元素类型（约束所有后代） */
-  readonly descendantInclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
-  /** 不允许的后代元素类型（约束所有后代） */
-  readonly descendantExclude?: readonly Exclude<CanvasElementTypeEnum, CanvasElementTypeEnum.ROOT>[];
-}
-
-/**
- * 元素类型的固定 HTML 结构约束
- * 元素嵌套校验（isChildTypeAllowed / isSubtreeAllowed）的唯一来源，按元素类型直接查表；
- * 内容为只读，共享引用无需克隆
- */
-export const ELEMENT_TYPE_CONSTRAINTS: Partial<Record<CanvasElementTypeEnum, ElementTypeConstraints>> = {
-  [CanvasElementTypeEnum.LINK]: { descendantExclude: LINK_DESCENDANT_EXCLUDE_TYPES },
-  [CanvasElementTypeEnum.FORM]: { descendantExclude: FORM_DESCENDANT_EXCLUDE_TYPES },
-  [CanvasElementTypeEnum.SPAN]: { descendantInclude: SPAN_DESCENDANT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.UNORDERED_LIST]: { directInclude: UL_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.ORDERED_LIST]: { directInclude: OL_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE]: { directInclude: TABLE_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE_HEAD]: { directInclude: THEAD_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE_BODY]: { directInclude: TBODY_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE_FOOT]: { directInclude: TFOOT_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE_ROW]: { directInclude: TR_DIRECT_INCLUDE_TYPES },
-  [CanvasElementTypeEnum.TABLE_COL_GROUP]: { directInclude: COLGROUP_DIRECT_INCLUDE_TYPES },
+  /** 仅允许 phrasing content 后代的行内标签 */
+  abbr: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  b: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  bdi: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  bdo: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  cite: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  code: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  data: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  dfn: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  em: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  i: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  kbd: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  mark: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  output: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  q: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  rp: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  rt: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  s: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  samp: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  small: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  strong: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  sub: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  sup: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  time: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  u: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  var: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
 };
 
 /** 表头单元格 scope 属性枚举 */
@@ -402,27 +397,15 @@ export const HEADING_LEVEL_OPTIONS = [
 ];
 
 /**
- * 将标题级别收敛到 1~6 的合法范围
- * @param level 标题级别（可能为脏数据）
- * @returns 非法值（非整数、越界、未定义）回退为一级标题
- */
-export function normalizeHeadingLevel(level: HeadingLevelEnum | number | undefined): HeadingLevelEnum {
-  const n = Number(level);
-  if (!Number.isInteger(n) || n < HeadingLevelEnum.H1 || n > HeadingLevelEnum.H6) {
-    return HeadingLevelEnum.H1;
-  }
-  return n;
-}
-
-/**
  * 获取元素显示名称
- * 优先使用元素别名；标题元素按级别显示 h1~h6；其余查类型标签映射
- * @param el 含 type/alias/level 的元素描述
  */
-export function getElementDisplayName(el: { alias?: string; type: CanvasElementTypeEnum; level?: HeadingLevelEnum }): string {
+export function getElementDisplayName(el: CanvasElement): string {
   if (el.alias) return el.alias;
   if (el.type === CanvasElementTypeEnum.HEADING) {
-    return `h${normalizeHeadingLevel(el.level)}`;
+    return `h${el.level}`;
+  }
+  if (el.type === CanvasElementTypeEnum.GENERAL && el.tagName) {
+    return el.tagName;
   }
   return CanvasElementLabelMap[el.type];
 }

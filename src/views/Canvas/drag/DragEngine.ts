@@ -19,20 +19,18 @@ class DragEngine {
     // 设置允许拖拽
     el.setAttribute("draggable", "true");
 
-    const that = this;
-
     /** 拖拽开始 */
-    function handleDragStart(e: DragEvent) {
+    const handleDragStart = (e: DragEvent) => {
       e.stopPropagation();
       const dragStore = useDragStore();
       dragStore.startDrag(id);
-    }
+    };
 
     /** 拖拽结束 */
-    function handleDragEnd(e: DragEvent) {
+    const handleDragEnd = (e: DragEvent) => {
       e.stopPropagation();
-      that.dropExisting();
-    }
+      this.dropExisting();
+    };
 
     el.addEventListener("dragstart", handleDragStart);
     el.addEventListener("dragend", handleDragEnd);
@@ -46,10 +44,8 @@ class DragEngine {
 
   /** 绑定「可接收」事件，返回解绑函数 */
   connectDroppable(el: HTMLElement, id: string): () => void {
-    const instance = this;
-
     /** 拖拽悬停 */
-    function handleDragOver(e: DragEvent) {
+    const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
 
       const dragStore = useDragStore();
@@ -74,7 +70,7 @@ class DragEngine {
       const targetReg = nodeRegistry.getNodeFromElement(e.target as HTMLElement);
       const dropTargetId = targetReg ? targetReg.id : id;
 
-      const indicator = instance.positioner.compute(
+      const indicator = this.positioner.compute(
         dropTargetId,
         e.clientX,
         e.clientY,
@@ -86,10 +82,10 @@ class DragEngine {
       );
 
       dragStore.setIndicator(indicator);
-    }
+    };
 
     /** 拖拽离开画布区域 */
-    function handleDragLeave(e: DragEvent) {
+    const handleDragLeave = (e: DragEvent) => {
       e.stopPropagation();
 
       const dragStore = useDragStore();
@@ -99,7 +95,7 @@ class DragEngine {
       if (relatedTarget && el.contains(relatedTarget)) return;
 
       dragStore.setIndicator(null);
-    }
+    };
 
     el.addEventListener("dragover", handleDragOver);
     el.addEventListener("dragleave", handleDragLeave);
@@ -115,19 +111,17 @@ class DragEngine {
     // 设置允许拖拽
     el.setAttribute("draggable", "true");
 
-    const instance = this;
-
     /** 拖拽开始 */
-    function handleDragStart(e: DragEvent) {
+    const handleDragStart = (e: DragEvent) => {
       e.stopPropagation();
       const dragStore = useDragStore();
       dragStore.startNewDrag(type);
     };
 
     /** 拖拽结束 */
-    function handleDragEnd(e: DragEvent) {
+    const handleDragEnd = (e: DragEvent) => {
       e.stopPropagation();
-      instance.dropNew();
+      this.dropNew();
     };
 
     el.addEventListener("dragstart", handleDragStart);

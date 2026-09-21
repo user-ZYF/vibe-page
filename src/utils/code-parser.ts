@@ -20,92 +20,38 @@ import type {
   CanvasFormElement,
   CanvasSpanElement,
   CanvasTextElement,
-  CanvasContainerElement,
+  CanvasDivElement,
   CanvasTableDataElement,
   CanvasTableHeaderCellElement,
   CanvasTableColGroupElement,
   CanvasTableColElement,
-  CanvasHeadingElement
+  CanvasHeadingElement,
+  CanvasGeneralElement
 } from '@/views/Canvas/types'
 import {
   CanvasElementTypeEnum,
   ButtonTypeEnum,
-  LinkTargetEnum,
   FormMethodEnum,
-  TableScopeEnum,
   CanvasElementLabelMap,
-  normalizeHeadingLevel
+  HeadingLevelEnum
 } from '@/constants/home'
 import {
   defaultClassStyleConfig,
   StyleRuleTypeEnum,
   CSS_NAME_REGEX,
 } from '@/constants/style'
-import { parseHtmlDocument, type ParsedElement } from '@/utils/html-parser'
+import { parseHtmlDocument, resolveSafeTagName, type ParsedElement } from '@/utils/html-parser'
+import { BLOCKED_TAGS, TAG_TO_TYPE, LINK_TARGET_ATTR_MAP, SCOPE_ATTR_MAP } from '@/constants/html'
 import { parseCss } from '@/utils/css-parser'
+import { sanitizeUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize'
 import { generateId } from '@/utils/id'
-import { styleConfigToCss, declarationWins } from '@/utils/style-converter'
+import { styleConfigToCss, declarationWins, enumValue } from '@/utils/style-converter'
 import { isParentElement, type CanvasStyleRule, type ElementClass } from '@/views/Canvas/types'
-
-/** HTML 标签到画布元素类型的映射（input 类元素特殊处理，需要根据 type 属性判定） */
-const TAG_TO_TYPE: Record<string, CanvasElementTypeEnum> = {
-  div: CanvasElementTypeEnum.CONTAINER,
-  button: CanvasElementTypeEnum.BUTTON,
-  p: CanvasElementTypeEnum.PARAGRAPH,
-  img: CanvasElementTypeEnum.IMAGE,
-  a: CanvasElementTypeEnum.LINK,
-  textarea: CanvasElementTypeEnum.TEXTAREA,
-  video: CanvasElementTypeEnum.VIDEO,
-  audio: CanvasElementTypeEnum.AUDIO,
-  label: CanvasElementTypeEnum.LABEL,
-  form: CanvasElementTypeEnum.FORM,
-  span: CanvasElementTypeEnum.SPAN,
-  ul: CanvasElementTypeEnum.UNORDERED_LIST,
-  ol: CanvasElementTypeEnum.ORDERED_LIST,
-  li: CanvasElementTypeEnum.LIST_ITEM,
-  table: CanvasElementTypeEnum.TABLE,
-  thead: CanvasElementTypeEnum.TABLE_HEAD,
-  tbody: CanvasElementTypeEnum.TABLE_BODY,
-  tfoot: CanvasElementTypeEnum.TABLE_FOOT,
-  tr: CanvasElementTypeEnum.TABLE_ROW,
-  td: CanvasElementTypeEnum.TABLE_DATA,
-  th: CanvasElementTypeEnum.TABLE_HEADER_CELL,
-  caption: CanvasElementTypeEnum.TABLE_CAPTION,
-  colgroup: CanvasElementTypeEnum.TABLE_COL_GROUP,
-  col: CanvasElementTypeEnum.TABLE_COL,
-  header: CanvasElementTypeEnum.HEADER,
-  footer: CanvasElementTypeEnum.FOOTER,
-  article: CanvasElementTypeEnum.ARTICLE,
-  section: CanvasElementTypeEnum.SECTION,
-  aside: CanvasElementTypeEnum.ASIDE,
-  h1: CanvasElementTypeEnum.HEADING,
-  h2: CanvasElementTypeEnum.HEADING,
-  h3: CanvasElementTypeEnum.HEADING,
-  h4: CanvasElementTypeEnum.HEADING,
-  h5: CanvasElementTypeEnum.HEADING,
-  h6: CanvasElementTypeEnum.HEADING
-}
-
-/** 超链接 target 属性值到枚举的映射 */
-const LINK_TARGET_ATTR_MAP: Record<string, LinkTargetEnum> = {
-  _self: LinkTargetEnum.SELF,
-  _blank: LinkTargetEnum.BLANK
-}
-
-/** 表头单元格 scope 属性值到枚举的反向映射 */
-const SCOPE_ATTR_MAP: Record<string, TableScopeEnum> = {
-  row: TableScopeEnum.ROW,
-  col: TableScopeEnum.COL,
-  rowgroup: TableScopeEnum.ROWGROUP,
-  colgroup: TableScopeEnum.COLGROUP,
-}
 
 /** 根元素（body 标签）属性补丁 */
 export interface ParsedRootPatch {
   /** 根元素 id（body 标签声明的 id；缺失、非法或与子元素冲突时回退为调用方传入的当前根 id） */
   id: string
-  /** 根元素行内样式 */
-  style: Record<string, string>
   /** 根元素 class 列表 */
   classes: ElementClass[]
 }
@@ -159,6 +105,13 @@ function dedupeDeclarations(
   }
 }
 
+/** 净化样式声明表中的 url() 地址（就地修改，不安全协议替换为空 url()） */
+function sanitizeStyleMap(style: Record<string, string>) {
+  Object.keys(style).forEach((prop) => {
+    style[prop] = sanitizeCssUrl(style[prop])
+  })
+}
+
 /** 将行内 style 声明合并进元素 #id 的最后一条规则 */
 function mergeInlineStyleIntoIdRule(
   selector: string,
@@ -166,6 +119,8 @@ function mergeInlineStyleIntoIdRule(
   styleRules: CanvasStyleRule[],
   ruleMap: SimpleRuleMap
 ) {
+  if (Object.keys(inlineStyle).length === 0) return
+  sanitizeStyleMap(inlineStyle)
   const idRule = ruleMap.get(selector)
   if (idRule) {
     mergeDeclarationMap(idRule.style, inlineStyle)
@@ -196,19 +151,35 @@ function resolveElementType(parsed: ParsedElement): CanvasElementTypeEnum | unde
   return TAG_TO_TYPE[parsed.tagName]
 }
 
+/** 净化通用元素属性表 */
+function sanitizeGeneralAttributes(attributes: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  Object.entries(attributes).forEach(([name, value]) => {
+    const safe = sanitizeAttributeValue(name, value)
+    if (safe !== null) result[name] = safe
+  })
+  return result
+}
+
+/** 解析元素 id：合法且未被占用时保留原 id，否则使用回退值（默认生成新 id），并登记占用 */
+function resolveElementId(rawId: string, usedIds: Set<string>, fallbackId?: string): string {
+  const id = CSS_NAME_REGEX.test(rawId) && !usedIds.has(rawId) ? rawId : (fallbackId ?? generateId())
+  usedIds.add(id)
+  return id
+}
+
+/** class 名列表转换为元素 class 配置（默认全部启用） */
+function buildClasses(classes: string[]): ElementClass[] {
+  return classes.map((name) => ({ name, enabled: true }))
+}
+
 /** 生成元素基础属性 */
 function buildBase(parsed: ParsedElement, type: CanvasElementTypeEnum, usedIds: Set<string>) {
-  const rawId = parsed.attributes.id || ''
-  let id = rawId
-  // id重复或不存在时，自动生成新id
-  if (!rawId || !CSS_NAME_REGEX.test(rawId) || usedIds.has(rawId)) {
-    id = generateId()
-  }
-  usedIds.add(id)
   return {
-    id,
+    // id重复或不存在时，自动生成新id
+    id: resolveElementId(parsed.id, usedIds),
     type,
-    classes: parsed.classes.map((name) => ({ name, enabled: true })),
+    classes: buildClasses(parsed.classes),
     alias: CanvasElementLabelMap[type]
   }
 }
@@ -226,42 +197,52 @@ function buildElement(
     return { ...base, text: parsed.textContent.trim() } as CanvasTextElement
   }
 
-  // 未知标签静默跳过
   const type = resolveElementType(parsed)
 
-  // todo: 替换为通用类型组件，而非直接跳过
-  if (type === undefined) return null
+  if (type === undefined) {
+    // style元素的内容会视为css代码的一部分，元素本身不进入画布
+    if (parsed.tagName === 'style') return null
+    if (BLOCKED_TAGS.has(parsed.tagName)) return null
+    const base = buildBase(parsed, CanvasElementTypeEnum.GENERAL, usedIds)
+    // 行内样式转移（与已知元素一致，合并进 #id 规则）
+    mergeInlineStyleIntoIdRule(`#${base.id}`, parsed.style, styleRules, ruleMap)
+    return {
+      ...base,
+      alias: parsed.tagName,
+      tagName: resolveSafeTagName(parsed.tagName),
+      attributes: sanitizeGeneralAttributes(parsed.attributes),
+      children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
+    } as CanvasGeneralElement
+  }
 
   const base = buildBase(parsed, type, usedIds)
   const attrs = parsed.attributes
 
   // 行内样式转移
-  if (Object.keys(parsed.style).length > 0) {
-    mergeInlineStyleIntoIdRule(`#${base.id}`, parsed.style, styleRules, ruleMap)
-  }
+  mergeInlineStyleIntoIdRule(`#${base.id}`, parsed.style, styleRules, ruleMap)
 
   switch (type) {
-    case CanvasElementTypeEnum.CONTAINER: {
+    case CanvasElementTypeEnum.DIV: {
       const el = {
         ...base,
         children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
-      } as CanvasContainerElement
+      } as CanvasDivElement
       return el
     }
     case CanvasElementTypeEnum.BUTTON: {
       const buttonType = Object.values(ButtonTypeEnum).includes(attrs.type as ButtonTypeEnum)
         ? (attrs.type as ButtonTypeEnum)
         : ButtonTypeEnum.BUTTON
-      return { ...base, text: extractText(parsed), buttonType } as CanvasButtonElement
+      return { ...base, text: extractText(parsed), buttonType, disabled: 'disabled' in attrs } as CanvasButtonElement
     }
     case CanvasElementTypeEnum.PARAGRAPH:
       return { ...base, text: extractText(parsed) } as CanvasParagraphElement
     case CanvasElementTypeEnum.IMAGE:
-      return { ...base, src: attrs.src ?? '', title: attrs.alt ?? '' } as CanvasImageElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), title: attrs.alt ?? '' } as CanvasImageElement
     case CanvasElementTypeEnum.LINK: {
       const el = {
         ...base,
-        href: attrs.href ?? '',
+        href: sanitizeUrl(attrs.href ?? ''),
         children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
       } as CanvasLinkElement
       const target = attrs.target ? LINK_TARGET_ATTR_MAP[attrs.target] : undefined
@@ -273,7 +254,8 @@ function buildElement(
         ...base,
         placeholder: attrs.placeholder ?? '',
         value: attrs.value ?? '',
-        required: 'required' in attrs
+        required: 'required' in attrs,
+        disabled: 'disabled' in attrs
       } as CanvasInputElement
     case CanvasElementTypeEnum.TEXTAREA:
       return {
@@ -281,7 +263,8 @@ function buildElement(
         placeholder: attrs.placeholder ?? '',
         value: extractText(parsed),
         rows: Number(attrs.rows) || undefined,
-        required: 'required' in attrs
+        required: 'required' in attrs,
+        disabled: 'disabled' in attrs
       } as CanvasTextareaElement
     case CanvasElementTypeEnum.RADIO:
       return {
@@ -289,7 +272,8 @@ function buildElement(
         name: attrs.name ?? '',
         value: attrs.value ?? '',
         checked: 'checked' in attrs,
-        required: 'required' in attrs
+        required: 'required' in attrs,
+        disabled: 'disabled' in attrs
       } as CanvasRadioElement
     case CanvasElementTypeEnum.CHECKBOX:
       return {
@@ -297,19 +281,21 @@ function buildElement(
         name: attrs.name ?? '',
         value: attrs.value ?? '',
         checked: 'checked' in attrs,
-        required: 'required' in attrs
+        required: 'required' in attrs,
+        disabled: 'disabled' in attrs
       } as CanvasCheckboxElement
     case CanvasElementTypeEnum.VIDEO:
-      return { ...base, src: attrs.src ?? '', controls: 'controls' in attrs } as CanvasVideoElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs } as CanvasVideoElement
     case CanvasElementTypeEnum.AUDIO:
-      return { ...base, src: attrs.src ?? '', controls: 'controls' in attrs } as CanvasAudioElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs } as CanvasAudioElement
     case CanvasElementTypeEnum.LABEL:
       return { ...base, text: extractText(parsed), for: attrs.for } as CanvasLabelElement
     case CanvasElementTypeEnum.FORM: {
+      const method = enumValue(attrs.method, FormMethodEnum) ?? FormMethodEnum.GET;
       const el = {
         ...base,
-        action: attrs.action ?? '',
-        method: (attrs.method as FormMethodEnum) || FormMethodEnum.GET,
+        action: sanitizeUrl(attrs.action ?? ''),
+        method,
         children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
       } as CanvasFormElement
       return el
@@ -370,7 +356,7 @@ function buildElement(
       return {
         ...base,
         text: extractText(parsed),
-        level: normalizeHeadingLevel(Number(parsed.tagName.slice(1)))
+        level: Number(parsed.tagName.slice(1)) as HeadingLevelEnum
       } as CanvasHeadingElement
     default:
       return null
@@ -403,17 +389,21 @@ function isSimpleSelector(selector: string) {
 }
 
 /** 解析 body 标签属性为根元素补丁；body 未声明任何属性时返回 null（根元素保持现状） */
-function buildRootPatch(body: ParsedElement, usedIds: Set<string>, fallbackId?: string): ParsedRootPatch | null {
-  const rawId = body.attributes.id || ''
+function buildRootPatch(
+  body: ParsedElement,
+  usedIds: Set<string>,
+  styleRules: CanvasStyleRule[],
+  ruleMap: SimpleRuleMap,
+  fallbackId?: string
+): ParsedRootPatch | null {
+  const rawId = body.id
   const hasBodyInfo = Boolean(rawId) || body.classes.length > 0 || Object.keys(body.style).length > 0
   if (!hasBodyInfo) return null
   // body id 合法且不与子元素冲突时采用，否则回退到当前根 id，保证样式规则引用稳定
-  const id = CSS_NAME_REGEX.test(rawId) && !usedIds.has(rawId) ? rawId : (fallbackId ?? generateId())
-  return {
-    id,
-    style: body.style,
-    classes: body.classes.map((name) => ({ name, enabled: true })),
-  }
+  const id = resolveElementId(rawId, usedIds, fallbackId)
+  // 行内样式合并进根元素 #id 规则（与其他元素行为一致）
+  mergeInlineStyleIntoIdRule(`#${id}`, body.style, styleRules, ruleMap)
+  return { id, classes: buildClasses(body.classes) }
 }
 
 /**
@@ -429,34 +419,43 @@ export function parseCodeToCanvas(html: string, css: string, rootId?: string): P
   // 保存选择器的最后一次规则定义，用于解析html时注入元素的行内style声明
   const ruleMap: SimpleRuleMap = new Map()
 
-  const parsedCss = parseCss(css);
-  parsedCss.forEach(({ selector, style, atRuleCssText }) => {
-    if (atRuleCssText) {
-      styleRules.push({ type: StyleRuleTypeEnum.AT_RULE, selector: '', style: {}, atRuleCssText })
-      return;
-    }
-    if (isSimpleSelector(selector)) {
-      // 声明覆盖
-      dedupeDeclarations(selector, style, styleRules)
-      const rule: CanvasStyleRule = { type: StyleRuleTypeEnum.EDITABLE, selector, style: { ...style } }
-      styleRules.push(rule)
-      ruleMap.set(selector, rule)
-      return
-    }
-    // 保存样式字符串
-    styleRules.push({ type: StyleRuleTypeEnum.RAW, selector, style })
-  })
+  // 将一段 CSS 文本并入样式规则清单（style 元素内嵌样式与用户输入 CSS 共用同一管线）
+  function pushCssRules(cssText: string) {
+    parseCss(cssText).forEach(({ selector, style, atRuleCssText }) => {
+      if (atRuleCssText) {
+        styleRules.push({ type: StyleRuleTypeEnum.AT_RULE, selector: '', style: {}, atRuleCssText: sanitizeCssUrl(atRuleCssText) })
+        return;
+      }
+      // 声明中的 url() 地址经协议校验，防止 javascript:/file: 等危险协议进入画布样式
+      sanitizeStyleMap(style)
+      if (isSimpleSelector(selector)) {
+        // 声明覆盖
+        dedupeDeclarations(selector, style, styleRules)
+        const rule: CanvasStyleRule = { type: StyleRuleTypeEnum.EDITABLE, selector, style: { ...style } }
+        styleRules.push(rule)
+        ruleMap.set(selector, rule)
+        return
+      }
+      // 保存样式字符串
+      styleRules.push({ type: StyleRuleTypeEnum.RAW, selector, style })
+    })
+  }
 
   // 解析 HTML 并构建元素树（buildElement 会合并行内 style 到最后一条同名 #id 规则，或为新元素创建 #id 规则）
-  const { body, children: parsedElements } = parseHtmlDocument(html)
+  const { body, children: parsedElements, styleBlocks } = parseHtmlDocument(html)
+
+  // style 元素内嵌样式并入 CSS 输出，排在用户输入 CSS 之前（用户 CSS 位于其下方，级联胜出）
+  styleBlocks.forEach(({ css: blockCss, media }) => {
+    // media 属性剔除会破坏 @media 语法结构的字符，防止 CSS 注入逃逸
+    const mediaText = media.replace(/[{};]/g, '').trim()
+    pushCssRules(mediaText ? `@media ${mediaText} {\n${blockCss}\n}` : blockCss)
+  })
+  pushCssRules(css)
   const usedIds = new Set<string>()
   const children = buildChildren(parsedElements, usedIds, styleRules, ruleMap)
 
-  // body 标签属性映射到根元素：行内样式合并进根元素 #id 规则（与其他元素行为一致）
-  const rootPatch = buildRootPatch(body, usedIds, rootId)
-  if (rootPatch && Object.keys(rootPatch.style).length > 0) {
-    mergeInlineStyleIntoIdRule(`#${rootPatch.id}`, rootPatch.style, styleRules, ruleMap)
-  }
+  // body 标签属性映射到根元素补丁（行内样式同样合并进根元素 #id 规则）
+  const rootPatch = buildRootPatch(body, usedIds, styleRules, ruleMap, rootId)
 
   // 为被引用但无 CSS 规则的 class 补充空白样式配置，避免引用丢失
   const definedClassNames = new Set(

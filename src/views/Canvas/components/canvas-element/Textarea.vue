@@ -1,6 +1,6 @@
 <!-- ? 画布多行文本框元素 -->
 <template>
-    <textarea ref="textareaEl" :id="data.id" :data-canvas-id="data.id" :class="classes" :placeholder="data.placeholder" :rows="data.rows" :required="data.required" :readonly="!isPreview" @click.stop="handleSelect"></textarea>
+    <textarea ref="textareaEl" :id="data.id" :value="data.value" :data-canvas-id="data.id" :class="classes" :placeholder="data.placeholder" :rows="data.rows" :required="data.required" :readonly="!isPreview" :disabled="data.disabled" @click.stop="handleSelect"></textarea>
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +15,8 @@ const data = defineModel<CanvasTextareaElement>("data", {
     required: true
 });
 
+const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
+
 /** 已启用的 class 名称列表 */
 const classes = useElementClasses(data);
 
@@ -23,6 +25,5 @@ const textareaEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id);
 
-const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
 useDragConnector(textareaEl, data.value.id);
 </script>

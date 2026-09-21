@@ -1,3 +1,7 @@
+import type { LanguageSupport } from '@codemirror/language';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+
 /** 代码块语言枚举 */
 export enum CodeLanguageEnum {
   /** XML/HTML */
@@ -6,8 +10,8 @@ export enum CodeLanguageEnum {
   CSS = 2,
 }
 
-/** 代码块语言到 highlight.js 语言名的映射 */
-export const CODE_LANGUAGE_NAME_MAP: Record<CodeLanguageEnum, string> = {
-  [CodeLanguageEnum.XML]: 'xml',
-  [CodeLanguageEnum.CSS]: 'css',
+/** 代码块语言到 CodeMirror 语言扩展的映射 */
+export const CODE_LANGUAGE_MAP: Record<CodeLanguageEnum, () => LanguageSupport> = {
+  [CodeLanguageEnum.XML]: html,
+  [CodeLanguageEnum.CSS]: css,
 };

@@ -9,11 +9,12 @@ describe('parseHtml', () => {
     expect(els[0].children[0].tagName).toBe('span');
   });
 
-  it('剥离 class/style 到独立字段，其余进入 attributes', () => {
+  it('剥离 id/class/style 到独立字段，其余进入 attributes', () => {
     const els = parseHtml('<div id="a" class="x y" style="color: red" data-v="1"></div>');
+    expect(els[0].id).toBe('a');
     expect(els[0].classes).toEqual(['x', 'y']);
     expect(els[0].style).toEqual({ color: 'red' });
-    expect(els[0].attributes).toEqual({ id: 'a', 'data-v': '1' });
+    expect(els[0].attributes).toEqual({ 'data-v': '1' });
   });
 
   it('保留非空白文本节点、丢弃纯空白文本节点', () => {
@@ -28,7 +29,7 @@ describe('parseHtml', () => {
 describe('parseHtmlDocument', () => {
   it('返回 body 标签属性与子元素', () => {
     const doc = parseHtmlDocument('<body id="b1" class="c" style="color: red"><div>x</div></body>');
-    expect(doc.body.attributes.id).toBe('b1');
+    expect(doc.body.id).toBe('b1');
     expect(doc.body.classes).toEqual(['c']);
     expect(doc.body.style.color).toBe('red');
     expect(doc.children).toHaveLength(1);

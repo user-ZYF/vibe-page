@@ -18,7 +18,7 @@ function lazy(loader: () => Promise<Component | { default: Component }>) {
   });
 }
 
-const Container = lazy(() => import("./components/canvas-element/Container.vue"));
+const Div = lazy(() => import("./components/canvas-element/Div.vue"));
 const Link = lazy(() => import("./components/canvas-element/Link.vue"));
 const Image = lazy(() => import("./components/canvas-element/Image.vue"));
 const Button = lazy(() => import("./components/canvas-element/Button.vue"));
@@ -52,13 +52,14 @@ const Article = lazy(() => import("./components/canvas-element/Article.vue"));
 const Section = lazy(() => import("./components/canvas-element/Section.vue"));
 const Aside = lazy(() => import("./components/canvas-element/Aside.vue"));
 const Heading = lazy(() => import("./components/canvas-element/Heading.vue"));
+const General = lazy(() => import("./components/canvas-element/General.vue"));
 import type { InjectionKey, Ref } from 'vue';
 import { ValidResizeDirEnum } from "./types.ts";
 import { ResizeDirEnum } from "@/constants/style.ts";
 
 /** 组件映射 */
 export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component> = {
-    [CanvasElementTypeEnum.CONTAINER]: Container,
+    [CanvasElementTypeEnum.DIV]: Div,
     [CanvasElementTypeEnum.PARAGRAPH]: Paragraph,
     [CanvasElementTypeEnum.LINK]: Link,
     [CanvasElementTypeEnum.IMAGE]: Image,
@@ -93,6 +94,7 @@ export const CanvasElementComponentMap: Record<CanvasElementTypeEnum, Component>
     [CanvasElementTypeEnum.SECTION]: Section,
     [CanvasElementTypeEnum.ASIDE]: Aside,
     [CanvasElementTypeEnum.HEADING]: Heading,
+    [CanvasElementTypeEnum.GENERAL]: General,
 };
 
 /** 隐藏的元素id列表 */

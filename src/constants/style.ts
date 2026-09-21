@@ -661,7 +661,7 @@ export const DefaultButtonStyleConfig: StyleConfig = {
 };
 
 /** 容器元素默认样式配置 */
-export const DefaultContainerStyleConfig: StyleConfig = {
+export const DefaultDivStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
@@ -947,6 +947,11 @@ export const DefaultHeadingStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
 };
 
+/** 通用元素默认样式配置 */
+export const DefaultGeneralElementStyleConfig: StyleConfig = {
+  ...cloneDeep(DefaultGeneralStyleConfig),
+};
+
 /** Class 默认样式配置（空白样式，所有属性均未设置） */
 export const defaultClassStyleConfig: StyleConfig = {
  ...cloneDeep(DefaultGeneralStyleConfig)
@@ -955,7 +960,7 @@ export const defaultClassStyleConfig: StyleConfig = {
 /** 画布元素默认样式配置映射 */
 export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> = {
   [CanvasElementTypeEnum.BUTTON]: DefaultButtonStyleConfig,
-  [CanvasElementTypeEnum.CONTAINER]: DefaultContainerStyleConfig,
+  [CanvasElementTypeEnum.DIV]: DefaultDivStyleConfig,
   [CanvasElementTypeEnum.PARAGRAPH]: DefaultParagraphStyleConfig,
   [CanvasElementTypeEnum.LINK]: DefaultLinkStyleConfig,
   [CanvasElementTypeEnum.IMAGE]: DefaultImageStyleConfig,
@@ -989,6 +994,7 @@ export const DefaultStyleConfigMap: Record<CanvasElementTypeEnum, StyleConfig> =
   [CanvasElementTypeEnum.SECTION]: DefaultSectionStyleConfig,
   [CanvasElementTypeEnum.ASIDE]: DefaultAsideStyleConfig,
   [CanvasElementTypeEnum.HEADING]: DefaultHeadingStyleConfig,
+  [CanvasElementTypeEnum.GENERAL]: DefaultGeneralElementStyleConfig,
 };
 
 /** 调整尺寸方向枚举 */

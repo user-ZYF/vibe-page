@@ -26,7 +26,7 @@ export function findDropPosition(
   posY: number
 ): { index: number; where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER } {
   /** 默认结果：插入到第一个元素之前 */
-  let result = { index: 0, where: DropPositionEnum.BEFORE as DropPositionEnum.BEFORE | DropPositionEnum.AFTER };
+  const result = { index: 0, where: DropPositionEnum.BEFORE as DropPositionEnum.BEFORE | DropPositionEnum.AFTER };
 
   /**
    * 三个"限制线"用于多行横排场景的优化跳过：

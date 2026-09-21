@@ -14,7 +14,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import type { CanvasHeadingElement } from '../../types';
-import { normalizeHeadingLevel } from '@/constants/home';
 import { useElementClasses } from '@/composables/useElementClasses';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
@@ -27,8 +26,8 @@ const data = defineModel<CanvasHeadingElement>("data", {
 /** 已启用的 class 名称列表 */
 const classes = useElementClasses(data);
 
-/** 标题级别对应的标签名（level 收敛到 1~6，未设置时默认 h1） */
-const headingTag = computed(() => `h${normalizeHeadingLevel(data.value.level)}`);
+/** 标题级别对应的标签名 */
+const headingTag = computed(() => `h${data.value.level}`);
 
 /** 标题 DOM 引用 */
 const headingEl = ref<HTMLElement>();

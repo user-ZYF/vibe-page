@@ -1,4 +1,4 @@
-import { type CanvasButtonElement, type CanvasContainerElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeadingElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, type ClassListItem, type ClassRef, type CanvasStorageData, isParentElement } from "@/views/Canvas/types";
+import { type CanvasButtonElement, type CanvasDivElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeadingElement, type CanvasGeneralElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, type ClassListItem, type ClassRef, type CanvasStorageData, isParentElement } from "@/views/Canvas/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, HeadingLevelEnum, LinkTargetEnum, SiderPanelEnum, FormMethodEnum, TableScopeEnum } from "@/constants/home";
 import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, UnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum, BorderStyleEnum, BorderCollapseEnum, TextDecorationEnum, FontStyleEnum, FontFamilyEnum, PositionStyleEnum, OverflowStyleEnum } from "@/constants/style";
 import { defineStore } from "pinia";
@@ -8,6 +8,7 @@ import { parseCodeToCanvas } from "@/utils/code-parser";
 import { cssToStyleConfig, styleConfigToCss, mergeDeclarations, syncStyleConfigToRules, declarationWins } from "@/utils/style-converter";
 import { generateId } from "@/utils/id";
 import { StyleRuleTypeEnum } from "@/constants/style";
+import { GENERAL_FALLBACK_TAG_NAME } from "@/constants/html";
 import type { CanvasStyleRule } from "@/views/Canvas/types";
 import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
 
@@ -16,7 +17,7 @@ import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
  * 开发阶段数据结构频繁变更，修改此版本号即可让所有用户的旧 LocalStorage 数据自动失效（清空并回退到默认内容）
  * 数据结构变更后只需递增此数字，无需编写迁移逻辑
  */
-const CANVAS_DATA_VERSION = 12;
+const CANVAS_DATA_VERSION = 13;
 
 /** 画布数据的 LocalStorage key */
 const CANVAS_DATA_STORAGE_KEY = 'vibe_page__canvas_data';
@@ -218,23 +219,23 @@ export const useCanvasStore = defineStore("canvas", {
       };
       switch(type){
         case CanvasElementTypeEnum.BUTTON:
-          return { ...elBase, text: '按钮', buttonType: ButtonTypeEnum.BUTTON } as CanvasButtonElement;
+          return { ...elBase, text: '按钮', buttonType: ButtonTypeEnum.BUTTON, disabled: false } as CanvasButtonElement;
         case CanvasElementTypeEnum.PARAGRAPH:
           return { ...elBase, text: '段落' } as CanvasParagraphElement;
         case CanvasElementTypeEnum.IMAGE:
           return { ...elBase, src: '', title: '图片' }  as CanvasImageElement;
         case CanvasElementTypeEnum.LINK:
           return { ...elBase, href: '', target: LinkTargetEnum.SELF, children: [] } as CanvasLinkElement;
-        case CanvasElementTypeEnum.CONTAINER:
-          return { ...elBase, children: [] }  as CanvasContainerElement;
+        case CanvasElementTypeEnum.DIV:
+          return { ...elBase, children: [] }  as CanvasDivElement;
         case CanvasElementTypeEnum.INPUT:
-          return { ...elBase, placeholder: '请输入内容', value: '', required: false } as CanvasInputElement;
+          return { ...elBase, placeholder: '请输入内容', value: '', required: false, disabled: false } as CanvasInputElement;
         case CanvasElementTypeEnum.TEXTAREA:
-          return { ...elBase, placeholder: '请输入内容', value: '', required: false } as CanvasTextareaElement;
+          return { ...elBase, placeholder: '请输入内容', value: '', required: false, disabled: false } as CanvasTextareaElement;
         case CanvasElementTypeEnum.RADIO:
-          return { ...elBase, name: '', value: '', checked: false, required: false } as CanvasRadioElement;
+          return { ...elBase, name: '', value: '', checked: false, required: false, disabled: false } as CanvasRadioElement;
         case CanvasElementTypeEnum.CHECKBOX:
-          return { ...elBase, name: '', value: '', checked: false, required: false } as CanvasCheckboxElement;
+          return { ...elBase, name: '', value: '', checked: false, required: false, disabled: false } as CanvasCheckboxElement;
         case CanvasElementTypeEnum.VIDEO:
           return { ...elBase, src: '', controls: true } as CanvasVideoElement;
         case CanvasElementTypeEnum.AUDIO:
@@ -285,6 +286,8 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, children: [] } as CanvasAsideElement;
         case CanvasElementTypeEnum.HEADING:
           return { ...elBase, text: '标题', level: HeadingLevelEnum.H1 } as CanvasHeadingElement;
+        case CanvasElementTypeEnum.GENERAL:
+          return { ...elBase, tagName: GENERAL_FALLBACK_TAG_NAME, attributes: {}, children: [] } as CanvasGeneralElement;
       }
     },
     /** 添加元素到指定容器 */
@@ -532,9 +535,9 @@ export const useCanvasStore = defineStore("canvas", {
       });
 
       // 创建容器元素
-      const mkContainer = (styleConfig: StyleConfig, children: CanvasInnerElement[] = [], alias?: string): CanvasContainerElement => ({
-        id: createElementId(styleConfig), type: CanvasElementTypeEnum.CONTAINER, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.CONTAINER], children,
+      const mkDiv = (styleConfig: StyleConfig, children: CanvasInnerElement[] = [], alias?: string): CanvasDivElement => ({
+        id: createElementId(styleConfig), type: CanvasElementTypeEnum.DIV, classes: [],
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.DIV], children,
       });
 
       // 创建段落元素
@@ -546,7 +549,7 @@ export const useCanvasStore = defineStore("canvas", {
       // 创建按钮元素
       const mkButton = (text: string, styleConfig: StyleConfig, alias?: string): CanvasButtonElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.BUTTON, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.BUTTON], text, buttonType: ButtonTypeEnum.BUTTON,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.BUTTON], text, buttonType: ButtonTypeEnum.BUTTON, disabled: false,
       });
 
       // 创建链接元素
@@ -558,7 +561,7 @@ export const useCanvasStore = defineStore("canvas", {
       // 创建输入框元素
       const mkInput = (placeholder: string, styleConfig: StyleConfig, alias?: string): CanvasInputElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.INPUT, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.INPUT], placeholder, value: '', required: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.INPUT], placeholder, value: '', required: false, disabled: false,
       });
 
       // 创建图片元素
@@ -582,19 +585,19 @@ export const useCanvasStore = defineStore("canvas", {
       // 创建多行文本框元素
       const mkTextarea = (placeholder: string, styleConfig: StyleConfig, alias?: string): CanvasTextareaElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.TEXTAREA, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.TEXTAREA], placeholder, value: '', required: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.TEXTAREA], placeholder, value: '', required: false, disabled: false,
       });
 
       // 创建单选框元素
       const mkRadio = (name: string, value: string, styleConfig: StyleConfig, alias?: string): CanvasRadioElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.RADIO, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.RADIO], name, value, checked: false, required: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.RADIO], name, value, checked: false, required: false, disabled: false,
       });
 
       // 创建多选框元素
       const mkCheckbox = (name: string, value: string, styleConfig: StyleConfig, alias?: string): CanvasCheckboxElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.CHECKBOX, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.CHECKBOX], name, value, checked: false, required: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.CHECKBOX], name, value, checked: false, required: false, disabled: false,
       });
 
       // 创建标签元素
@@ -782,7 +785,7 @@ export const useCanvasStore = defineStore("canvas", {
           }), [
             mkText('VibePage', mkStyle({ font: { fontSize: 24, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] } }), 'logo-text'),
           ], 'logo'),
-          mkContainer(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
             mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: UnitEnum.PX } }), [
               mkText('首页', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
             ], 'nav-home'),
@@ -842,7 +845,7 @@ export const useCanvasStore = defineStore("canvas", {
             font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#555555', textAlign: TextAlignEnum.JUSTIFY, lineHeight: '1.8', textShadows: [] },
             size: { marginBottom: '32', marginBottomUnit: UnitEnum.PX, maxWidth: '640', maxWidthUnit: UnitEnum.PX },
           }), 'hero-desc'),
-          mkContainer(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER } }), [
             mkButton('立即开始', mkStyle({
               font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.2)' }] },
               visual: {
@@ -877,7 +880,7 @@ export const useCanvasStore = defineStore("canvas", {
               mkText('查看文档', mkStyle({ font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
             ], 'hero-docs-link'),
           ], 'hero-actions'),
-          mkContainer(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER } }), [
             mkHeading(HeadingLevelEnum.H4, '拖拽设计', mkStyle({
               font: { fontSize: 18, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#1a1a2e', textDecoration: TextDecorationEnum.UNDERLINE, textShadows: [] },
               size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
@@ -914,7 +917,7 @@ export const useCanvasStore = defineStore("canvas", {
         'hero',
       );
 
-      // ---- 功能卡片区域（h3 + h4 + p + container + 不同边框样式） ----
+      // ---- 功能卡片区域（h3 + h4 + p + div + 不同边框样式） ----
       const mkFeatureCard = (
         title: string,
         desc: string,
@@ -923,8 +926,8 @@ export const useCanvasStore = defineStore("canvas", {
         bgColor: string,
         accentColor: string,
         fontFamily?: string,
-      ): CanvasContainerElement => {
-        return mkContainer(
+      ): CanvasDivElement => {
+        return mkDiv(
           mkStyle({
             general: { display: DisplayStyleEnum.FLEX },
             flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.FLEX_START },
@@ -974,7 +977,7 @@ export const useCanvasStore = defineStore("canvas", {
             font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#888888', textAlign: TextAlignEnum.CENTER, textShadows: [] },
             size: { marginBottom: '40', marginBottomUnit: UnitEnum.PX },
           }), 'features-subtitle'),
-          mkContainer(
+          mkDiv(
             flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START } }),
             [
               mkFeatureCard('拖拽编辑', '所见即所得的可视化编辑体验，只需拖拽即可完成页面布局，零门槛上手。', 'feature-1', BorderStyleEnum.SOLID, '#ffffff', '#1677ff'),
@@ -983,7 +986,7 @@ export const useCanvasStore = defineStore("canvas", {
             ],
             'feature-cards',
           ),
-          mkContainer(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER } }), [
             mkHeading(HeadingLevelEnum.H5, '支持自定义样式', mkStyle({
               font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.MEDIUM, color: '#333333', textShadows: [] },
             }), 'h5-sample'),
@@ -1063,7 +1066,7 @@ export const useCanvasStore = defineStore("canvas", {
                 font: { fontSize: 13, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', lineHeight: '1.7', textShadows: [] },
                 size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
               }), 'aside-desc'),
-              mkContainer(flexCol({}), [
+              mkDiv(flexCol({}), [
                 mkLink('#intro', mkStyle({ size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX } }), [
                   mkText('→ 产品介绍', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
                 ], 'aside-link-1'),
@@ -1119,21 +1122,21 @@ export const useCanvasStore = defineStore("canvas", {
           font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#888888', textAlign: TextAlignEnum.CENTER, textShadows: [] },
           size: { marginBottom: '24', marginBottomUnit: UnitEnum.PX },
         }), 'form-subtitle'),
-        mkContainer(flexCol({}), [
+        mkDiv(flexCol({}), [
           mkLabel('姓名', '', cloneDeep(labelStyle), 'label-name'),
           mkInput('请输入你的姓名', cloneDeep(inputStyle), 'form-name'),
         ], 'form-name-group'),
-        mkContainer(flexCol({}), [
+        mkDiv(flexCol({}), [
           mkLabel('邮箱', '', cloneDeep(labelStyle), 'label-email'),
           mkInput('请输入你的邮箱', cloneDeep(inputStyle), 'form-email'),
         ], 'form-email-group'),
-        mkContainer(flexCol({}), [
+        mkDiv(flexCol({}), [
           mkLabel('留言', '', cloneDeep(labelStyle), 'label-message'),
           mkTextarea('请输入留言内容，我们会认真阅读每一条反馈...', cloneDeep(inputStyle), 'form-message'),
         ], 'form-message-group'),
-        mkContainer(flexCol({}), [
+        mkDiv(flexCol({}), [
           mkLabel('性别', '', cloneDeep(labelStyle), 'label-gender'),
-          mkContainer(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
             mkRadio('gender', 'male', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'radio-male'),
             mkLabel('男', '', mkStyle({
               font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
@@ -1145,9 +1148,9 @@ export const useCanvasStore = defineStore("canvas", {
             }), 'label-female'),
           ], 'radio-group'),
         ], 'form-gender-group'),
-        mkContainer(flexCol({}), [
+        mkDiv(flexCol({}), [
           mkLabel('兴趣爱好', '', cloneDeep(labelStyle), 'label-hobby'),
-          mkContainer(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
             mkCheckbox('hobby', 'coding', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'checkbox-coding'),
             mkLabel('编程', '', mkStyle({
               font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
@@ -1208,7 +1211,7 @@ export const useCanvasStore = defineStore("canvas", {
           },
         }),
         [
-          mkContainer(mkStyle({
+          mkDiv(mkStyle({
             size: { width: '45', widthUnit: UnitEnum.PERCENT },
             visual: {
               backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f9fafb' }],
@@ -1245,7 +1248,7 @@ export const useCanvasStore = defineStore("canvas", {
               ], 'ul-item-5'),
             ], 'feature-ul'),
           ], 'ul-group'),
-          mkContainer(mkStyle({
+          mkDiv(mkStyle({
             size: { width: '45', widthUnit: UnitEnum.PERCENT },
             visual: {
               backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f0f7ff' }],
@@ -1401,7 +1404,7 @@ export const useCanvasStore = defineStore("canvas", {
           },
         }),
         [
-          mkContainer(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
+          mkDiv(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
             mkHeading(HeadingLevelEnum.H3, '视频展示', mkStyle({
               font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
               size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
@@ -1416,7 +1419,7 @@ export const useCanvasStore = defineStore("canvas", {
               },
             }), 'demo-video'),
           ], 'video-group'),
-          mkContainer(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
+          mkDiv(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
             mkHeading(HeadingLevelEnum.H3, '音频示例', mkStyle({
               font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
               size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
@@ -1456,7 +1459,7 @@ export const useCanvasStore = defineStore("canvas", {
           },
         }),
         [
-          mkContainer(flexCol({}), [
+          mkDiv(flexCol({}), [
             mkSpan(mkStyle({
               font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
             }), [
@@ -1467,7 +1470,7 @@ export const useCanvasStore = defineStore("canvas", {
               size: { marginTop: '8', marginTopUnit: UnitEnum.PX },
             }), 'footer-copyright'),
           ], 'footer-brand'),
-          mkContainer(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
             mkLink('#', mkStyle({ size: { marginRight: '20', marginRightUnit: UnitEnum.PX } }), [
               mkText('隐私政策', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
             ], 'footer-link-1'),
@@ -1504,13 +1507,13 @@ export const useCanvasStore = defineStore("canvas", {
         const raw = localStorage.getItem(CANVAS_DATA_STORAGE_KEY);
         if (!raw) return false;
         const data = JSON.parse(raw) as CanvasStorageData;
-        // 版本不匹配或数据结构异常则自动删除本地存储
-        if (data.version !== CANVAS_DATA_VERSION || !data.children || !Array.isArray(data.children)) {
+        // 版本不匹配说明数据结构已变更，旧数据自动作废，避免带病加载损坏画布
+        if (data.version !== CANVAS_DATA_VERSION) {
           this.clearCanvasStorage();
           return false;
         }
 
-        this.root.children = data.children;
+        this.root.children = data.children ?? [];
         this.styleRules = data.styleRules ?? [];
         this.selectedElementId = null;
         this.cleanupUnreferencedStyleRules();

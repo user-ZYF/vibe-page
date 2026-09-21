@@ -69,7 +69,7 @@ function camelToKebab(str: string): string {
  * @example enumValue('bold', FontWeightEnum) → 'bold'（若在枚举中）
  * @example enumValue('abc', FontWeightEnum) → undefined
  */
-function enumValue<T extends string>(value: string | undefined, enumObj: object): T | undefined {
+export function enumValue<T extends string>(value: string | undefined, enumObj: object): T | undefined {
   if (value === undefined) return undefined;
   const v = value.trim();
   if (!v) return undefined;

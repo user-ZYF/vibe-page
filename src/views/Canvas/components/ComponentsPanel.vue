@@ -119,7 +119,6 @@ const componentGroups: ComponentGroup[] = [
     header: 'Basic',
     components: [
       CanvasElementTypeEnum.DIV,
-      CanvasElementTypeEnum.GENERAL,
       CanvasElementTypeEnum.SPAN,
       CanvasElementTypeEnum.TEXT,
       CanvasElementTypeEnum.PARAGRAPH,

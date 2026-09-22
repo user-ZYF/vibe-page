@@ -20,6 +20,7 @@ import { watch, onMounted, inject, ref, computed, nextTick } from "vue";
 import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
+import { canvasScroll, type CanvasScrollPosition } from "@/composables/canvas-scroll";
 import { useDebounceFn } from "@vueuse/core";
 import { generateCss } from "@/utils/code-generator";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
@@ -29,7 +30,7 @@ import Root from './canvas-element/Root.vue';
 import { IS_PREVIEW_KEY } from '../constants.ts';
 
 const canvasStore = useCanvasStore();
-const { root, styleRules } = storeToRefs(canvasStore);
+const { root, styleRules, selectedElementId } = storeToRefs(canvasStore);
 
 /** 是否处于预览模式 */
 const isPreview = inject(IS_PREVIEW_KEY, ref(false));
@@ -39,10 +40,14 @@ const { debouncedRecord } = useCanvasHistory({
   snapshot: () => ({
     root: canvasStore.root,
     styleRules: canvasStore.styleRules,
+    selectedElementId: selectedElementId.value,
+    scrollPosition: { left: canvasScroll.left.value, top: canvasScroll.top.value }
   }),
   restore: (state) => {
     root.value = state.root;
     styleRules.value = state.styleRules;
+    selectedElementId.value = state.selectedElementId;
+    restoreCanvasScrollPosition(state.scrollPosition);
   },
   debounceMs: 100
 });
@@ -68,6 +73,14 @@ watch(canvasCss, (css) => {
 
 /** Teleport 目标（Shadow Root，类型断言以兼容 Teleport 的 to prop 类型） */
 const teleportTarget = computed(() => shadowRoot.value as unknown as HTMLElement);
+
+/** 恢复画布滚动位置（等待 DOM 更新后应用，避免内容高度变化导致位置被钳制） */
+function restoreCanvasScrollPosition(position: CanvasScrollPosition) {
+  nextTick(() => {
+    canvasScroll.left.value = position.left;
+    canvasScroll.top.value = position.top;
+  });
+}
   
 /** 是否已完成初始加载（避免加载后立即触发冗余保存） */
 const isInitialized = ref(false);

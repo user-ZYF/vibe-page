@@ -14,6 +14,7 @@ import { dragEngine } from '../../drag/DragEngine';
 import { nodeRegistry } from '../../drag/NodeRegistry';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
+import { bindCanvasScroll } from '@/composables/canvas-scroll';
 
 const data = defineModel<CanvasRootElement>("data", {
   required: true
@@ -21,6 +22,9 @@ const data = defineModel<CanvasRootElement>("data", {
 
 /** 根 DOM 引用 */
 const rootEl = ref<HTMLElement>();
+
+/** 绑定画布滚动容器到共享滚动状态（供历史记录读取/恢复滚动位置） */
+const unbindCanvasScroll = bindCanvasScroll(rootEl);
 
 useElementVisibility(data.value.id);
 
@@ -62,5 +66,6 @@ watch(isPreview, (preview) => {
 
 onBeforeUnmount(() => {
   unbindDropFn();
+  unbindCanvasScroll();
 });
 </script>

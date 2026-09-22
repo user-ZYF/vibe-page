@@ -56,6 +56,9 @@
 
       <!-- 样式配置面板 -->
       <a-collapse v-model:activeKey="activeKey" ghost accordion>
+        <template #expandIcon="{ isActive }">
+          <CaretRightOutlined :rotate="isActive ? 90 : 0" />
+        </template>
         <!-- 元素设置配置 -->
         <a-collapse-panel v-if="!isRootElement && !activeClassName" :key="StyleConfigTypeEnum.SETTING" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SETTING]">
           <SettingConfig v-model="(selectedElement as CanvasInnerElement)" />
@@ -110,7 +113,7 @@ import SettingConfig from './style-panel/SettingConfig.vue';
 import ExtraConfig from './style-panel/ExtraConfig.vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
+import { CaretRightOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
 import { MeInput, MeTag } from '@zyf_dsb/me-ui';
 import { EXTRA_CONFIG_TYPES } from '../constants.ts';
 
@@ -264,6 +267,10 @@ watch(selectedElementId, () => {
 :deep(.ant-collapse-expand-icon) {
   color: var(--editor-text-secondary);
   font-size: 12px;
+
+  .anticon {
+    transition: transform 0.2s;
+  }
 }
 
 :deep(.ant-collapse-content) {

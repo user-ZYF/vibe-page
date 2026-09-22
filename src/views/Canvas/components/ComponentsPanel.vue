@@ -2,6 +2,9 @@
 <template>
   <div class="components-panel">
     <a-collapse v-model:activeKey="activeKeys" ghost accordion>
+      <template #expandIcon="{ isActive }">
+        <CaretRightOutlined :rotate="isActive ? 90 : 0" />
+      </template>
       <a-collapse-panel
         v-for="group in componentGroups"
         :key="group.key"
@@ -41,6 +44,7 @@ import {
   BorderRightOutlined,
   BorderTopOutlined,
   BorderVerticleOutlined,
+  CaretRightOutlined,
   CheckCircleOutlined,
   CheckSquareOutlined,
   CodeOutlined,
@@ -233,6 +237,10 @@ onUnmounted(() => {
 
   :deep(.ant-collapse-expand-icon) {
     color: var(--editor-text-secondary);
+
+    .anticon {
+      transition: transform 0.2s;
+    }
   }
 }
 

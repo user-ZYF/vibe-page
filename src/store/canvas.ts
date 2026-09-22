@@ -1,6 +1,6 @@
 import { type CanvasButtonElement, type CanvasDivElement, type CanvasInnerElement, type CanvasImageElement, type CanvasInputElement, type CanvasLinkElement, type CanvasParagraphElement, type CanvasRadioElement, type CanvasCheckboxElement, type CanvasVideoElement, type CanvasAudioElement, type CanvasTextareaElement, type CanvasLabelElement, type CanvasFormElement, type CanvasSpanElement, type CanvasTextElement, type CanvasUnorderedListElement, type CanvasOrderedListElement, type CanvasListItemElement, type CanvasTableElement, type CanvasTableHeadElement, type CanvasTableBodyElement, type CanvasTableFootElement, type CanvasTableRowElement, type CanvasTableDataElement, type CanvasTableHeaderCellElement, type CanvasTableCaptionElement, type CanvasTableColGroupElement, type CanvasTableColElement, type CanvasHeaderElement, type CanvasFooterElement, type CanvasArticleElement, type CanvasSectionElement, type CanvasAsideElement, type CanvasHeadingElement, type CanvasGeneralElement, type CanvasRootElement, type CanvasElement, type CanvasInnerElementTypeEnum, type StyleConfig, type ClassListItem, type ClassRef, type CanvasStorageData, isParentElement } from "@/views/Canvas/types";
 import { ButtonTypeEnum, CanvasElementLabelMap, CanvasElementTypeEnum, HeadingLevelEnum, LinkTargetEnum, SiderPanelEnum, FormMethodEnum, TableScopeEnum } from "@/constants/home";
-import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, UnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum, BorderStyleEnum, BorderCollapseEnum, TextDecorationEnum, FontStyleEnum, FontFamilyEnum, PositionStyleEnum, OverflowStyleEnum } from "@/constants/style";
+import { DefaultStyleConfigMap, defaultClassStyleConfig, DisplayStyleEnum, FlexDirectionEnum, JustifyContentEnum, AlignItemsEnum, UnitEnum, FontWeightEnum, TextAlignEnum, BackgroundTypeEnum, BackgroundSizeEnum, BackgroundPositionEnum, BackgroundRepeatEnum, BorderStyleEnum, BorderCollapseEnum, TextDecorationEnum, FontFamilyEnum, PositionStyleEnum, OverflowStyleEnum } from "@/constants/style";
 import { defineStore } from "pinia";
 import { cloneDeep, isEqual } from "lodash";
 import { Positioner } from "@/views/Canvas/drag/Positioner";
@@ -17,7 +17,7 @@ import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
  * 开发阶段数据结构频繁变更，修改此版本号即可让所有用户的旧 LocalStorage 数据自动失效（清空并回退到默认内容）
  * 数据结构变更后只需递增此数字，无需编写迁移逻辑
  */
-const CANVAS_DATA_VERSION = 13;
+const CANVAS_DATA_VERSION = 16;
 
 /** 画布数据的 LocalStorage key */
 const CANVAS_DATA_STORAGE_KEY = 'vibe_page__canvas_data';
@@ -618,8 +618,8 @@ export const useCanvasStore = defineStore("canvas", {
         alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.SPAN], children,
       });
 
-      // 创建纯文本元素
-      const mkText = (text: string, _styleConfig: StyleConfig, alias?: string): CanvasTextElement => ({
+      // 创建纯文本元素（文本节点无对应 DOM 元素，不创建样式规则，样式自父元素继承）
+      const mkText = (text: string, alias?: string): CanvasTextElement => ({
         id: generateId(), type: CanvasElementTypeEnum.TEXT, classes: [],
         alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.TEXT], text,
       });
@@ -631,7 +631,7 @@ export const useCanvasStore = defineStore("canvas", {
         styleConfig: StyleConfig,
         alias?: string,
       ): CanvasHeadingElement => ({
-        id: generateId(), type: CanvasElementTypeEnum.HEADING, classes: [],
+        id: createElementId(styleConfig), type: CanvasElementTypeEnum.HEADING, classes: [],
         alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.HEADING], text, level,
       });
 
@@ -754,740 +754,520 @@ export const useCanvasStore = defineStore("canvas", {
         flex: { flexDirection: FlexDirectionEnum.COLUMN, ...overrides.flex },
         ...overrides,
       });
-      const sectionPadding = {
-        paddingTop: 64, paddingTopUnit: UnitEnum.PX,
-        paddingRight: 32, paddingRightUnit: UnitEnum.PX,
-        paddingBottom: 64, paddingBottomUnit: UnitEnum.PX,
-        paddingLeft: 32, paddingLeftUnit: UnitEnum.PX,
-        width: '100', widthUnit: UnitEnum.PERCENT,
-      };
 
-      // ---- 页头（header） ----
+      // ---- 设计变量（暖纸调 editorial：奶油纸底 + 墨色 + 赭石点缀，衬线西文标题） ----
+      const INK = '#292524';
+      const BODY_TEXT = '#57534e';
+      const MUTED = '#a8a29e';
+      const LINE = '#e7e5e0';
+      const PAPER = '#faf7f2';
+      const BAND = '#f3ede2';
+      const ACCENT = '#9a3412';
+      const INPUT_LINE = '#d6d0c7';
+      /** 按钮、输入控件不继承根字体族，需单独声明 */
+      const FONT_STACK = '"Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+      /** 衬线西文（眉题、价格等拉丁字符位置点缀） */
+      const SERIF = `${FontFamilyEnum.GEORGIA}, "Times New Roman", serif`;
+
+      /** 单边分割线：样式模型仅支持四边边框，用零模糊投影模拟发丝线 */
+      const hairline = (y: number) => ({ x: 0, xUnit: UnitEnum.PX, y, yUnit: UnitEnum.PX, blur: 0, blurUnit: UnitEnum.PX, color: LINE, inset: false });
+      /** 卡片投影 */
+      const cardShadow = { x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(41,37,36,0.06)', inset: false };
+      /** 四角统一圆角 */
+      const rounded = (px: number) => ({
+        borderRadiusTL: px, borderRadiusTLUnit: UnitEnum.PX,
+        borderRadiusTR: px, borderRadiusTRUnit: UnitEnum.PX,
+        borderRadiusBL: px, borderRadiusBLUnit: UnitEnum.PX,
+        borderRadiusBR: px, borderRadiusBRUnit: UnitEnum.PX,
+      });
+      /** 四边内边距（上右下左） */
+      const pad = (t: number, r: number, b: number, l: number) => ({
+        paddingTop: t, paddingTopUnit: UnitEnum.PX,
+        paddingRight: r, paddingRightUnit: UnitEnum.PX,
+        paddingBottom: b, paddingBottomUnit: UnitEnum.PX,
+        paddingLeft: l, paddingLeftUnit: UnitEnum.PX,
+      });
+      /** 四边外边距（上下右左，覆盖浏览器默认的标题/段落外边距） */
+      const m = (t: string, b: string, r = '0', l = '0') => ({
+        marginTop: t, marginTopUnit: UnitEnum.PX,
+        marginRight: r, marginRightUnit: UnitEnum.PX,
+        marginBottom: b, marginBottomUnit: UnitEnum.PX,
+        marginLeft: l, marginLeftUnit: UnitEnum.PX,
+      });
+      /** 字体配置简写（补齐必填的 textShadows） */
+      const f = (font: Partial<StyleConfig['font']>): StyleConfig['font'] => ({ textShadows: [], ...font });
+      /** 视觉配置简写（补齐必填的 backgrounds / boxShadows） */
+      const v = (visual: Partial<StyleConfig['visual']>): StyleConfig['visual'] => ({ backgrounds: [], boxShadows: [], ...visual });
+
+      /** 区块通用样式：纵向布局、子元素水平居中，默认纸色底 */
+      const sectionStyle = (bg = PAPER): StyleConfig => mkStyle({
+        general: { display: DisplayStyleEnum.FLEX },
+        flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.CENTER },
+        size: { width: '100', widthUnit: UnitEnum.PERCENT, ...pad(72, 32, 72, 32) },
+        visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: bg }] }),
+      });
+
+      /** 限宽容器：maxWidth 960 居中，row 时横向两端对齐 */
+      const wrap = (children: CanvasInnerElement[], alias: string, row = false): CanvasDivElement =>
+        mkDiv(mkStyle({
+          general: { display: DisplayStyleEnum.FLEX },
+          flex: row
+            ? { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START }
+            : { flexDirection: FlexDirectionEnum.COLUMN },
+          size: { width: '100', widthUnit: UnitEnum.PERCENT, maxWidth: '960', maxWidthUnit: UnitEnum.PX },
+        }), children, alias);
+
+      /** 区块标题组（h2 + 可选描述段落；light 用于深色区块） */
+      const sectionHead = (title: string, desc: string | null, alias: string, light = false): CanvasDivElement =>
+        mkDiv(mkStyle({ size: m('0', '40') }), [
+          mkHeading(HeadingLevelEnum.H2, title, mkStyle({
+            font: f({ fontSize: 24, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: light ? PAPER : INK }),
+            size: desc ? m('0', '8') : m('0', '0'),
+          }), `${alias}-title`),
+          ...(desc ? [mkParagraph(desc, mkStyle({
+            font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: light ? MUTED : BODY_TEXT }),
+            size: m('0', '0'),
+          }), `${alias}-desc`)] : []),
+        ], `${alias}-head`);
+
+      /** 卡片小标题（h4，衬线西文点缀） */
+      const cardTitle = (text: string, alias: string, marginBottom = '16'): CanvasHeadingElement =>
+        mkHeading(HeadingLevelEnum.H4, text, mkStyle({
+          font: f({ fontFamily: SERIF, fontSize: 15, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }),
+          size: m('0', marginBottom),
+        }), alias);
+
+      /** 白底描边卡片 */
+      const card = (children: CanvasInnerElement[], alias: string, widthPct: string): CanvasDivElement =>
+        mkDiv(mkStyle({
+          size: { width: widthPct, widthUnit: UnitEnum.PERCENT, ...pad(24, 24, 24, 24) },
+          visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], boxShadows: [cardShadow], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: LINE, ...rounded(10) }),
+        }), children, alias);
+
+      /** 实心主按钮（覆盖浏览器默认边框，手动指定字体族；bg/fg 可换色） */
+      const primaryBtn = (size: StyleConfig['size'] = {}, bg = INK, fg = '#ffffff'): StyleConfig => mkStyle({
+        font: f({ fontFamily: FONT_STACK, fontSize: 14, fontSizeUnit: UnitEnum.PX, color: fg, fontWeight: FontWeightEnum.MEDIUM }),
+        visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: bg }], borderWidth: 0, ...rounded(6) }),
+        size: { ...pad(10, 20, 10, 20), ...size },
+      });
+
+      /** 文字导航链接 */
+      const textLink = (marginRight = '0', fontSize = 14): StyleConfig => mkStyle({
+        font: f({ fontSize, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT, textDecoration: TextDecorationEnum.NONE }),
+        size: marginRight !== '0' ? m('0', '0', marginRight) : m('0', '0'),
+      });
+
+      // ---- 页头（header + div + span + text + link + button） ----
       const headerEl = mkHeader(
         mkStyle({
-          general: { display: DisplayStyleEnum.FLEX, position: PositionStyleEnum.RELATIVE, zIndex: 100 },
+          general: { display: DisplayStyleEnum.FLEX },
           flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER },
-          size: {
-            paddingTop: 16, paddingTopUnit: UnitEnum.PX,
-            paddingRight: 32, paddingRightUnit: UnitEnum.PX,
-            paddingBottom: 16, paddingBottomUnit: UnitEnum.PX,
-            paddingLeft: 32, paddingLeftUnit: UnitEnum.PX,
-            width: '100', widthUnit: UnitEnum.PERCENT,
-          },
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }],
-            boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 12, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.15)', inset: false }],
-          },
+          size: { width: '100', widthUnit: UnitEnum.PERCENT, ...pad(18, 32, 18, 32) },
+          visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: PAPER }], boxShadows: [hairline(1)] }),
         }),
         [
-          mkSpan(mkStyle({
-            font: { fontSize: 24, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
-          }), [
-            mkText('VibePage', mkStyle({ font: { fontSize: 24, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] } }), 'logo-text'),
-          ], 'logo'),
           mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
-            mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: UnitEnum.PX } }), [
-              mkText('首页', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-            ], 'nav-home'),
-            mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: UnitEnum.PX } }), [
-              mkText('功能', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textShadows: [] } })),
-            ], 'nav-features'),
-            mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: UnitEnum.PX } }), [
-              mkText('定价', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textShadows: [] } })),
-            ], 'nav-pricing'),
-            mkLink('#', mkStyle({ size: { marginRight: '24', marginRightUnit: UnitEnum.PX } }), [
-              mkText('关于', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textShadows: [] } })),
-            ], 'nav-about'),
-            mkButton('开始使用', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] },
-              visual: {
-                backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #e94560 0%, #c23152 100%)' }],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 8, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(233,69,96,0.4)', inset: false }],
-                borderRadiusTL: 6, borderRadiusTR: 6, borderRadiusBL: 6, borderRadiusBR: 6, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              },
-              size: {
-                paddingTop: 8, paddingTopUnit: UnitEnum.PX,
-                paddingRight: 20, paddingRightUnit: UnitEnum.PX,
-                paddingBottom: 8, paddingBottomUnit: UnitEnum.PX,
-                paddingLeft: 20, paddingLeftUnit: UnitEnum.PX,
-              },
-            }), 'header-cta'),
-          ], 'nav-actions'),
+            mkDiv(mkStyle({
+              size: { width: '10', widthUnit: UnitEnum.PX, height: '10', heightUnit: UnitEnum.PX, ...m('0', '0', '10') },
+              visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: ACCENT }], ...rounded(3) }),
+            }), [], 'logo-mark'),
+            mkSpan(mkStyle({ font: f({ fontSize: 15, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }) }), [
+              mkText('山下咖啡'),
+            ], 'logo'),
+          ], 'brand'),
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+            mkLink('#', textLink('28'), [mkText('菜单')], 'nav-menu'),
+            mkLink('#', textLink('28'), [mkText('位置')], 'nav-location'),
+            mkLink('#', textLink('28'), [mkText('活动')], 'nav-events'),
+            mkButton('在线点单', primaryBtn({ ...pad(8, 16, 8, 16) }), 'nav-cta'),
+          ], 'nav'),
         ],
         'site-header',
       );
 
-      // ---- Hero 区域（section + h1~h6 + p + button + image + link） ----
+      // ---- Hero：实景照片底 + 深色遮罩 + 白色衬线标题（section + h6/h1 + p + button + link） ----
       const hero = mkSection(
         mkStyle({
-          general: { display: DisplayStyleEnum.FLEX, overflow: OverflowStyleEnum.HIDDEN },
+          general: { display: DisplayStyleEnum.FLEX, position: PositionStyleEnum.RELATIVE, overflow: OverflowStyleEnum.HIDDEN },
           flex: { flexDirection: FlexDirectionEnum.COLUMN, justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER },
-          size: { ...sectionPadding, paddingTop: 80, paddingBottom: 80 },
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(180deg, #f0f4ff 0%, #e8eaf6 50%, #f5f7fa 100%)' }],
-            boxShadows: [],
-          },
+          size: { width: '100', widthUnit: UnitEnum.PERCENT, minHeight: '540', minHeightUnit: UnitEnum.PX, ...pad(96, 32, 88, 32) },
+          visual: v({
+            backgrounds: [{
+              type: BackgroundTypeEnum.IMAGE,
+              imageUrl: 'https://picsum.photos/seed/shanxia-coffee/1600/900',
+              size: BackgroundSizeEnum.COVER,
+              position: BackgroundPositionEnum.CENTER,
+              repeat: BackgroundRepeatEnum.NO_REPEAT,
+            }],
+          }),
         }),
         [
-          mkHeading(HeadingLevelEnum.H1, '打造你的专属页面', mkStyle({
-            font: { fontSize: 42, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', textAlign: TextAlignEnum.CENTER, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 4, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.1)' }], letterSpacing: '2', letterSpacingUnit: UnitEnum.PX },
-            size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
-          }), 'hero-title'),
-          mkHeading(HeadingLevelEnum.H2, '所见即所得 · 可视化编辑器', mkStyle({
-            font: { fontSize: 30, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#0f3460', textAlign: TextAlignEnum.CENTER, fontStyle: FontStyleEnum.ITALIC, fontFamily: FontFamilyEnum.GEORGIA, textShadows: [] },
-            size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-          }), 'hero-subtitle'),
-          mkHeading(HeadingLevelEnum.H3, '零代码 · 拖拽式 · 实时预览', mkStyle({
-            font: { fontSize: 22, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.MEDIUM, color: '#16213e', textAlign: TextAlignEnum.CENTER, letterSpacing: '1', letterSpacingUnit: UnitEnum.PX, textShadows: [] },
-            size: { marginBottom: '24', marginBottomUnit: UnitEnum.PX },
-          }), 'hero-h3'),
-          mkParagraph('VibePage 是一款面向所有人的可视化页面搭建工具，无论你是设计师、产品经理还是开发者，都能在这里快速构建专业级网页。拖拽组件、调整样式、实时预览，一切操作所见即所得。', mkStyle({
-            font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#555555', textAlign: TextAlignEnum.JUSTIFY, lineHeight: '1.8', textShadows: [] },
-            size: { marginBottom: '32', marginBottomUnit: UnitEnum.PX, maxWidth: '640', maxWidthUnit: UnitEnum.PX },
-          }), 'hero-desc'),
-          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER } }), [
-            mkButton('立即开始', mkStyle({
-              font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.2)' }] },
-              visual: {
-                backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1677ff 0%, #0958d9 100%)' }],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 12, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(22,119,255,0.35)', inset: false }],
-                borderRadiusTL: 8, borderRadiusTR: 8, borderRadiusBL: 8, borderRadiusBR: 8, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              },
-              size: {
-                paddingTop: 12, paddingTopUnit: UnitEnum.PX,
-                paddingRight: 36, paddingRightUnit: UnitEnum.PX,
-                paddingBottom: 12, paddingBottomUnit: UnitEnum.PX,
-                paddingLeft: 36, paddingLeftUnit: UnitEnum.PX,
-                marginRight: '16', marginRightUnit: UnitEnum.PX,
-              },
-            }), 'hero-cta-primary'),
-            mkLink('#docs', mkStyle({
-              general: { display: DisplayStyleEnum.INLINE_BLOCK },
-              size: {
-                paddingTop: 12, paddingTopUnit: UnitEnum.PX,
-                paddingRight: 36, paddingRightUnit: UnitEnum.PX,
-                paddingBottom: 12, paddingBottomUnit: UnitEnum.PX,
-                paddingLeft: 36, paddingLeftUnit: UnitEnum.PX,
-              },
-              visual: {
-                backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-                boxShadows: [],
-                borderWidth: 2, borderStyle: BorderStyleEnum.DASHED, borderColor: '#1677ff',
-                borderRadiusTL: 8, borderRadiusTR: 8, borderRadiusBL: 8, borderRadiusBR: 8, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              },
-              font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] },
-            }), [
-              mkText('查看文档', mkStyle({ font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-            ], 'hero-docs-link'),
-          ], 'hero-actions'),
-          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER } }), [
-            mkHeading(HeadingLevelEnum.H4, '拖拽设计', mkStyle({
-              font: { fontSize: 18, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#1a1a2e', textDecoration: TextDecorationEnum.UNDERLINE, textShadows: [] },
-              size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
-            }), 'hero-h4'),
-            mkHeading(HeadingLevelEnum.H5, '限时免费', mkStyle({
-              font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.MEDIUM, color: '#e94560', textDecoration: TextDecorationEnum.LINE_THROUGH, textShadows: [] },
-              size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
-            }), 'hero-h5'),
-            mkHeading(HeadingLevelEnum.H6, 'v2.0.1', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.THIN, color: '#999999', textShadows: [] },
-            }), 'hero-h6'),
-          ], 'hero-meta'),
-          mkImage('https://placeholder.com/800x400', 'Hero 示意图', mkStyle({
-            size: {
-              width: '800', widthUnit: UnitEnum.PX,
-              maxWidth: '100', maxWidthUnit: UnitEnum.PERCENT,
-              marginTop: '32', marginTopUnit: UnitEnum.PX,
-            },
-            visual: {
-              backgrounds: [],
-              boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 8, yUnit: UnitEnum.PX, blur: 32, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.12)', inset: false }],
-              borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#e8e8e8',
-            },
-          }), 'hero-image'),
-          mkLink('#more', mkStyle({
-            general: { display: DisplayStyleEnum.INLINE_BLOCK },
-            size: { marginTop: '20', marginTopUnit: UnitEnum.PX },
-            font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', textDecoration: TextDecorationEnum.UNDERLINE, textShadows: [] },
+          // 深色遮罩层，保证前景文字可读
+          mkDiv(mkStyle({
+            general: { position: PositionStyleEnum.ABSOLUTE, top: '0', topUnit: UnitEnum.PX, right: '0', rightUnit: UnitEnum.PX, bottom: '0', bottomUnit: UnitEnum.PX, left: '0', leftUnit: UnitEnum.PX },
+            visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: 'rgba(28,25,23,0.45)' }] }),
+          }), [], 'hero-overlay'),
+          mkDiv(mkStyle({
+            general: { display: DisplayStyleEnum.FLEX, position: PositionStyleEnum.RELATIVE, zIndex: 1 },
+            flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.CENTER },
           }), [
-            mkText('了解更多 →', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', textDecoration: TextDecorationEnum.UNDERLINE, textShadows: [] } })),
-          ], 'hero-more-link'),
+            mkHeading(HeadingLevelEnum.H6, 'SHANXIA COFFEE', mkStyle({
+              font: f({ fontFamily: SERIF, fontSize: 12, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#e7d9c8', letterSpacing: '3', letterSpacingUnit: UnitEnum.PX, textAlign: TextAlignEnum.CENTER }),
+              size: m('0', '20'),
+            }), 'hero-eyebrow'),
+            mkHeading(HeadingLevelEnum.H1, '巷子里的小咖啡店', mkStyle({
+              font: f({ fontSize: 46, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textAlign: TextAlignEnum.CENTER, lineHeight: '1.2' }),
+              size: m('0', '16'),
+            }), 'hero-title'),
+            mkParagraph('现磨咖啡、手作甜点与十八个座位。每日 8:00–21:00 营业，周二店休。', mkStyle({
+              font: f({ fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#e8e2d9', textAlign: TextAlignEnum.CENTER, lineHeight: '1.7' }),
+              size: { maxWidth: '480', maxWidthUnit: UnitEnum.PX, ...m('0', '36') },
+            }), 'hero-desc'),
+            mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER } }), [
+              mkButton('查看菜单', primaryBtn({ ...pad(12, 28, 12, 28), ...m('0', '0', '12') }, ACCENT), 'hero-cta'),
+              mkLink('#', mkStyle({
+                general: { display: DisplayStyleEnum.INLINE_BLOCK },
+                font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.MEDIUM, textDecoration: TextDecorationEnum.NONE }),
+                size: { ...pad(12, 28, 12, 28) },
+                visual: v({ borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: 'rgba(255,255,255,0.6)', ...rounded(6) }),
+              }), [mkText('门店位置')], 'hero-location'),
+            ], 'hero-actions'),
+          ], 'hero-content'),
         ],
         'hero',
       );
 
-      // ---- 功能卡片区域（h3 + h4 + p + div + 不同边框样式） ----
-      const mkFeatureCard = (
-        title: string,
-        desc: string,
-        alias: string,
-        borderStyle: BorderStyleEnum,
-        bgColor: string,
-        accentColor: string,
-        fontFamily?: string,
-      ): CanvasDivElement => {
-        return mkDiv(
-          mkStyle({
-            general: { display: DisplayStyleEnum.FLEX },
-            flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.FLEX_START },
-            size: {
-              paddingTop: 28, paddingTopUnit: UnitEnum.PX,
-              paddingRight: 28, paddingRightUnit: UnitEnum.PX,
-              paddingBottom: 28, paddingBottomUnit: UnitEnum.PX,
-              paddingLeft: 28, paddingLeftUnit: UnitEnum.PX,
-              width: '30', widthUnit: UnitEnum.PERCENT,
-            },
-            visual: {
-              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: bgColor }],
-              boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 16, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.06)', inset: false }],
-              borderWidth: 2, borderStyle, borderColor: accentColor,
-              borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-            },
-          }),
-          [
-            mkHeading(HeadingLevelEnum.H4, title, mkStyle({
-              font: { fontSize: 18, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: accentColor, fontFamily, textShadows: [] },
-              size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-            })),
-            mkParagraph(desc, mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#555555', lineHeight: '1.7', fontFamily, textShadows: [] },
-            })),
-          ],
-          alias,
-        );
-      };
+      // ---- 功能卡片（h2 + div 卡片 + h4 + p） ----
+      const featureCard = (title: string, desc: string, alias: string): CanvasDivElement =>
+        card([
+          cardTitle(title, `${alias}-title`, '8'),
+          mkParagraph(desc, mkStyle({
+            font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT, lineHeight: '1.6' }),
+            size: m('0', '0'),
+          }), `${alias}-desc`),
+        ], alias, '32');
 
       const features = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.CENTER },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-            boxShadows: [],
-          },
-        }),
+        sectionStyle(BAND),
         [
-          mkHeading(HeadingLevelEnum.H3, '核心功能', mkStyle({
-            font: { fontSize: 28, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', textAlign: TextAlignEnum.CENTER, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 4, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.08)' }] },
-            size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-          }), 'features-title'),
-          mkParagraph('从拖拽编辑到代码导出，VibePage 提供一站式页面搭建体验', mkStyle({
-            font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#888888', textAlign: TextAlignEnum.CENTER, textShadows: [] },
-            size: { marginBottom: '40', marginBottomUnit: UnitEnum.PX },
-          }), 'features-subtitle'),
-          mkDiv(
-            flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START } }),
-            [
-              mkFeatureCard('拖拽编辑', '所见即所得的可视化编辑体验，只需拖拽即可完成页面布局，零门槛上手。', 'feature-1', BorderStyleEnum.SOLID, '#ffffff', '#1677ff'),
-              mkFeatureCard('组件丰富', '内置 30+ 基础组件，涵盖容器、表单、媒体、表格等，满足各种页面需求。', 'feature-2', BorderStyleEnum.DASHED, '#f0f7ff', '#52c41a', FontFamilyEnum.GEORGIA),
-              mkFeatureCard('实时预览', '随时切换预览模式，所见即所得，确保设计效果与最终呈现完全一致。', 'feature-3', BorderStyleEnum.DOTTED, '#fff9f0', '#fa8c16', FontFamilyEnum.VERDANA),
-            ],
-            'feature-cards',
-          ),
-          mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER } }), [
-            mkHeading(HeadingLevelEnum.H5, '支持自定义样式', mkStyle({
-              font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.MEDIUM, color: '#333333', textShadows: [] },
-            }), 'h5-sample'),
-            mkSpan(mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontStyle: FontStyleEnum.ITALIC, textShadows: [] },
-            }), [
-              mkText('→ 查看全部功能', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontStyle: FontStyleEnum.ITALIC, textShadows: [] } })),
-            ], 'features-more'),
-            mkHeading(HeadingLevelEnum.H6, 'v2.0.1', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.LIGHT, color: '#999999', textShadows: [] },
-            }), 'h6-sample'),
-          ], 'heading-samples'),
+          wrap([
+            sectionHead('本周推荐', '豆单与甜点每周更新。', 'features'),
+            mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.STRETCH } }), [
+              featureCard('耶加雪菲 · 水洗', '柑橘调性，茉莉花香，冰手冲表现更好。', 'feature-beans'),
+              featureCard('黑糖拿铁', '自家熬的黑糖酱，默认半糖，可加浓。', 'feature-latte'),
+              featureCard('栗子蒙布朗', '每日限量二十份，建议搭配美式。', 'feature-dessert'),
+            ], 'feature-cards'),
+          ], 'features-inner'),
         ],
         'features',
       );
 
-      // ---- 文章 + 侧边栏区域（article + section + aside + p + span + text + link） ----
-      const articleSection = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(180deg, #fafbff 0%, #f0f4ff 100%)' }],
-            boxShadows: [],
-          },
-        }),
+      // ---- 文章 + 侧边栏（article + aside + h3/h5 + p + span + text + link） ----
+      const asideLine = (text: string, alias: string, last = false): CanvasParagraphElement =>
+        mkParagraph(text, mkStyle({
+          font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: last ? MUTED : BODY_TEXT }),
+          size: last ? m('0', '0') : m('0', '10'),
+        }), alias);
+
+      const contentSection = mkSection(
+        sectionStyle(),
         [
-          mkArticle(
-            mkStyle({
-              size: { width: '62', widthUnit: UnitEnum.PERCENT },
-              visual: {
-                backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 12, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.05)', inset: false }],
-                borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              },
-            }),
-            [
-              mkHeading(HeadingLevelEnum.H2, '关于 VibePage', mkStyle({
-                font: { fontSize: 26, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', fontFamily: FontFamilyEnum.GEORGIA, textShadows: [] },
-                size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
+          wrap([
+            mkArticle(mkStyle({ size: { width: '64', widthUnit: UnitEnum.PERCENT } }), [
+              mkHeading(HeadingLevelEnum.H3, '关于山下', mkStyle({
+                font: f({ fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }),
+                size: m('0', '16'),
               }), 'article-title'),
-              mkParagraph('VibePage 是一款可视化的页面搭建工具，支持拖拽编辑、实时预览，内置丰富的组件库，帮助用户快速构建专业页面。无论是落地页、产品展示页还是个人博客，都能轻松应对。', mkStyle({
-                font: { fontSize: 15, fontSizeUnit: UnitEnum.PX, color: '#333333', lineHeight: '1.8', textAlign: TextAlignEnum.JUSTIFY, textIndent: '32', textIndentUnit: UnitEnum.PX, textShadows: [] },
-                size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
+              mkParagraph('山下咖啡开在老城青云巷，2021 年开业。十八个座位，一台烘豆机，豆子自烘，甜点当天做。', mkStyle({
+                font: f({ fontSize: 15, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT, lineHeight: '1.8' }),
+                size: m('0', '16'),
               }), 'article-p1'),
-              mkParagraph('通过直观的编辑界面，你可以轻松调整元素的样式、布局和交互行为，无需任何编码经验。所有修改实时生效，所见即所得。', mkStyle({
-                font: { fontSize: 15, fontSizeUnit: UnitEnum.PX, color: '#333333', lineHeight: '1.8', textAlign: TextAlignEnum.JUSTIFY, textIndent: '32', textIndentUnit: UnitEnum.PX, textShadows: [] },
-                size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
+              mkParagraph('店里只播放固定歌单，下午四点后灯光调暗。插座管够，久坐不会被赶。', mkStyle({
+                font: f({ fontSize: 15, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT, lineHeight: '1.8' }),
+                size: m('0', '20'),
               }), 'article-p2'),
-              mkSpan(mkStyle({
-                font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontWeight: FontWeightEnum.SEMI_BOLD, fontStyle: FontStyleEnum.ITALIC, textShadows: [] },
-              }), [
-                mkText('了解更多详情，请访问', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#555555', textShadows: [] } })),
-                mkLink('#detail', mkStyle({ size: { marginLeft: '4', marginLeftUnit: UnitEnum.PX } }), [
-                  mkText('详细文档', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', textDecoration: TextDecorationEnum.UNDERLINE, fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] } })),
-                ], 'article-link'),
-              ], 'article-span'),
-            ],
-            'main-article',
-          ),
-          mkAside(
-            mkStyle({
-              size: { width: '32', widthUnit: UnitEnum.PERCENT, paddingTop: 24, paddingTopUnit: UnitEnum.PX, paddingRight: 24, paddingRightUnit: UnitEnum.PX, paddingBottom: 24, paddingBottomUnit: UnitEnum.PX, paddingLeft: 24, paddingLeftUnit: UnitEnum.PX },
-              visual: {
-                backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)' }],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 16, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.15)', inset: false }],
-                borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              },
-            }),
-            [
-              mkHeading(HeadingLevelEnum.H4, '快速导航', mkStyle({
-                font: { fontSize: 18, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
-                size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
+              mkSpan(mkStyle({ font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT }) }), [
+                mkText('外卖覆盖周边三公里，'),
+                mkLink('#', mkStyle({
+                  font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: ACCENT, textDecoration: TextDecorationEnum.UNDERLINE }),
+                }), [mkText('查看配送范围')], 'article-link'),
+                mkText('。'),
+              ], 'article-meta'),
+            ], 'article'),
+            mkAside(mkStyle({
+              size: { width: '30', widthUnit: UnitEnum.PERCENT, ...pad(20, 24, 20, 24) },
+              visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: BAND }], ...rounded(10) }),
+            }), [
+              mkHeading(HeadingLevelEnum.H5, '营业时间', mkStyle({
+                font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }),
+                size: m('0', '16'),
               }), 'aside-title'),
-              mkParagraph('在这里放置相关链接、最新动态或推荐内容。', mkStyle({
-                font: { fontSize: 13, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', lineHeight: '1.7', textShadows: [] },
-                size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-              }), 'aside-desc'),
-              mkDiv(flexCol({}), [
-                mkLink('#intro', mkStyle({ size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX } }), [
-                  mkText('→ 产品介绍', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-                ], 'aside-link-1'),
-                mkLink('#tutorial', mkStyle({ size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX } }), [
-                  mkText('→ 使用教程', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-                ], 'aside-link-2'),
-                mkLink('#faq', mkStyle({}), [
-                  mkText('→ 常见问题', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-                ], 'aside-link-3'),
-              ], 'aside-links'),
-            ],
-            'sidebar',
-          ),
+              mkDiv(flexCol(), [
+                asideLine('周一至周五 · 8:00–21:00', 'aside-weekday'),
+                asideLine('周末 · 9:00–22:00', 'aside-weekend'),
+                asideLine('周二店休', 'aside-closed', true),
+              ], 'aside-hours'),
+            ], 'sidebar'),
+          ], 'content-inner', true),
         ],
-        'article-section',
+        'content',
       );
 
-      // ---- 表单区域（form + label + input + textarea + radio + checkbox + button） ----
-      const inputStyle = mkStyle({
-        size: {
-          width: '100', widthUnit: UnitEnum.PERCENT,
-          paddingTop: 12, paddingTopUnit: UnitEnum.PX,
-          paddingRight: 16, paddingRightUnit: UnitEnum.PX,
-          paddingBottom: 12, paddingBottomUnit: UnitEnum.PX,
-          paddingLeft: 16, paddingLeftUnit: UnitEnum.PX,
-          marginBottom: '16', marginBottomUnit: UnitEnum.PX,
-        },
-        visual: {
-          backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f9fafb' }],
-          boxShadows: [],
-          borderRadiusTL: 8, borderRadiusTR: 8, borderRadiusBL: 8, borderRadiusBR: 8, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-          borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#d9d9d9',
-        },
-      });
-      const labelStyle = mkStyle({
-        font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#1a1a2e', letterSpacing: '0.5', letterSpacingUnit: UnitEnum.PX, textShadows: [] },
-        size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX },
-      });
+      // ---- 列表（ul + ol + li + text） ----
+      const listItem = (text: string, alias: string, last = false): CanvasListItemElement =>
+        mkListItem(mkStyle({ size: last ? m('0', '0') : m('0', '8') }), [mkText(text)], alias);
+      const listFont = f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT, lineHeight: '1.7' });
+      const listBase = { paddingLeft: 18, paddingLeftUnit: UnitEnum.PX, ...m('0', '0') };
 
-      const formEl = mkForm('/submit', FormMethodEnum.POST, mkStyle({
-        size: { width: '560', widthUnit: UnitEnum.PX, maxWidth: '100', maxWidthUnit: UnitEnum.PERCENT },
-        visual: {
-          backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-          boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 8, yUnit: UnitEnum.PX, blur: 32, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.08)', inset: false }],
-          borderRadiusTL: 16, borderRadiusTR: 16, borderRadiusBL: 16, borderRadiusBR: 16, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-        },
-      }), [
-        mkHeading(HeadingLevelEnum.H3, '联系我们', mkStyle({
-          font: { fontSize: 26, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', textAlign: TextAlignEnum.CENTER, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 4, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.06)' }] },
-          size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX },
-        }), 'form-title'),
-        mkParagraph('有任何问题或建议？填写下方表单，我们会尽快回复你。', mkStyle({
-          font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#888888', textAlign: TextAlignEnum.CENTER, textShadows: [] },
-          size: { marginBottom: '24', marginBottomUnit: UnitEnum.PX },
-        }), 'form-subtitle'),
-        mkDiv(flexCol({}), [
-          mkLabel('姓名', '', cloneDeep(labelStyle), 'label-name'),
-          mkInput('请输入你的姓名', cloneDeep(inputStyle), 'form-name'),
-        ], 'form-name-group'),
-        mkDiv(flexCol({}), [
-          mkLabel('邮箱', '', cloneDeep(labelStyle), 'label-email'),
-          mkInput('请输入你的邮箱', cloneDeep(inputStyle), 'form-email'),
-        ], 'form-email-group'),
-        mkDiv(flexCol({}), [
-          mkLabel('留言', '', cloneDeep(labelStyle), 'label-message'),
-          mkTextarea('请输入留言内容，我们会认真阅读每一条反馈...', cloneDeep(inputStyle), 'form-message'),
-        ], 'form-message-group'),
-        mkDiv(flexCol({}), [
-          mkLabel('性别', '', cloneDeep(labelStyle), 'label-gender'),
-          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
-            mkRadio('gender', 'male', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'radio-male'),
-            mkLabel('男', '', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
-              size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
-            }), 'label-male'),
-            mkRadio('gender', 'female', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'radio-female'),
-            mkLabel('女', '', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
-            }), 'label-female'),
-          ], 'radio-group'),
-        ], 'form-gender-group'),
-        mkDiv(flexCol({}), [
-          mkLabel('兴趣爱好', '', cloneDeep(labelStyle), 'label-hobby'),
-          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
-            mkCheckbox('hobby', 'coding', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'checkbox-coding'),
-            mkLabel('编程', '', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
-              size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
-            }), 'label-coding'),
-            mkCheckbox('hobby', 'design', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'checkbox-design'),
-            mkLabel('设计', '', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
-              size: { marginRight: '24', marginRightUnit: UnitEnum.PX },
-            }), 'label-design'),
-            mkCheckbox('hobby', 'writing', mkStyle({ size: { marginRight: '6', marginRightUnit: UnitEnum.PX } }), 'checkbox-writing'),
-            mkLabel('写作', '', mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] },
-            }), 'label-writing'),
-          ], 'checkbox-group'),
-        ], 'form-hobby-group'),
-        mkButton('提交反馈', mkStyle({
-          font: { fontSize: 16, fontSizeUnit: UnitEnum.PX, color: '#ffffff', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.2)' }] },
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1677ff 0%, #0958d9 100%)' }],
-            boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 12, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(22,119,255,0.3)', inset: false }],
-            borderRadiusTL: 8, borderRadiusTR: 8, borderRadiusBL: 8, borderRadiusBR: 8, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-          },
-          size: {
-            width: '100', widthUnit: UnitEnum.PERCENT,
-            paddingTop: 14, paddingTopUnit: UnitEnum.PX,
-            paddingRight: 32, paddingRightUnit: UnitEnum.PX,
-            paddingBottom: 14, paddingBottomUnit: UnitEnum.PX,
-            paddingLeft: 32, paddingLeftUnit: UnitEnum.PX,
-            marginTop: '8', marginTopUnit: UnitEnum.PX,
-          },
-        }), 'form-submit'),
-      ], 'contact-form');
-
-      const formSection = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.COLUMN, justifyContent: JustifyContentEnum.CENTER, alignItems: AlignItemsEnum.CENTER },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(180deg, #f0f4ff 0%, #e8eaf6 100%)' }],
-            boxShadows: [],
-          },
-        }),
-        [formEl],
-        'form-section',
-      );
-
-      // ---- 列表区域（ul + ol + li + p + link + span） ----
       const listSection = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-            boxShadows: [],
-          },
-        }),
+        sectionStyle(BAND),
         [
-          mkDiv(mkStyle({
-            size: { width: '45', widthUnit: UnitEnum.PERCENT },
-            visual: {
-              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f9fafb' }],
-              boxShadows: [],
-              borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#e8e8e8',
-            },
-          }), [
-            mkHeading(HeadingLevelEnum.H3, '功能列表', mkStyle({
-              font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', textShadows: [] },
-              size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
-            }), 'ul-title'),
-            mkUnorderedList(mkStyle({
-              size: { paddingLeft: 24, paddingLeftUnit: UnitEnum.PX },
-            }), [
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('拖拽式可视化编辑', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ul-item-1'),
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('丰富的组件库', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ul-item-2'),
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('实时预览与代码导出', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ul-item-3'),
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('支持自定义样式与动画', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ul-item-4'),
-              mkListItem(mkStyle({}), [
-                mkSpan(mkStyle({
-                  font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontStyle: FontStyleEnum.ITALIC, textShadows: [] },
-                }), [
-                  mkText('→ 查看完整功能列表', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontStyle: FontStyleEnum.ITALIC, textShadows: [] } })),
-                ], 'ul-more-span'),
-              ], 'ul-item-5'),
-            ], 'feature-ul'),
-          ], 'ul-group'),
-          mkDiv(mkStyle({
-            size: { width: '45', widthUnit: UnitEnum.PERCENT },
-            visual: {
-              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f0f7ff' }],
-              boxShadows: [],
-              borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-              borderWidth: 1, borderStyle: BorderStyleEnum.DASHED, borderColor: '#1677ff',
-            },
-          }), [
-            mkHeading(HeadingLevelEnum.H3, '使用步骤', mkStyle({
-              font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#0f3460', fontFamily: FontFamilyEnum.GEORGIA, textShadows: [] },
-              size: { marginBottom: '16', marginBottomUnit: UnitEnum.PX },
-            }), 'ol-title'),
-            mkOrderedList(mkStyle({
-              size: { paddingLeft: 24, paddingLeftUnit: UnitEnum.PX },
-            }), [
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('打开编辑器，选择组件', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ol-item-1'),
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('拖拽组件到画布', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ol-item-2'),
-              mkListItem(mkStyle({ size: { marginBottom: '10', marginBottomUnit: UnitEnum.PX } }), [
-                mkText('调整样式和属性', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', textShadows: [] } })),
-              ], 'ol-item-3'),
-              mkListItem(mkStyle({}), [
-                mkText('预览并导出代码', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] } })),
-              ], 'ol-item-4'),
-            ], 'steps-ol'),
-          ], 'ol-group'),
+          wrap([
+            sectionHead('菜单速览', '本周常驻出品。', 'lists'),
+            mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.STRETCH } }), [
+              card([
+                cardTitle('本周豆单', 'ul-card-title', '12'),
+                mkUnorderedList(mkStyle({ font: listFont, size: listBase }), [
+                  listItem('耶加雪菲 · 水洗', 'ul-item-1'),
+                  listItem('哥伦比亚 · 日晒', 'ul-item-2'),
+                  listItem('曼特宁 · 湿刨', 'ul-item-3'),
+                  listItem('瑰夏 · 水洗（限量）', 'ul-item-4', true),
+                ], 'beans-ul'),
+              ], 'ul-card', '49'),
+              card([
+                cardTitle('点单建议', 'ol-card-title', '12'),
+                mkOrderedList(mkStyle({ font: listFont, size: listBase }), [
+                  listItem('先选豆子', 'ol-item-1'),
+                  listItem('再选冷热', 'ol-item-2'),
+                  listItem('甜点最后再加', 'ol-item-3'),
+                  listItem('外带杯减两元', 'ol-item-4', true),
+                ], 'steps-ol'),
+              ], 'ol-card', '49'),
+            ], 'list-cards'),
+          ], 'lists-inner'),
         ],
-        'list-section',
+        'lists',
       );
 
-      // ---- 表格区域（table + caption + colgroup + col + thead + tbody + tfoot + tr + th + td） ----
-      const tdPadding = {
-        paddingTop: 12, paddingTopUnit: UnitEnum.PX,
-        paddingRight: 20, paddingRightUnit: UnitEnum.PX,
-        paddingBottom: 12, paddingBottomUnit: UnitEnum.PX,
-        paddingLeft: 20, paddingLeftUnit: UnitEnum.PX,
-      };
+      // ---- 表格（table + caption + colgroup + col + thead + tbody + tfoot + tr + th + td） ----
+      const cellPad = pad(10, 16, 10, 16);
+      const cellBorder = { borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: LINE };
+      const thCell = (text: string, alias: string): CanvasTableHeaderCellElement =>
+        mkTableHeaderCell(mkStyle({
+          size: cellPad,
+          font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK, textAlign: TextAlignEnum.LEFT }),
+          visual: v(cellBorder),
+        }), [mkText(text)], alias, TableScopeEnum.COL);
+      const tdCell = (text: string, alias: string, muted = false, serif = false): CanvasTableDataElement =>
+        mkTableData(mkStyle({
+          size: cellPad,
+          font: f({ fontFamily: serif ? SERIF : undefined, fontSize: 14, fontSizeUnit: UnitEnum.PX, color: muted ? MUTED : BODY_TEXT }),
+          visual: v(cellBorder),
+        }), [mkText(text)], alias);
+
       const tableSection = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.COLUMN, alignItems: AlignItemsEnum.CENTER },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(180deg, #fafbff 0%, #f0f4ff 100%)' }],
-            boxShadows: [],
-          },
-        }),
+        sectionStyle(),
         [
-          mkHeading(HeadingLevelEnum.H3, '版本对比', mkStyle({
-            font: { fontSize: 26, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#1a1a2e', textAlign: TextAlignEnum.CENTER, textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 2, yUnit: UnitEnum.PX, blur: 4, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.06)' }] },
-            size: { marginBottom: '8', marginBottomUnit: UnitEnum.PX },
-          }), 'table-title'),
-          mkParagraph('选择最适合你的方案', mkStyle({
-            font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#888888', textAlign: TextAlignEnum.CENTER, textShadows: [] },
-            size: { marginBottom: '24', marginBottomUnit: UnitEnum.PX },
-          }), 'table-subtitle'),
-          mkTable(mkStyle({
-            general: { borderCollapse: BorderCollapseEnum.COLLAPSE },
-            visual: {
-              backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }],
-              boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 16, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.08)', inset: false }],
-              borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#e8e8e8',
-              borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-            },
-          }), [
-            mkTableCaption(mkStyle({
-              font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#666666', fontStyle: FontStyleEnum.ITALIC, textShadows: [] },
-              size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
+          wrap([
+            sectionHead('价目表', '以下为堂食价格，外带杯减 ¥2。', 'table'),
+            mkTable(mkStyle({
+              general: { borderCollapse: BorderCollapseEnum.COLLAPSE },
+              size: { width: '100', widthUnit: UnitEnum.PERCENT },
+              visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], boxShadows: [cardShadow], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: LINE }),
             }), [
-              mkText('VibePage 各版本功能对比表', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: '#666666', fontStyle: FontStyleEnum.ITALIC, textShadows: [] } })),
-            ], 'table-caption'),
-            mkTableColGroup(1, mkStyle({}), [
-              mkTableCol(1, mkStyle({})),
-              mkTableCol(1, mkStyle({})),
-              mkTableCol(1, mkStyle({})),
-            ], 'table-colgroup'),
-            mkTableHead(mkStyle({
-              visual: { backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)' }], boxShadows: [] },
-            }), [
-              mkTableRow(mkStyle({}), [
-                mkTableHeaderCell(mkStyle({ size: tdPadding }), [
-                  mkText('功能', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [] } })),
-                ], 'th-feature', TableScopeEnum.COL),
-                mkTableHeaderCell(mkStyle({ size: tdPadding }), [
-                  mkText('免费版', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#a0c4ff', textShadows: [] } })),
-                ], 'th-free', TableScopeEnum.COL),
-                mkTableHeaderCell(mkStyle({ size: tdPadding }), [
-                  mkText('专业版', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#a0c4ff', textShadows: [] } })),
-                ], 'th-pro', TableScopeEnum.COL),
-              ], 'thead-tr'),
-            ], 'table-thead'),
-            mkTableBody(mkStyle({}), [
-              mkTableRow(mkStyle({ visual: { backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], boxShadows: [] } }), [
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('拖拽编辑', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-                ], 'td-1-1'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('✓ 支持', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#52c41a', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] } })),
-                ], 'td-1-2'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('✓ 支持', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#52c41a', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] } })),
-                ], 'td-1-3'),
-              ], 'tbody-tr-1'),
-              mkTableRow(mkStyle({ visual: { backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f9fafb' }], boxShadows: [] } }), [
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('组件数量', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-                ], 'td-2-1'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('10+', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#666666', textShadows: [] } })),
-                ], 'td-2-2'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('50+', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#1677ff', fontWeight: FontWeightEnum.BOLD, textShadows: [] } })),
-                ], 'td-2-3'),
-              ], 'tbody-tr-2'),
-              mkTableRow(mkStyle({ visual: { backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], boxShadows: [] } }), [
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('代码导出', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#333333', fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-                ], 'td-3-1'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('✗ 不支持', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#999999', textShadows: [] } })),
-                ], 'td-3-2'),
-                mkTableData(mkStyle({ size: tdPadding, visual: { backgrounds: [], boxShadows: [], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#f0f0f0' } }), [
-                  mkText('✓ 支持', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#52c41a', fontWeight: FontWeightEnum.SEMI_BOLD, textShadows: [] } })),
-                ], 'td-3-3'),
-              ], 'tbody-tr-3'),
-            ], 'table-tbody'),
-            mkTableFoot(mkStyle({
-              visual: { backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#f0f4ff' }], boxShadows: [] },
-            }), [
-              mkTableRow(mkStyle({}), [
-                mkTableData(mkStyle({ size: tdPadding }), [
-                  mkText('专业版提供更多高级功能与技术支持', mkStyle({ font: { fontSize: 13, fontSizeUnit: UnitEnum.PX, color: '#0f3460', textAlign: TextAlignEnum.CENTER, fontStyle: FontStyleEnum.ITALIC, fontWeight: FontWeightEnum.MEDIUM, textShadows: [] } })),
-                ], 'td-foot'),
-              ], 'tfoot-tr'),
-            ], 'table-tfoot'),
-          ], 'comparison-table'),
+              mkTableCaption(mkStyle({
+                font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: MUTED, textAlign: TextAlignEnum.LEFT }),
+                size: { paddingBottom: 8, paddingBottomUnit: UnitEnum.PX },
+              }), [mkText('常规饮品')], 'table-caption'),
+              mkTableColGroup(1, mkStyle({}), [
+                mkTableCol(1, mkStyle({ size: { width: '40', widthUnit: UnitEnum.PERCENT } })),
+                mkTableCol(1, mkStyle({})),
+                mkTableCol(1, mkStyle({})),
+              ], 'table-colgroup'),
+              mkTableHead(mkStyle({
+                visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: BAND }] }),
+              }), [
+                mkTableRow(mkStyle({}), [
+                  thCell('饮品', 'th-drink'),
+                  thCell('规格', 'th-size'),
+                  thCell('价格', 'th-price'),
+                ], 'thead-tr'),
+              ], 'table-thead'),
+              mkTableBody(mkStyle({}), [
+                mkTableRow(mkStyle({}), [
+                  tdCell('美式', 'td-1-1'), tdCell('350ml', 'td-1-2'), tdCell('¥22', 'td-1-3', false, true),
+                ], 'tbody-tr-1'),
+                mkTableRow(mkStyle({}), [
+                  tdCell('拿铁', 'td-2-1'), tdCell('350ml', 'td-2-2'), tdCell('¥26', 'td-2-3', false, true),
+                ], 'tbody-tr-2'),
+                mkTableRow(mkStyle({}), [
+                  tdCell('手冲单品', 'td-3-1'), tdCell('200ml', 'td-3-2'), tdCell('¥38', 'td-3-3', false, true),
+                ], 'tbody-tr-3'),
+                mkTableRow(mkStyle({}), [
+                  tdCell('Dirty', 'td-4-1'), tdCell('250ml', 'td-4-2'), tdCell('¥28', 'td-4-3', false, true),
+                ], 'tbody-tr-4'),
+              ], 'table-tbody'),
+              mkTableFoot(mkStyle({
+                visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: BAND }] }),
+              }), [
+                mkTableRow(mkStyle({}), [
+                  { ...mkTableData(mkStyle({
+                    size: cellPad,
+                    font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: MUTED }),
+                    visual: v(cellBorder),
+                  }), [mkText('甜点与季节饮品以吧台当日牌为准。')], 'td-foot'), colspan: 3 },
+                ], 'tfoot-tr'),
+              ], 'table-tfoot'),
+            ], 'menu-table'),
+          ], 'table-inner'),
         ],
         'table-section',
       );
 
-      // ---- 媒体区域（video + audio + image） ----
+      // ---- 表单（form + label + input + textarea + radio + checkbox + button） ----
+      const fieldLabel = mkStyle({
+        font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.MEDIUM, color: INK }),
+        size: m('0', '6'),
+      });
+      const fieldInput = mkStyle({
+        size: { width: '100', widthUnit: UnitEnum.PERCENT, ...pad(9, 12, 9, 12) },
+        font: f({ fontFamily: FONT_STACK, fontSize: 14, fontSizeUnit: UnitEnum.PX, color: INK }),
+        visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: INPUT_LINE, ...rounded(6) }),
+      });
+      const fieldGroup = flexCol({ size: m('0', '16') });
+      const optionInput = mkStyle({ size: m('0', '0', '6') });
+      const optionLabel = (marginRight = '0'): StyleConfig => mkStyle({
+        font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, color: BODY_TEXT }),
+        size: marginRight !== '0' ? m('0', '0', marginRight) : m('0', '0'),
+      });
+
+      const nameInput = mkInput('怎么称呼你', fieldInput, 'field-name-input');
+      const noteInput: CanvasTextareaElement = { ...mkTextarea('口味偏好或其他说明', fieldInput, 'field-note-input'), rows: 3 };
+      const earlyRadio: CanvasRadioElement = { ...mkRadio('session', '14:00', optionInput, 'session-early'), checked: true };
+      const lateRadio = mkRadio('session', '16:00', optionInput, 'session-late');
+      const newsCheckbox = mkCheckbox('opts', 'beans', optionInput, 'opt-beans');
+
+      const formEl = mkForm('', FormMethodEnum.GET, mkStyle({
+        size: { width: '440', widthUnit: UnitEnum.PX, maxWidth: '100', maxWidthUnit: UnitEnum.PERCENT, ...pad(32, 32, 32, 32) },
+        visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#ffffff' }], boxShadows: [cardShadow], borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: LINE, ...rounded(12) }),
+      }), [
+        mkHeading(HeadingLevelEnum.H4, '手冲体验课', mkStyle({
+          font: f({ fontSize: 18, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }),
+          size: m('0', '4'),
+        }), 'form-title'),
+        mkParagraph('每周六下午两场，限额六位。', mkStyle({
+          font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: MUTED }),
+          size: m('0', '24'),
+        }), 'form-desc'),
+        mkDiv(fieldGroup, [
+          mkLabel('称呼', nameInput.id, fieldLabel, 'label-name'),
+          nameInput,
+        ], 'field-name'),
+        mkDiv(fieldGroup, [
+          mkLabel('备注', noteInput.id, fieldLabel, 'label-note'),
+          noteInput,
+        ], 'field-note'),
+        mkDiv(fieldGroup, [
+          mkLabel('场次', '', fieldLabel, 'label-session'),
+          mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
+            earlyRadio,
+            mkLabel('14:00', earlyRadio.id, optionLabel('20'), 'label-early'),
+            lateRadio,
+            mkLabel('16:00', lateRadio.id, optionLabel(), 'label-late'),
+          ], 'session-row'),
+        ], 'field-session'),
+        mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER }, size: m('0', '20') }), [
+          newsCheckbox,
+          mkLabel('课后接收新豆单通知', newsCheckbox.id, optionLabel(), 'label-beans'),
+        ], 'field-news'),
+        mkButton('报名', primaryBtn({ width: '100', widthUnit: UnitEnum.PERCENT, ...pad(10, 16, 10, 16) }, ACCENT), 'form-submit'),
+      ], 'class-form');
+
+      const formSection = mkSection(
+        sectionStyle(BAND),
+        [formEl],
+        'form-section',
+      );
+
+      // ---- 媒体（video + audio + image） ----
+      const mediaCaption = mkStyle({
+        font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: MUTED }),
+        size: m('8', '0'),
+      });
+      const mediaFrame = v({ borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#44403c', ...rounded(8) });
+
+      // 深色区块：与浅色区块形成明暗节奏
       const mediaSection = mkSection(
-        mkStyle({
-          general: { display: DisplayStyleEnum.FLEX },
-          flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START },
-          size: sectionPadding,
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: '#1a1a2e' }],
-            boxShadows: [],
-          },
-        }),
+        sectionStyle(INK),
         [
-          mkDiv(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
-            mkHeading(HeadingLevelEnum.H3, '视频展示', mkStyle({
-              font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
-              size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-            }), 'video-title'),
-            mkVideo('https://example.com/demo.mp4', mkStyle({
-              size: { width: '100', widthUnit: UnitEnum.PERCENT },
-              visual: {
-                backgrounds: [],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 16, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)', inset: false }],
-                borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-                borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#333333',
-              },
-            }), 'demo-video'),
-          ], 'video-group'),
-          mkDiv(mkStyle({ size: { width: '45', widthUnit: UnitEnum.PERCENT } }), [
-            mkHeading(HeadingLevelEnum.H3, '音频示例', mkStyle({
-              font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
-              size: { marginBottom: '12', marginBottomUnit: UnitEnum.PX },
-            }), 'audio-title'),
-            mkAudio('https://example.com/demo.mp3', mkStyle({
-              size: { width: '100', widthUnit: UnitEnum.PERCENT },
-            }), 'demo-audio'),
-            mkImage('https://placeholder.com/400x200', '音频配图', mkStyle({
-              size: { width: '100', widthUnit: UnitEnum.PERCENT, marginTop: '16', marginTopUnit: UnitEnum.PX },
-              visual: {
-                backgrounds: [],
-                boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: 4, yUnit: UnitEnum.PX, blur: 16, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)', inset: false }],
-                borderRadiusTL: 12, borderRadiusTR: 12, borderRadiusBL: 12, borderRadiusBR: 12, borderRadiusTLUnit: UnitEnum.PX, borderRadiusTRUnit: UnitEnum.PX, borderRadiusBLUnit: UnitEnum.PX, borderRadiusBRUnit: UnitEnum.PX,
-                borderWidth: 1, borderStyle: BorderStyleEnum.SOLID, borderColor: '#333333',
-              },
-            }), 'audio-image'),
-          ], 'audio-group'),
+          wrap([
+            sectionHead('门店影像', '吧台、座位与本周甜点。', 'media', true),
+            mkDiv(flexRow({ flex: { justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.FLEX_START } }), [
+              mkDiv(flexCol({ size: { width: '49', widthUnit: UnitEnum.PERCENT } }), [
+                mkVideo('https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4', mkStyle({
+                  size: { width: '100', widthUnit: UnitEnum.PERCENT },
+                  visual: mediaFrame,
+                }), 'demo-video'),
+                mkParagraph('店内日常', mediaCaption, 'video-caption'),
+              ], 'media-video'),
+              mkDiv(flexCol({ size: { width: '49', widthUnit: UnitEnum.PERCENT } }), [
+                mkImage('https://picsum.photos/640/360', '吧台一角', mkStyle({
+                  size: { width: '100', widthUnit: UnitEnum.PERCENT },
+                  visual: mediaFrame,
+                }), 'demo-image'),
+                mkParagraph('吧台一角', mediaCaption, 'image-caption'),
+                mkAudio('https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3', mkStyle({
+                  size: { width: '100', widthUnit: UnitEnum.PERCENT, ...m('24', '0') },
+                }), 'demo-audio'),
+                mkParagraph('店内环境声', mediaCaption, 'audio-caption'),
+              ], 'media-misc'),
+            ], 'media-row'),
+          ], 'media-inner'),
         ],
         'media-section',
       );
 
-      // ---- 页脚（footer） ----
+      // ---- 页脚 ----
       const footerEl = mkFooter(
         mkStyle({
           general: { display: DisplayStyleEnum.FLEX },
           flex: { flexDirection: FlexDirectionEnum.ROW, justifyContent: JustifyContentEnum.SPACE_BETWEEN, alignItems: AlignItemsEnum.CENTER },
-          size: {
-            paddingTop: 32, paddingTopUnit: UnitEnum.PX,
-            paddingRight: 32, paddingRightUnit: UnitEnum.PX,
-            paddingBottom: 32, paddingBottomUnit: UnitEnum.PX,
-            paddingLeft: 32, paddingLeftUnit: UnitEnum.PX,
-            width: '100', widthUnit: UnitEnum.PERCENT,
-          },
-          visual: {
-            backgrounds: [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }],
-            boxShadows: [{ x: 0, xUnit: UnitEnum.PX, y: -2, yUnit: UnitEnum.PX, blur: 12, blurUnit: UnitEnum.PX, spread: 0, spreadUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.15)', inset: false }],
-          },
+          size: { width: '100', widthUnit: UnitEnum.PERCENT, ...pad(28, 32, 28, 32) },
+          visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: PAPER }], boxShadows: [hairline(-1)] }),
         }),
         [
-          mkDiv(flexCol({}), [
-            mkSpan(mkStyle({
-              font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] },
-            }), [
-              mkText('VibePage', mkStyle({ font: { fontSize: 20, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.BOLD, color: '#ffffff', textShadows: [{ x: 1, xUnit: UnitEnum.PX, y: 1, yUnit: UnitEnum.PX, blur: 2, blurUnit: UnitEnum.PX, color: 'rgba(0,0,0,0.3)' }] } })),
+          mkDiv(flexCol(), [
+            mkSpan(mkStyle({ font: f({ fontSize: 14, fontSizeUnit: UnitEnum.PX, fontWeight: FontWeightEnum.SEMI_BOLD, color: INK }) }), [
+              mkText('山下咖啡'),
             ], 'footer-logo'),
-            mkParagraph('© 2024 VibePage. 保留所有权利。', mkStyle({
-              font: { fontSize: 13, fontSizeUnit: UnitEnum.PX, color: '#888888', textShadows: [] },
-              size: { marginTop: '8', marginTopUnit: UnitEnum.PX },
-            }), 'footer-copyright'),
+            mkParagraph('© 2026 山下咖啡 · 老城青云巷 12 号', mkStyle({
+              font: f({ fontSize: 13, fontSizeUnit: UnitEnum.PX, color: MUTED }),
+              size: m('6', '0'),
+            }), 'footer-copy'),
           ], 'footer-brand'),
           mkDiv(flexRow({ flex: { alignItems: AlignItemsEnum.CENTER } }), [
-            mkLink('#', mkStyle({ size: { marginRight: '20', marginRightUnit: UnitEnum.PX } }), [
-              mkText('隐私政策', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-            ], 'footer-link-1'),
-            mkLink('#', mkStyle({ size: { marginRight: '20', marginRightUnit: UnitEnum.PX } }), [
-              mkText('服务条款', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-            ], 'footer-link-2'),
-            mkLink('#', mkStyle({}), [
-              mkText('联系我们', mkStyle({ font: { fontSize: 14, fontSizeUnit: UnitEnum.PX, color: '#a0c4ff', textDecoration: TextDecorationEnum.NONE, textShadows: [] } })),
-            ], 'footer-link-3'),
+            mkLink('#', textLink('24', 13), [mkText('外卖合作')], 'footer-delivery'),
+            mkLink('#', textLink('24', 13), [mkText('会员注册')], 'footer-member'),
+            mkLink('#', textLink('0', 13), [mkText('联系我们')], 'footer-contact'),
           ], 'footer-links'),
         ],
         'site-footer',
       );
 
-      this.root.children = [headerEl, hero, features, articleSection, formSection, listSection, tableSection, mediaSection, footerEl];
+      // 根元素基础排版：纸色底、统一字体族、墨色与行高，子元素继承
+      localStyleRules.unshift({
+        type: StyleRuleTypeEnum.EDITABLE,
+        selector: `#${this.root.id}`,
+        style: styleConfigToCss(mkStyle({
+          font: f({ fontFamily: FONT_STACK, fontSize: 14, fontSizeUnit: UnitEnum.PX, color: INK, lineHeight: '1.5' }),
+          visual: v({ backgrounds: [{ type: BackgroundTypeEnum.COLOR, color: PAPER }] }),
+        }), true),
+      });
+
+      this.root.children = [headerEl, hero, features, contentSection, listSection, tableSection, formSection, mediaSection, footerEl];
       this.styleRules = localStyleRules;
     },
+
     /** 将画布数据保存到 LocalStorage */
     saveCanvasToStorage() {
       try {

@@ -20,7 +20,7 @@
           </me-button>
         </me-tooltip>
         <a-divider type="vertical" />
-        <me-tooltip content="编辑源码" effect="light">
+        <me-tooltip content="代码编辑" effect="light">
           <me-button @click="emit('code')">
             <CodeOutlined />
           </me-button>

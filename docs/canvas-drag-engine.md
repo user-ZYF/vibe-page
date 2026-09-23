@@ -168,12 +168,10 @@ function findDropPosition(dims: NodeInfo[], posX: number, posY: number): DropPos
 ```
 
 `findDropPosition` 逻辑：
-- 先排除 `FREE` 锚点；若全部为 `FREE`，走 `findInFree`（按矩形边缘最近距离取锚点，Y 轴中心定前后）
-- 按 DOM 顺序找「鼠标位于其之前」的第一个锚点（`isBeforeAnchor`）：
-  - 纵向元素：比较垂直中心点
-  - 横向元素：仅当鼠标处于其纵向带（所在行）内时比较水平中心点；鼠标在行上方 → 之前，行下方 → 之后
+- 锚点只取常规流元素（`FREE` 脱流元素一律不作参照）；无常规流子元素 → `anchor: null`，插到容器开头
+- 取矩形边缘距鼠标最近的元素作锚点（`nearestAnchor`），再按 `isBeforeAnchor` 定前后：
+  - 纵向元素：比较垂直中心点；横向元素：比较水平中心点
   - 排列方向反向（`*-reverse` / `float: right`）：轴向比较取反
-- 无命中 → 插入到最后一个锚点之后
 - `index` 取 `anchor.childIndex`（children 数组真实下标）
 
 ---

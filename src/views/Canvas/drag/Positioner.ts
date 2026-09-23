@@ -9,9 +9,8 @@ import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, LayoutModeEnum, Po
 /**
  * 根据子元素维度数组和鼠标坐标计算插入位置
  *
- * 核心思路：按 DOM 顺序找到「鼠标位于其之前」的第一个锚点，插入到它前面；
- * 若鼠标在所有锚点之后，则插入到最后一个锚点之后。
- * 「之前」的判定跟随锚点自身的布局模式（见 isBeforeAnchor）。
+ * 核心思路：取矩形边缘距鼠标最近的子元素作锚点，
+ * 再按锚点自身的布局轴与排列方向判断插入到其前面还是后面
  */
 export function findDropPosition(
   /** 子元素维度数组 */
@@ -21,73 +20,53 @@ export function findDropPosition(
   /** 鼠标 Y 坐标（视口坐标） */
   posY: number
 ): DropPositionResult {
-  /** 常规流锚点集合 */
+  /** 非 absolute/fixed 定位锚点集合 */
   const anchors = dims.filter((d) => d.mode !== LayoutModeEnum.FREE);
 
+  /** 容器内无可参考的子元素 → 插到容器开头 */
   if (anchors.length === 0) {
-    // 如果一个常规流都没有，则退而求其次，以定位元素进行参考
-    return dims.length > 0
-      ? findInFree(dims, posX, posY)
-      : { anchor: null, where: DropPositionEnum.BEFORE };
+    return { anchor: null, where: DropPositionEnum.BEFORE };
   }
 
-  for (const anchor of anchors) {
-    if (isBeforeAnchor(anchor, posX, posY)) {
-      return { anchor, where: DropPositionEnum.BEFORE };
-    }
-  }
-
-  return { anchor: anchors[anchors.length - 1], where: DropPositionEnum.AFTER };
+  const anchor = nearestAnchor(anchors, posX, posY);
+  const where = isBeforeAnchor(anchor, posX, posY)
+    ? DropPositionEnum.BEFORE
+    : DropPositionEnum.AFTER;
+  return { anchor, where };
 }
 
-/**
- * 判断鼠标是否位于锚点「之前」
- * - 纵向锚点：比较垂直中心点
- * - 横向锚点：仅在鼠标处于其纵向带（所在行）内时比较水平中心点；
- *   鼠标在行上方 → 之前，行下方 → 之后（避免跨行 / 跨布局模式误锚定）
- * - 主轴反向（flex-direction: *-reverse、float: right）：轴向比较取反，与视觉顺序保持一致
- */
-function isBeforeAnchor(anchor: NodeInfo, posX: number, posY: number): boolean {
-  if (anchor.mode === LayoutModeEnum.HORIZONTAL) {
-    if (posY < anchor.top) return true;
-    if (posY > anchor.bottom) return false;
-
-    const center = anchor.left + anchor.outerWidth / 2;
-    return anchor.reversed ? posX > center : posX < center;
-  }
-
-  const center = anchor.top + anchor.outerHeight / 2;
-  return anchor.reversed ? posY > center : posY < center;
-}
-
-/**
- * 自由定位：absolute/fixed 元素无常规流排列语义，
- * 取矩形边界距离鼠标最近的元素，用其 Y 轴中心点判断前后（横线占位）
- */
-function findInFree(dims: NodeInfo[], posX: number, posY: number): DropPositionResult {
+/** 取矩形边缘距鼠标最近的元素（距离相等时偏向 DOM 靠后的元素） */
+function nearestAnchor(dims: NodeInfo[], posX: number, posY: number): NodeInfo {
   let anchor = dims[0];
   let minDist = Infinity;
 
   for (const dim of dims) {
     const dx = Math.max(dim.left - posX, 0, posX - dim.right);
     const dy = Math.max(dim.top - posY, 0, posY - dim.bottom);
-    // 鼠标距离矩形边缘的距离
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    /** 距离相等时偏向后面的元素（DOM 顺序靠后），配合 BEFORE 语义更符合向后插入的直觉 */
+    /** 鼠标到矩形边缘的平方距离（比较大小无需开方） */
+    const dist = dx * dx + dy * dy;
     if (dist <= minDist) {
       minDist = dist;
       anchor = dim;
     }
   }
 
-  /**
-   * 脱流元素的 DOM 顺序只影响绘制层级，插入位置没有"正确"方向可言，
-   * 统一用 Y 轴中心点判断前后（配横向占位线），符合"上下插入"的直觉：
-   * 鼠标在锚点垂直中点上方 → 插入其前；下方 → 插入其后
-   */
-  const where =
-    posY < anchor.top + anchor.outerHeight / 2 ? DropPositionEnum.BEFORE : DropPositionEnum.AFTER;
-  return { anchor, where };
+  return anchor;
+}
+
+/**
+ * 判断鼠标是否位于锚点「之前」
+ * - 纵向锚点：比较垂直中心点；横向锚点：比较水平中心点
+ * - 主轴反向（flex-direction: *-reverse、float: right）：轴向比较取反，与视觉顺序保持一致
+ */
+function isBeforeAnchor(anchor: NodeInfo, posX: number, posY: number): boolean {
+  const center =
+    anchor.mode === LayoutModeEnum.HORIZONTAL
+      ? anchor.left + anchor.outerWidth / 2
+      : anchor.top + anchor.outerHeight / 2;
+  const pos = anchor.mode === LayoutModeEnum.HORIZONTAL ? posX : posY;
+
+  return anchor.reversed ? pos > center : pos < center;
 }
 
 /**
@@ -450,7 +429,7 @@ export class Positioner {
       };
     }
 
-    /** 纵向流 / 自由定位的锚点：插入缝隙是水平的，画横线 */
+    /** 纵向流锚点：插入缝隙是水平的，画横线 */
     return {
       top: visualBefore ? anchor.top : anchor.bottom,
       left: anchor.left,

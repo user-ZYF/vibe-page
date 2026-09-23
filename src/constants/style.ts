@@ -458,7 +458,7 @@ export enum LayoutModeEnum {
   VERTICAL = 1,
   /** 横向排列（flex-row / float / inline-block / grid / 表格单元格等） */
   HORIZONTAL = 2,
-  /** 自由定位（子元素均为 absolute/fixed），取最近元素按 Y 轴判定 */
+  /** 自由定位（absolute/fixed，完全脱流，不作插入锚点） */
   FREE = 3,
 }
 

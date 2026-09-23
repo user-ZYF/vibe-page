@@ -64,19 +64,28 @@ actions:
 /** 单个子元素的几何维度（复用于 findDropPosition） */
 interface NodeInfo {
   id: string;
+  childIndex: number;       // 在父容器 children 数组中的真实下标
+  mode: LayoutModeEnum;     // 布局模式（VERTICAL / HORIZONTAL / FREE）
+  reversed: boolean;        // 排列方向是否反向（flex-direction: *-reverse、float: right）
   top: number;
   left: number;
+  right: number;
   outerWidth: number;
   outerHeight: number;
   bottom: number;
-  inFlow: boolean;  // 是否在文档流中（非 float/absolute）
+}
+
+/** 落点计算结果（复用于 findDropPosition） */
+interface DropPositionResult {
+  anchor: NodeInfo | null;  // 插入参照的锚点元素
+  where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER;
 }
 
 /** 落点位置 */
 interface DropPosition {
   parentId: string | null;
   index: number;
-  where: 'before' | 'after';
+  where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER;
 }
 
 /** DOM 节点注册信息 */
@@ -86,6 +95,11 @@ interface NodeRegistration {
   isCanvas: boolean;  // 是否为可接收子元素的容器
 }
 ```
+
+`LayoutModeEnum`（`src/constants/style.ts`）：
+- `VERTICAL`：纵向流（块流 / flex-column / 表格行等）
+- `HORIZONTAL`：横向排列（flex-row / float / inline-block / grid / 表格单元格等）
+- `FREE`：自由定位（absolute/fixed，完全脱离文档流）
 
 ---
 
@@ -126,30 +140,41 @@ class Positioner {
   static BORDER_OFFSET = 10
 
   compute(
-    dropTargetId: string | null,
+    dropTargetId: string,
     x: number,
     y: number,
-    elements: CanvasElement[],
+    root: CanvasRootElement,
     registry: NodeRegistry,
-    draggingId: string | null
+    draggingId: string | null,
+    dragType: CanvasInnerElementTypeEnum | null,
+    dragElement: CanvasInnerElement | null
   ): DropIndicator | null
 
-  private getCanvasAncestor(id: string | null, elements: CanvasElement[], registry: NodeRegistry): string | null
+  private getCanvasAncestor(id: string, root: CanvasRootElement, registry: NodeRegistry): string | null
 
   private isNearBorder(el: HTMLElement, x: number, y: number): boolean
 
-  private getChildNodeInfos(parentId: string | null, elements: CanvasElement[], registry: NodeRegistry): NodeInfo[]
+  /** 收集子元素维度（含布局模式），跳过 display:none 与未注册节点 */
+  private getChildNodeInfos(parentId: string, root: CanvasRootElement, registry: NodeRegistry, parentEl: HTMLElement): NodeInfo[]
 
-  private canDrop(parentId: string | null, draggingId: string | null, elements: CanvasElement[]): boolean
+  /** 按自身 display / 父容器 display / float / position 判定布局模式与主轴方向 */
+  private classifyElementMode(style: CSSStyleDeclaration, parentStyle: CSSStyleDeclaration): { mode: LayoutModeEnum; reversed: boolean }
+
+  private computeRect(anchor: NodeInfo | null, where, parentEl: HTMLElement): PlaceholderLine
 }
 
 /** findDropPosition —— 纯函数，根据子元素维度数组和鼠标坐标计算插入位置 */
-function findDropPosition(dims: NodeInfo[], x: number, y: number): { index: number; where: 'before' | 'after' }
+function findDropPosition(dims: NodeInfo[], posX: number, posY: number): DropPositionResult
 ```
 
 `findDropPosition` 逻辑：
-- 正常流元素：以 `yCenter` 为分界，鼠标在上半 = before，下半 = after
-- float 元素：以 `xCenter` 为分界
+- 先排除 `FREE` 锚点；若全部为 `FREE`，走 `findInFree`（按矩形边缘最近距离取锚点，Y 轴中心定前后）
+- 按 DOM 顺序找「鼠标位于其之前」的第一个锚点（`isBeforeAnchor`）：
+  - 纵向元素：比较垂直中心点
+  - 横向元素：仅当鼠标处于其纵向带（所在行）内时比较水平中心点；鼠标在行上方 → 之前，行下方 → 之后
+  - 排列方向反向（`*-reverse` / `float: right`）：轴向比较取反
+- 无命中 → 插入到最后一个锚点之后
+- `index` 取 `anchor.childIndex`（children 数组真实下标）
 
 ---
 
@@ -257,8 +282,9 @@ function useDragConnector(
 ```
 
 渲染规则：
-- 水平排列（非 inFlow）：竖线，`width: 2px, height: elHeight`
-- 垂直排列（inFlow）：横线，`height: 2px, width: elWidth`
+- 锚点为 `HORIZONTAL`（横向排列）：竖线，`width: 2px, height: elHeight`
+- 锚点为 `VERTICAL` / `FREE`：横线，`height: 2px, width: elWidth`
+- 无锚点（空容器）：容器内顶部横线
 
 ---
 

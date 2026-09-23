@@ -78,8 +78,11 @@ const labelRef = ref<HTMLElement | null>(null);
 /** 名称标签宽度 */
 const labelWidth = ref(0);
 
+/** 悬停元素是否处于渲染状态（display 不为 none，直接读取 DOM 计算样式，反映真实渲染结果） */
+const isTargetDisplayed = ref(true);
+
 /** 是否显示覆盖层 */
-const visible = computed(() => !!currentTarget.value && !isDragging.value && !isResizing.value);
+const visible = computed(() => !!currentTarget.value && !isDragging.value && !isResizing.value && isTargetDisplayed.value);
 
 /** 名称元素自然的top位置 */
 const NATURAL_TOP = -18;
@@ -123,6 +126,19 @@ function handleMouseLeave() {
   currentTarget.value = null;
 }
 
+/**
+ * 重新测量悬停元素的可见性与盒模型
+ * display:none 时元素无渲染框（几何数据全为 0），隐藏指示层并跳过测量
+ */
+function refreshTargetBox(el: Element) {
+  isTargetDisplayed.value = getComputedStyle(el).display !== 'none';
+  if (!isTargetDisplayed.value) return;
+  updateBox(el);
+  nextTick(() => {
+    labelWidth.value = labelRef.value?.offsetWidth ?? 0;
+  });
+}
+
 /** 窗口尺寸变化时同步更新元素尺寸 */
 function handleRecompute() {
   if (currentTarget.value) {
@@ -132,21 +148,61 @@ function handleRecompute() {
 
 watch(currentTarget, (el) => {
   if (el) {
-    updateBox(el);
-    nextTick(() => {
-      labelWidth.value = labelRef.value?.offsetWidth ?? 0;
-    });
+    refreshTargetBox(el);
+    startLayoutWatch();
   } else {
+    isTargetDisplayed.value = true;
     resetElRect();
+    stopLayoutWatch();
   }
 });
 
 /** 拖拽/调整尺寸结束时，刷新元素尺寸数据，避免显示旧尺寸 */
 watch([isDragging, isResizing], () => {
   if (!isDragging.value && !isResizing.value && currentTarget.value) {
-    updateBox(currentTarget.value);
+    refreshTargetBox(currentTarget.value);
   }
 });
+
+/** 画布数据深度监听的停止函数（仅悬停期间订阅，避免无目标时的全树深度遍历开销） */
+let layoutWatchStop: (() => void) | null = null;
+
+/** 订阅画布元素数据与样式规则变化：悬停元素的盒模型、可见性可能改变，元素也可能已被删除 */
+function startLayoutWatch() {
+  if (layoutWatchStop) return;
+  layoutWatchStop = watch(
+    [() => canvasStore.root, () => canvasStore.styleRules],
+    () => {
+      const el = currentTarget.value;
+      /** 拖拽/调整尺寸期间指示器不可见，跳过测量（结束时由对应 watch 统一刷新） */
+      if (!el || isDragging.value || isResizing.value) return;
+      /** 待 DOM 更新完成后重新校验并测量 */
+      nextTick(() => {
+        /** 期间鼠标可能已移出，以最新悬停目标为准 */
+        if (currentTarget.value !== el) return;
+        /** 悬停元素的 DOM 节点已被卸载重建（删除/合并/代码重写）时，隐藏指示器 */
+        if (!el.isConnected) {
+          currentTarget.value = null;
+          return;
+        }
+        const id = el.getAttribute('data-canvas-id');
+        /** 画布元素已从元素树移除时隐藏指示器；无 data-canvas-id 的内部节点仅重新测量 */
+        if (id && !canvasStore.getElementById(id)) {
+          currentTarget.value = null;
+          return;
+        }
+        refreshTargetBox(el);
+      });
+    },
+    { deep: true },
+  );
+}
+
+/** 停止画布数据深度监听 */
+function stopLayoutWatch() {
+  layoutWatchStop?.();
+  layoutWatchStop = null;
+}
 
 onMounted(() => {
   const canvasEl = getCanvasEl();
@@ -159,6 +215,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  stopLayoutWatch();
   const canvasEl = getCanvasEl();
   if (canvasEl) {
     canvasEl.removeEventListener('mouseover', handleMouseOver as EventListener);

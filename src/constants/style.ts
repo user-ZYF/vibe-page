@@ -450,6 +450,18 @@ export const FLOAT_OPTIONS = [
   { label: 'right', value: FloatStyleEnum.RIGHT },
 ];
 
+/** 容器布局模式枚举（用于拖拽落点判定） */
+export enum LayoutModeEnum {
+  /** 未定义 */
+  UNDEFINED = 0,
+  /** 纵向流（块流 / flex-column / 表格行等） */
+  VERTICAL = 1,
+  /** 横向排列（flex-row / float / inline-block / grid / 表格单元格等） */
+  HORIZONTAL = 2,
+  /** 自由定位（子元素均为 absolute/fixed），取最近元素按 Y 轴判定 */
+  FREE = 3,
+}
+
 /** position枚举 */
 export enum PositionStyleEnum {
   /** 静态定位 */
@@ -480,6 +492,12 @@ export enum DisplayStyleEnum {
   INLINE_BLOCK = "inline-block",
   /** 弹性盒子 */
   FLEX = "flex",
+  /** 行内弹性盒子 */
+  INLINE_FLEX = "inline-flex",
+  /** 网格 */
+  GRID = "grid",
+  /** 行内网格 */
+  INLINE_GRID = "inline-grid",
   /** 隐藏 */
   NONE = "none",
   /** 表格 */
@@ -512,6 +530,9 @@ export const DISPLAY_OPTIONS = [
   { label: 'block', value: DisplayStyleEnum.BLOCK },
   { label: 'inline-block', value: DisplayStyleEnum.INLINE_BLOCK },
   { label: 'flex', value: DisplayStyleEnum.FLEX },
+  { label: 'inline-flex', value: DisplayStyleEnum.INLINE_FLEX },
+  { label: 'grid', value: DisplayStyleEnum.GRID },
+  { label: 'inline-grid', value: DisplayStyleEnum.INLINE_GRID },
   { label: 'none', value: DisplayStyleEnum.NONE },
 ];
 

@@ -2,111 +2,92 @@ import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement, Canvas
 import { DropPositionEnum } from "@/constants/home";
 import { isParentElement, isChildTypeAllowed, isSubtreeAllowed } from "@/views/Canvas/types";
 import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
-import type { NodeInfo, DropIndicator } from "./types";
+import type { NodeInfo, DropIndicator, PlaceholderLine, DropPositionResult } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
-import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, PositionStyleEnum } from "@/constants/style";
+import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, LayoutModeEnum, PositionStyleEnum } from "@/constants/style";
 
 /**
- * 纯函数：根据子元素维度数组和鼠标坐标计算插入位置
+ * 根据子元素维度数组和鼠标坐标计算插入位置
  *
- * 核心思路：遍历容器内所有子元素，用鼠标坐标与每个元素的中心点比较，
- * 找到鼠标最接近的元素，并判断鼠标在该元素的上半/下半（纵向流）
- * 或左半/右半（横向排列），从而决定插入到该元素的前面还是后面。
- *
- * - 文档流元素（inFlow = true）：纵向堆叠，用 Y 轴中心点判断，确定后立即 break
- * - 非文档流元素（inFlow = false，如 float/absolute）：横向排列，用 X 轴中心点判断，
- *   需要处理多行换行的情况，不能提前退出
+ * 核心思路：按 DOM 顺序找到「鼠标位于其之前」的第一个锚点，插入到它前面；
+ * 若鼠标在所有锚点之后，则插入到最后一个锚点之后。
+ * 「之前」的判定跟随锚点自身的布局模式（见 isBeforeAnchor）。
  */
 export function findDropPosition(
-  /** 子元素维度数组（包含位置、尺寸、是否在文档流中） */
+  /** 子元素维度数组 */
   dims: NodeInfo[],
   /** 鼠标 X 坐标（视口坐标） */
   posX: number,
   /** 鼠标 Y 坐标（视口坐标） */
   posY: number
-): { index: number; where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER } {
-  /** 默认结果：插入到第一个元素之前 */
-  const result = { index: 0, where: DropPositionEnum.BEFORE as DropPositionEnum.BEFORE | DropPositionEnum.AFTER };
+): DropPositionResult {
+  /** 常规流锚点集合 */
+  const anchors = dims.filter((d) => d.mode !== LayoutModeEnum.FREE);
 
-  /**
-   * 三个"限制线"用于多行横排场景的优化跳过：
-   * - leftLimit：已确定鼠标在某元素右侧（AFTER）后，右边缘还不到此线的元素可跳过
-   * - xLimit：已确定鼠标在某元素左侧（BEFORE）后，左边缘超过此线的元素可跳过
-   * - yLimit：已确定鼠标在某元素上方后，中心点低于此线的元素（下一行）可跳过
-   */
-  let leftLimit = 0;
-  let xLimit = 0;
-  let yLimit = 0;
+  if (anchors.length === 0) {
+    // 如果一个常规流都没有，则退而求其次，以定位元素进行参考
+    return dims.length > 0
+      ? findInFree(dims, posX, posY)
+      : { anchor: null, where: DropPositionEnum.BEFORE };
+  }
 
-  /** 当前元素的右边缘坐标 */
-  let dimRight = 0;
-  /** 当前元素的水平中心点 */
-  let xCenter = 0;
-  /** 当前元素的垂直中心点 */
-  let yCenter = 0;
-  /** 当前元素的下边缘坐标 */
-  let dimDown = 0;
-
-  for (let i = 0; i < dims.length; i++) {
-    const dim = dims[i];
-
-    /** 计算当前元素的四个关键坐标 */
-    dimRight = dim.left + dim.outerWidth;
-    dimDown = dim.top + dim.outerHeight;
-    xCenter = dim.left + dim.outerWidth / 2;
-    yCenter = dim.top + dim.outerHeight / 2;
-
-    /**
-     * 跳过不可能匹配的元素（主要用于 float 横排多行场景）：
-     * 1. xLimit 已设置且当前元素左边缘超过 xLimit → 鼠标已确定在更左边，跳过更靠右的元素
-     * 2. yLimit 已设置且当前元素中心点 >= yLimit → 鼠标已确定在更上方，跳过下一行的元素
-     * 3. leftLimit 已设置且当前元素右边缘不到 leftLimit → 鼠标已确定在更右边，跳过更靠左的元素
-     */
-    if (
-      (xLimit && dim.left > xLimit) ||
-      (yLimit && yCenter >= yLimit) ||
-      (leftLimit && dimRight < leftLimit)
-    ) {
-      continue;
-    }
-
-    /** 更新当前匹配到的元素索引 */
-    result.index = i;
-
-    if (!dim.inFlow) {
-      /**
-       * 非文档流元素（float/absolute 等）：横向排列，用 X 轴中心点判断
-       */
-
-      /** 鼠标还在当前元素上方（未超出下边缘），设置 yLimit 排除下一行的元素 */
-      if (posY < dimDown) yLimit = dimDown;
-
-      if (posX < xCenter) {
-        /** 鼠标在水平中心左侧 → 插入到该元素前面，设置 xLimit 排除更靠右的元素 */
-        xLimit = xCenter;
-        result.where = DropPositionEnum.BEFORE;
-      } else {
-        /** 鼠标在水平中心右侧 → 插入到该元素后面，设置 leftLimit 排除更靠左的元素 */
-        leftLimit = xCenter;
-        result.where = DropPositionEnum.AFTER;
-      }
-    } else {
-      /**
-       * 文档流元素：纵向堆叠，用 Y 轴中心点判断
-       */
-
-      if (posY < yCenter) {
-        /** 鼠标在垂直中心上方 → 插入到该元素前面，后续元素更靠下，不可能匹配，直接退出 */
-        result.where = DropPositionEnum.BEFORE;
-        break;
-      } else {
-        /** 鼠标在垂直中心下方 → 插入到该元素后面，继续检查下一个元素是否更接近 */
-        result.where = DropPositionEnum.AFTER;
-      }
+  for (const anchor of anchors) {
+    if (isBeforeAnchor(anchor, posX, posY)) {
+      return { anchor, where: DropPositionEnum.BEFORE };
     }
   }
 
-  return result;
+  return { anchor: anchors[anchors.length - 1], where: DropPositionEnum.AFTER };
+}
+
+/**
+ * 判断鼠标是否位于锚点「之前」
+ * - 纵向锚点：比较垂直中心点
+ * - 横向锚点：仅在鼠标处于其纵向带（所在行）内时比较水平中心点；
+ *   鼠标在行上方 → 之前，行下方 → 之后（避免跨行 / 跨布局模式误锚定）
+ * - 主轴反向（flex-direction: *-reverse、float: right）：轴向比较取反，与视觉顺序保持一致
+ */
+function isBeforeAnchor(anchor: NodeInfo, posX: number, posY: number): boolean {
+  if (anchor.mode === LayoutModeEnum.HORIZONTAL) {
+    if (posY < anchor.top) return true;
+    if (posY > anchor.bottom) return false;
+
+    const center = anchor.left + anchor.outerWidth / 2;
+    return anchor.reversed ? posX > center : posX < center;
+  }
+
+  const center = anchor.top + anchor.outerHeight / 2;
+  return anchor.reversed ? posY > center : posY < center;
+}
+
+/**
+ * 自由定位：absolute/fixed 元素无常规流排列语义，
+ * 取矩形边界距离鼠标最近的元素，用其 Y 轴中心点判断前后（横线占位）
+ */
+function findInFree(dims: NodeInfo[], posX: number, posY: number): DropPositionResult {
+  let anchor = dims[0];
+  let minDist = Infinity;
+
+  for (const dim of dims) {
+    const dx = Math.max(dim.left - posX, 0, posX - dim.right);
+    const dy = Math.max(dim.top - posY, 0, posY - dim.bottom);
+    // 鼠标距离矩形边缘的距离
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    /** 距离相等时偏向后面的元素（DOM 顺序靠后），配合 BEFORE 语义更符合向后插入的直觉 */
+    if (dist <= minDist) {
+      minDist = dist;
+      anchor = dim;
+    }
+  }
+
+  /**
+   * 脱流元素的 DOM 顺序只影响绘制层级，插入位置没有"正确"方向可言，
+   * 统一用 Y 轴中心点判断前后（配横向占位线），符合"上下插入"的直觉：
+   * 鼠标在锚点垂直中点上方 → 插入其前；下方 → 插入其后
+   */
+  const where =
+    posY < anchor.top + anchor.outerHeight / 2 ? DropPositionEnum.BEFORE : DropPositionEnum.AFTER;
+  return { anchor, where };
 }
 
 /**
@@ -137,24 +118,29 @@ export class Positioner {
     dragElement: CanvasInnerElement | null
   ): DropIndicator | null {
     /** 找到最近的 isCanvas 祖先 */
-    let parentId = this.getCanvasAncestor(dropTargetId, root, registry)!;
+    let parentId = this.getCanvasAncestor(dropTargetId, root, registry);
 
-    /** 获取 parentId 对应的 DOM 元素 */
-    const parentEl = registry.get(parentId)?.el;
-    
-    if(!parentEl) {
+    /** 获取 parentId 对应的 DOM 元素（注册表与元素树短暂不同步时兜底） */
+    let parentEl = parentId ? registry.get(parentId)?.el : undefined;
+
+    if (!parentId || !parentEl) {
       return null;
     }
 
     /** 如果鼠标接近元素的边框，则上升到父级 */
     if (parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
       parentId = this.findParentId(parentId, root);
+      parentEl = registry.get(parentId)?.el;
+      if (!parentEl) return null;
     }
 
-    /** 获取父级内所有直接子元素的维度 */
-    const childInfos = this.getChildNodeInfos(parentId, root, registry);
+    /** 获取父级内所有直接子元素的维度（含各自布局模式） */
+    const childInfos = this.getChildNodeInfos(parentId, root, registry, parentEl);
 
-    const { index, where } = findDropPosition(childInfos, x, y);
+    const { anchor, where } = findDropPosition(childInfos, x, y);
+
+    /** 锚点在 children 数组中的真实下标（无锚点时插入到容器开头） */
+    const index = anchor ? anchor.childIndex : 0;
 
     /** 错误信息 */
     let error = "";
@@ -183,7 +169,7 @@ export class Positioner {
     }
 
     /** 计算占位线 rect */
-    const rect = this.computeRect(childInfos, index, where, parentEl);
+    const rect = this.computeRect(anchor, where, parentEl);
 
     return {
       parentId,
@@ -241,85 +227,121 @@ export class Positioner {
   private getChildNodeInfos(
     parentId: string,
     root: CanvasRootElement,
-    registry: NodeRegistry
+    registry: NodeRegistry,
+    parentEl: HTMLElement
   ): NodeInfo[] {
     const children = this.getDirectChildren(parentId, root);
-    const result: NodeInfo[] = [];
+    const parentStyle = getComputedStyle(parentEl);
+    const infos: NodeInfo[] = [];
 
-    for (const child of children) {
-      const reg = registry.get(child.id);
+    for (let i = 0; i < children.length; i++) {
+      const reg = registry.get(children[i].id);
       if (!reg) continue;
-      const rect = reg.el.getBoundingClientRect();
       const style = getComputedStyle(reg.el);
-      const parentEl = reg.el.parentElement;
-      const parentStyle = parentEl ? getComputedStyle(parentEl) : null;
 
-      /** 判断元素是否在纵向文档流中 */
-      const computeInFlow = () => {
-        if (!parentStyle) return true;
+      /** display:none 不渲染，不作插入锚点 */
+      if (style.display === DisplayStyleEnum.NONE) continue;
 
-        /** 父容器是 float */
-        if (parentStyle.float !== FloatStyleEnum.NONE) return false;
+      const rect = reg.el.getBoundingClientRect();
+      const { mode, reversed } = this.classifyElementMode(style, parentStyle);
 
-        /** 父容器是横向 flex（flex-direction 不为 column） */
-        if (
-          parentStyle.display === DisplayStyleEnum.FLEX &&
-          parentStyle.flexDirection !== FlexDirectionEnum.COLUMN && 
-          parentStyle.flexDirection !== FlexDirectionEnum.COLUMN_REVERSE
-        ) {
-          return false;
-        }
-
-        /** 自身绝对/固定定位 */
-        if (style.position === PositionStyleEnum.ABSOLUTE || style.position === PositionStyleEnum.FIXED) return false;
-
-        /** 自身浮动 */
-        if (style.float !== FloatStyleEnum.NONE) return false;
-
-        /** 自身 display 类型 */
-        switch (style.display) {
-          case DisplayStyleEnum.BLOCK:
-          case DisplayStyleEnum.FLEX:
-          /** 列表项纵向排列 */
-          case DisplayStyleEnum.LIST_ITEM:
-          /** 表格为块级元素，纵向排列 */
-          case DisplayStyleEnum.TABLE:
-          /** 表格行在表组内纵向排列 */
-          case DisplayStyleEnum.TABLE_ROW:
-          /** 表头/表体/表脚组在表格内纵向排列 */
-          case DisplayStyleEnum.TABLE_HEADER_GROUP:
-          case DisplayStyleEnum.TABLE_ROW_GROUP:
-          case DisplayStyleEnum.TABLE_FOOTER_GROUP:
-          /** 表格标题纵向排列 */
-          case DisplayStyleEnum.TABLE_CAPTION:
-            return true;
-          /** 表格单元格在行内横向排列，类似横向 flex */
-          case DisplayStyleEnum.TABLE_CELL:
-          /** 列定义不参与视觉流 */
-          case DisplayStyleEnum.TABLE_COLUMN:
-          case DisplayStyleEnum.TABLE_COLUMN_GROUP:
-          /** 行内表格非纵向流 */
-          case DisplayStyleEnum.INLINE_TABLE:
-            return false;
-        }
-
-        return false;
-      };
-
-      const inFlow = computeInFlow();
-
-      result.push({
-        id: child.id,
+      infos.push({
+        id: children[i].id,
+        childIndex: i,
+        mode,
+        reversed,
         top: rect.top,
         left: rect.left,
+        right: rect.right,
         outerWidth: rect.width,
         outerHeight: rect.height,
         bottom: rect.bottom,
-        inFlow,
       });
     }
 
-    return result;
+    return infos;
+  }
+
+  /** 判断元素是否为 absolute/fixed 定位（完全脱离文档流，不影响兄弟布局） */
+  private isPositioned(style: CSSStyleDeclaration): boolean {
+    return (
+      style.position === PositionStyleEnum.ABSOLUTE || style.position === PositionStyleEnum.FIXED
+    );
+  }
+
+  /**
+   * 判断子元素按自身 display 是否参与纵向文档流。
+   * float / position / display:none 由调用方先行排除
+   */
+  private isInVerticalFlow(style: CSSStyleDeclaration): boolean {
+    /** 自身 display 类型 */
+    switch (style.display) {
+      case DisplayStyleEnum.BLOCK:
+      case DisplayStyleEnum.FLEX:
+      /** 块级网格在文档流中纵向排列 */
+      case DisplayStyleEnum.GRID:
+      /** 列表项纵向排列 */
+      case DisplayStyleEnum.LIST_ITEM:
+      /** 表格为块级元素，纵向排列 */
+      case DisplayStyleEnum.TABLE:
+      /** 表格行在表组内纵向排列 */
+      case DisplayStyleEnum.TABLE_ROW:
+      /** 表头/表体/表脚组在表格内纵向排列 */
+      case DisplayStyleEnum.TABLE_HEADER_GROUP:
+      case DisplayStyleEnum.TABLE_ROW_GROUP:
+      case DisplayStyleEnum.TABLE_FOOTER_GROUP:
+      /** 表格标题纵向排列 */
+      case DisplayStyleEnum.TABLE_CAPTION:
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 判定元素的布局模式与主轴方向：
+   * 1. absolute/fixed 定位 → 自由定位（完全脱离文档流，不影响兄弟布局）
+   * 2. 父容器是 flex / inline-flex → 按 flex-direction 判定主轴方向与是否反向（float 对 flex/grid 子项无效）
+   * 3. 父容器是 grid / inline-grid → 横向（二维布局按行处理）
+   * 4. 自身浮动 → 横向（float 占据布局空间，成行排列并换行；float:right 为反向排列）
+   * 5. 自身 display 是纵向流类型（block/表格行/列表项等）→ 纵向
+   * 6. 其余（inline 系列/表格单元格等）→ 横向
+   */
+  private classifyElementMode(
+    style: CSSStyleDeclaration,
+    parentStyle: CSSStyleDeclaration
+  ): { mode: LayoutModeEnum; reversed: boolean } {
+    /** 正向结果 */
+    const result = (mode: LayoutModeEnum, reversed = false) => ({ mode, reversed });
+
+    if (this.isPositioned(style)) return result(LayoutModeEnum.FREE);
+
+    if (
+      parentStyle.display === DisplayStyleEnum.FLEX ||
+      parentStyle.display === DisplayStyleEnum.INLINE_FLEX
+    ) {
+      const isColumn =
+        parentStyle.flexDirection === FlexDirectionEnum.COLUMN ||
+        parentStyle.flexDirection === FlexDirectionEnum.COLUMN_REVERSE;
+      const isReverse =
+        parentStyle.flexDirection === FlexDirectionEnum.ROW_REVERSE ||
+        parentStyle.flexDirection === FlexDirectionEnum.COLUMN_REVERSE;
+      return result(isColumn ? LayoutModeEnum.VERTICAL : LayoutModeEnum.HORIZONTAL, isReverse);
+    }
+
+    if (
+      parentStyle.display === DisplayStyleEnum.GRID ||
+      parentStyle.display === DisplayStyleEnum.INLINE_GRID
+    ) {
+      return result(LayoutModeEnum.HORIZONTAL);
+    }
+
+    /** 右浮动从容器右缘排起，视觉顺序与 DOM 顺序相反（同 row-reverse） */
+    if (style.float !== FloatStyleEnum.NONE) {
+      return result(LayoutModeEnum.HORIZONTAL, style.float === FloatStyleEnum.RIGHT);
+    }
+
+    return result(this.isInVerticalFlow(style) ? LayoutModeEnum.VERTICAL : LayoutModeEnum.HORIZONTAL);
   }
 
   /** 获取指定父级的直接子元素列表 */
@@ -377,39 +399,62 @@ export class Positioner {
     return isInside((sourceEl as CanvasParentElement).children, targetId);
   }
 
-  /** 根据落点信息计算占位线的 rect（视口坐标） */
+  /** 根据落点信息计算占位线的 rect（视口坐标），方向跟随锚点自身的布局模式与排列方向 */
   private computeRect(
-    dims: NodeInfo[],
-    index: number,
+    anchor: NodeInfo | null,
     where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER,
     parentEl: HTMLElement
-  ): { top: number; left: number; width: number; height: number } {
+  ): PlaceholderLine {
     const thickness = 2;
-    const targetDim = dims[index];
 
-    if (targetDim) {
-      if (!targetDim.inFlow) {
-        /** 竖线（float 元素横排） */
-        const l = where === DropPositionEnum.BEFORE ? targetDim.left : targetDim.left + targetDim.outerWidth;
-        return { top: targetDim.top, left: l, width: thickness, height: targetDim.outerHeight };
-      } else {
-        /** 横线（文档流竖排） */
-        const t = where === DropPositionEnum.BEFORE ? targetDim.top : targetDim.bottom;
-        return { top: t, left: targetDim.left, width: targetDim.outerWidth, height: thickness };
-      }
+    /** 无锚点（容器内无可参照子元素）：在容器内容区顶部画横线 */
+    if (!anchor) {
+      const parentRect = parentEl.getBoundingClientRect();
+      const style = window.getComputedStyle(parentEl);
+      const paddingTop = parseFloat(style.paddingTop) || 0;
+      const paddingBottom = parseFloat(style.paddingBottom) || 0;
+      const paddingLeft = parseFloat(style.paddingLeft) || 0;
+      const paddingRight = parseFloat(style.paddingRight) || 0;
+
+      /** column-reverse 容器首项从底部排起，占位线画在底部 */
+      const isColumnReverse =
+        (style.display === DisplayStyleEnum.FLEX ||
+          style.display === DisplayStyleEnum.INLINE_FLEX) &&
+        style.flexDirection === FlexDirectionEnum.COLUMN_REVERSE;
+
+      return {
+        top: isColumnReverse
+          ? parentRect.bottom - paddingBottom - thickness
+          : parentRect.top + paddingTop,
+        left: parentRect.left + paddingLeft,
+        width: parentRect.width - paddingLeft - paddingRight,
+        height: thickness,
+      };
     }
 
-    /** 容器为空时，显示在容器内顶部 */
-    const parentRect = parentEl.getBoundingClientRect();
-    const style = window.getComputedStyle(parentEl);
-    const paddingTop = parseFloat(style.paddingTop) || 0;
-    const paddingLeft = parseFloat(style.paddingLeft) || 0;
-    const paddingRight = parseFloat(style.paddingRight) || 0;
+    /**
+     * where 是 DOM 语义（插到锚点 DOM 前/后），占位线要画在锚点的视觉边缘上：
+     * 正向排列时 DOM 前 = 视觉前（左缘/上缘），反向排列时相反，故翻转取值
+     */
+    const visualBefore = anchor.reversed
+      ? where === DropPositionEnum.AFTER
+      : where === DropPositionEnum.BEFORE;
 
+    /** 横向排列的锚点：插入缝隙是竖直的，画竖线 */
+    if (anchor.mode === LayoutModeEnum.HORIZONTAL) {
+      return {
+        top: anchor.top,
+        left: visualBefore ? anchor.left : anchor.right,
+        width: thickness,
+        height: anchor.outerHeight,
+      };
+    }
+
+    /** 纵向流 / 自由定位的锚点：插入缝隙是水平的，画横线 */
     return {
-      top: parentRect.top + paddingTop,
-      left: parentRect.left + paddingLeft,
-      width: parentRect.width - paddingLeft - paddingRight,
+      top: visualBefore ? anchor.top : anchor.bottom,
+      left: anchor.left,
+      width: anchor.outerWidth,
       height: thickness,
     };
   }

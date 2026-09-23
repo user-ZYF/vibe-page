@@ -277,12 +277,14 @@ function updatePos() {
 watch(selectedElementId, (id) => {
   if (id) {
     updatePos();
+    startLayoutWatch();
   } else {
     resetElRect();
+    stopLayoutWatch();
   }
 });
 
-/** 监听选中元素数据变化（如内容、class变化）或拖拽状态变化（因为可能是选中的元素被拖拽了），更新工具栏位置 */
+/** 监听选中元素数据（如内容、class变化）或拖拽状态变化（因为可能是选中的元素被拖拽了），更新工具栏位置 */
 watch(
   [() => selectedElement.value, () => isDragging.value],
   () => {
@@ -292,6 +294,29 @@ watch(
   },
   { deep: true },
 );
+
+/** 画布数据深度监听的停止函数（仅选中期间订阅，避免无目标时的全树深度遍历开销） */
+let layoutWatchStop: (() => void) | null = null;
+
+/** 订阅画布元素树与样式规则变化：选中元素的尺寸、可见性可能被兄弟元素或规则变更影响 */
+function startLayoutWatch() {
+  if (layoutWatchStop) return;
+  layoutWatchStop = watch(
+    [() => canvasStore.root, () => canvasStore.styleRules],
+    () => {
+      if (selectedElementId.value && !isResizing.value) {
+        nextTick(updatePos);
+      }
+    },
+    { deep: true },
+  );
+}
+
+/** 停止画布数据深度监听 */
+function stopLayoutWatch() {
+  layoutWatchStop?.();
+  layoutWatchStop = null;
+}
 
 /** 滚动或窗口尺寸变化时同步更新位置 */
 function handleRecompute() {
@@ -309,10 +334,12 @@ onMounted(() => {
   /** 初始化时如果已有选中元素，立即更新位置 */
   if (selectedElementId.value) {
     updatePos();
+    startLayoutWatch();
   }
 });
 
 onBeforeUnmount(() => {
+  stopLayoutWatch();
   const canvasEl = getCanvasEl();
   if (canvasEl) {
     canvasEl.removeEventListener('scroll', handleRecompute, true);

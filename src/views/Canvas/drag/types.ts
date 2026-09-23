@@ -3,23 +3,38 @@
  */
 
 import { DropPositionEnum } from "@/constants/home";
+import type { LayoutModeEnum } from "@/constants/style";
 
 /** 单个子元素的几何维度（复用于 findDropPosition） */
 export interface NodeInfo {
   /** 元素 id */
   id: string;
+  /** 在父容器 children 数组中的真实下标 */
+  childIndex: number;
+  /** 元素自身布局模式（决定其作为锚点时的判定轴和占位线方向） */
+  mode: LayoutModeEnum;
+  /** 排列方向是否反向（flex-direction: *-reverse、float: right），影响「之前」的轴向比较方向 */
+  reversed: boolean;
   /** 顶部距视口距离 */
   top: number;
   /** 左侧距视口距离 */
   left: number;
+  /** 右侧距视口距离 */
+  right: number;
   /** 外部宽度 */
   outerWidth: number;
   /** 外部高度 */
   outerHeight: number;
   /** 底部距视口距离 */
   bottom: number;
-  /** 是否在文档流中（非 float/absolute） */
-  inFlow: boolean;
+}
+
+/** 落点计算结果（复用于 findDropPosition） */
+export interface DropPositionResult {
+  /** 插入参照的锚点元素（null = 容器中无可参照的子元素） */
+  anchor: NodeInfo | null;
+  /** 插入到锚点元素的前面还是后面 */
+  where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER;
 }
 
 /** 落点位置 */
@@ -29,7 +44,7 @@ export interface DropPosition {
   /** 插入位置 index */
   index: number;
   /** before / after */
-  where: "before" | "after";
+  where: DropPositionEnum.BEFORE | DropPositionEnum.AFTER;
 }
 
 /** DOM 节点注册信息 */
@@ -46,7 +61,7 @@ export interface NodeRegistration {
 export interface PlaceholderLine {
   /** 距离视口顶部 */
   top: number;
-  /** 距离视口底部 */
+  /** 距离视口左侧 */
   left: number;
   /** 宽度 */
   width: number;

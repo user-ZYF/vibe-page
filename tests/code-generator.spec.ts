@@ -142,10 +142,53 @@ describe('generateCss', () => {
     expect(css).toContain('content-box');
   });
 
-  it('at-rule 原样透传', () => {
+  it('at-rule 原样透传（仅重写 < 防 </style> 截断）', () => {
     const css = generateCss([
       { type: StyleRuleTypeEnum.AT_RULE, selector: '', style: {}, atRuleCssText: '@media print { .a { color: red; } }' },
     ]);
-    expect(css).toContain('@media print');
+    expect(css).toContain('@media print { .a { color: red; } }');
+    const withLt = generateCss([
+      { type: StyleRuleTypeEnum.AT_RULE, selector: '', style: {}, atRuleCssText: '@media x { .a { content: "</style>"; } }' },
+    ]);
+    expect(withLt).not.toContain('</style>');
+  });
+
+  it('声明值含规则逃逸字符时整条声明丢弃', () => {
+    const css = generateCss([
+      {
+        type: StyleRuleTypeEnum.EDITABLE,
+        selector: '.a',
+        style: {
+          color: 'red;}*{display:none',
+          background: 'linear-gradient(red, blue)',
+          backgroundImage: 'url("data:image/png;base64,AA")',
+        },
+      },
+    ]);
+    expect(css).not.toContain('display:none');
+    expect(css).toContain('background: linear-gradient(red, blue);');
+    expect(css).toContain('backgroundImage: url("data:image/png;base64,AA");');
+  });
+
+  it('声明值中的 < 重写为定长转义，防 </style> 截断', () => {
+    const css = generateCss([
+      { type: StyleRuleTypeEnum.EDITABLE, selector: '.a', style: { content: '"x</style>y"' } },
+    ]);
+    expect(css).not.toContain('</style>');
+    expect(css).toContain('\\00003c');
+  });
+
+  it('非法属性名与含 { } < / 的选择器对应声明/规则被丢弃', () => {
+    const css = generateCss([
+      { type: StyleRuleTypeEnum.EDITABLE, selector: '.a}*{', style: { color: 'red' } },
+      { type: StyleRuleTypeEnum.EDITABLE, selector: '.e}', style: { color: 'red' } },
+      { type: StyleRuleTypeEnum.EDITABLE, selector: '.d/*', style: { color: 'red' } },
+      { type: StyleRuleTypeEnum.EDITABLE, selector: '.b', style: { 'x;y': 'red', color: 'blue' } },
+    ]);
+    expect(css).not.toContain('.a}*{');
+    expect(css).not.toContain('.e}');
+    expect(css).not.toContain('.d/*');
+    expect(css).not.toContain('x;y');
+    expect(css).toContain('.b {\n  color: blue;\n}');
   });
 });

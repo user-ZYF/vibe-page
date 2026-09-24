@@ -27,7 +27,7 @@ import { CanvasElementTypeEnum, ELEMENT_TYPE_TAG_MAP, LinkTargetEnum, TABLE_SCOP
 import { StyleRuleTypeEnum } from '@/constants/style';
 
 import type { CanvasStyleRule } from '@/views/Canvas/types';
-import { sanitizeUrl, sanitizeAttributeValue } from '@/utils/sanitize';
+import { sanitizeUrl, sanitizeAttributeValue, sanitizeCssDeclarationValue, escapeCssLt } from '@/utils/sanitize';
 import { isVoidElement, resolveSafeTagName, resolveHeadingTag } from '@/utils/html-parser';
 
 /**
@@ -267,12 +267,22 @@ function collectCssRules(styleRules: CanvasStyleRule[] = []): string {
   for (const rule of styleRules) {
     const { selector, style, atRuleCssText } = rule;
     if (rule.type === StyleRuleTypeEnum.AT_RULE && atRuleCssText) {
-      rules.push(atRuleCssText);
+      // at-rule 为完整规则文本（{} 是其语法结构，不做声明级校验），仅重写 < 防止 </style> 截断样式文本上下文
+      rules.push(escapeCssLt(atRuleCssText));
     } else {
+      // 属性名须为 CSS 标识符（含 -- 自定义属性），防止脏数据经属性名注入声明
+      // 声明值经注入校验与 < 重写：字符串/括号外的 ; { } 可逃逸声明上下文注入任意规则，整条丢弃
       const declarations = Object.entries(style)
-        .map(([prop, value]) => `  ${prop}: ${value};`)
+        .map(([prop, value]) => {
+          if (!/^[a-zA-Z0-9_-]+$/.test(prop)) return '';
+          const safe = sanitizeCssDeclarationValue(value);
+          return safe === null ? '' : `  ${prop}: ${safe};`;
+        })
+        .filter(Boolean)
         .join('\n');
-      if (declarations) rules.push(`${selector} {\n${declarations}\n}`);
+      // 选择器含 { } < 可逃逸规则上下文，整条规则丢弃；/ 可拼出 /* 注释吞掉后续全部规则，一并拦截
+      // （; 在选择器位置仅使规则失效，无注入风险）
+      if (declarations && !/[{}</]/.test(selector)) rules.push(`${selector} {\n${declarations}\n}`);
     }
   }
 

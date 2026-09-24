@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize';
+import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue } from '@/utils/sanitize';
 
 describe('isSafeUrl', () => {
   it('放行 http/https/ftp/mailto/tel 协议', () => {
@@ -120,11 +120,17 @@ describe('sanitizeCssUrl', () => {
     expect(sanitizeCssUrl('@namespace "http://www.w3.org/1999/xhtml"')).toBe('@namespace "http://www.w3.org/1999/xhtml"');
   });
 
-  it('image-set()/src() 字符串参数按 URL 校验', () => {
+  it('image-set()/src()/image() 字符串参数按 URL 校验', () => {
     expect(sanitizeCssUrl('image-set("javascript:alert(1)" 1x, "a.png" 2x)')).toBe('image-set("" 1x, "a.png" 2x)');
     expect(sanitizeCssUrl("image-set('https://a.com/b.png' 1x)")).toBe("image-set('https://a.com/b.png' 1x)");
     // url() 形式同样生效
     expect(sanitizeCssUrl('image-set(url("javascript:alert(1)") 1x)')).toBe('image-set(url() 1x)');
+    // image() 的字符串参数即 URL
+    expect(sanitizeCssUrl('image("javascript:alert(1)" red)')).toBe('image("" red)');
+    expect(sanitizeCssUrl('image("https://a.com/x.png" red)')).toBe('image("https://a.com/x.png" red)');
+    // ximage()/my-image-set() 等前缀变体不误伤
+    expect(sanitizeCssUrl('ximage("javascript:x")')).toBe('ximage("javascript:x")');
+    expect(sanitizeCssUrl('my-image-set("javascript:x")')).toBe('my-image-set("javascript:x")');
   });
 
   it('@import 与字符串间省略空白或插入注释的写法仍被校验', () => {
@@ -152,6 +158,51 @@ describe('sanitizeCssUrl', () => {
 
   it('无引号 url() 中字面的 /* 不再截断地址', () => {
     expect(sanitizeCssUrl('url(https://a.com/a/*b/c.png)')).toBe('url(https://a.com/a/*b/c.png)');
+  });
+
+  it('字符串外的转义引号是字面字符，其后 url() 仍被净化', () => {
+    expect(sanitizeCssUrl("x:\\';background:url(javascript:x)")).toBe("x:\\';background:url()");
+    // \\ 配对后，其后的 ' 仍是真实字符串边界：';content:' 为字符串，url() 在串外被净化
+    expect(sanitizeCssUrl("x:\\\\';content:'url(javascript:x)'")).toBe("x:\\\\';content:'url()'");
+  });
+
+  it('代理对码点按规范回退为 U+FFFD', () => {
+    expect(sanitizeCssUrl('a\\d800 b')).toBe('a\ufffdb');
+  });
+});
+
+describe('sanitizeCssDeclarationValue', () => {
+  it('正常声明值原样返回', () => {
+    expect(sanitizeCssDeclarationValue('linear-gradient(red, blue)')).toBe('linear-gradient(red, blue)');
+    expect(sanitizeCssDeclarationValue('url("data:image/png;base64,AA")')).toBe('url("data:image/png;base64,AA")');
+  });
+
+  it('值内 url() 经协议净化', () => {
+    expect(sanitizeCssDeclarationValue('url(javascript:x)')).toBe('url()');
+    expect(sanitizeCssDeclarationValue('u\\72l(javascript:x)')).toBe('url()');
+  });
+
+  it('字符串/括号外的 ; { } 整条丢弃', () => {
+    expect(sanitizeCssDeclarationValue('red;}*{display:none')).toBeNull();
+    expect(sanitizeCssDeclarationValue('"a;b"')).toBe('"a;b"');
+  });
+
+  it('字符串外转义引号不能隐藏注入字符', () => {
+    // \' 是字面字符而非字符串边界，其后 ; } { 均为真实分隔符
+    expect(sanitizeCssDeclarationValue("\\';}body{display:none")).toBeNull();
+  });
+
+  it('转义解码出的分隔符同样按注入处理', () => {
+    expect(sanitizeCssDeclarationValue('red\\3b }x{y:z')).toBeNull();
+  });
+
+  it('未闭合括号整条丢弃，防止吞掉规则闭合符', () => {
+    expect(sanitizeCssDeclarationValue('url(foo')).toBeNull();
+    expect(sanitizeCssDeclarationValue('calc(100% - (10px')).toBeNull();
+  });
+
+  it('< 重写为定长转义防 </style> 截断', () => {
+    expect(sanitizeCssDeclarationValue('"a</style>b"')).toBe('"a\\00003c/style>b"');
   });
 });
 

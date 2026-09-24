@@ -136,6 +136,26 @@ onMounted(() => {
       .canvas-text {
         display: inline;
       }
+
+      .canvas-media {
+        display: inline-block;
+      }
+
+      .canvas-media > video,
+      .canvas-media > audio {
+        display: block;
+      }
+        
+      .canvas-root:not(.is-preview) .canvas-media {
+        outline: none;
+      }
+
+      .canvas-root:not(.is-preview) .canvas-media > video,
+      .canvas-root:not(.is-preview) .canvas-media > audio {
+        pointer-events: none;
+        outline: 1px dashed #ccc;
+        outline-offset: -1px;
+      }
     `;
     shadow.appendChild(baseStyle);
 

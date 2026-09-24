@@ -154,6 +154,12 @@
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasVideoElement).controls">显示控件</me-checkbox>
       </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasVideoElement).autoplay">自动播放</me-checkbox>
+      </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasVideoElement).loop">循环播放</me-checkbox>
+      </div>
     </template>
 
     <!-- 音频 -->
@@ -164,6 +170,12 @@
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasAudioElement).controls">显示控件</me-checkbox>
+      </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasAudioElement).autoplay">自动播放</me-checkbox>
+      </div>
+      <div class="style-config-section">
+        <me-checkbox v-model="(model as CanvasAudioElement).loop">循环播放</me-checkbox>
       </div>
     </template>
 

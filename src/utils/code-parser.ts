@@ -285,9 +285,9 @@ function buildElement(
         disabled: 'disabled' in attrs
       } as CanvasCheckboxElement
     case CanvasElementTypeEnum.VIDEO:
-      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs } as CanvasVideoElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, loop: 'loop' in attrs } as CanvasVideoElement
     case CanvasElementTypeEnum.AUDIO:
-      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs } as CanvasAudioElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, loop: 'loop' in attrs } as CanvasAudioElement
     case CanvasElementTypeEnum.LABEL:
       return { ...base, text: extractText(parsed), for: attrs.for } as CanvasLabelElement
     case CanvasElementTypeEnum.FORM: {

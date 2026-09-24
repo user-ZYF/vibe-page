@@ -38,6 +38,11 @@ const attrs = computed(() => {
     if (safeValue !== null) result[name] = safeValue;
   });
   if (!isPreview.value && (tag.value === 'input' || tag.value === 'textarea')) result.readonly = 'true';
+  /** 编辑态剥离媒体元素 controls/autoplay，阻止播放等原生交互 */
+  if (!isPreview.value && (tag.value === 'video' || tag.value === 'audio')) {
+    delete result.controls;
+    delete result.autoplay;
+  }
   return result;
 });
 

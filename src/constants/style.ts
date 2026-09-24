@@ -686,30 +686,23 @@ export const DefaultDivStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    minHeight: '100',
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
     minHeightUnit: UnitEnum.PX,
-    paddingTop: 8,
-    paddingTopUnit: UnitEnum.PX,
-    paddingRight: 12,
-    paddingRightUnit: UnitEnum.PX,
-    paddingBottom: 8,
-    paddingBottomUnit: UnitEnum.PX,
-    paddingLeft: 12,
-    paddingLeftUnit: UnitEnum.PX,
-    marginTop: '8',
-    marginTopUnit: UnitEnum.PX,
-    marginRight: '12',
-    marginRightUnit: UnitEnum.PX,
-    marginBottom: '8',
-    marginBottomUnit: UnitEnum.PX,
-    marginLeft: '12',
-    marginLeftUnit: UnitEnum.PX,
   },
 };
 
 /** 段落元素默认样式配置 */
 export const DefaultParagraphStyleConfig: StyleConfig = {
-  ...cloneDeep(DefaultGeneralStyleConfig)
+  ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 链接元素默认样式配置 */
@@ -725,20 +718,19 @@ export const DefaultLinkStyleConfig: StyleConfig = {
   minWidthUnit: UnitEnum.PX,
   minHeight: '40',
   minHeightUnit: UnitEnum.PX,
-  paddingTop: 8,
-  paddingTopUnit: UnitEnum.PX,
-  paddingRight: 12,
-  paddingRightUnit: UnitEnum.PX,
-  paddingBottom: 8,
-  paddingBottomUnit: UnitEnum.PX,
-  paddingLeft: 12,
-  paddingLeftUnit: UnitEnum.PX,
  },
 };
 
 /** 图片元素默认样式配置 */
 export const DefaultImageStyleConfig: StyleConfig = {
- ...cloneDeep(DefaultGeneralStyleConfig)
+ ...cloneDeep(DefaultGeneralStyleConfig),
+ size: {
+  ...cloneDeep(DefaultGeneralStyleConfig.size),
+  minWidth: '120',
+  minWidthUnit: UnitEnum.PX,
+  minHeight: '80',
+  minHeightUnit: UnitEnum.PX,
+ },
 };
 
 /** 根元素默认样式配置 */
@@ -779,6 +771,13 @@ export const DefaultAudioStyleConfig: StyleConfig = {
 /** 标签元素默认样式配置 */
 export const DefaultLabelStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表单元素默认样式配置 */
@@ -806,14 +805,6 @@ export const DefaultSpanStyleConfig: StyleConfig = {
     minWidthUnit: UnitEnum.PX,
     minHeight: '40',
     minHeightUnit: UnitEnum.PX,
-    paddingTop: 8,
-    paddingTopUnit: UnitEnum.PX,
-    paddingRight: 12,
-    paddingRightUnit: UnitEnum.PX,
-    paddingBottom: 8,
-    paddingBottomUnit: UnitEnum.PX,
-    paddingLeft: 12,
-    paddingLeftUnit: UnitEnum.PX,
   },
 };
 
@@ -849,6 +840,13 @@ export const DefaultOrderedListStyleConfig: StyleConfig = {
 /** 列表项元素默认样式配置 */
 export const DefaultListItemStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表格元素默认样式配置 */
@@ -860,9 +858,9 @@ export const DefaultTableStyleConfig: StyleConfig = {
   },
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    minWidth: '80',
-    minWidthUnit: UnitEnum.PX,
-    minHeight: '40',
+    width: '100',
+    widthUnit: UnitEnum.PERCENT,
+    minHeight: '120',
     minHeightUnit: UnitEnum.PX,
   },
 };
@@ -870,21 +868,41 @@ export const DefaultTableStyleConfig: StyleConfig = {
 /** 表头元素默认样式配置 */
 export const DefaultTableHeadStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    height: '40',
+    heightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表体元素默认样式配置 */
 export const DefaultTableBodyStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    height: '40',
+    heightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表脚元素默认样式配置 */
 export const DefaultTableFootStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    height: '40',
+    heightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表格行元素默认样式配置 */
 export const DefaultTableRowStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    height: '40',
+    heightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表格单元格元素默认样式配置 */
@@ -892,14 +910,10 @@ export const DefaultTableDataStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    paddingTop: 8,
-    paddingTopUnit: UnitEnum.PX,
-    paddingRight: 12,
-    paddingRightUnit: UnitEnum.PX,
-    paddingBottom: 8,
-    paddingBottomUnit: UnitEnum.PX,
-    paddingLeft: 12,
-    paddingLeftUnit: UnitEnum.PX,
+    width: '80',
+    widthUnit: UnitEnum.PX,
+    height: '40',
+    heightUnit: UnitEnum.PX,
   },
 };
 
@@ -908,14 +922,10 @@ export const DefaultTableHeaderCellStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
   size: {
     ...cloneDeep(DefaultGeneralStyleConfig.size),
-    paddingTop: 8,
-    paddingTopUnit: UnitEnum.PX,
-    paddingRight: 12,
-    paddingRightUnit: UnitEnum.PX,
-    paddingBottom: 8,
-    paddingBottomUnit: UnitEnum.PX,
-    paddingLeft: 12,
-    paddingLeftUnit: UnitEnum.PX,
+    width: '80',
+    widthUnit: UnitEnum.PX,
+    height: '40',
+    heightUnit: UnitEnum.PX,
   },
   font: {
     ...cloneDeep(DefaultGeneralStyleConfig.font),
@@ -926,6 +936,11 @@ export const DefaultTableHeaderCellStyleConfig: StyleConfig = {
 /** 表格标题元素默认样式配置 */
 export const DefaultTableCaptionStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    height: '40',
+    heightUnit: UnitEnum.PX,
+  },
 };
 
 /** 表格列组元素默认样式配置 */
@@ -941,36 +956,85 @@ export const DefaultTableColStyleConfig: StyleConfig = {
 /** 页头元素默认样式配置 */
 export const DefaultHeaderStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 页脚元素默认样式配置 */
 export const DefaultFooterStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 文章元素默认样式配置 */
 export const DefaultArticleStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 章节元素默认样式配置 */
 export const DefaultSectionStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 侧边栏元素默认样式配置 */
 export const DefaultAsideStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 标题元素默认样式配置 */
 export const DefaultHeadingStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** 通用元素默认样式配置 */
 export const DefaultGeneralElementStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
+  size: {
+    ...cloneDeep(DefaultGeneralStyleConfig.size),
+    minWidth: '80',
+    minWidthUnit: UnitEnum.PX,
+    minHeight: '40',
+    minHeightUnit: UnitEnum.PX,
+  },
 };
 
 /** Class 默认样式配置（空白样式，所有属性均未设置） */

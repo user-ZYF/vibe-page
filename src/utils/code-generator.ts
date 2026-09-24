@@ -125,6 +125,8 @@ function buildAttributes(element: CanvasElement): string {
       const safeSrc = sanitizeUrl(video.src ?? '');
       if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (video.controls) attrs.push(`controls`);
+      if (video.autoplay) attrs.push(`autoplay`, `muted`);
+      if (video.loop) attrs.push(`loop`);
       break;
     }
     case CanvasElementTypeEnum.AUDIO: {
@@ -132,6 +134,8 @@ function buildAttributes(element: CanvasElement): string {
       const safeSrc = sanitizeUrl(audio.src ?? '');
       if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (audio.controls) attrs.push(`controls`);
+      if (audio.autoplay) attrs.push(`autoplay`, `muted`);
+      if (audio.loop) attrs.push(`loop`);
       break;
     }
     case CanvasElementTypeEnum.LABEL: {

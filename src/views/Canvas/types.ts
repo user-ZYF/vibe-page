@@ -499,6 +499,10 @@ export interface CanvasVideoElement extends CanvasElementBase {
   src: string;
   /** 是否显示控件 */
   controls: boolean;
+  /** 是否自动播放 */
+  autoplay: boolean;
+  /** 是否循环播放 */
+  loop: boolean;
 }
 
 /** 画布音频元素 */
@@ -509,6 +513,10 @@ export interface CanvasAudioElement extends CanvasElementBase {
   src: string;
   /** 是否显示控件 */
   controls: boolean;
+  /** 是否自动播放 */
+  autoplay: boolean;
+  /** 是否循环播放 */
+  loop: boolean;
 }
 
 /** 画布标签元素 */

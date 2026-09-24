@@ -48,6 +48,7 @@ import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
 import { useDragStore } from '@/store/drag';
+import { nodeRegistry } from '../drag/NodeRegistry';
 
 defineOptions({
   name: 'MarginPaddingIndicator',
@@ -71,6 +72,9 @@ const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBo
 
 /** 当前悬停的画布 DOM 元素 */
 const currentTarget = shallowRef<Element | null>(null);
+
+/** 当前悬停目标对应的画布元素 id（由悬停命中节点解析，与测量目标可能不是同一节点，如媒体元素注册的是内层 audio/video） */
+const currentTargetId = shallowRef<string | null>(null);
 
 /** 名称标签 DOM 引用 */
 const labelRef = ref<HTMLElement | null>(null);
@@ -109,7 +113,7 @@ const labelLeft = computed(() => {
 
 /** 元素名称 */
 const elName = computed(() => {
-  const id = currentTarget.value?.getAttribute('data-canvas-id');
+  const id = currentTargetId.value;
   if (!id) return '';
   const el = canvasStore.getElementById(id);
   if(!el) return '';
@@ -118,12 +122,18 @@ const elName = computed(() => {
 
 /** 鼠标移入 */
 function handleMouseOver(event: MouseEvent) {
-  currentTarget.value = event.target as Element | null;
+  const target = event.target as Element | null;
+  const host = target instanceof HTMLElement ? target.closest<HTMLElement>('[data-canvas-id]') : null;
+  // 这里需要从 registry 中拿目标元素，因为 id 并不一定都绑定在目标元素上
+  const reg = host?.dataset.canvasId ? nodeRegistry.get(host.dataset.canvasId) : undefined;
+  currentTargetId.value = reg?.id ?? host?.dataset.canvasId ?? null;
+  currentTarget.value = reg ? reg.el : target;
 }
 
 /** 鼠标移出画布 */
 function handleMouseLeave() {
   currentTarget.value = null;
+  currentTargetId.value = null;
 }
 
 /**
@@ -185,7 +195,7 @@ function startLayoutWatch() {
           currentTarget.value = null;
           return;
         }
-        const id = el.getAttribute('data-canvas-id');
+        const id = currentTargetId.value;
         /** 画布元素已从元素树移除时隐藏指示器；无 data-canvas-id 的内部节点仅重新测量 */
         if (id && !canvasStore.getElementById(id)) {
           currentTarget.value = null;

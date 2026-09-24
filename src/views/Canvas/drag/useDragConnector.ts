@@ -10,7 +10,7 @@ import { useCanvasInteraction } from "@/composables/useCanvasInteraction";
 export function useDragConnector(
   el: Ref<HTMLElement | undefined>,
   id: string,
-  options: { isCanvas?: boolean } = {}
+  options: { isCanvas?: boolean; registerEl?: Ref<HTMLElement | undefined> } = {}
 ) {
   const { isPreview, guard } = useCanvasInteraction(id);
 
@@ -31,8 +31,8 @@ export function useDragConnector(
   onMounted(() => {
     if (!el.value) return;
 
-    /** 1. 注册 DOM 到 registry */
-    nodeRegistry.register(id, el.value, options.isCanvas ?? false);
+    /** 1. 注册 DOM 到 registry（registerEl 存在时注册内层元素，选中框/落点以其实际盒模型为准） */
+    nodeRegistry.register(id, (options.registerEl?.value ?? el.value), options.isCanvas ?? false);
 
     /** 2. 绑定可拖拽（预览模式下自动拦截） */
     bindDrag();

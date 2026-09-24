@@ -237,9 +237,9 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.CHECKBOX:
           return { ...elBase, name: '', value: '', checked: false, required: false, disabled: false } as CanvasCheckboxElement;
         case CanvasElementTypeEnum.VIDEO:
-          return { ...elBase, src: '', controls: true } as CanvasVideoElement;
+          return { ...elBase, src: '', controls: true, autoplay: false, loop: false } as CanvasVideoElement;
         case CanvasElementTypeEnum.AUDIO:
-          return { ...elBase, src: '', controls: true } as CanvasAudioElement;
+          return { ...elBase, src: '', controls: true, autoplay: false, loop: false } as CanvasAudioElement;
         case CanvasElementTypeEnum.LABEL:
           return { ...elBase, text: '标签' } as CanvasLabelElement;
         case CanvasElementTypeEnum.SPAN:
@@ -344,8 +344,7 @@ export const useCanvasStore = defineStore("canvas", {
     /** 清空所有元素（保留根元素） */
     clearAllElements() {
       this.root.children = [];
-      // 保留 root 的 #id 规则，移除其他所有规则
-      this.styleRules = this.styleRules.filter((r) => r.selector === `#${this.root.id}`);
+      this.styleRules = [];
       if(this.selectedElementId !== this.root.id){
         this.selectElement(null);
       }
@@ -573,13 +572,13 @@ export const useCanvasStore = defineStore("canvas", {
       // 创建视频元素
       const mkVideo = (src: string, styleConfig: StyleConfig, alias?: string): CanvasVideoElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.VIDEO, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.VIDEO], src, controls: true,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.VIDEO], src, controls: true, autoplay: false, loop: false,
       });
 
       // 创建音频元素
       const mkAudio = (src: string, styleConfig: StyleConfig, alias?: string): CanvasAudioElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.AUDIO, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.AUDIO], src, controls: true,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.AUDIO], src, controls: true, autoplay: false, loop: false,
       });
 
       // 创建多行文本框元素

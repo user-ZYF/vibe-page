@@ -6,6 +6,7 @@
  */
 
 import { VOID_ELEMENTS, RAW_TEXT_ELEMENTS, BLOCKED_TAGS, GENERAL_FALLBACK_TAG_NAME, TAG_NAME_REGEX } from '@/constants/html';
+import { HeadingLevelEnum } from '@/constants/home';
 
 /** 解析后的元素节点描述 */
 export interface ParsedElement {
@@ -47,6 +48,13 @@ export function isAllowedTagName(tagName: string): boolean {
 export function resolveSafeTagName(tagName: string): string {
   const tag = tagName.toLowerCase();
   return isAllowedTagName(tag) ? tag : GENERAL_FALLBACK_TAG_NAME;
+}
+
+/** 解析标题元素标签名：level 为枚举范围外脏数据时回退 h1，避免生成 h0/hNaN/h2.5 等非法标签 */
+export function resolveHeadingTag(level: number): string {
+  const safeLevel =
+    Number.isInteger(level) && level >= HeadingLevelEnum.H1 && level <= HeadingLevelEnum.H6 ? level : HeadingLevelEnum.H1;
+  return `h${safeLevel}`;
 }
 
 /** 文档内 style 元素的样式内容描述 */

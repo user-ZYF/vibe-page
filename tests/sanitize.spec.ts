@@ -99,6 +99,60 @@ describe('sanitizeCssUrl', () => {
     expect(sanitizeCssUrl('linear-gradient(red, blue)')).toBe('linear-gradient(red, blue)');
     expect(sanitizeCssUrl('')).toBe('');
   });
+
+  it('CSS 转义写法的 url() 仍被净化', () => {
+    // 转义函数名（裸 url 内嵌括号时残留外层右括号，危险协议已清除）
+    expect(sanitizeCssUrl('u\\72l(javascript:alert(1))')).toBe('url())');
+    expect(sanitizeCssUrl('\\75\\72\\6c(javascript:alert(1))')).toBe('url())');
+    // URL 内部转义冒号
+    expect(sanitizeCssUrl('url(javascript\\3a alert(1))')).toBe('url())');
+  });
+
+  it('url 函数名与括号之间的注释不再绕过', () => {
+    expect(sanitizeCssUrl('url/**/(javascript:alert(1))')).toBe('url())');
+    expect(sanitizeCssUrl('u/**/rl(javascript:alert(1))')).toBe('url())');
+  });
+
+  it('@import/@namespace 字符串形式 URL 按协议校验', () => {
+    expect(sanitizeCssUrl('@import "javascript:alert(1)"')).toBe('@import ""');
+    expect(sanitizeCssUrl("@import 'data:text/css,body{}'")).toBe('@import ""');
+    expect(sanitizeCssUrl('@import "https://a.com/x.css"')).toBe('@import "https://a.com/x.css"');
+    expect(sanitizeCssUrl('@namespace "http://www.w3.org/1999/xhtml"')).toBe('@namespace "http://www.w3.org/1999/xhtml"');
+  });
+
+  it('image-set()/src() 字符串参数按 URL 校验', () => {
+    expect(sanitizeCssUrl('image-set("javascript:alert(1)" 1x, "a.png" 2x)')).toBe('image-set("" 1x, "a.png" 2x)');
+    expect(sanitizeCssUrl("image-set('https://a.com/b.png' 1x)")).toBe("image-set('https://a.com/b.png' 1x)");
+    // url() 形式同样生效
+    expect(sanitizeCssUrl('image-set(url("javascript:alert(1)") 1x)')).toBe('image-set(url() 1x)');
+  });
+
+  it('@import 与字符串间省略空白或插入注释的写法仍被校验', () => {
+    expect(sanitizeCssUrl('@import"javascript:x"')).toBe('@import ""');
+    expect(sanitizeCssUrl('@import/**/"javascript:x"')).toBe('@import ""');
+  });
+
+  it('解码出的反斜杠回写为定长转义，防止输出二次分词组成新转义绕过', () => {
+    expect(sanitizeCssUrl('u\\5c 72l(javascript:x)')).toBe('u\\00005c72l(javascript:x)');
+  });
+
+  it('字符串字面量内的伪 url()/@import 为文本内容，不做改写', () => {
+    expect(sanitizeCssUrl('content:"url(javascript:x)"')).toBe('content:"url(javascript:x)"');
+    expect(sanitizeCssUrl('content:"@import \'javascript:x\'"')).toBe('content:"@import \'javascript:x\'"');
+  });
+
+  it('解码出的引号保留转义形式，不破坏字符串边界', () => {
+    // \22 后的空格为转义终止符被消费，回写为定长转义后与后续字符安全拼接
+    expect(sanitizeCssUrl('content:"a\\22 b"')).toBe('content:"a\\000022b"');
+  });
+
+  it('注释优先于字符串识别，注释闭合后的 url() 仍被净化', () => {
+    expect(sanitizeCssUrl('/* " */ url(javascript:x)')).toBe(' url()');
+  });
+
+  it('无引号 url() 中字面的 /* 不再截断地址', () => {
+    expect(sanitizeCssUrl('url(https://a.com/a/*b/c.png)')).toBe('url(https://a.com/a/*b/c.png)');
+  });
 });
 
 describe('sanitizeAttributeValue', () => {
@@ -149,6 +203,18 @@ describe('sanitizeAttributeValue', () => {
     expect(sanitizeAttributeValue('values', 'a.png; javascript:alert(1)')).toBeNull();
     expect(sanitizeAttributeValue('to', 'javascript:alert(1)')).toBeNull();
     expect(sanitizeAttributeValue('values', '0; 0.5; 1')).toBe('0; 0.5; 1');
+  });
+
+  it('ping 属性空格分隔 URL 逐个校验，不安全地址剔除', () => {
+    expect(sanitizeAttributeValue('ping', 'https://a.com/p javascript:alert(1) https://b.com/q')).toBe(
+      'https://a.com/p https://b.com/q'
+    );
+    expect(sanitizeAttributeValue('ping', 'javascript:alert(1)')).toBeNull();
+  });
+
+  it('style 属性值内 url() 经协议净化', () => {
+    expect(sanitizeAttributeValue('style', 'background:url(javascript:alert(1))')).toBe('background:url())');
+    expect(sanitizeAttributeValue('style', 'color:red')).toBe('color:red');
   });
 
   it('普通属性原样返回', () => {

@@ -28,7 +28,7 @@ import { StyleRuleTypeEnum } from '@/constants/style';
 
 import type { CanvasStyleRule } from '@/views/Canvas/types';
 import { sanitizeUrl, sanitizeAttributeValue } from '@/utils/sanitize';
-import { isVoidElement, resolveSafeTagName } from '@/utils/html-parser';
+import { isVoidElement, resolveSafeTagName, resolveHeadingTag } from '@/utils/html-parser';
 
 /**
  * 转义 HTML 特殊字符（属性值与文本内容通用）
@@ -78,6 +78,8 @@ function buildAttributes(element: CanvasElement): string {
       if (link.target) {
         const targetAttr = TARGET_ATTR_MAP[link.target];
         if (targetAttr) attrs.push(`target="${targetAttr}"`);
+        // 新窗口打开时补 rel="noopener"，防止目标页通过 window.opener 反向操纵当前页
+        if (link.target === LinkTargetEnum.BLANK) attrs.push('rel="noopener"');
       }
       break;
     }
@@ -211,7 +213,7 @@ function getElementContent(element: CanvasElement): string {
  */
 function resolveTag(element: CanvasElement): string {
   if (element.type === CanvasElementTypeEnum.HEADING) {
-    return `h${(element as CanvasHeadingElement).level}`;
+    return resolveHeadingTag((element as CanvasHeadingElement).level);
   }
   if (element.type === CanvasElementTypeEnum.GENERAL) {
     // 通用元素按存储的原始标签名生成（解析入库与改名时均已校验，此处兜底防脏数据生成危险标签）

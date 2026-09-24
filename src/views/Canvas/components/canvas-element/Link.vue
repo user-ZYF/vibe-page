@@ -1,6 +1,6 @@
 <!-- ? 画布超链接元素 -->
 <template>
-    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="classes" :href="isPreview ? safeHref : undefined" @click.stop.prevent="handleSelect">
+    <a ref="linkEl" :id="data.id" :data-canvas-id="data.id" :class="classes" :href="isPreview ? safeHref : undefined" :target="isPreview && data.target === LinkTargetEnum.BLANK ? '_blank' : undefined" :rel="isPreview && data.target === LinkTargetEnum.BLANK ? 'noopener' : undefined" @click.stop.prevent="handleSelect">
         <component :is="CanvasElementComponentMap[child.type]" v-for="(child, index) in data.children" :key="child.id" v-model:data="data.children[index]"/>
     </a>
 </template>
@@ -14,6 +14,7 @@ import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 import { isSafeUrl } from '@/utils/sanitize';
+import { LinkTargetEnum } from '@/constants/home';
 
 const data = defineModel<CanvasLinkElement>("data", {
     required: true

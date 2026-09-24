@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateHtml, generateCss } from '@/utils/code-generator';
-import { ButtonTypeEnum, CanvasElementTypeEnum, HeadingLevelEnum } from '@/constants/home';
+import { ButtonTypeEnum, CanvasElementTypeEnum, HeadingLevelEnum, LinkTargetEnum } from '@/constants/home';
 import { StyleRuleTypeEnum } from '@/constants/style';
 import type {
   CanvasButtonElement,
@@ -8,6 +8,7 @@ import type {
   CanvasHeadingElement,
   CanvasImageElement,
   CanvasInnerElement,
+  CanvasLinkElement,
   CanvasRootElement,
   CanvasStyleRule,
   CanvasTextElement,
@@ -41,6 +42,11 @@ function mkGeneral(id: string, tagName: string, children: CanvasInnerElement[] =
 /** 构造纯文本元素 */
 function mkText(id: string, text: string): CanvasTextElement {
   return { id, type: CanvasElementTypeEnum.TEXT, classes: [], text };
+}
+
+/** 构造超链接元素 */
+function mkLink(id: string, target?: LinkTargetEnum): CanvasLinkElement {
+  return { id, type: CanvasElementTypeEnum.LINK, classes: [], href: 'a.html', target, children: [] };
 }
 
 describe('generateHtml', () => {
@@ -95,6 +101,22 @@ describe('generateHtml', () => {
     expect(html).toContain('<div id="g2"');
     expect(html).not.toContain('<script');
     expect(html).not.toContain('<iframe');
+  });
+
+  it('target="_blank" 时自动补 rel="noopener"', () => {
+    const html = generateHtml(mkRoot([mkLink('l1', LinkTargetEnum.BLANK)]));
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener"');
+    // 非新窗口不输出 rel
+    const selfHtml = generateHtml(mkRoot([mkLink('l2', LinkTargetEnum.SELF)]));
+    expect(selfHtml).not.toContain('rel=');
+  });
+
+  it('标题 level 枚举范围外脏数据回退 h1', () => {
+    const dirty = { ...mkHeading('h9', HeadingLevelEnum.H2), level: 9 as HeadingLevelEnum };
+    expect(generateHtml(mkRoot([dirty]))).toContain('<h1 id="h9">');
+    const zero = { ...mkHeading('h0', HeadingLevelEnum.H2), level: 0 as HeadingLevelEnum };
+    expect(generateHtml(mkRoot([zero]))).toContain('<h1 id="h0">');
   });
 });
 

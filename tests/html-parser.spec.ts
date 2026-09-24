@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseHtml, parseHtmlDocument } from '@/utils/html-parser';
+import { parseHtml, parseHtmlDocument, resolveHeadingTag } from '@/utils/html-parser';
 
 describe('parseHtml', () => {
   it('解析顶层元素与嵌套子元素', () => {
@@ -41,5 +41,19 @@ describe('parseHtmlDocument', () => {
     expect(doc.body.attributes).toEqual({});
     expect(doc.body.classes).toEqual([]);
     expect(doc.children).toHaveLength(1);
+  });
+});
+
+describe('resolveHeadingTag', () => {
+  it('合法 level 输出对应标题标签', () => {
+    expect(resolveHeadingTag(1)).toBe('h1');
+    expect(resolveHeadingTag(6)).toBe('h6');
+  });
+
+  it('枚举范围外脏数据回退 h1', () => {
+    expect(resolveHeadingTag(0)).toBe('h1');
+    expect(resolveHeadingTag(7)).toBe('h1');
+    expect(resolveHeadingTag(NaN)).toBe('h1');
+    expect(resolveHeadingTag(2.5)).toBe('h1');
   });
 });

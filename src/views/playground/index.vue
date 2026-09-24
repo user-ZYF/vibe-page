@@ -19,7 +19,7 @@
           </div>
           <div class="code-parser-output">
             <div class="code-parser-output-title">预览</div>
-            <div ref="parserPreviewRef" class="code-parser-preview"></div>
+            <iframe ref="parserPreviewRef" class="code-parser-preview" sandbox="allow-same-origin" title="代码解析预览"></iframe>
           </div>
         </div>
         <p class="code-parser-error">{{ parserError }}</p>
@@ -48,29 +48,28 @@ const parserHtml = ref(CODE_PARSER_SAMPLE_HTML);
 const parserCss = ref(CODE_PARSER_SAMPLE_CSS);
 /** 代码解析 - 错误信息 */
 const parserError = ref('');
-/** 代码解析 - 预览容器 */
-const parserPreviewRef = ref<HTMLElement | null>(null);
-/** 代码解析 - 预览容器的 Shadow DOM 隔离环境（style 元素 + 渲染容器，用户 CSS 仅作用于预览内部） */
-let parserShadowEnv: { styleEl: HTMLStyleElement; container: HTMLElement } | null = null;
+/** 代码解析 - 预览 iframe（sandbox 隔离：用户代码不可执行脚本、不可导航顶层页面，CSS 不影响宿主应用） */
+const parserPreviewRef = ref<HTMLIFrameElement | null>(null);
+/** 预览 iframe 内注入样式的 style 元素（惰性创建，随 iframe 文档生命周期存在） */
+let parserStyleEl: HTMLStyleElement | null = null;
 
 /** 解析并渲染当前输入的 HTML + CSS */
 function renderParsedCode() {
-  const container = parserPreviewRef.value;
-  if (!container) return;
+  const doc = parserPreviewRef.value?.contentDocument;
+  if (!doc?.body) return;
   parserError.value = '';
   try {
-    // 惰性创建 Shadow DOM，将用户 CSS 与应用全局样式互相隔离
-    if (!parserShadowEnv) {
-      const shadowRoot = container.attachShadow({ mode: 'open' });
-      const styleEl = document.createElement('style');
-      shadowRoot.appendChild(styleEl);
-      const shadowContainer = document.createElement('div');
-      shadowRoot.appendChild(shadowContainer);
-      parserShadowEnv = { styleEl, container: shadowContainer };
+    // 惰性创建 style 元素，将用户 CSS 与宿主应用样式互相隔离
+    if (!parserStyleEl) {
+      parserStyleEl = doc.createElement('style');
+      doc.head.appendChild(parserStyleEl);
+      // iframe 文档仅有浏览器默认 margin，补齐与原预览容器一致的留白
+      doc.body.style.margin = '0';
+      doc.body.style.padding = '16px';
     }
     const elements = parseHtml(parserHtml.value);
     const rules = parseCss(parserCss.value);
-    renderToContainer(parserShadowEnv.container, elements, rules, parserShadowEnv.styleEl);
+    renderToContainer(doc.body, elements, rules, parserStyleEl);
   } catch (err) {
     parserError.value = (err as Error).message || String(err);
   }
@@ -84,8 +83,8 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  /** Shadow DOM 随宿主元素销毁，仅清理引用 */
-  parserShadowEnv = null;
+  /** iframe 随宿主元素销毁，仅清理引用 */
+  parserStyleEl = null;
 });
 
 watch([parserHtml, parserCss], () => {
@@ -167,11 +166,9 @@ watch([parserHtml, parserCss], () => {
 
   &-preview {
     flex: 1;
-    padding: 16px;
     border: 1px dashed #d1d5db;
     border-radius: 6px;
     background: #fff;
-    overflow: auto;
     min-height: 400px;
   }
 

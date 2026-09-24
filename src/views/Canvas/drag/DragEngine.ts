@@ -135,7 +135,7 @@ class DragEngine {
   }
 
   /** 执行已有元素落点逻辑 */
-  private dropExisting(): void {
+  private dropExisting() {
     const dragStore = useDragStore();
     const canvasStore = useCanvasStore();
     const { indicator, draggingId } = dragStore;

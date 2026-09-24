@@ -5,12 +5,22 @@ import { dragEngine } from "./DragEngine";
 import { useCanvasInteraction } from "@/composables/useCanvasInteraction";
 
 /**
+ * 拖拽连接器配置项
+ */
+export interface DragConnectorOptions {
+  /** 是否为可接收子元素的容器（注册为拖拽落点目标） */
+  isCanvas?: boolean;
+  /** 实际注册到 registry 的内层 DOM（缺省时注册 el；选中框/落点以其实际盒模型为准） */
+  registerEl?: Ref<HTMLElement | undefined>;
+}
+
+/**
  * 每个画布元素组件在 onMounted 调用，onUnmounted 清理
  */
 export function useDragConnector(
   el: Ref<HTMLElement | undefined>,
   id: string,
-  options: { isCanvas?: boolean; registerEl?: Ref<HTMLElement | undefined> } = {}
+  options: DragConnectorOptions = {}
 ) {
   const { isPreview, guard } = useCanvasInteraction(id);
 

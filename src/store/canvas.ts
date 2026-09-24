@@ -162,7 +162,7 @@ export const useCanvasStore = defineStore("canvas", {
       return undefined;
     },
     /** 直写指定选择器的声明（rule.style）：value 为 undefined 时从所有同名规则中删除该声明；已有声明写入其所在规则（原声明带 !important 则保留），无则写入最后一条同名规则（级联末尾生效） */
-    setRawStyleDeclaration(selector: string, prop: string, value: string | undefined): void {
+    setRawStyleDeclaration(selector: string, prop: string, value: string | undefined) {
       const rules = this.styleRules.filter((r) => r.selector === selector && r.type === StyleRuleTypeEnum.EDITABLE);
       if (!value) {
         rules.forEach((r) => {

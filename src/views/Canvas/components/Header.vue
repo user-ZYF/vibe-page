@@ -96,11 +96,11 @@ defineProps({
 })
 
 const emit = defineEmits<{
-  (e: 'toggle-preview'): void
-  (e: 'undo'): void
-  (e: 'redo'): void
-  (e: 'code'): void
-  (e: 'clear'): void
+  (e: 'toggle-preview')
+  (e: 'undo')
+  (e: 'redo')
+  (e: 'code')
+  (e: 'clear')
 }>()
 </script>
 

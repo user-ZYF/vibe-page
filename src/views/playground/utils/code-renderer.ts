@@ -105,7 +105,7 @@ export function renderToContainer(
   elements: ParsedElement[],
   rules: ParsedCssRule[],
   styleEl: HTMLStyleElement,
-): void {
+) {
   // 清空容器
   container.innerHTML = '';
   // 注入 CSS（url() 地址经协议校验，与画布管线行为一致）

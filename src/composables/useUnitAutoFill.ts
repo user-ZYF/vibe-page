@@ -19,7 +19,7 @@ export function autoFillUnit<T extends Record<string, any>>(
   obj: T,
   valueKey: keyof T | (keyof T)[],
   unitKey: keyof T,
-): void {
+) {
   const keys = Array.isArray(valueKey) ? valueKey : [valueKey];
   const hasValue = keys.some((k) => isNotEmptyish(obj[k]));
 

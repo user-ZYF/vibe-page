@@ -9,12 +9,12 @@ export class NodeRegistry {
   private map: Map<string, NodeRegistration> = new Map();
 
   /** 注册一个 DOM 节点 */
-  register(id: string, el: HTMLElement, isCanvas: boolean): void {
+  register(id: string, el: HTMLElement, isCanvas: boolean) {
     this.map.set(id, { id, el, isCanvas });
   }
 
   /** 注销一个 DOM 节点 */
-  unregister(id: string): void {
+  unregister(id: string) {
     this.map.delete(id);
   }
 

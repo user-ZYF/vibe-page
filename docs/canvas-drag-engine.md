@@ -113,8 +113,8 @@ interface NodeRegistration {
 class NodeRegistry {
   private map: Map<string, NodeRegistration>
 
-  register(id: string, el: HTMLElement, isCanvas: boolean): void
-  unregister(id: string): void
+  register(id: string, el: HTMLElement, isCanvas: boolean)
+  unregister(id: string)
   get(id: string): NodeRegistration | undefined
   getAll(): NodeRegistration[]
 
@@ -210,8 +210,8 @@ class DragEngine {
     // dragend:   dropNew() → canvasStore.addElement / addElementToContainer
     //            dragStore.endDrag()
 
-  private dropExisting(): void   // 读取 dragStore.indicator，执行 moveElement
-  private dropNew(): void        // 读取 dragStore.indicator，执行 addElement
+  private dropExisting()   // 读取 dragStore.indicator，执行 moveElement
+  private dropNew()        // 读取 dragStore.indicator，执行 addElement
 }
 
 /** 全局单例 */
@@ -296,7 +296,7 @@ moveElement(
   id: string,
   targetParentId: string | null,
   index: number
-): void
+)
 // 实现：先从原位置 remove，再插入到 targetParentId 的 children[index]
 // targetParentId = null 表示插入根 elements
 ```

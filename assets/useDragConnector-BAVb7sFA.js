@@ -1,0 +1,1 @@
+import{Cn as e,dn as t,ln as n}from"./index-DDkrSmFG.js";import{f as r,m as i,u as a}from"./constants-CVdizlwe.js";function o(o,s,c={}){let{isPreview:l,guard:u}=a(s),d=null,f=u(()=>{!o.value||d||(d=r.connectDraggable(o.value,s))});function p(){d?.(),d=null}t(()=>{o.value&&(i.register(s,o.value,c.isCanvas??!1),f())}),e(l,e=>{e?p():f()}),n(()=>{p(),i.unregister(s)})}export{o as t};

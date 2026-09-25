@@ -29,20 +29,14 @@ const tag = computed(() => resolveSafeTagName(data.value.tagName));
 /** 已启用的 class 名称列表 */
 const classes = useElementClasses(data);
 
-/** 透传到 DOM 的属性：剔除画布托管属性与 on* 事件属性、URL 类属性经协议校验；编辑态对文本类标签补 readonly 阻止输入 */
+/** 透传到 DOM 的额外保留属性：剔除画布托管属性与 on* 事件属性、URL 类属性经协议校验 */
 const attrs = computed(() => {
   const result: Record<string, string> = {};
-  Object.entries(data.value.attributes).forEach(([name, value]) => {
+  Object.entries(data.value.extraAttrs ?? {}).forEach(([name, value]) => {
     if (CANVAS_MANAGED_ATTRIBUTES.has(name.toLowerCase())) return;
     const safeValue = sanitizeAttributeValue(name, value);
     if (safeValue !== null) result[name] = safeValue;
   });
-  if (!isPreview.value && (tag.value === 'input' || tag.value === 'textarea')) result.readonly = 'true';
-  /** 编辑态剥离媒体元素 controls/autoplay，阻止播放等原生交互 */
-  if (!isPreview.value && (tag.value === 'video' || tag.value === 'audio')) {
-    delete result.controls;
-    delete result.autoplay;
-  }
   return result;
 });
 

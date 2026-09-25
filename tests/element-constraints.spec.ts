@@ -19,7 +19,7 @@ import { CanvasElementTypeEnum, ButtonTypeEnum, LinkTargetEnum } from '@/constan
 
 /** 构造通用元素 */
 function mkGeneral(tagName: string, children: CanvasInnerElement[] = []): CanvasGeneralElement {
-  return { id: `g-${tagName}`, type: CanvasElementTypeEnum.GENERAL, tagName, attributes: {}, classes: [], children };
+  return { id: `g-${tagName}`, type: CanvasElementTypeEnum.GENERAL, tagName, classes: [], children };
 }
 
 /** 构造容器元素 */

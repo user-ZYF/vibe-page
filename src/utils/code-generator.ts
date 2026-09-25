@@ -125,7 +125,8 @@ function buildAttributes(element: CanvasElement): string {
       const safeSrc = sanitizeUrl(video.src ?? '');
       if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (video.controls) attrs.push(`controls`);
-      if (video.autoplay) attrs.push(`autoplay`, `muted`);
+      if (video.autoplay) attrs.push(`autoplay`);
+      if (video.muted) attrs.push(`muted`);
       if (video.loop) attrs.push(`loop`);
       break;
     }
@@ -134,7 +135,8 @@ function buildAttributes(element: CanvasElement): string {
       const safeSrc = sanitizeUrl(audio.src ?? '');
       if (safeSrc) attrs.push(`src="${escapeHtml(safeSrc)}"`);
       if (audio.controls) attrs.push(`controls`);
-      if (audio.autoplay) attrs.push(`autoplay`, `muted`);
+      if (audio.autoplay) attrs.push(`autoplay`);
+      if (audio.muted) attrs.push(`muted`);
       if (audio.loop) attrs.push(`loop`);
       break;
     }
@@ -176,16 +178,15 @@ function buildAttributes(element: CanvasElement): string {
       if (colgroup.span !== undefined && colgroup.span > 1) attrs.push(`span="${colgroup.span}"`);
       break;
     }
-    case CanvasElementTypeEnum.GENERAL: {
-      /** 通用元素原样输出存储的属性 */
-      const general = element as CanvasGeneralElement;
-      Object.entries(general.attributes).forEach(([name, value]) => {
-        const safeValue = sanitizeAttributeValue(name, value);
-        if (safeValue !== null) attrs.push(`${name}="${escapeHtml(safeValue)}"`);
-      });
-      break;
-    }
   }
+
+  /** 元素保留的额外安全属性：跳过已输出的同名属性（如 rel），每项兜底净化一次 */
+  const emittedNames = new Set(attrs.map((attr) => attr.split('=')[0]));
+  Object.entries(element.extraAttrs ?? {}).forEach(([name, value]) => {
+    if (emittedNames.has(name.toLowerCase())) return;
+    const safeValue = sanitizeAttributeValue(name, value);
+    if (safeValue !== null) attrs.push(`${name}="${escapeHtml(safeValue)}"`);
+  });
 
   return attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
 }

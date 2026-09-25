@@ -172,6 +172,7 @@ function extractCssUrl(url: string): string {
  * - 先做归一化（解码 CSS 转义、剥离已闭合注释），防止 u\72l(...)、url 与括号间插注释、javascript\3a x 等写法绕过检测
  * - url(...) 三种引号形式逐个校验协议，不安全替换为空 url()
  * - @import/@namespace 的字符串形式 URL、image-set()/src()/image() 的字符串参数同样按协议校验
+ *   （@import 规则整体已在 stripCssImports 中剔除，此处仅兜底防御脏数据）
  * - 匹配起点落在字符串字面量/未闭合注释内的为文本内容，跳过不改写
  * 返回处理后的 CSS 值
  * @example sanitizeCssUrl('url("a.png")') → 'url("a.png")'
@@ -204,7 +205,7 @@ export function sanitizeCssUrl(cssValue: string): string {
     },
   );
 
-  /** @import/@namespace 字符串形式 URL 协议校验，不安全替换为空字符串参数 */
+  /** @import/@namespace 字符串形式 URL 协议校验，不安全替换为空字符串参数（@import 已在 stripCssImports 剔除，此处兜底） */
   literalRanges = scanLiteralRanges(value);
   value = value.replace(
     CSS_URL_AT_RULE_REGEX,
@@ -231,6 +232,90 @@ export function sanitizeCssUrl(cssValue: string): string {
   );
 
   return value;
+}
+
+/**
+ * 剔除 CSS 文本中的全部 @import 规则（整条丢弃，不进入 CSSOM 解析，从源头杜绝外部样式表请求）
+ * - 先解码 CSS 转义，防止 @im\70 ort 等写法绕过关键词匹配
+ * - 注释视作空白边界（@import + 注释 + url 仍命中），且注释会切断标识符：
+ *   @im + 注释 + port 按浏览器分词规则为两个 ident，本就不构成 @import 规则，故不剔除
+ * - 字符串字面量整体跳过（content:"@import x" 为文本内容不删）
+ * - 规则体消费至顶层首个分号或文件尾；遇 { 停止且不消费（@import 语法不含块，非法块交给 CSSOM 丢弃）
+ * @example stripCssImports('@import "a.css"; .a{}') → ' .a{}'
+ * @example stripCssImports('@im\\70 ort url(a.css)') → ''
+ * @example stripCssImports('@im /*注释*∕ port "a.css"; .a{}') → '@im   port "a.css"; .a{}'（注释切断标识符，不构成 @import）
+ * @example stripCssImports('content:"@import x"') → 'content:"@import x"'
+ */
+export function stripCssImports(input: string): string {
+  if (!input.includes('@')) return input;
+  const value = decodeCssEscapes(input);
+  const n = value.length;
+  let result = '';
+  let i = 0;
+
+  /** 跳过字符串字面量，返回字面量结束后的下标（未闭合则到末尾） */
+  const skipString = (pos: number) => {
+    const quote = value[pos++];
+    while (pos < n) {
+      if (value[pos] === '\\') {
+        pos += 2;
+        continue;
+      }
+      if (value[pos++] === quote) break;
+    }
+    return pos;
+  };
+
+  while (i < n) {
+    const c = value[i];
+    if (c === '"' || c === "'") {
+      const end = skipString(i);
+      result += value.slice(i, end);
+      i = end;
+      continue;
+    }
+    if (c === '/' && value[i + 1] === '*') {
+      const end = value.indexOf('*/', i + 2);
+      // 注释替换为空白：保持其标识边界作用，未闭合注释则后续均为注释内容
+      result += ' ';
+      if (end === -1) break;
+      i = end + 2;
+      continue;
+    }
+    if (
+      c === '@' &&
+      value.slice(i + 1, i + 7).toLowerCase() === 'import' &&
+      (value[i + 7] === undefined || !/[a-zA-Z0-9_-]/.test(value[i + 7]))
+    ) {
+      i += 7;
+      while (i < n) {
+        const ch = value[i];
+        if (ch === '"' || ch === "'") {
+          i = skipString(i);
+          continue;
+        }
+        if (ch === '/' && value[i + 1] === '*') {
+          const end = value.indexOf('*/', i + 2);
+          if (end === -1) {
+            i = n;
+            break;
+          }
+          i = end + 2;
+          continue;
+        }
+        if (ch === ';') {
+          i++;
+          break;
+        }
+        if (ch === '{') break;
+        i++;
+      }
+      continue;
+    }
+    result += c;
+    i++;
+  }
+  return result;
 }
 
 /**

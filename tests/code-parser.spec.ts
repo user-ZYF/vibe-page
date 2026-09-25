@@ -49,7 +49,7 @@ describe('parseCodeToCanvas', () => {
     expect(children[0].type).toBe(CanvasElementTypeEnum.GENERAL);
     const general = children[0] as CanvasGeneralElement;
     expect(general.tagName).toBe('custom-el');
-    expect(general.attributes['data-x']).toBe('1');
+    expect(general.extraAttrs?.['data-x']).toBe('1');
     expect(general.children).toHaveLength(1);
     expect((general.children[0] as CanvasGeneralElement).tagName).toBe('b');
   });
@@ -61,10 +61,10 @@ describe('parseCodeToCanvas', () => {
     );
     const general = children[0] as CanvasGeneralElement;
     expect(general.id).toBe('c1');
-    expect(general.attributes).not.toHaveProperty('id');
-    expect(general.attributes).not.toHaveProperty('onclick');
-    expect(general.attributes).not.toHaveProperty('formaction');
-    expect(general.attributes.title).toBe('t');
+    expect(general.extraAttrs).not.toHaveProperty('id');
+    expect(general.extraAttrs).not.toHaveProperty('onclick');
+    expect(general.extraAttrs).not.toHaveProperty('formaction');
+    expect(general.extraAttrs?.title).toBe('t');
   });
 
   it('script/iframe/object 等危险标签连同子树被丢弃，不进入画布', () => {
@@ -128,11 +128,42 @@ describe('parseCodeToCanvas', () => {
     expect((img as { src?: string }).src).toBe('x.png');
   });
 
-  it('非法 id 重新生成，data-* 等未识别属性不进入模型', () => {
+  it('非法 id 重新生成，data-* 等未识别属性进入 extraAttrs 保留表', () => {
     const { children } = parseCodeToCanvas('<div id="a&quot;b" data-x="1" aria-hidden="true"></div>', '');
     expect(children[0].id).not.toBe('a"b');
     expect(children[0]).not.toHaveProperty('data-x');
-    expect(children[0]).not.toHaveProperty('aria-hidden');
+    expect(children[0].extraAttrs?.['data-x']).toBe('1');
+    expect(children[0].extraAttrs?.['aria-hidden']).toBe('true');
+  });
+
+  it('已知元素保留额外安全属性，已消费属性不重复入表', () => {
+    const { children } = parseCodeToCanvas(
+      '<img src="a.png" alt="pic" title="t" data-x="1"><input type="text" value="v" data-y="2">',
+      ''
+    );
+    const img = children[0];
+    expect(img.extraAttrs).toEqual({ title: 't', 'data-x': '1' });
+    const input = children[1];
+    expect(input.extraAttrs).toEqual({ 'data-y': '2' });
+  });
+
+  it('已知元素的 on* 事件属性与危险 URL 属性同样被净化', () => {
+    const { children } = parseCodeToCanvas(
+      '<div onclick="alert(1)" title="t"></div><a href="https://a.com" ping="javascript:x">x</a>',
+      ''
+    );
+    expect(children[0].extraAttrs).toEqual({ title: 't' });
+    // ping 全部候选不安全时属性整体丢弃；href 已消费进类型字段
+    expect(children[1].extraAttrs).toBeUndefined();
+  });
+
+  it('画布托管属性不进入 extraAttrs 保留表', () => {
+    const { children } = parseCodeToCanvas(
+      '<div data-canvas-id="fake" draggable="false" title="t"></div><x-el ref="r" is="script"></x-el>',
+      ''
+    );
+    expect(children[0].extraAttrs).toEqual({ title: 't' });
+    expect(children[1].extraAttrs).toBeUndefined();
   });
 
   it('fragment 输入 rootPatch 为 null', () => {
@@ -217,8 +248,25 @@ describe('parseCodeToCanvas 与 code-generator 往返', () => {
     const general = second.children[0] as CanvasGeneralElement;
     expect(general.type).toBe(CanvasElementTypeEnum.GENERAL);
     expect(general.tagName).toBe('marquee');
-    expect(general.attributes.direction).toBe('left');
+    expect(general.extraAttrs?.direction).toBe('left');
     expect(general.children).toHaveLength(1);
+  });
+
+  it('已知元素往返保留额外属性且不重复输出已消费属性', () => {
+    const first = parseCodeToCanvas('<a id="l1" href="https://a.com" target="_blank" rel="nofollow" data-x="1">x</a>', '');
+    const root: CanvasRootElement = {
+      id: 'b1',
+      type: CanvasElementTypeEnum.ROOT,
+      classes: [],
+      children: first.children,
+    };
+    const generated = generateHtml(root);
+    expect(generated).toContain('data-x="1"');
+    // rel 已被生成器以 noopener 输出，保留表中的 rel 不再重复输出
+    expect(generated.match(/rel=/g)).toHaveLength(1);
+    const second = parseCodeToCanvas(generated, '', 'b1');
+    expect(second.children[0].extraAttrs?.['data-x']).toBe('1');
+    expect(second.children[0].extraAttrs?.rel).toBe('noopener');
   });
 
   it('script 元素不进入画布，生成代码中也不再保留', () => {

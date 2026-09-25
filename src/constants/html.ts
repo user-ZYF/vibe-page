@@ -58,9 +58,10 @@ export const TAG_NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9-]*$/;
 export const ATTR_NAME_REGEX = /^[^\s"'/>=\x00-\x1f]+$/;
 
 /**
- * 画布托管属性（渲染通用元素时不透传，统一按小写匹配）
- * id/class/style 由画布字段接管；draggable/contenteditable 由画布交互接管；
- * ref/key 为 Vue 保留属性（透传会覆盖模板 ref/影响 vnode diff）；
+ * 画布托管属性
+ * 不进入 extraAttrs 保留表
+ * id/class/style 由画布字段接管；draggable/contenteditable/data-canvas-id 由画布交互接管；
+ * ref/key 为 Vue 保留属性（透传会覆盖模板 ref/影响 vnode diff）；is 会改变动态组件渲染标签；
  * innerhtml/outerhtml/textcontent 为可注入任意内容的 DOM 属性（防脏数据经 v-bind 属性赋值注入）
  */
 export const CANVAS_MANAGED_ATTRIBUTES = new Set([
@@ -69,8 +70,10 @@ export const CANVAS_MANAGED_ATTRIBUTES = new Set([
   'style',
   'draggable',
   'contenteditable',
+  'data-canvas-id',
   'ref',
   'key',
+  'is',
   'innerhtml',
   'outerhtml',
   'textcontent',
@@ -113,6 +116,28 @@ export const TAG_TO_TYPE: Record<string, CanvasElementTypeEnum> = {
   h4: CanvasElementTypeEnum.HEADING,
   h5: CanvasElementTypeEnum.HEADING,
   h6: CanvasElementTypeEnum.HEADING
+}
+
+/**
+ * 被消费字段
+ * 解析时会直接成为元素的顶级属性，extraAttrs 保留表不保存它们
+ */
+export const CONSUMED_ATTRIBUTES: Partial<Record<CanvasElementTypeEnum, readonly string[]>> = {
+  [CanvasElementTypeEnum.BUTTON]: ['type', 'disabled'],
+  [CanvasElementTypeEnum.IMAGE]: ['src', 'alt'],
+  [CanvasElementTypeEnum.LINK]: ['href', 'target'],
+  [CanvasElementTypeEnum.INPUT]: ['type', 'placeholder', 'value', 'required', 'disabled'],
+  [CanvasElementTypeEnum.TEXTAREA]: ['placeholder', 'rows', 'required', 'disabled'],
+  [CanvasElementTypeEnum.RADIO]: ['type', 'name', 'value', 'checked', 'required', 'disabled'],
+  [CanvasElementTypeEnum.CHECKBOX]: ['type', 'name', 'value', 'checked', 'required', 'disabled'],
+  [CanvasElementTypeEnum.VIDEO]: ['src', 'controls', 'autoplay', 'loop', 'muted'],
+  [CanvasElementTypeEnum.AUDIO]: ['src', 'controls', 'autoplay', 'loop', 'muted'],
+  [CanvasElementTypeEnum.LABEL]: ['for'],
+  [CanvasElementTypeEnum.FORM]: ['action', 'method'],
+  [CanvasElementTypeEnum.TABLE_DATA]: ['colspan', 'rowspan'],
+  [CanvasElementTypeEnum.TABLE_HEADER_CELL]: ['colspan', 'rowspan', 'scope'],
+  [CanvasElementTypeEnum.TABLE_COL]: ['span'],
+  [CanvasElementTypeEnum.TABLE_COL_GROUP]: ['span'],
 }
 
 /** 超链接 target 属性值到枚举的映射 */

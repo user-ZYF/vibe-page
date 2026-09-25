@@ -19,7 +19,7 @@ describe('getElementDisplayName', () => {
   });
 
   it('通用元素显示原始标签名', () => {
-    const el: CanvasGeneralElement = { id: 'g1', type: CanvasElementTypeEnum.GENERAL, classes: [], tagName: 'marquee', attributes: {}, children: [] };
+    const el: CanvasGeneralElement = { id: 'g1', type: CanvasElementTypeEnum.GENERAL, classes: [], tagName: 'marquee', children: [] };
     expect(getElementDisplayName(el)).toBe('marquee');
   });
 

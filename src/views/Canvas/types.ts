@@ -377,6 +377,8 @@ export interface CanvasElementBase {
   classes: ElementClass[];
   /** 元素别名 */
   alias?: string;
+  /** 解析时保留的额外安全属性（排除被消费属性以及画布字段接管属性） */
+  extraAttrs?: Record<string, string>;
 }
 
 /** 画布 div 元素 */
@@ -501,6 +503,8 @@ export interface CanvasVideoElement extends CanvasElementBase {
   controls: boolean;
   /** 是否自动播放 */
   autoplay: boolean;
+  /** 是否静音 */
+  muted: boolean;
   /** 是否循环播放 */
   loop: boolean;
 }
@@ -515,6 +519,8 @@ export interface CanvasAudioElement extends CanvasElementBase {
   controls: boolean;
   /** 是否自动播放 */
   autoplay: boolean;
+  /** 是否静音 */
+  muted: boolean;
   /** 是否循环播放 */
   loop: boolean;
 }
@@ -737,8 +743,6 @@ export interface CanvasGeneralElement extends CanvasElementBase {
   type: CanvasElementTypeEnum.GENERAL;
   /** 原始 HTML 标签名（小写） */
   tagName: string;
-  /** 原始 HTML 属性（已剔除 id/class/style 与 on* 事件属性，URL 属性经协议校验） */
-  attributes: Record<string, string>;
   /** 子元素 */
   children: CanvasInnerElement[];
 }

@@ -3,7 +3,7 @@
     <!-- 编辑态通过 pointer-events 禁用媒体交互，点击落在外层容器上完成选中 -->
     <div ref="videoWrapEl" :data-canvas-id="data.id" class="canvas-media" @click.stop="handleSelect">
         <!-- 编辑态剥离 controls/autoplay，阻止播放等原生行为，预览模式下放行；autoplay 需配合 muted 才能在浏览器中生效 -->
-        <video ref="videoEl" :id="data.id" :class="classes" :src="data.src" :controls="isPreview && data.controls" :autoplay="isPreview && data.autoplay" :muted="isPreview && data.autoplay" :loop="data.loop"></video>
+        <video ref="videoEl" :id="data.id" :class="classes" :src="data.src" :controls="isPreview && data.controls" :autoplay="isPreview && data.autoplay" :muted="isPreview && data.muted" :loop="data.loop"></video>
     </div>
 </template>
 

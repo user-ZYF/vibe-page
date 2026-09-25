@@ -237,9 +237,9 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.CHECKBOX:
           return { ...elBase, name: '', value: '', checked: false, required: false, disabled: false } as CanvasCheckboxElement;
         case CanvasElementTypeEnum.VIDEO:
-          return { ...elBase, src: '', controls: true, autoplay: false, loop: false } as CanvasVideoElement;
+          return { ...elBase, src: '', controls: true, autoplay: false, muted: false, loop: false } as CanvasVideoElement;
         case CanvasElementTypeEnum.AUDIO:
-          return { ...elBase, src: '', controls: true, autoplay: false, loop: false } as CanvasAudioElement;
+          return { ...elBase, src: '', controls: true, autoplay: false, muted: false, loop: false } as CanvasAudioElement;
         case CanvasElementTypeEnum.LABEL:
           return { ...elBase, text: '标签' } as CanvasLabelElement;
         case CanvasElementTypeEnum.SPAN:
@@ -310,7 +310,7 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.HEADING:
           return { ...elBase, text: '标题', level: HeadingLevelEnum.H1 } as CanvasHeadingElement;
         case CanvasElementTypeEnum.GENERAL:
-          return { ...elBase, tagName: GENERAL_FALLBACK_TAG_NAME, attributes: {}, children: [] } as CanvasGeneralElement;
+          return { ...elBase, tagName: GENERAL_FALLBACK_TAG_NAME, children: [] } as CanvasGeneralElement;
       }
     },
     /** 添加元素到指定容器 */
@@ -596,13 +596,13 @@ export const useCanvasStore = defineStore("canvas", {
       // 创建视频元素
       const mkVideo = (src: string, styleConfig: StyleConfig, alias?: string): CanvasVideoElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.VIDEO, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.VIDEO], src, controls: true, autoplay: false, loop: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.VIDEO], src, controls: true, autoplay: false, muted: false, loop: false,
       });
 
       // 创建音频元素
       const mkAudio = (src: string, styleConfig: StyleConfig, alias?: string): CanvasAudioElement => ({
         id: createElementId(styleConfig), type: CanvasElementTypeEnum.AUDIO, classes: [],
-        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.AUDIO], src, controls: true, autoplay: false, loop: false,
+        alias: alias ?? CanvasElementLabelMap[CanvasElementTypeEnum.AUDIO], src, controls: true, autoplay: false, muted: false, loop: false,
       });
 
       // 创建多行文本框元素

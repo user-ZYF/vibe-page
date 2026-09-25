@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue } from '@/utils/sanitize';
+import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports } from '@/utils/sanitize';
 
 describe('isSafeUrl', () => {
   it('放行 http/https/ftp/mailto/tel 协议', () => {
@@ -271,5 +271,42 @@ describe('sanitizeAttributeValue', () => {
   it('普通属性原样返回', () => {
     expect(sanitizeAttributeValue('title', 'hello')).toBe('hello');
     expect(sanitizeAttributeValue('data-x', 'a;b,c:d')).toBe('a;b,c:d');
+  });
+});
+
+describe('stripCssImports', () => {
+  it('剔除字符串与 url() 形式的 @import 规则', () => {
+    expect(stripCssImports('@import "https://a.com/x.css"; .a{color:red}')).toBe(' .a{color:red}');
+    expect(stripCssImports('@import url("https://a.com/x.css") screen; .b{}')).toBe(' .b{}');
+  });
+
+  it('剔除结尾无分号的 @import 规则', () => {
+    expect(stripCssImports('.a{} @import "https://a.com/x.css"')).toBe('.a{} ');
+  });
+
+  it('大小写不敏感', () => {
+    expect(stripCssImports('@IMPORT "a.css";')).toBe('');
+  });
+
+  it('关键词内插转义仍被剔除', () => {
+    expect(stripCssImports('@im\\70 ort "a.css";')).toBe('');
+  });
+
+  it('关键词内插注释则不构成 @import（CSS 注释是标识边界），注释归一为空白', () => {
+    expect(stripCssImports('@im/**/port "a.css";')).toBe('@im port "a.css";');
+    expect(stripCssImports('@import/**/"a.css"; .a{}')).toBe(' .a{}');
+  });
+
+  it('规则体内字符串与注释正确跳过，不误截分号', () => {
+    expect(stripCssImports('@import "a;b.css"; .c{}')).toBe(' .c{}');
+    expect(stripCssImports('@import /*x;y*/ url(a.css); .d{}')).toBe(' .d{}');
+  });
+
+  it('字符串字面量内的伪 @import 为文本内容，不删除', () => {
+    expect(stripCssImports('.a{content:"@import x.css"}')).toBe('.a{content:"@import x.css"}');
+  });
+
+  it('@importx 等非 @import at-keyword 不误删', () => {
+    expect(stripCssImports('@importx "a";')).toBe('@importx "a";');
   });
 });

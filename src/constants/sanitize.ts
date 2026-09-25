@@ -52,7 +52,8 @@ export const CSS_QUOTED_STRING_REGEX = /"([^"]*)"|'([^']*)'/g;
 export const CSS_URL_FUNCTION_REGEX = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]+))\s*\)/gi;
 
 /**
- * CSS 中以字符串形式承载 URL 的 at-rule（@import/@namespace 首个字符串参数为 URL 地址，at-keyword 与字符串间允许零空白）
+ * CSS 中以字符串形式承载 URL 的 at-rule（@import/@namespace 首个字符串参数为 URL 地址，at-keyword 与字符串间允许零空白；
+ * @import 规则整体由 stripCssImports 剔除，此正则对 @import 的命中仅作兜底防御）
  * 匹配示例：@import "x.css"、@import"x.css"、@NAMESPACE 'x'
  */
 export const CSS_URL_AT_RULE_REGEX = /@(import|namespace)\s*("([^"]*)"|'([^']*)')/gi;

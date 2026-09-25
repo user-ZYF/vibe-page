@@ -36,7 +36,7 @@ function mkImage(id: string): CanvasImageElement {
 
 /** 构造通用元素 */
 function mkGeneral(id: string, tagName: string, children: CanvasInnerElement[] = []): CanvasGeneralElement {
-  return { id, type: CanvasElementTypeEnum.GENERAL, classes: [], tagName, attributes: {}, children };
+  return { id, type: CanvasElementTypeEnum.GENERAL, classes: [], tagName, children };
 }
 
 /** 构造纯文本元素 */

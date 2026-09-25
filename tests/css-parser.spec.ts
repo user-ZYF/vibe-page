@@ -24,4 +24,10 @@ describe('parseCss', () => {
     expect(rules[0].atRuleCssText).toContain('@media');
     expect(rules[0].selector).toBe('');
   });
+
+  it('@import 规则被剔除，不进入解析结果', () => {
+    const rules = parseCss('@import "https://a.com/x.css"; .a { color: red; }');
+    expect(rules).toHaveLength(1);
+    expect(rules[0].selector).toBe('.a');
+  });
 });

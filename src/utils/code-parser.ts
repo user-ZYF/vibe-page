@@ -41,7 +41,7 @@ import {
   CSS_NAME_REGEX,
 } from '@/constants/style'
 import { parseHtmlDocument, resolveSafeTagName, type ParsedElement } from '@/utils/html-parser'
-import { BLOCKED_TAGS, TAG_TO_TYPE, LINK_TARGET_ATTR_MAP, SCOPE_ATTR_MAP } from '@/constants/html'
+import { BLOCKED_TAGS, TAG_TO_TYPE, LINK_TARGET_ATTR_MAP, SCOPE_ATTR_MAP, CONSUMED_ATTRIBUTES, CANVAS_MANAGED_ATTRIBUTES } from '@/constants/html'
 import { parseCss } from '@/utils/css-parser'
 import { sanitizeUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize'
 import { generateId } from '@/utils/id'
@@ -151,10 +151,19 @@ function resolveElementType(parsed: ParsedElement): CanvasElementTypeEnum | unde
   return TAG_TO_TYPE[parsed.tagName]
 }
 
-/** 净化通用元素属性表 */
-function sanitizeGeneralAttributes(attributes: Record<string, string>): Record<string, string> {
+/**
+ * 净化元素属性表为额外保留属性
+ * 剔除 on* 事件属性与不安全 URL 属性
+ * 跳过被类型字段消费的属性（解析时已提升为顶级属性）
+ * 丢弃画布托管属性（会发生冲突）
+ */
+function pickExtraAttributes(attributes: Record<string, string>, type: CanvasElementTypeEnum): Record<string, string> {
+  const consumed = CONSUMED_ATTRIBUTES[type]
   const result: Record<string, string> = {}
   Object.entries(attributes).forEach(([name, value]) => {
+    const lowerName = name.toLowerCase()
+    if (consumed?.includes(lowerName)) return
+    if (CANVAS_MANAGED_ATTRIBUTES.has(lowerName)) return
     const safe = sanitizeAttributeValue(name, value)
     if (safe !== null) result[name] = safe
   })
@@ -173,15 +182,17 @@ function buildClasses(classes: string[]): ElementClass[] {
   return classes.map((name) => ({ name, enabled: true }))
 }
 
-/** 生成元素基础属性 */
+/** 生成元素基础属性（含净化后的额外保留属性，空表不挂载避免冗余字段） */
 function buildBase(parsed: ParsedElement, type: CanvasElementTypeEnum, usedIds: Set<string>) {
-  return {
+  const base = {
     // id重复或不存在时，自动生成新id
     id: resolveElementId(parsed.id, usedIds),
     type,
     classes: buildClasses(parsed.classes),
     alias: CanvasElementLabelMap[type]
   }
+  const extraAttrs = pickExtraAttributes(parsed.attributes, type)
+  return Object.keys(extraAttrs).length > 0 ? { ...base, extraAttrs } : base
 }
 
 /** 解析单个 ParsedElement 为画布元素 */
@@ -210,7 +221,6 @@ function buildElement(
       ...base,
       alias: parsed.tagName,
       tagName: resolveSafeTagName(parsed.tagName),
-      attributes: sanitizeGeneralAttributes(parsed.attributes),
       children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
     } as CanvasGeneralElement
   }
@@ -285,9 +295,9 @@ function buildElement(
         disabled: 'disabled' in attrs
       } as CanvasCheckboxElement
     case CanvasElementTypeEnum.VIDEO:
-      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, loop: 'loop' in attrs } as CanvasVideoElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, muted: 'muted' in attrs, loop: 'loop' in attrs } as CanvasVideoElement
     case CanvasElementTypeEnum.AUDIO:
-      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, loop: 'loop' in attrs } as CanvasAudioElement
+      return { ...base, src: sanitizeUrl(attrs.src ?? ''), controls: 'controls' in attrs, autoplay: 'autoplay' in attrs, muted: 'muted' in attrs, loop: 'loop' in attrs } as CanvasAudioElement
     case CanvasElementTypeEnum.LABEL:
       return { ...base, text: extractText(parsed), for: attrs.for } as CanvasLabelElement
     case CanvasElementTypeEnum.FORM: {

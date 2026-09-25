@@ -5,6 +5,7 @@
  */
 
 import type { ParsedCssRule } from "@/views/Canvas/types";
+import { stripCssImports } from "@/utils/sanitize";
 
 
 /**
@@ -14,7 +15,8 @@ import type { ParsedCssRule } from "@/views/Canvas/types";
  */
 export function parseCss(input: string): ParsedCssRule[] {
   const el = document.createElement('style');
-  el.textContent = input;
+  // 挂载前剔除 @import：style 元素一旦挂载，@import 的外部样式表请求即发出，CSSOM 层面再丢弃为时已晚
+  el.textContent = stripCssImports(input);
   // 必须先挂载到 head 才能拿到 sheet
   document.head.appendChild(el);
   const sheet = el.sheet;
@@ -34,6 +36,8 @@ function parseRuleList(rules: CSSRuleList): ParsedCssRule[] {
         style: parseStyleDeclarations(rule.style),
       });
     } else {
+      // @import 挂载前已被文本级剔除，此处为双保险（防某些内核仍解析出残留规则）
+      if (rule.type === CSSRule.IMPORT_RULE) return;
       // at-rule直接保存完整规则文本
       result.push({ selector: '', style: {}, atRuleCssText: rule.cssText });
     }

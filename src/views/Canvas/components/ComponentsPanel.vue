@@ -165,15 +165,6 @@ const componentGroups: ComponentGroup[] = [
     header: 'Table',
     components: [
       CanvasElementTypeEnum.TABLE,
-      CanvasElementTypeEnum.TABLE_HEAD,
-      CanvasElementTypeEnum.TABLE_BODY,
-      CanvasElementTypeEnum.TABLE_FOOT,
-      CanvasElementTypeEnum.TABLE_ROW,
-      CanvasElementTypeEnum.TABLE_DATA,
-      CanvasElementTypeEnum.TABLE_HEADER_CELL,
-      CanvasElementTypeEnum.TABLE_CAPTION,
-      CanvasElementTypeEnum.TABLE_COL_GROUP,
-      CanvasElementTypeEnum.TABLE_COL,
     ],
   },
   {

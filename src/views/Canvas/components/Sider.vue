@@ -45,8 +45,8 @@
     <div class="editor-sider-panel">
       <StylePanel v-show="activePanel === SiderPanelEnum.EDIT" class="panel-content"/>
       <LayersPanel v-show="activePanel === SiderPanelEnum.LAYER" class="panel-content"/>
-      <ComponentsPanel v-show="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
       <ClassManagerPanel v-show="activePanel === SiderPanelEnum.CLASS_MANAGER" class="panel-content"/>
+      <ComponentsPanel v-show="activePanel === SiderPanelEnum.COMPONENTS" class="panel-content"/>
     </div>
   </a-layout-sider>
 </template>

@@ -10,7 +10,7 @@ import { generateId } from "@/utils/id";
 import { StyleRuleTypeEnum } from "@/constants/style";
 import { GENERAL_FALLBACK_TAG_NAME } from "@/constants/html";
 import type { CanvasStyleRule } from "@/views/Canvas/types";
-import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
+import { findElementInTree } from "@/utils/tree-traversal";
 
 /**
  * 画布数据的存储版本号
@@ -254,24 +254,47 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, children: [] } as CanvasOrderedListElement;
         case CanvasElementTypeEnum.LIST_ITEM:
           return { ...elBase, children: [] } as CanvasListItemElement;
-        case CanvasElementTypeEnum.TABLE:
-          return { ...elBase, children: [] } as CanvasTableElement;
+        case CanvasElementTypeEnum.TABLE: {
+          /** 表格行组/行无独立命中盒，各类型 generateElement 已自带骨架，此处组装完整表格 */
+          const caption = this.generateElement(CanvasElementTypeEnum.TABLE_CAPTION) as CanvasTableCaptionElement;
+          const colGroup = this.generateElement(CanvasElementTypeEnum.TABLE_COL_GROUP) as CanvasTableColGroupElement;
+          const head = this.generateElement(CanvasElementTypeEnum.TABLE_HEAD) as CanvasTableHeadElement;
+          const body = this.generateElement(CanvasElementTypeEnum.TABLE_BODY) as CanvasTableBodyElement;
+          const foot = this.generateElement(CanvasElementTypeEnum.TABLE_FOOT) as CanvasTableFootElement;
+          return { ...elBase, children: [caption, colGroup, head, body, foot] } as CanvasTableElement;
+        }
         case CanvasElementTypeEnum.TABLE_HEAD:
-          return { ...elBase, children: [] } as CanvasTableHeadElement;
         case CanvasElementTypeEnum.TABLE_BODY:
-          return { ...elBase, children: [] } as CanvasTableBodyElement;
-        case CanvasElementTypeEnum.TABLE_FOOT:
-          return { ...elBase, children: [] } as CanvasTableFootElement;
+        case CanvasElementTypeEnum.TABLE_FOOT: {
+          /** 行组无独立命中盒，自动创建一行单元格骨架，保证内部有可投放内容 */
+          const isHead = type === CanvasElementTypeEnum.TABLE_HEAD;
+          const row = this.generateElement(CanvasElementTypeEnum.TABLE_ROW) as CanvasTableRowElement;
+          row.children = [
+            this.generateElement(isHead ? CanvasElementTypeEnum.TABLE_HEADER_CELL : CanvasElementTypeEnum.TABLE_DATA),
+            this.generateElement(isHead ? CanvasElementTypeEnum.TABLE_HEADER_CELL : CanvasElementTypeEnum.TABLE_DATA),
+          ];
+          return { ...elBase, children: [row] } as CanvasTableHeadElement | CanvasTableBodyElement | CanvasTableFootElement;
+        }
         case CanvasElementTypeEnum.TABLE_ROW:
-          return { ...elBase, children: [] } as CanvasTableRowElement;
+          /** 行无独立命中盒，自动创建两个单元格 */
+          return { ...elBase, children: [
+            this.generateElement(CanvasElementTypeEnum.TABLE_DATA),
+            this.generateElement(CanvasElementTypeEnum.TABLE_DATA)
+          ] } as CanvasTableRowElement;
         case CanvasElementTypeEnum.TABLE_DATA:
           return { ...elBase, children: [] } as CanvasTableDataElement;
         case CanvasElementTypeEnum.TABLE_HEADER_CELL:
           return { ...elBase, children: [] } as CanvasTableHeaderCellElement;
         case CanvasElementTypeEnum.TABLE_CAPTION:
-          return { ...elBase, children: [] } as CanvasTableCaptionElement;
+          return { ...elBase, children: [
+            this.generateElement(CanvasElementTypeEnum.TEXT),
+          ] } as CanvasTableCaptionElement;
         case CanvasElementTypeEnum.TABLE_COL_GROUP:
-          return { ...elBase, children: [] } as CanvasTableColGroupElement;
+          /** 列组无渲染盒，自动创建一个 col */
+          return { ...elBase, children: [
+            this.generateElement(CanvasElementTypeEnum.TABLE_COL),
+            this.generateElement(CanvasElementTypeEnum.TABLE_COL),
+          ] } as CanvasTableColGroupElement;
         case CanvasElementTypeEnum.TABLE_COL:
           return { ...elBase } as CanvasTableColElement;
         case CanvasElementTypeEnum.HEADER:
@@ -334,7 +357,8 @@ export const useCanvasStore = defineStore("canvas", {
           });
       }
       this.root.children = removeFromList(this.root.children);
-      if(this.selectedElementId === id){
+      /** 删除的元素或其子孙为当前选中元素时，清空选中态 */
+      if(this.selectedElementId && !this.getElementById(this.selectedElementId)){
         this.selectElement(null);
       }
 

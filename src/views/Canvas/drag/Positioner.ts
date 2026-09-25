@@ -1,7 +1,7 @@
 import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement, CanvasInnerElementTypeEnum } from "@/views/Canvas/types";
 import { DropPositionEnum } from "@/constants/home";
 import { isParentElement, isChildTypeAllowed, isSubtreeAllowed } from "@/views/Canvas/types";
-import { findElementInTree } from "@/views/Canvas/utils/treeTraversal";
+import { findElementInTree } from "@/utils/tree-traversal";
 import type { NodeInfo, DropIndicator, PlaceholderLine, DropPositionResult } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
 import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, LayoutModeEnum, PositionStyleEnum } from "@/constants/style";
@@ -328,19 +328,9 @@ export class Positioner {
     if(parentId === root.id){
       return root.children;
     }
-    const findParent = (list: CanvasInnerElement[]): CanvasParentElement | null => {
-      for (const el of list) {
-        if (el.id === parentId && isParentElement(el)) return el;
-        if (isParentElement(el)) {
-          const found = findParent(el.children);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const parent = findParent(root.children);
-    return parent?.children ?? [];
+    const parent = findElementInTree(root, parentId);
+    if (!parent || !isParentElement(parent as CanvasInnerElement)) return [];
+    return (parent as CanvasParentElement).children;
   }
 
   /** 判断 targetId 是否是 sourceId 的后代或本身 */
@@ -351,19 +341,8 @@ export class Positioner {
   ): boolean {
     if (sourceId === targetId) return true;
 
-    const findEl = (list: CanvasInnerElement[], id: string): CanvasInnerElement | null => {
-      for (const el of list) {
-        if (el.id === id) return el;
-        if (isParentElement(el)) {
-          const found = findEl(el.children, id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const sourceEl = findEl(root.children, sourceId);
-    if (!sourceEl || !isParentElement(sourceEl)) return false;
+    const sourceEl = findElementInTree(root, sourceId);
+    if (!sourceEl || sourceId === root.id || !isParentElement(sourceEl as CanvasInnerElement)) return false;
 
     const isInside = (list: CanvasInnerElement[], targetId: string): boolean => {
       for (const el of list) {

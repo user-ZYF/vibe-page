@@ -251,8 +251,62 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, children: [] } as CanvasSpanElement;
         case CanvasElementTypeEnum.TEXT:
           return { ...elBase, text: '文本' } as CanvasTextElement;
-        case CanvasElementTypeEnum.FORM:
-          return { ...elBase, action: '', method: FormMethodEnum.GET, children: [] } as CanvasFormElement;
+        case CanvasElementTypeEnum.FORM: {
+          /** 表单自动创建基础字段骨架：单行输入、多行输入、单选组、多选组、提交按钮 */
+          /** 单行输入框 */
+          const input = this.generateElement(CanvasElementTypeEnum.INPUT) as CanvasInputElement;
+          /** 单行输入框标签 */
+          const inputLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          inputLabel.text = '单行输入';
+          inputLabel.for = input.id;
+          /** 多行输入框 */
+          const textarea = this.generateElement(CanvasElementTypeEnum.TEXTAREA) as CanvasTextareaElement;
+          /** 多行输入框标签 */
+          const textareaLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          textareaLabel.text = '多行输入';
+          textareaLabel.for = textarea.id;
+          /** 单选组标签 */
+          const radioLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          radioLabel.text = '单选';
+          /** 单选项一 */
+          const radio1 = this.generateElement(CanvasElementTypeEnum.RADIO) as CanvasRadioElement;
+          /** 单选项二 */
+          const radio2 = this.generateElement(CanvasElementTypeEnum.RADIO) as CanvasRadioElement;
+          /** 单选组名拼接元素 id 保证唯一，避免与同表单内其他单选组串组 */
+          radio1.name = radio2.name = `radio-group-${radio1.id}`;
+          radio1.value = '选项一';
+          radio2.value = '选项二';
+          radio1.checked = true;
+          /** 多选组标签 */
+          const checkboxLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          checkboxLabel.text = '多选';
+          /** 多选项一 */
+          const checkbox1 = this.generateElement(CanvasElementTypeEnum.CHECKBOX) as CanvasCheckboxElement;
+          /** 多选项二 */
+          const checkbox2 = this.generateElement(CanvasElementTypeEnum.CHECKBOX) as CanvasCheckboxElement;
+          checkbox1.name = checkbox2.name = `checkbox-group-${checkbox1.id}`;
+          checkbox1.value = '选项一';
+          checkbox2.value = '选项二';
+          /** 提交按钮 */
+          const submit = this.generateElement(CanvasElementTypeEnum.BUTTON) as CanvasButtonElement;
+          submit.text = '提交';
+          submit.buttonType = ButtonTypeEnum.SUBMIT;
+          /** 生成字段分组容器 */
+          const group = (children: CanvasInnerElement[]): CanvasDivElement =>
+            ({ ...this.generateElement(CanvasElementTypeEnum.DIV), children } as CanvasDivElement);
+          return {
+            ...elBase,
+            action: '',
+            method: FormMethodEnum.GET,
+            children: [
+              group([inputLabel, input]),
+              group([textareaLabel, textarea]),
+              group([radioLabel, radio1, radio2]),
+              group([checkboxLabel, checkbox1, checkbox2]),
+              submit,
+            ],
+          } as CanvasFormElement;
+        }
         case CanvasElementTypeEnum.UNORDERED_LIST:
         case CanvasElementTypeEnum.ORDERED_LIST: {
           /** 列表自动创建三个列表项骨架，保证内部有可投放内容 */
@@ -296,10 +350,12 @@ export const useCanvasStore = defineStore("canvas", {
           return { ...elBase, children: [] } as CanvasTableDataElement;
         case CanvasElementTypeEnum.TABLE_HEADER_CELL:
           return { ...elBase, children: [] } as CanvasTableHeaderCellElement;
-        case CanvasElementTypeEnum.TABLE_CAPTION:
-          return { ...elBase, children: [
-            this.generateElement(CanvasElementTypeEnum.TEXT),
-          ] } as CanvasTableCaptionElement;
+        case CanvasElementTypeEnum.TABLE_CAPTION: {
+          /** 标题文本默认展示「表格标题」 */
+          const text = this.generateElement(CanvasElementTypeEnum.TEXT) as CanvasTextElement;
+          text.text = '表格标题';
+          return { ...elBase, children: [text] } as CanvasTableCaptionElement;
+        }
         case CanvasElementTypeEnum.TABLE_COL_GROUP:
           /** 列组无渲染盒，自动创建一个 col */
           return { ...elBase, children: [

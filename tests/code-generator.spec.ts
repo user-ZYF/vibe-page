@@ -125,12 +125,16 @@ describe('generateCss', () => {
     const rules: CanvasStyleRule[] = [
       { type: StyleRuleTypeEnum.EDITABLE, selector: '.a', style: { color: 'red' } },
     ];
-    expect(generateCss(rules)).toBe('* {\n  box-sizing: border-box;\n}\n\n.a {\n  color: red;\n}');
+    expect(generateCss(rules)).toBe(
+      'body {\n  margin-top: 0px;\n  margin-right: 0px;\n  margin-bottom: 0px;\n  margin-left: 0px;\n}\n\n* {\n  box-sizing: border-box;\n}\n\n.a {\n  color: red;\n}'
+    );
   });
 
   it('无 box-sizing 规则时自动补在最前且不带 !important', () => {
     const css = generateCss([{ type: StyleRuleTypeEnum.EDITABLE, selector: '.a', style: { color: 'red' } }]);
-    expect(css.startsWith('* {\n  box-sizing: border-box;\n}')).toBe(true);
+    /** 生成 CSS 以 body margin 重置开头，随后紧跟 * box-sizing 规则 */
+    expect(css.startsWith('body {\n  margin-top: 0px;')).toBe(true);
+    expect(css.indexOf('* {\n  box-sizing: border-box;\n}')).toBeLessThan(css.indexOf('.a {'));
     expect(css).not.toContain('!important');
   });
 

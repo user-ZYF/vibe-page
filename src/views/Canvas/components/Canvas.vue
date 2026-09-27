@@ -38,8 +38,8 @@ const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 /** 撤销/重做功能 */
 const { debouncedRecord } = useCanvasHistory({
   snapshot: () => ({
-    root: canvasStore.root,
-    styleRules: canvasStore.styleRules,
+    root: root.value,
+    styleRules: styleRules.value,
     selectedElementId: selectedElementId.value,
     scrollPosition: { left: canvasScroll.left.value, top: canvasScroll.top.value }
   }),
@@ -93,7 +93,7 @@ const debouncedSaveToStorage = useDebounceFn(() => {
 
 /** 监听画布数据变化，自动记录历史快照并保存到 LocalStorage */
 watch(
-  [() => canvasStore.root, () => canvasStore.styleRules],
+  [root, styleRules],
   () => {
     debouncedRecord();
     debouncedSaveToStorage();

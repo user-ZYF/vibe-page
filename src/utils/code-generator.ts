@@ -31,10 +31,17 @@ import { sanitizeUrl, sanitizeAttributeValue, sanitizeCssDeclarationValue, escap
 import { isVoidElement, resolveSafeTagName, resolveHeadingTag } from '@/utils/html-parser';
 
 /**
- * 转义 HTML 特殊字符（属性值与文本内容通用）
+ * 转义 HTML 属性值特殊字符（需转义引号防止属性注入）
  */
 function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/**
+ * 转义文本节点的 HTML 特殊字符（文本节点无需转义引号，仅转义 & < > 防止被解析为标签）
+ */
+function escapeText(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
@@ -197,17 +204,17 @@ function buildAttributes(element: CanvasElement): string {
 function getElementContent(element: CanvasElement): string {
   switch (element.type) {
     case CanvasElementTypeEnum.BUTTON:
-      return escapeHtml((element as CanvasButtonElement).text);
+      return escapeText((element as CanvasButtonElement).text);
     case CanvasElementTypeEnum.PARAGRAPH:
-      return escapeHtml((element as CanvasParagraphElement).text);
+      return escapeText((element as CanvasParagraphElement).text);
     case CanvasElementTypeEnum.TEXTAREA:
-      return escapeHtml((element as CanvasTextareaElement).value);
+      return escapeText((element as CanvasTextareaElement).value);
     case CanvasElementTypeEnum.LABEL:
-      return escapeHtml((element as CanvasLabelElement).text);
+      return escapeText((element as CanvasLabelElement).text);
     case CanvasElementTypeEnum.TEXT:
-      return escapeHtml((element as CanvasTextElement).text);
+      return escapeText((element as CanvasTextElement).text);
     case CanvasElementTypeEnum.HEADING:
-      return escapeHtml((element as CanvasHeadingElement).text);
+      return escapeText((element as CanvasHeadingElement).text);
     default:
       return '';
   }

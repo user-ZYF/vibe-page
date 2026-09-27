@@ -19,11 +19,11 @@
     <template v-else-if="element.type === CanvasElementTypeEnum.TABLE_DATA">
       <div class="style-config-section">
         <div class="style-config-label">跨列数（colspan）</div>
-        <a-input-number v-model:value="(element as CanvasTableDataElement).colspan" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(element as CanvasTableDataElement).colspan" class="style-config-input-number" :min="1" :precision="0" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">跨行数（rowspan）</div>
-        <a-input-number v-model:value="(element as CanvasTableDataElement).rowspan" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(element as CanvasTableDataElement).rowspan" class="style-config-input-number" :min="1" :precision="0" />
       </div>
     </template>
 
@@ -31,11 +31,11 @@
     <template v-else-if="element.type === CanvasElementTypeEnum.TABLE_HEADER_CELL">
       <div class="style-config-section">
         <div class="style-config-label">跨列数（colspan）</div>
-        <a-input-number v-model:value="(element as CanvasTableHeaderCellElement).colspan" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(element as CanvasTableHeaderCellElement).colspan" class="style-config-input-number" :min="1" :precision="0" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">跨行数（rowspan）</div>
-        <a-input-number v-model:value="(element as CanvasTableHeaderCellElement).rowspan" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(element as CanvasTableHeaderCellElement).rowspan" class="style-config-input-number" :min="1" :precision="0" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">表头范围（scope）</div>
@@ -47,7 +47,7 @@
     <template v-else-if="element.type === CanvasElementTypeEnum.TABLE_COL_GROUP">
       <div class="style-config-section">
         <div class="style-config-label">跨列数（span）</div>
-        <a-input-number v-model:value="(element as CanvasTableColGroupElement).span" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(element as CanvasTableColGroupElement).span" class="style-config-input-number" :min="1" :precision="0" />
       </div>
     </template>
   </div>

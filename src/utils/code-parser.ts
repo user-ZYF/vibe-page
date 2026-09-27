@@ -399,7 +399,7 @@ function isSimpleSelector(selector: string) {
   return /^([.#])([_a-zA-Z][_a-zA-Z0-9-]*)$/.test(selector);
 }
 
-/** 解析 body 标签属性为根元素补丁；body 未声明任何属性时返回 null（根元素保持现状） */
+/** 解析 body 标签属性为根元素补丁；body 未声明任何属性时返回 null */
 function buildRootPatch(
   body: ParsedElement,
   usedIds: Set<string>,

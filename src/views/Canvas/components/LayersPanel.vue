@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
@@ -96,6 +96,19 @@ const treePropsConfig = {
 /** 展开元素id列表（默认展开根元素） */
 const expandedKeys = ref<string[]>([rootId.value]);
 
+/** 画布中选中元素时，自动展开其所有祖先节点，保证选中节点在树中可见 */
+watch(selectedElementId, (id) => {
+  if (!id) return;
+  /** 收集选中元素的全部祖先 id */
+  const ancestors: string[] = [];
+  let parentId = canvasStore.getParentElementId(id);
+  while (parentId) {
+    ancestors.push(parentId);
+    parentId = canvasStore.getParentElementId(parentId);
+  }
+  expandedKeys.value = [...new Set([...expandedKeys.value, ...ancestors])];
+});
+
 /** 当前选中节点 key（双向绑定 canvasStore.selectedElementId） */
 const currentNodeKey = computed<string | undefined>({
   get: () => selectedElementId.value ?? undefined,
@@ -128,6 +141,9 @@ const allowDrop: AllowDropFunction = (
   const draggedEl = canvasStore.getElementById(draggedId);
   if (!draggedEl || draggedEl.type === CanvasElementTypeEnum.ROOT) return false;
   const dragElement = draggedEl as CanvasInnerElement;
+
+  /** 禁止放置到根节点同级位置（before/after 根节点） */
+  if (dropId === rootId.value && type !== 'inner') return false;
 
   if (type === 'inner') {
     /** 放入容器内部：检查目标容器是否允许接收该子树 */
@@ -170,6 +186,8 @@ function handleNodeDrop(
   } else {
     /** before / after：插入到目标元素前/后 */
     const dropId = dropNode.data.id as string;
+    /** 根节点无父级，before/after 落在根节点上视为与根同级，拒绝处理 */
+    if (dropId === rootId.value) return;
     targetParentId = canvasStore.getParentElementId(dropId) ?? rootId.value;
     const parent = canvasStore.getElementById(targetParentId);
     if (!parent) return;

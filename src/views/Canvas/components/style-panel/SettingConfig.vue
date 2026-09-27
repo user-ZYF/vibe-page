@@ -17,7 +17,7 @@
     <template v-if="model.type === CanvasElementTypeEnum.BUTTON">
       <div class="style-config-section">
         <div class="style-config-label">按钮文本</div>
-        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
+        <me-input v-model="(model as CanvasButtonElement).text" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">按钮类型</div>
@@ -32,7 +32,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.PARAGRAPH">
       <div class="style-config-section">
         <div class="style-config-label">段落文本</div>
-        <me-input type="textarea" v-model="pendingText" :rows="3" @blur="commitText" />
+        <me-input type="textarea" v-model="(model as CanvasParagraphElement).text" :rows="3" />
       </div>
     </template>
 
@@ -40,7 +40,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.IMAGE">
       <div class="style-config-section">
         <div class="style-config-label">图片地址</div>
-        <me-input v-model="(model as CanvasImageElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">图片标题</div>
@@ -52,7 +52,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LINK">
       <div class="style-config-section">
         <div class="style-config-label">链接地址</div>
-        <me-input v-model="(model as CanvasLinkElement).href" class="style-config-input" placeholder="https://" @blur="handleHrefBlur" />
+        <me-input v-model="pendingHref" class="style-config-input" placeholder="https://" @blur="handleHrefBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">打开方式</div>
@@ -90,7 +90,7 @@
       </div>
       <div class="style-config-section">
         <div class="style-config-label">行数</div>
-        <a-input-number v-model:value="(model as CanvasTextareaElement).rows" class="style-config-input-number" :min="1" />
+        <a-input-number v-model:value="(model as CanvasTextareaElement).rows" class="style-config-input-number" :min="1" :precision="0" />
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasTextareaElement).required">必填</me-checkbox>
@@ -146,7 +146,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.VIDEO">
       <div class="style-config-section">
         <div class="style-config-label">视频地址</div>
-        <me-input v-model="(model as CanvasVideoElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasVideoElement).controls">显示控件</me-checkbox>
@@ -166,7 +166,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.AUDIO">
       <div class="style-config-section">
         <div class="style-config-label">音频地址</div>
-        <me-input v-model="(model as CanvasAudioElement).src" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasAudioElement).controls">显示控件</me-checkbox>
@@ -186,7 +186,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.LABEL">
       <div class="style-config-section">
         <div class="style-config-label">标签文本</div>
-        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
+        <me-input v-model="(model as CanvasLabelElement).text" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">关联表单元素</div>
@@ -204,7 +204,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.FORM">
       <div class="style-config-section">
         <div class="style-config-label">提交地址</div>
-        <me-input v-model="(model as CanvasFormElement).action" class="style-config-input" placeholder="https://" @blur="handleActionBlur" />
+        <me-input v-model="pendingAction" class="style-config-input" placeholder="https://" @blur="handleActionBlur" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">提交方式</div>
@@ -216,7 +216,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.HEADING">
       <div class="style-config-section">
         <div class="style-config-label">标题文本</div>
-        <me-input v-model="pendingText" class="style-config-input" @blur="commitText" />
+        <me-input v-model="(model as CanvasHeadingElement).text" class="style-config-input" />
       </div>
       <div class="style-config-section">
         <div class="style-config-label">标题级别</div>
@@ -237,7 +237,7 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.TEXT">
       <div class="style-config-section">
         <div class="style-config-label">文本内容</div>
-        <me-input type="textarea" v-model="pendingText" :rows="3" @blur="commitText" />
+        <me-input type="textarea" v-model="(model as CanvasTextElement).text" :rows="3" />
       </div>
     </template>
   </div>
@@ -279,14 +279,17 @@ const model = defineModel<CanvasInnerElement>({ required: true });
 
 const canvasStore = useCanvasStore();
 
-/** 编辑前的 id */
-const oldId = ref('');
-
 /** id 输入框当前值（blur 校验通过后才同步到 model.id） */
 const pendingId = ref('');
 
-/** 文本内容编辑的临时值（blur 后才同步到 model，避免输入过程中频繁触发元素尺寸重算） */
-const pendingText = ref('');
+/** 媒体资源地址编辑的临时值（blur 后才同步到 model.src，避免每输入一个字符就触发一次资源请求） */
+const pendingSrc = ref('');
+
+/** 链接地址编辑的临时值（blur 后才同步到 model.href） */
+const pendingHref = ref('');
+
+/** 表单提交地址编辑的临时值（blur 后才同步到 model.action） */
+const pendingAction = ref('');
 
 // 通用元素标签名编辑的临时值（blur 校验后才同步到 model）——标签名编辑已停用，保留注释便于还原
 // const pendingTagName = ref('');
@@ -300,32 +303,21 @@ watch(
   { immediate: true },
 );
 
-/** 同步 model 文本到临时值 */
+/** 同步 model 的 URL 类属性到临时值 */
 watch(
   () => model.value,
   (el) => {
     if (!el) return;
-    if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
-    else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
-    else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
-    else if (el.type === CanvasElementTypeEnum.HEADING) pendingText.value = (el as CanvasHeadingElement).text;
-    else if (el.type === CanvasElementTypeEnum.TEXT) pendingText.value = (el as CanvasTextElement).text;
+    if (el.type === CanvasElementTypeEnum.IMAGE) pendingSrc.value = (el as CanvasImageElement).src;
+    else if (el.type === CanvasElementTypeEnum.VIDEO) pendingSrc.value = (el as CanvasVideoElement).src;
+    else if (el.type === CanvasElementTypeEnum.AUDIO) pendingSrc.value = (el as CanvasAudioElement).src;
+    else if (el.type === CanvasElementTypeEnum.LINK) pendingHref.value = (el as CanvasLinkElement).href;
+    else if (el.type === CanvasElementTypeEnum.FORM) pendingAction.value = (el as CanvasFormElement).action;
     // 标签名编辑已停用，还原时恢复以下同步逻辑
     // if (el.type === CanvasElementTypeEnum.GENERAL) pendingTagName.value = (el as CanvasGeneralElement).tagName;
   },
   { immediate: true, deep: true },
 );
-
-/** blur 时将临时文本同步到 model */
-function commitText() {
-  const el = model.value;
-  if (!el) return;
-  if (el.type === CanvasElementTypeEnum.BUTTON) (el as CanvasButtonElement).text = pendingText.value;
-  else if (el.type === CanvasElementTypeEnum.PARAGRAPH) (el as CanvasParagraphElement).text = pendingText.value;
-  else if (el.type === CanvasElementTypeEnum.LABEL) (el as CanvasLabelElement).text = pendingText.value;
-  else if (el.type === CanvasElementTypeEnum.HEADING) (el as CanvasHeadingElement).text = pendingText.value;
-  else if (el.type === CanvasElementTypeEnum.TEXT) (el as CanvasTextElement).text = pendingText.value;
-}
 
 // 标签名编辑已停用
 // /** blur 时将临时标签名同步到 model（非法值回退并提示） */
@@ -364,9 +356,8 @@ function commitText() {
 //   generalEl.tagName = tagName;
 // }
 
-/** id 输入框聚焦时保存原值 */
+/** id 输入框聚焦时重置为当前 id */
 function handleIdFocus() {
-  oldId.value = model.value.id;
   pendingId.value = model.value.id;
 }
 
@@ -377,69 +368,73 @@ function handleIdInput(value: string) {
 
 /** id 输入框失焦时校验格式与唯一性 */
 function handleIdBlur() {
+  const oldId = model.value.id;
   const newId = pendingId.value.trim();
-  if (newId === oldId.value) return;
+  if (newId === oldId) return;
   /** 校验未通过时还原显示为旧 id */
   if (!newId || !CSS_NAME_REGEX.test(newId)) {
-    pendingId.value = oldId.value;
+    pendingId.value = oldId;
     if (newId) message.warning('ID 名称格式不合法');
     return;
   }
   /** 唯一性校验 */
   if (canvasStore.getElementById(newId)) {
-    pendingId.value = oldId.value;
+    pendingId.value = oldId;
     message.warning('该 ID 已被其他元素使用');
     return;
   }
   model.value.id = newId;
   pendingId.value = newId;
   /** 同步重命名 #id 样式规则及 label 的 for 引用，避免引用失配 */
-  canvasStore.renameElementId(oldId.value, newId);
-  if (canvasStore.selectedElementId === oldId.value) {
+  canvasStore.renameElementId(oldId, newId);
+  if (canvasStore.selectedElementId === oldId) {
     canvasStore.selectElement(newId);
   }
 }
 
-/** 链接地址失焦时校验协议安全性 */
+/** 链接地址失焦时校验协议安全性并同步到 model */
 function handleHrefBlur() {
   const el = model.value as CanvasLinkElement;
   if (!el || el.type !== CanvasElementTypeEnum.LINK) return;
-  const href = el.href?.trim() ?? '';
-  if (!href) return;
-  if (!isSafeUrl(href)) {
-    el.href = '';
+  const href = pendingHref.value.trim();
+  /** 校验未通过时还原显示为旧地址 */
+  if (href && !isSafeUrl(href)) {
+    pendingHref.value = el.href;
     message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
     return;
   }
   el.href = href;
+  pendingHref.value = href;
 }
 
-/** 表单提交地址失焦时校验协议安全性 */
+/** 表单提交地址失焦时校验协议安全性并同步到 model */
 function handleActionBlur() {
   const el = model.value as CanvasFormElement;
   if (!el || el.type !== CanvasElementTypeEnum.FORM) return;
-  const action = el.action?.trim() ?? '';
-  if (!action) return;
-  if (!isSafeUrl(action)) {
-    el.action = '';
+  const action = pendingAction.value.trim();
+  /** 校验未通过时还原显示为旧地址 */
+  if (action && !isSafeUrl(action)) {
+    pendingAction.value = el.action;
     message.warning('提交地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
     return;
   }
   el.action = action;
+  pendingAction.value = action;
 }
 
-/** 媒体资源地址失焦时校验协议安全性（Image/Video/Audio） */
+/** 媒体资源地址失焦时校验协议安全性并同步到 model（Image/Video/Audio） */
 function handleSrcBlur() {
   const el = model.value as CanvasImageElement | CanvasVideoElement | CanvasAudioElement;
   if (!el) return;
-  const src = el.src?.trim() ?? '';
-  if (!src) return;
-  if (!isSafeUrl(src)) {
-    el.src = '';
+  const src = pendingSrc.value.trim();
+  /** 校验未通过时还原显示为旧地址 */
+  if (src && !isSafeUrl(src)) {
+    pendingSrc.value = el.src;
     message.warning('资源地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
     return;
   }
   el.src = src;
+  pendingSrc.value = src;
 }
 
 /** 递归收集所有表单元素，生成下拉选项 */

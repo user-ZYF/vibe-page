@@ -863,6 +863,14 @@ export const DefaultTableStyleConfig: StyleConfig = {
     minHeight: '120',
     minHeightUnit: UnitEnum.PX,
   },
+  visual: {
+    ...cloneDeep(DefaultGeneralStyleConfig.visual),
+    /** 默认表格边框，保证空表格在画布中可见 */
+    borderWidth: 1,
+    borderWidthUnit: UnitEnum.PX,
+    borderStyle: BorderStyleEnum.SOLID,
+    borderColor: '#d9d9d9',
+  },
 };
 
 /** 表头元素默认样式配置 */
@@ -915,6 +923,14 @@ export const DefaultTableDataStyleConfig: StyleConfig = {
     height: '40',
     heightUnit: UnitEnum.PX,
   },
+  visual: {
+    ...cloneDeep(DefaultGeneralStyleConfig.visual),
+    /** 默认单元格边框 */
+    borderWidth: 1,
+    borderWidthUnit: UnitEnum.PX,
+    borderStyle: BorderStyleEnum.SOLID,
+    borderColor: '#d9d9d9',
+  },
 };
 
 /** 表头单元格元素默认样式配置 */
@@ -930,6 +946,14 @@ export const DefaultTableHeaderCellStyleConfig: StyleConfig = {
   font: {
     ...cloneDeep(DefaultGeneralStyleConfig.font),
     fontWeight: FontWeightEnum.BOLD,
+  },
+  visual: {
+    ...cloneDeep(DefaultGeneralStyleConfig.visual),
+    /** 默认表头单元格边框 */
+    borderWidth: 1,
+    borderWidthUnit: UnitEnum.PX,
+    borderStyle: BorderStyleEnum.SOLID,
+    borderColor: '#d9d9d9',
   },
 };
 

@@ -42,7 +42,7 @@
       <div class="style-config-label">Color</div>
       <div class="style-config-color-row">
         <me-input v-model="model.color" class="style-config-input" placeholder="#000000" />
-        <input type="color" v-model="model.color" class="style-config-color-picker" />
+        <ColorPicker v-model="model.color" />
       </div>
     </div>
 
@@ -139,7 +139,7 @@
           <div class="style-config-label">Color</div>
           <div class="style-config-color-row">
             <me-input v-model="shadow.color" class="style-config-input" placeholder="#000000" />
-            <input type="color" v-model="shadow.color" class="style-config-color-picker" />
+            <ColorPicker v-model="shadow.color" />
           </div>
         </div>
       </div>
@@ -164,6 +164,7 @@ import {
 import { MeInput, MeRadioButton, MeRadioGroup, MeSelect } from '@zyf_dsb/me-ui';
 import { SIZE_UNIT_OPTIONS, FONT_FAMILY_OPTIONS, FONT_WEIGHT_OPTIONS, FONT_STYLE_OPTIONS, TextAlignEnum, TextDecorationEnum, UnitEnum } from '@/constants/style';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
+import ColorPicker from './ColorPicker.vue';
 import type { FontConfig, TextShadowItem } from '@/views/Canvas/types';
 
 defineOptions({

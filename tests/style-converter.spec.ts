@@ -6,7 +6,7 @@ import {
   isImportantDecl,
   mergeDeclarations,
 } from '@/utils/style-converter';
-import { StyleRuleTypeEnum, UnitEnum } from '@/constants/style';
+import { BackgroundTypeEnum, StyleRuleTypeEnum, UnitEnum } from '@/constants/style';
 import type { CanvasStyleRule, StyleConfig } from '@/views/Canvas/types';
 
 /** 构造空白样式配置 */
@@ -44,6 +44,34 @@ describe('styleConfigToCss', () => {
     const config = emptyConfig();
     config.size.paddingTop = 0;
     expect(styleConfigToCss(config).paddingTop).toBe('0');
+  });
+
+  it('无内容的占位背景层不产出声明', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{}];
+    const css = styleConfigToCss(config);
+    expect(css.backgroundImage).toBeUndefined();
+    expect(css.backgroundColor).toBeUndefined();
+  });
+
+  it('已选类型但未填内容的背景层不产出声明', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [
+      { type: BackgroundTypeEnum.COLOR },
+      { type: BackgroundTypeEnum.IMAGE },
+      { type: BackgroundTypeEnum.GRADIENT },
+    ];
+    const css = styleConfigToCss(config);
+    expect(css.backgroundImage).toBeUndefined();
+    expect(css.backgroundColor).toBeUndefined();
+  });
+
+  it('占位层不影响有内容层的序列化', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{}, { type: BackgroundTypeEnum.COLOR, color: '#ff0000' }];
+    const css = styleConfigToCss(config);
+    expect(css.backgroundColor).toBe('#ff0000');
+    expect(css.backgroundImage).toBeUndefined();
   });
 });
 

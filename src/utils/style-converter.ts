@@ -243,6 +243,26 @@ function expandLonghands(prop: string, value: string): string[] {
 }
 
 /**
+ * 判断背景层是否包含可序列化的内容
+ * 占位层（未选类型或未填内容）不产生 CSS 声明，避免输出 none/revert 等占位值污染规则；
+ * 同时避免无意义的规则写回触发编辑副本重建，导致面板中未填完的层被丢弃
+ * @example hasBackgroundContent({}) → false
+ * @example hasBackgroundContent({ type: COLOR, color: 'red' }) → true
+ */
+function hasBackgroundContent(item: BackgroundItem): boolean {
+  switch (item.type) {
+    case BackgroundTypeEnum.COLOR:
+      return isNotEmpty(item.color);
+    case BackgroundTypeEnum.GRADIENT:
+      return isNotEmpty(item.gradient);
+    case BackgroundTypeEnum.IMAGE:
+      return isNotEmpty(item.imageUrl);
+    default:
+      return false;
+  }
+}
+
+/**
  * @example backgroundItemToCss({ type: COLOR, color: 'red' }) → 'red'
  * @example backgroundItemToCss({ type: GRADIENT, gradient: 'linear-gradient(red, blue)' }) → 'linear-gradient(red, blue)'
  * @example backgroundItemToCss({ type: IMAGE, imageUrl: 'a.png' }) → 'url("a.png")'
@@ -344,9 +364,11 @@ export function styleConfigToCss(styleConfig: StyleConfig, kebabCase = false): R
   }
 
   // --- visual ---
-  if (isNotEmpty(visual.backgrounds) && visual.backgrounds.length > 0) {
-    const colorBgs = visual.backgrounds.filter((b) => b.type === BackgroundTypeEnum.COLOR);
-    const imageBgs = visual.backgrounds.filter((b) => b.type !== BackgroundTypeEnum.COLOR);
+  /** 仅序列化有内容的背景层：占位层不产出声明，保证「先建层、后填内容」期间规则不被污染 */
+  const serializableBgs = (visual.backgrounds ?? []).filter(hasBackgroundContent);
+  if (serializableBgs.length > 0) {
+    const colorBgs = serializableBgs.filter((b) => b.type === BackgroundTypeEnum.COLOR);
+    const imageBgs = serializableBgs.filter((b) => b.type !== BackgroundTypeEnum.COLOR);
     if (imageBgs.length > 0) {
       /** 各长手属性均为逗号分隔的层列表，缺省值需按层补齐以保持层对齐 */
       css['backgroundImage'] = imageBgs.map(backgroundItemToCss).join(', ');

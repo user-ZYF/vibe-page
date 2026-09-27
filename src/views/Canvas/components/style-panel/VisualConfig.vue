@@ -26,12 +26,7 @@
           <DragOutlined class="style-config-drag-icon" />
           <span>{{ bg.type === BackgroundTypeEnum.IMAGE ? 'Image' : bg.type === BackgroundTypeEnum.COLOR ? 'Color' : 'Gradient' }}</span>
           <!-- 颜色预览（color/gradient 类型） -->
-          <input
-            v-if="bg.type === BackgroundTypeEnum.COLOR"
-            type="color"
-            v-model="bg.color"
-            class="style-config-color-picker style-config-color-picker--small"
-          />
+          <ColorPicker v-if="bg.type === BackgroundTypeEnum.COLOR" v-model="bg.color" small />
           <CloseOutlined class="style-config-shadow-close" @click="model.backgrounds?.splice(index, 1)" />
         </div>
 
@@ -45,7 +40,13 @@
         <!-- Image 类型 -->
         <template v-if="bg.type === BackgroundTypeEnum.IMAGE">
           <div class="style-config-label">Image</div>
-          <me-input v-model="bg.imageUrl" placeholder="https://" class="style-config-mb" @blur="handleBgImageUrlBlur(bg)" />
+          <me-input
+            :model-value="bgImageUrlValue(bg)"
+            placeholder="https://"
+            class="style-config-mb"
+            @input="handleBgImageUrlInput(bg, $event)"
+            @blur="handleBgImageUrlBlur(bg)"
+          />
           <div class="style-config-row">
             <div class="style-config-col">
               <div class="style-config-label">Repeat</div>
@@ -73,7 +74,7 @@
           <div class="style-config-label">Color</div>
           <div class="style-config-color-row">
             <me-input v-model="bg.color" class="style-config-input" placeholder="#ffffff" />
-            <input type="color" v-model="bg.color" class="style-config-color-picker" />
+            <ColorPicker v-model="bg.color" />
           </div>
         </template>
 
@@ -105,7 +106,7 @@
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row">
           <me-input v-model="model.borderColor" class="style-config-input" placeholder="#000000" />
-          <input type="color" v-model="model.borderColor" class="style-config-color-picker" />
+          <ColorPicker v-model="model.borderColor" />
         </div>
       </div>
     </div>
@@ -169,7 +170,7 @@
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row">
           <me-input v-model="model.outlineColor" class="style-config-input" placeholder="#000000" />
-          <input type="color" v-model="model.outlineColor" class="style-config-color-picker" />
+          <ColorPicker v-model="model.outlineColor" />
         </div>
         <div class="style-config-label">Offset</div>
         <div class="style-config-input-group">
@@ -246,7 +247,7 @@
         <div class="style-config-label">Color</div>
         <div class="style-config-color-row style-config-color-row--mb">
           <me-input v-model="shadow.color" class="style-config-input" placeholder="#000000" />
-          <input type="color" v-model="shadow.color" class="style-config-color-picker" />
+          <ColorPicker v-model="shadow.color" />
         </div>
         <me-checkbox v-model="shadow.inset">
           <span class="style-config-checkbox-label">Inset</span>
@@ -277,11 +278,12 @@ import {
   BackgroundTypeEnum,
   UnitEnum,
 } from '@/constants/style';
+import ColorPicker from './ColorPicker.vue';
 import type { VisualConfig, BoxShadowItem, BackgroundItem } from '@/views/Canvas/types';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import { isSafeUrl, sanitizeCssUrl } from '@/utils/sanitize';
 import { message } from 'ant-design-vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 defineOptions({
   name: 'VisualConfig',
@@ -335,12 +337,25 @@ function handleAddBoxShadow() {
   });
 }
 
-/** 背景图地址失焦时校验协议安全性 */
+/** 背景图地址编辑的临时值（blur 后才同步到 bg.imageUrl，避免每输入一个字符就触发一次背景图请求） */
+const pendingBgImageUrls = ref(new Map<BackgroundItem, string>());
+
+/** 背景图地址输入框当前值（未编辑时显示 bg.imageUrl） */
+function bgImageUrlValue(bg: BackgroundItem) {
+  return pendingBgImageUrls.value.get(bg) ?? bg.imageUrl ?? '';
+}
+
+/** 背景图地址输入时暂存临时值 */
+function handleBgImageUrlInput(bg: BackgroundItem, value: string) {
+  pendingBgImageUrls.value.set(bg, value);
+}
+
+/** 背景图地址失焦时校验协议安全性并同步到 bg.imageUrl */
 function handleBgImageUrlBlur(bg: BackgroundItem) {
-  const url = bg.imageUrl?.trim() ?? '';
-  if (!url) return;
-  if (!isSafeUrl(url)) {
-    bg.imageUrl = '';
+  const url = bgImageUrlValue(bg).trim();
+  pendingBgImageUrls.value.delete(bg);
+  /** 校验未通过时还原显示为旧地址 */
+  if (url && !isSafeUrl(url)) {
     message.warning('背景图地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
     return;
   }
@@ -368,12 +383,6 @@ function handleBgGradientBlur(bg: BackgroundItem) {
 
 .style-config-mb {
   margin-bottom: 8px;
-}
-
-.style-config-color-picker--small {
-  width: 20px;
-  height: 20px;
-  margin-left: auto;
 }
 
 .style-config-color-row--mb {

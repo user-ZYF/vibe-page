@@ -6,3 +6,15 @@
     margin: 0;
     padding: 0;
 }
+
+/* 颜色选择器弹层（取色器容器自带背景与阴影，去掉 popover 默认样式） */
+.comp-color-picker-popover {
+    .ant-popover-inner {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .ant-popover-inner-content {
+        padding: 0;
+    }
+}

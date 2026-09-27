@@ -36,7 +36,7 @@
             @keydown.enter="handleAddClass"
           />
           <div v-if="newClassName && !isClassNameValid" class="style-panel-classes-error">
-            class 名称须以字母、下划线或连字符开头，仅包含字母、数字、下划线和连字符
+            须以字母或下划线开头，仅包含字母、数字、下划线和连字符
           </div>
         </div>
       </div>
@@ -163,14 +163,25 @@ watch(activeStyleConfig, (config) => {
   if (config && activeSelector.value) canvasStore.syncStyle(activeSelector.value, config);
 }, { deep: true });
 
-/** 规则被其他路径修改（撤销/重做、图层隐藏直写、代码应用）时重建编辑副本，避免陈旧副本把已撤销/被覆盖的样式写回 */
-watch(() => canvasStore.styleRules, () => {
+/** 从样式规则重建当前编辑副本 */
+function rebuildActiveStyleConfig() {
   if (!activeSelector.value) return;
   const fresh = canvasStore.getOrCreateStyleConfig(activeSelector.value);
   if (!isEqual(fresh, activeStyleConfig.value)) {
     activeStyleConfig.value = fresh;
   }
+}
+
+/** 规则被其他路径修改（撤销/重做、图层隐藏直写、代码应用）时重建编辑副本，避免陈旧副本把已撤销/被覆盖的样式写回 */
+watch(() => canvasStore.styleRules, () => {
+  /** 取色面板打开期间挂起重建：拖拽取色时每帧写回规则，重建引发的重渲染会卸载取色器 DOM 使其拖拽监听读到空引用 */
+  if (!canvasStore.isColorPickerOpen) rebuildActiveStyleConfig();
 }, { deep: true });
+
+/** 取色面板关闭后补一次重建，应用打开期间被跳过的规则投影 */
+watch(() => canvasStore.isColorPickerOpen, (open) => {
+  if (!open) rebuildActiveStyleConfig();
+});
 
 /** 点击 class tag，切换编辑目标 */
 function handleClassTagClick(cls: string) {

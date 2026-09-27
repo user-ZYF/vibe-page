@@ -44,6 +44,8 @@ export const useCanvasStore = defineStore("canvas", {
     activePanel: SiderPanelEnum.COMPONENTS as SiderPanelEnum,
     /** 是否正在调整元素尺寸 */
     isResizing: false,
+    /** 打开的取色面板数量（大于 0 期间挂起 styleRules 到编辑副本的回读重建，避免拖拽取色时重渲染卸载取色器 DOM） */
+    colorPickerOpenCount: 0,
     /** 插入位置 */
     positioner: new Positioner(),
     /** 样式规则有序清单 */
@@ -58,6 +60,10 @@ export const useCanvasStore = defineStore("canvas", {
     };
   },
   getters: {
+    /** 取色面板是否打开（存在多个取色器实例时用计数避免互相清除标记） */
+    isColorPickerOpen(state): boolean {
+      return state.colorPickerOpenCount > 0;
+    },
     /** 全局 class 列表（含引用元素 id 及启用状态），供全局 class 管理面板使用 */
     classList(state): ClassListItem[] {
       // 收集每个 class 被哪些元素引用
@@ -272,7 +278,6 @@ export const useCanvasStore = defineStore("canvas", {
           const radio1 = this.generateElement(CanvasElementTypeEnum.RADIO) as CanvasRadioElement;
           radio1.name = `radio-group-${radio1.id}`;
           radio1.value = '选项一';
-          radio1.checked = true;
           /** 单选项一文本标签（for 绑定对应选项，点击文本即可选中） */
           const radio1Label = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
           radio1Label.text = '选项一';
@@ -1431,10 +1436,6 @@ export const useCanvasStore = defineStore("canvas", {
     applyParsedCode(html: string, css: string): boolean {
       try {
         const { children, styleRules, rootPatch } = parseCodeToCanvas(html, css, this.root.id);
-        // HTML 非空但未解析出任何可识别元素时视为解析失败，避免静默清空画布
-        if (html.trim() !== '' && children.length === 0 && rootPatch === null) {
-          throw new Error('HTML 中未解析出任何可识别的元素');
-        }
         this.root.children = children;
         this.styleRules = styleRules;
         // 应用 body 标签声明的根元素属性（id 变更会使 CSS 中同名 #id 规则生效，旧规则因失去引用被清理）

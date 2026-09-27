@@ -14,6 +14,7 @@ import type {
   BackgroundRepeatEnum,
   BackgroundSizeEnum,
   BorderCollapseEnum,
+  TableLayoutEnum,
   BorderStyleEnum,
   DisplayStyleEnum,
   FloatStyleEnum,
@@ -128,6 +129,8 @@ export interface GeneralConfig {
   overflow?: OverflowStyleEnum;
   /** 表格边框合并方式 */
   borderCollapse?: BorderCollapseEnum;
+  /** 表格布局方式 */
+  tableLayout?: TableLayoutEnum;
   /** 层叠顺序 */
   zIndex?: number;
 }

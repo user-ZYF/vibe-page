@@ -381,6 +381,20 @@ export const BORDER_COLLAPSE_OPTIONS = [
   { label: 'collapse', value: BorderCollapseEnum.COLLAPSE },
 ];
 
+/** table-layout 枚举 */
+export enum TableLayoutEnum {
+  /** 自动布局 */
+  AUTO = "auto",
+  /** 固定布局 */
+  FIXED = "fixed",
+}
+
+/** table-layout 选项 */
+export const TABLE_LAYOUT_OPTIONS = [
+  { label: 'auto', value: TableLayoutEnum.AUTO },
+  { label: 'fixed', value: TableLayoutEnum.FIXED },
+];
+
 /** border-style枚举 */
 export enum BorderStyleEnum {
   /** 无样式 */

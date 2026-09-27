@@ -15,6 +15,7 @@ import {
   DisplayStyleEnum,
   OverflowStyleEnum,
   BorderCollapseEnum,
+  TableLayoutEnum,
   BorderStyleEnum,
   FlexDirectionEnum,
   JustifyContentEnum,
@@ -332,6 +333,7 @@ export function styleConfigToCss(styleConfig: StyleConfig, kebabCase = false): R
     css['overflowY'] = general.overflow;
   }
   if (isNotEmpty(general.borderCollapse)) css['borderCollapse'] = general.borderCollapse;
+  if (isNotEmpty(general.tableLayout)) css['tableLayout'] = general.tableLayout;
   if (isNotEmpty(general.zIndex)) css['zIndex'] = String(general.zIndex);
 
   // --- size ---
@@ -638,6 +640,7 @@ export function cssToStyleConfig(declarations: Record<string, string>): StyleCon
     general.overflow = enumValue<OverflowStyleEnum>(overflowXRaw ?? overflowYRaw, OverflowStyleEnum);
   }
   general.borderCollapse = enumValue<BorderCollapseEnum>(get(style, 'border-collapse'), BorderCollapseEnum);
+  general.tableLayout = enumValue<TableLayoutEnum>(get(style, 'table-layout'), TableLayoutEnum);
   const zIndexRaw = get(style, 'z-index');
   // auto 等非数值不写入（toNumber 会将其扭曲为 0），原声明保留在 rule.style 中透传
   if (zIndexRaw !== undefined && Number.isFinite(Number(zIndexRaw))) general.zIndex = toNumber(zIndexRaw);

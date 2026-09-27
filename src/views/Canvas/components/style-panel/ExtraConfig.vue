@@ -13,6 +13,16 @@
           clearable
         />
       </div>
+      <div class="style-config-section">
+        <div class="style-config-label">表格布局（table-layout）</div>
+        <me-select
+          v-model="styleModel.general.tableLayout"
+          class="style-config-select"
+          :options="TABLE_LAYOUT_OPTIONS"
+          placeholder="auto"
+          clearable
+        />
+      </div>
     </template>
 
     <!-- 表格单元格 td -->
@@ -56,7 +66,7 @@
 <script lang="ts" setup>
 import { MeSelect } from '@zyf_dsb/me-ui';
 import { CanvasElementTypeEnum, TABLE_SCOPE_OPTIONS } from '@/constants/home';
-import { BORDER_COLLAPSE_OPTIONS } from '@/constants/style';
+import { BORDER_COLLAPSE_OPTIONS, TABLE_LAYOUT_OPTIONS } from '@/constants/style';
 import type { CanvasInnerElement, CanvasTableDataElement, CanvasTableHeaderCellElement, CanvasTableColGroupElement, StyleConfig } from '@/views/Canvas/types';
 
 defineOptions({

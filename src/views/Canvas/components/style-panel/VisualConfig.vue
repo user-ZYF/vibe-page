@@ -282,6 +282,7 @@ import ColorPicker from './ColorPicker.vue';
 import type { VisualConfig, BoxShadowItem, BackgroundItem } from '@/views/Canvas/types';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import { isSafeUrl, sanitizeCssUrl } from '@/utils/sanitize';
+import { CSS_URL_ADDRESS_FORBIDDEN_REGEX } from '@/constants/sanitize';
 import { message } from 'ant-design-vue';
 import { computed, ref } from 'vue';
 
@@ -319,7 +320,8 @@ const opacity = computed({
  */
 function handleAddBackground() {
   if (!model.value.backgrounds) model.value.backgrounds = [];
-  model.value.backgrounds.push({});
+  /** 新增背景默认选中 color 类型，避免空类型导致预览行只显示占位文本 */
+  model.value.backgrounds.push({ type: BackgroundTypeEnum.COLOR });
 }
 
 /**
@@ -357,6 +359,11 @@ function handleBgImageUrlBlur(bg: BackgroundItem) {
   /** 校验未通过时还原显示为旧地址 */
   if (url && !isSafeUrl(url)) {
     message.warning('背景图地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    return;
+  }
+  /** 校验地址能否安全写入 url("...")：引号、括号、<>、反斜杠、空白会破坏 CSS 字符串边界 */
+  if (url && CSS_URL_ADDRESS_FORBIDDEN_REGEX.test(url)) {
+    message.warning('背景图地址包含非法字符（空格、引号、括号等），请转义或改用 base64 编码');
     return;
   }
   bg.imageUrl = url;

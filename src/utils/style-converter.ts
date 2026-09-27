@@ -27,6 +27,7 @@ import {
   defaultClassStyleConfig,
 } from '@/constants/style';
 import { sanitizeCssUrl, sanitizeUrl } from '@/utils/sanitize';
+import { CSS_URL_ADDRESS_FORBIDDEN_REGEX } from '@/constants/sanitize';
 import { cloneDeep } from 'lodash';
 
 /**
@@ -249,7 +250,7 @@ function expandLonghands(prop: string, value: string): string[] {
  * @example hasBackgroundContent({}) → false
  * @example hasBackgroundContent({ type: COLOR, color: 'red' }) → true
  */
-function hasBackgroundContent(item: BackgroundItem): boolean {
+export function hasBackgroundContent(item: BackgroundItem): boolean {
   switch (item.type) {
     case BackgroundTypeEnum.COLOR:
       return isNotEmpty(item.color);
@@ -275,7 +276,9 @@ function backgroundItemToCss(item: BackgroundItem): string {
     return sanitizeCssUrl(item.gradient || 'none');
   }
   if (item.type === BackgroundTypeEnum.IMAGE) {
-    return `url("${sanitizeUrl(item.imageUrl ?? '')}")`;
+    /** 含破坏 url("...") 字符串边界的字符时丢弃整层（输入层已拦截，此处为代码导入路径的兜底） */
+    const url = sanitizeUrl(item.imageUrl ?? '');
+    return CSS_URL_ADDRESS_FORBIDDEN_REGEX.test(url) ? 'none' : `url("${url}")`;
   }
   return 'none';
 }

@@ -91,3 +91,9 @@ export const SPACE_SEPARATOR_REGEX = /\s+/;
 
 /** 特殊的 SVG 动画取值属性（分号分隔取值中可能夹带 javascript: 等危险协议） */
 export const SVG_ANIMATION_VALUE_ATTRIBUTES = new Set(['to', 'from', 'by', 'values']);
+
+/**
+ * 写入 url("...") 的地址中禁止出现的字符（会破坏引号字符串边界或 CSS 分词，且并非合法 URL 字符）
+ * 匹配示例：空白、"、'、(、)、<、>、\
+ */
+export const CSS_URL_ADDRESS_FORBIDDEN_REGEX = /[\s"'()<>\\]/;

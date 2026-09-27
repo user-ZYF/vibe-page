@@ -5,6 +5,7 @@ import {
   declarationWins,
   isImportantDecl,
   mergeDeclarations,
+  hasBackgroundContent,
 } from '@/utils/style-converter';
 import { BackgroundTypeEnum, StyleRuleTypeEnum, UnitEnum } from '@/constants/style';
 import type { CanvasStyleRule, StyleConfig } from '@/views/Canvas/types';
@@ -72,6 +73,35 @@ describe('styleConfigToCss', () => {
     const css = styleConfigToCss(config);
     expect(css.backgroundColor).toBe('#ff0000');
     expect(css.backgroundImage).toBeUndefined();
+  });
+
+  it('图片地址正常输出为 url("...")', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.IMAGE, imageUrl: 'https://a.com/x.png' }];
+    const css = styleConfigToCss(config);
+    expect(css.backgroundImage).toBe('url("https://a.com/x.png")');
+  });
+
+  it('图片地址含破坏字符串边界的字符时输出 none', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.IMAGE, imageUrl: 'a"b.png' }];
+    const css = styleConfigToCss(config);
+    expect(css.backgroundImage).toBe('none');
+  });
+});
+
+describe('hasBackgroundContent', () => {
+  it('未选类型或未填内容的层视为无内容', () => {
+    expect(hasBackgroundContent({})).toBe(false);
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.COLOR })).toBe(false);
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.IMAGE })).toBe(false);
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.GRADIENT, gradient: '' })).toBe(false);
+  });
+
+  it('已填内容的层视为有内容', () => {
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.COLOR, color: 'red' })).toBe(true);
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.IMAGE, imageUrl: 'a.png' })).toBe(true);
+    expect(hasBackgroundContent({ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(red, blue)' })).toBe(true);
   });
 });
 

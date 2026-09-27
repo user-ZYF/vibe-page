@@ -102,6 +102,7 @@
 import { computed, ref, watch } from 'vue';
 import { isEqual } from 'lodash';
 import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME, CSS_NAME_REGEX } from '@/constants/style';
+import { hasBackgroundContent } from '@/utils/style-converter';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
 import type { CanvasInnerElement, StyleConfig } from '@/views/Canvas/types';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
@@ -167,6 +168,12 @@ watch(activeStyleConfig, (config) => {
 function rebuildActiveStyleConfig() {
   if (!activeSelector.value) return;
   const fresh = canvasStore.getOrCreateStyleConfig(activeSelector.value);
+  /** 未填内容的背景层不会写入规则，投影回来会丢；按原下标把本地这类层插回去 */
+  const merged = [...fresh.visual.backgrounds];
+  activeStyleConfig.value?.visual.backgrounds?.forEach((bg, index) => {
+    if (!hasBackgroundContent(bg)) merged.splice(index, 0, bg);
+  });
+  fresh.visual.backgrounds = merged;
   if (!isEqual(fresh, activeStyleConfig.value)) {
     activeStyleConfig.value = fresh;
   }

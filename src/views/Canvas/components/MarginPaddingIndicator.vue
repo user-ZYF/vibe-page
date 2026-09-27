@@ -47,7 +47,7 @@ import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
-import { useResizeObserver } from '@vueuse/core';
+import { useResizeObserver, useEventListener } from '@vueuse/core';
 import { useDragStore } from '@/store/drag';
 import { nodeRegistry } from '../drag/NodeRegistry';
 
@@ -64,7 +64,7 @@ defineProps({
 });
 
 const canvasStore = useCanvasStore();
-const { isResizing } = storeToRefs(canvasStore);
+const { isResizing, root, styleRules } = storeToRefs(canvasStore);
 
 const dragStore = useDragStore();
 const { isDragging } = storeToRefs(dragStore);
@@ -189,7 +189,7 @@ let layoutWatchStop: (() => void) | null = null;
 function startLayoutWatch() {
   if (layoutWatchStop) return;
   layoutWatchStop = watch(
-    [() => canvasStore.root, () => canvasStore.styleRules],
+    [root, styleRules],
     () => {
       const el = currentTarget.value;
       /** 拖拽/调整尺寸期间指示器不可见，跳过测量（结束时由对应 watch 统一刷新） */
@@ -222,25 +222,20 @@ function stopLayoutWatch() {
   layoutWatchStop = null;
 }
 
+/** 画布根 DOM（onMounted 后从注册表获取，驱动事件监听的目标） */
+const canvasElRef = shallowRef<Element | null>(null);
+
+useEventListener(canvasElRef, 'mouseover', handleMouseOver as EventListener);
+useEventListener(canvasElRef, 'mouseleave', handleMouseLeave);
+useEventListener(canvasElRef, 'scroll', handleRecompute, true);
+useEventListener(window, 'resize', handleRecompute);
+
 onMounted(() => {
-  const canvasEl = getCanvasEl();
-  if (canvasEl) {
-    canvasEl.addEventListener('mouseover', handleMouseOver as EventListener);
-    canvasEl.addEventListener('mouseleave', handleMouseLeave);
-    canvasEl.addEventListener('scroll', handleRecompute, true);
-    window.addEventListener('resize', handleRecompute);
-  }
+  canvasElRef.value = getCanvasEl();
 });
 
 onBeforeUnmount(() => {
   stopLayoutWatch();
-  const canvasEl = getCanvasEl();
-  if (canvasEl) {
-    canvasEl.removeEventListener('mouseover', handleMouseOver as EventListener);
-    canvasEl.removeEventListener('mouseleave', handleMouseLeave);
-    canvasEl.removeEventListener('scroll', handleRecompute, true);
-    window.removeEventListener('resize', handleRecompute);
-  }
 });
 </script>
 

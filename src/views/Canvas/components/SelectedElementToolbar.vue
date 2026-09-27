@@ -37,7 +37,7 @@
 
 <script lang="ts" setup>
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useResizeObserver } from '@vueuse/core';
+import { useResizeObserver, useEventListener } from '@vueuse/core';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { MeTooltip } from '@zyf_dsb/me-ui';
 import { useCanvasStore } from '@/store/canvas';
@@ -56,7 +56,7 @@ defineOptions({
 });
 
 const canvasStore = useCanvasStore();
-const { selectedElementId, isResizing } = storeToRefs(canvasStore);
+const { selectedElementId, isResizing, root, styleRules } = storeToRefs(canvasStore);
 
 const dragStore = useDragStore();
 const { isDragging } = storeToRefs(dragStore);
@@ -105,7 +105,7 @@ const isElementDisplayed = ref(true);
 const visible = computed(() => !!selectedElementId.value && !isDragging.value && isElementDisplayed.value);
 
 /** 是否显示操作工具栏按钮（根画布元素不显示） */
-const showToolbar = computed(() => visible.value && selectedElementId.value !== canvasStore.root.id);
+const showToolbar = computed(() => visible.value && selectedElementId.value !== root.value.id);
 
 /** 是否显示resizer（只有选中非根容器元素或链接元素才会出现） */
 const showResizer = computed(() => showToolbar.value && !!selectedElement.value && selectedElement.value.type !== CanvasElementTypeEnum.ROOT && isParentElement(selectedElement.value as CanvasInnerElement));
@@ -297,25 +297,17 @@ watch(selectedElementId, (id) => {
   }
 });
 
-/** 监听选中元素数据（如内容、class变化）或拖拽状态变化（因为可能是选中的元素被拖拽了），更新工具栏位置 */
-watch(
-  [() => selectedElement.value, () => isDragging.value],
-  () => {
-    if (selectedElementId.value && !isResizing.value) {
-      nextTick(updatePos);
-    }
-  },
-  { deep: true },
-);
-
 /** 画布数据深度监听的停止函数（仅选中期间订阅，避免无目标时的全树深度遍历开销） */
 let layoutWatchStop: (() => void) | null = null;
 
-/** 订阅画布元素树与样式规则变化：选中元素的尺寸、可见性可能被兄弟元素或规则变更影响 */
+/** 
+ * 订阅画布元素树与样式规则变化：选中元素的尺寸、可见性可能被自身数据、兄弟元素或规则变更影响
+ * 选择非顶层watch，是因为在无选中元素时，也会深度对比root和styleRules，造成性能损失
+ */
 function startLayoutWatch() {
   if (layoutWatchStop) return;
   layoutWatchStop = watch(
-    [() => canvasStore.root, () => canvasStore.styleRules],
+    [root, styleRules],
     () => {
       if (selectedElementId.value && !isResizing.value) {
         nextTick(updatePos);
@@ -338,12 +330,14 @@ function handleRecompute() {
   }
 }
 
+/** 画布根 DOM（onMounted 后从注册表获取，驱动事件监听的目标） */
+const canvasElRef = shallowRef<Element | null>(null);
+
+useEventListener(canvasElRef, 'scroll', handleRecompute, true);
+useEventListener(window, 'resize', handleRecompute);
+
 onMounted(() => {
-  const canvasEl = getCanvasEl();
-  if (canvasEl) {
-    canvasEl.addEventListener('scroll', handleRecompute, true);
-    window.addEventListener('resize', handleRecompute);
-  }
+  canvasElRef.value = getCanvasEl();
   /** 初始化时如果已有选中元素，立即更新位置 */
   if (selectedElementId.value) {
     updatePos();
@@ -353,12 +347,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopLayoutWatch();
-  const canvasEl = getCanvasEl();
-  if (canvasEl) {
-    canvasEl.removeEventListener('scroll', handleRecompute, true);
-    window.removeEventListener('resize', handleRecompute);
-  }
-
   window.removeEventListener('pointermove', handleResizeMove);
   window.removeEventListener('pointerup', handleResizeEnd);
   if (posRafId !== null) {

@@ -25,20 +25,20 @@
           <BlockOutlined />
         </me-button>
       </me-tooltip>
-      <me-tooltip content="组件库" effect="light">
-        <me-button
-          :class="{ 'is-active': activePanel === SiderPanelEnum.COMPONENTS }"
-          @click="handlePanelSwitch(SiderPanelEnum.COMPONENTS)"
-        >
-          <AppstoreOutlined />
-        </me-button>
-      </me-tooltip>
       <me-tooltip content="Class 管理" effect="light">
         <me-button
           :class="{ 'is-active': activePanel === SiderPanelEnum.CLASS_MANAGER }"
           @click="handlePanelSwitch(SiderPanelEnum.CLASS_MANAGER)"
         >
           <BgColorsOutlined />
+        </me-button>
+      </me-tooltip>
+      <me-tooltip content="组件库" effect="light">
+        <me-button
+          :class="{ 'is-active': activePanel === SiderPanelEnum.COMPONENTS }"
+          @click="handlePanelSwitch(SiderPanelEnum.COMPONENTS)"
+        >
+          <AppstoreOutlined />
         </me-button>
       </me-tooltip>
     </div>

@@ -47,6 +47,7 @@ import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
+import { useResizeObserver } from '@vueuse/core';
 import { useDragStore } from '@/store/drag';
 import { nodeRegistry } from '../drag/NodeRegistry';
 
@@ -71,7 +72,7 @@ const { isDragging } = storeToRefs(dragStore);
 const { elRect, elMarginBox, updateBox, resetElRect, getCanvasEl } = useCanvasBoxRect();
 
 /** 当前悬停的画布 DOM 元素 */
-const currentTarget = shallowRef<Element | null>(null);
+const currentTarget = shallowRef<HTMLElement | null>(null);
 
 /** 当前悬停目标对应的画布元素 id（由悬停命中节点解析，与测量目标可能不是同一节点，如媒体元素注册的是内层 audio/video） */
 const currentTargetId = shallowRef<string | null>(null);
@@ -122,7 +123,7 @@ const elName = computed(() => {
 
 /** 鼠标移入 */
 function handleMouseOver(event: MouseEvent) {
-  const target = event.target as Element | null;
+  const target = event.target as HTMLElement | null;
   const host = target instanceof HTMLElement ? target.closest<HTMLElement>('[data-canvas-id]') : null;
   // 这里需要从 registry 中拿目标元素，因为 id 并不一定都绑定在目标元素上
   const reg = host?.dataset.canvasId ? nodeRegistry.get(host.dataset.canvasId) : undefined;
@@ -140,7 +141,7 @@ function handleMouseLeave() {
  * 重新测量悬停元素的可见性与盒模型
  * display:none 时元素无渲染框（几何数据全为 0），隐藏指示层并跳过测量
  */
-function refreshTargetBox(el: Element) {
+function refreshTargetBox(el: HTMLElement) {
   isTargetDisplayed.value = getComputedStyle(el).display !== 'none';
   if (!isTargetDisplayed.value) return;
   updateBox(el);
@@ -155,6 +156,13 @@ function handleRecompute() {
     updateBox(currentTarget.value);
   }
 }
+
+/** 监听悬停元素尺寸变化（如图片/媒体加载完成、内容撑开等不改变响应式数据的场景），重新测量盒模型 */
+useResizeObserver(currentTarget, () => {
+  const el = currentTarget.value;
+  if (!el || isDragging.value || isResizing.value) return;
+  refreshTargetBox(el);
+});
 
 watch(currentTarget, (el) => {
   if (el) {

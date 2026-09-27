@@ -36,7 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useResizeObserver } from '@vueuse/core';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { MeTooltip } from '@zyf_dsb/me-ui';
 import { useCanvasStore } from '@/store/canvas';
@@ -67,6 +68,9 @@ const toolbarRef = ref<HTMLElement | null>(null);
 
 /** 工具栏宽度 */
 const toolbarWidth = ref(0);
+
+/** 选中元素的 DOM（供 ResizeObserver 监听尺寸变化） */
+const selectedEl = shallowRef<HTMLElement | null>(null);
 
 /** 判断方向是否包含北（上） */
 function isNorthDir(dir: ResizeDirEnum): boolean {
@@ -254,14 +258,22 @@ function handleResizeEnd() {
 }
 
 /** 获取选中元素的 DOM */
-function getSelectedEl(): Element | null {
+function getSelectedEl(): HTMLElement | null {
   if (!selectedElementId.value) return null;
   return nodeRegistry.get(selectedElementId.value)?.el ?? null;
 }
 
+/** 监听选中元素尺寸变化（如图片/媒体加载完成、内容撑开等不改变响应式数据的场景），重新更新工具栏位置 */
+useResizeObserver(selectedEl, () => {
+  if (selectedElementId.value && !isResizing.value) {
+    updatePos();
+  }
+});
+
 /** 更新工具栏位置 */
 function updatePos() {
   const el = getSelectedEl();
+  selectedEl.value = el;
   if (!el) return;
   /** 直接读取 DOM 计算样式，反映真实 CSS 渲染状态（含后代选择器、伪类等影响） */
   isElementDisplayed.value = getComputedStyle(el).display !== 'none';
@@ -279,6 +291,7 @@ watch(selectedElementId, (id) => {
     updatePos();
     startLayoutWatch();
   } else {
+    selectedEl.value = null;
     resetElRect();
     stopLayoutWatch();
   }

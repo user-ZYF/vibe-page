@@ -10,7 +10,7 @@ import { generateId } from "@/utils/id";
 import { StyleRuleTypeEnum } from "@/constants/style";
 import { GENERAL_FALLBACK_TAG_NAME } from "@/constants/html";
 import type { CanvasStyleRule } from "@/views/Canvas/types";
-import { findElementInTree } from "@/utils/tree-traversal";
+import { findElementInTree, forEachElementInTree } from "@/utils/tree-traversal";
 
 /**
  * 画布数据的存储版本号
@@ -176,11 +176,16 @@ export const useCanvasStore = defineStore("canvas", {
         targetRule.style[prop] = declarationWins(value, targetRule.style[prop]) ? value : `${value} !important`;
       }
     },
-    /** 重命名元素的 #id 规则选择器（元素 id 变更时同步迁移样式，避免规则失配导致样式丢失） */
-    renameElementIdRules(oldId: string, newId: string) {
+    /** 重命名元素 id：迁移其 #id 规则选择器（避免规则失配导致样式丢失），并同步所有 label 元素的 for 引用（避免改名后悬空） */
+    renameElementId(oldId: string, newId: string) {
       this.styleRules.forEach((rule) => {
         if (rule.type === StyleRuleTypeEnum.EDITABLE && rule.selector === `#${oldId}`) {
           rule.selector = `#${newId}`;
+        }
+      });
+      forEachElementInTree(this.root, (el) => {
+        if (el.type === CanvasElementTypeEnum.LABEL && (el as CanvasLabelElement).for === oldId) {
+          (el as CanvasLabelElement).for = newId;
         }
       });
     },
@@ -363,6 +368,15 @@ export const useCanvasStore = defineStore("canvas", {
           });
       }
       this.root.children = removeFromList(this.root.children);
+      /** 清理指向已删除元素的 label.for 悬空引用 */
+      forEachElementInTree(this.root, (el) => {
+        if (el.type === CanvasElementTypeEnum.LABEL) {
+          const label = el as CanvasLabelElement;
+          if (label.for && !this.getElementById(label.for)) {
+            delete label.for;
+          }
+        }
+      });
       /** 删除的元素或其子孙为当前选中元素时，清空选中态 */
       if(this.selectedElementId && !this.getElementById(this.selectedElementId)){
         this.selectElement(null);

@@ -5,15 +5,12 @@
     <div v-if="model.type !== CanvasElementTypeEnum.TEXT" class="style-config-section">
       <div class="style-config-label">ID</div>
       <me-input
-        :model-value="model.id"
+        :model-value="pendingId"
         class="style-config-input"
         @focus="handleIdFocus"
         @input="handleIdInput"
         @blur="handleIdBlur"
       />
-      <div v-if="pendingId && !isIdNameValid" class="style-config-error">
-        ID 名称须以字母、下划线开头，仅包含字母、数字、下划线和短横线
-      </div>
     </div>
 
     <!-- 按钮 -->
@@ -285,11 +282,8 @@ const canvasStore = useCanvasStore();
 /** 编辑前的 id */
 const oldId = ref('');
 
-/** id 输入框当前值（用于实时校验显示） */
+/** id 输入框当前值（blur 校验通过后才同步到 model.id） */
 const pendingId = ref('');
-
-/** id 名称是否合法 */
-const isIdNameValid = computed(() => CSS_NAME_REGEX.test(pendingId.value.trim()));
 
 /** 文本内容编辑的临时值（blur 后才同步到 model，避免输入过程中频繁触发元素尺寸重算） */
 const pendingText = ref('');
@@ -297,12 +291,20 @@ const pendingText = ref('');
 // 通用元素标签名编辑的临时值（blur 校验后才同步到 model）——标签名编辑已停用，保留注释便于还原
 // const pendingTagName = ref('');
 
+/** 同步元素 id 到输入框临时值（仅跟随 id 变化，避免编辑期间被其他属性变更重置） */
+watch(
+  () => model.value?.id,
+  (id) => {
+    if (id) pendingId.value = id;
+  },
+  { immediate: true },
+);
+
 /** 同步 model 文本到临时值 */
 watch(
   () => model.value,
   (el) => {
     if (!el) return;
-    pendingId.value = '';
     if (el.type === CanvasElementTypeEnum.BUTTON) pendingText.value = (el as CanvasButtonElement).text;
     else if (el.type === CanvasElementTypeEnum.PARAGRAPH) pendingText.value = (el as CanvasParagraphElement).text;
     else if (el.type === CanvasElementTypeEnum.LABEL) pendingText.value = (el as CanvasLabelElement).text;
@@ -374,31 +376,27 @@ function handleIdInput(value: string) {
 }
 
 /** id 输入框失焦时校验格式与唯一性 */
-function handleIdBlur(e: FocusEvent) {
-  const newId = (e.target as HTMLInputElement).value.trim();
-  pendingId.value = '';
-  if (!newId || newId === oldId.value) {
-    model.value.id = oldId.value;
+function handleIdBlur() {
+  const newId = pendingId.value.trim();
+  if (newId === oldId.value) return;
+  /** 校验未通过时还原显示为旧 id */
+  if (!newId || !CSS_NAME_REGEX.test(newId)) {
+    pendingId.value = oldId.value;
+    if (newId) message.warning('ID 名称格式不合法');
     return;
   }
-  /** 格式校验 */
-  if (!CSS_NAME_REGEX.test(newId)) {
-    model.value.id = oldId.value;
-    message.warning('ID 名称格式不合法');
-    return;
-  }
-  /** 临时恢复旧 id，检查新 id 是否已被其他元素使用 */
-  model.value.id = oldId.value;
-  const existing = canvasStore.getElementById(newId);
-  if (existing) {
+  /** 唯一性校验 */
+  if (canvasStore.getElementById(newId)) {
+    pendingId.value = oldId.value;
     message.warning('该 ID 已被其他元素使用');
-  } else {
-    model.value.id = newId;
-    /** 同步重命名 #id 样式规则，避免规则失配导致元素样式丢失 */
-    canvasStore.renameElementIdRules(oldId.value, newId);
-    if (canvasStore.selectedElementId === oldId.value) {
-      canvasStore.selectElement(newId);
-    }
+    return;
+  }
+  model.value.id = newId;
+  pendingId.value = newId;
+  /** 同步重命名 #id 样式规则及 label 的 for 引用，避免引用失配 */
+  canvasStore.renameElementId(oldId.value, newId);
+  if (canvasStore.selectedElementId === oldId.value) {
+    canvasStore.selectElement(newId);
   }
 }
 

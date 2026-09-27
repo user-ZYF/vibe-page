@@ -21,3 +21,20 @@ export function findElementInTree(root: CanvasRootElement, id: string): CanvasEl
   };
   return find(root.children);
 }
+
+/**
+ * 遍历元素树中所有子孙元素（不含根元素）
+ * @param root 根元素
+ * @param callback 对每个元素执行的回调
+ */
+export function forEachElementInTree(root: CanvasRootElement, callback: (el: CanvasInnerElement) => void): void {
+  const walk = (list: CanvasInnerElement[]) => {
+    for (const el of list) {
+      callback(el);
+      if (isParentElement(el)) {
+        walk(el.children);
+      }
+    }
+  };
+  walk(root.children);
+}

@@ -17,7 +17,7 @@
       >
         <div class="class-manager-item-header" @click="handleClassClick(item)">
           <span class="class-manager-item-name">.{{ item.name }}</span>
-          <me-tooltip content="删除该 class" effect="light">
+          <me-tooltip content="删除该 class" effect="light" placement="left">
             <DeleteOutlined
               class="class-manager-item-delete"
               @click.stop="handleClassDelete(item.name)"

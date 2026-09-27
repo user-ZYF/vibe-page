@@ -22,6 +22,7 @@ class DragEngine {
     /** 拖拽开始 */
     const handleDragStart = (e: DragEvent) => {
       e.stopPropagation();
+      if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
       const dragStore = useDragStore();
       dragStore.startDrag(id);
     };
@@ -51,7 +52,10 @@ class DragEngine {
       const dragStore = useDragStore();
       const canvasStore = useCanvasStore();
 
-      if (!dragStore.isDragging) return;
+      if (!dragStore.isDragging) {
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+        return;
+      }
 
       /** 计算当前拖拽元素的类型（已有元素从树中查找，新元素取 dragNewType） */
       let dragType: CanvasInnerElementTypeEnum | null = null;
@@ -80,6 +84,13 @@ class DragEngine {
         dragType,
         dragElement
       );
+
+      /** 非法落点显示 not-allowed 光标（拖拽中 CSS cursor 不生效，需通过 dropEffect 控制） */
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = indicator && !indicator.error
+          ? (dragStore.dragNewType !== null ? "copy" : "move")
+          : "none";
+      }
 
       dragStore.setIndicator(indicator);
     };
@@ -114,6 +125,7 @@ class DragEngine {
     /** 拖拽开始 */
     const handleDragStart = (e: DragEvent) => {
       e.stopPropagation();
+      if (e.dataTransfer) e.dataTransfer.effectAllowed = "copy";
       const dragStore = useDragStore();
       dragStore.startNewDrag(type);
     };

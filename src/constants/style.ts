@@ -1016,13 +1016,6 @@ export const DefaultAsideStyleConfig: StyleConfig = {
 /** 标题元素默认样式配置 */
 export const DefaultHeadingStyleConfig: StyleConfig = {
   ...cloneDeep(DefaultGeneralStyleConfig),
-  size: {
-    ...cloneDeep(DefaultGeneralStyleConfig.size),
-    minWidth: '80',
-    minWidthUnit: UnitEnum.PX,
-    minHeight: '40',
-    minHeightUnit: UnitEnum.PX,
-  },
 };
 
 /** 通用元素默认样式配置 */

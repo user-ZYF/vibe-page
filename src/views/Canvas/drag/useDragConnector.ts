@@ -48,6 +48,18 @@ export function useDragConnector(
     bindDrag();
   });
 
+  /** 动态标签元素（heading level、general tagName）切换 :is 时 DOM 节点被重建，需重新注册与绑定 */
+  /** flush: 'post' 保证回调在渲染完成后执行，此时 registerEl 等关联模板 ref 已指向新节点 */
+  watch(el, (newEl, oldEl) => {
+    if (newEl === oldEl) return;
+    unbindDragFn();
+    nodeRegistry.unregister(id);
+    if (newEl) {
+      nodeRegistry.register(id, (options.registerEl?.value ?? newEl), options.isCanvas ?? false);
+      bindDrag();
+    }
+  }, { flush: 'post' });
+
   /** 预览模式切换时动态绑定/解绑 */
   watch(isPreview, (preview) => {
     if (preview) {

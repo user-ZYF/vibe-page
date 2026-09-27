@@ -758,9 +758,12 @@ export type CanvasParentElement = CanvasDivElement | CanvasLinkElement | CanvasF
 
 /**
  * 元素结构约束（按 HTML 标签名匹配，'#text' 伪标签表示文本节点）
- * 直接子元素约束：
+ * 直接子元素约束（父→子方向）：
  * - directIncludeTags：白名单，定义时表示仅允许的直接子元素标签
  * - directExcludeTags：黑名单，定义时表示不允许的直接子元素标签
+ *
+ * 直接父元素约束（子→父方向）：
+ * - directParentTags：白名单，定义时表示该元素仅允许作为这些标签的直接子元素
  *
  * 后代元素约束：
  * - descendantIncludeTags：白名单，定义时表示仅允许的后代标签
@@ -781,6 +784,8 @@ export interface TagConstraints {
   readonly descendantIncludeTags?: readonly string[];
   /** 不允许的后代元素标签名（约束所有后代，含直接子元素） */
   readonly descendantExcludeTags?: readonly string[];
+  /** 允许的父元素标签名（反向约束，限制当前元素的父元素类型） */
+  readonly directParentTags?: readonly string[];
 }
 
 /** 判断元素是否允许包含子元素 */
@@ -816,29 +821,43 @@ function isChildTagAllowed(constraints: TagConstraints, tag: string): boolean {
 }
 
 /**
+ * 判断子标签是否允许作为指定父标签的直接子元素
+ * 同时校验父→子方向约束（directInclude/directExclude/descendantInclude/descendantExclude）
+ * 与子→父方向白名单（directParentTags）
+ */
+function isChildPlacementAllowed(constraints: TagConstraints | undefined, childTag: string, parentTag: string): boolean {
+  if (constraints && !isChildTagAllowed(constraints, childTag)) return false;
+  const parentTags = TAG_CONSTRAINTS[childTag]?.directParentTags;
+  return parentTags === undefined || parentTags.includes(parentTag);
+}
+
+/**
  * 判断元素类型是否允许作为指定父元素的直接子元素
  *
  * 仅检查类型本身，不递归检查后代子树。适用于新元素拖入时仅知道类型、不知道子树的场景。
  * 所有父元素统一按 resolveParentTag 解析出的标签名查 TAG_CONSTRAINTS；
- * GENERAL 子类型无法解析标签名，放行交给 isSubtreeAllowed 按实际 tagName 精确校验；
+ * GENERAL 子类型无法解析标签名，放行交给 isSubtreeAllowed 按实际 tagName 精确校验
+ * （directParentTags 同样由 isSubtreeAllowed 兜底校验，此处不检查）；
  * HEADING 子类型标签随 level 变化，h1~h6 任一通过即放行。
  *
  * 直接子元素约束（`directIncludeTags` / `directExcludeTags`）和后代元素约束
  * （`descendantIncludeTags` / `descendantExcludeTags`）均按 include/exclude 组合规则判定，
  * 且直接子元素需同时满足两组约束。
  *
+ * 同时校验子元素的直接父元素白名单（directParentTags）。
+ *
  * @param parent 父元素模型数据
  * @param childType 待放入的子元素类型
  */
 export function isChildTypeAllowed(parent: CanvasElement, childType: CanvasInnerElementTypeEnum): boolean {
-  const constraints = TAG_CONSTRAINTS[resolveElementTag(parent)];
-  if (!constraints) return true;
+  const parentTag = resolveElementTag(parent);
+  const constraints = TAG_CONSTRAINTS[parentTag];
   if (childType === CanvasElementTypeEnum.GENERAL) return true;
   if (childType === CanvasElementTypeEnum.HEADING) {
-    return HEADING_TAGS.some((tag) => isChildTagAllowed(constraints, tag));
+    return HEADING_TAGS.some((tag) => isChildPlacementAllowed(constraints, tag, parentTag));
   }
   const tag = childType === CanvasElementTypeEnum.TEXT ? TEXT_NODE_TAG : ELEMENT_TYPE_TAG_MAP[childType];
-  return isChildTagAllowed(constraints, tag);
+  return isChildPlacementAllowed(constraints, tag, parentTag);
 }
 
 /**
@@ -847,13 +866,17 @@ export function isChildTypeAllowed(parent: CanvasElement, childType: CanvasInner
  * @param child 待放入的子元素（含其后代子树）
  */
 export function isSubtreeAllowed(parent: CanvasElement, child: CanvasInnerElement): boolean {
-  const constraints = TAG_CONSTRAINTS[resolveElementTag(parent)];
-  if (!constraints) return true;
-  if (!isChildTagAllowed(constraints, resolveElementTag(child))) return false;
-  /** 存在后代约束时递归检查更深层后代 */
-  const hasDescendantRules = constraints.descendantIncludeTags !== undefined || constraints.descendantExcludeTags !== undefined;
-  if (hasDescendantRules && isParentElement(child)) {
-    return child.children.every((descendant) => isDescendantTagAllowed(constraints, descendant));
+  const parentTag = resolveElementTag(parent);
+  const constraints = TAG_CONSTRAINTS[parentTag];
+  const childTag = resolveElementTag(child);
+  /** 校验父→子方向约束与子→父方向白名单 */
+  if (!isChildPlacementAllowed(constraints, childTag, parentTag)) return false;
+  if (constraints) {
+    /** 存在后代约束时递归检查更深层后代 */
+    const hasDescendantRules = constraints.descendantIncludeTags !== undefined || constraints.descendantExcludeTags !== undefined;
+    if (hasDescendantRules && isParentElement(child)) {
+      if (!child.children.every((descendant) => isDescendantTagAllowed(constraints, descendant))) return false;
+    }
   }
   return true;
 }
@@ -866,6 +889,38 @@ function isDescendantTagAllowed(constraints: TagConstraints, descendant: CanvasI
     return descendant.children.every((child) => isDescendantTagAllowed(constraints, child));
   }
   return true;
+}
+
+/**
+ * 按结构约束就地修剪子元素列表，返回过滤后的数组
+ * 用于代码导入等入口保证画布树满足嵌套规范，每个子元素需同时满足：
+ * 1. 直接父级的子代/后代约束（directInclude/directExclude/descendantInclude/descendantExclude）
+ * 2. 自身的直接父级白名单（directParentTags）
+ * 3. 所有祖先级的后代约束（descendantInclude/descendantExclude）
+ * 修剪语义为整体丢弃非法子树，不做合法后代提升
+ * @param children 待修剪的子元素列表
+ * @param parentTag 直接父元素标签名
+ * @param ancestorConstraints 祖先级后代约束链（递归内部传递）
+ */
+export function normalizeChildren(
+  children: CanvasInnerElement[],
+  parentTag: string,
+  ancestorConstraints: readonly TagConstraints[] = []
+): CanvasInnerElement[] {
+  const constraints = TAG_CONSTRAINTS[parentTag];
+  return children.filter((child) => {
+    const tag = resolveElementTag(child);
+    if (!isChildPlacementAllowed(constraints, tag, parentTag)) return false;
+    /** 校验所有祖先级的后代约束 */
+    if (ancestorConstraints.some((c) => !isTagInList(tag, c.descendantIncludeTags, c.descendantExcludeTags))) return false;
+    if (isParentElement(child)) {
+      const hasDescendantRules = constraints !== undefined
+        && (constraints.descendantIncludeTags !== undefined || constraints.descendantExcludeTags !== undefined);
+      const nextAncestors = hasDescendantRules ? [...ancestorConstraints, constraints] : ancestorConstraints;
+      child.children = normalizeChildren(child.children, tag, nextAncestors);
+    }
+    return true;
+  });
 }
 
 /** 画布元素 */

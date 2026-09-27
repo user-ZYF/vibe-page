@@ -249,9 +249,15 @@ export const useCanvasStore = defineStore("canvas", {
         case CanvasElementTypeEnum.FORM:
           return { ...elBase, action: '', method: FormMethodEnum.GET, children: [] } as CanvasFormElement;
         case CanvasElementTypeEnum.UNORDERED_LIST:
-          return { ...elBase, children: [] } as CanvasUnorderedListElement;
-        case CanvasElementTypeEnum.ORDERED_LIST:
-          return { ...elBase, children: [] } as CanvasOrderedListElement;
+        case CanvasElementTypeEnum.ORDERED_LIST: {
+          /** 列表自动创建三个列表项骨架，保证内部有可投放内容 */
+          const items = [
+            this.generateElement(CanvasElementTypeEnum.LIST_ITEM),
+            this.generateElement(CanvasElementTypeEnum.LIST_ITEM),
+            this.generateElement(CanvasElementTypeEnum.LIST_ITEM),
+          ];
+          return { ...elBase, children: items } as CanvasUnorderedListElement | CanvasOrderedListElement;
+        }
         case CanvasElementTypeEnum.LIST_ITEM:
           return { ...elBase, children: [] } as CanvasListItemElement;
         case CanvasElementTypeEnum.TABLE: {

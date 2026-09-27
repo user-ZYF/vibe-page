@@ -33,7 +33,8 @@ import {
   ButtonTypeEnum,
   FormMethodEnum,
   CanvasElementLabelMap,
-  HeadingLevelEnum
+  HeadingLevelEnum,
+  ELEMENT_TYPE_TAG_MAP
 } from '@/constants/home'
 import {
   defaultClassStyleConfig,
@@ -46,7 +47,7 @@ import { parseCss } from '@/utils/css-parser'
 import { sanitizeUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize'
 import { generateId } from '@/utils/id'
 import { styleConfigToCss, declarationWins, enumValue } from '@/utils/style-converter'
-import { isParentElement, type CanvasStyleRule, type ElementClass } from '@/views/Canvas/types'
+import { isParentElement, normalizeChildren, type CanvasStyleRule, type ElementClass } from '@/views/Canvas/types'
 
 /** 根元素（body 标签）属性补丁 */
 export interface ParsedRootPatch {
@@ -462,7 +463,11 @@ export function parseCodeToCanvas(html: string, css: string, rootId?: string): P
   })
   pushCssRules(css)
   const usedIds = new Set<string>()
-  const children = buildChildren(parsedElements, usedIds, styleRules, ruleMap)
+  // 按结构约束修剪导入的元素树，剔除非法嵌套（DOMParser 只修解析级问题，内容模型违规如游离 li 会保留）
+  const children = normalizeChildren(
+    buildChildren(parsedElements, usedIds, styleRules, ruleMap),
+    ELEMENT_TYPE_TAG_MAP[CanvasElementTypeEnum.ROOT]
+  )
 
   // body 标签属性映射到根元素补丁（行内样式同样合并进根元素 #id 规则）
   const rootPatch = buildRootPatch(body, usedIds, styleRules, ruleMap, rootId)

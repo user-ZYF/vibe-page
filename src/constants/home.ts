@@ -281,36 +281,49 @@ const ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS: readonly string[] = [
  */
 export const TAG_CONSTRAINTS: Readonly<Record<string, TagConstraints>> = {
   /** 直接子元素结构约束 */
-  colgroup: { directIncludeTags: ['col'] },
+  colgroup: { directIncludeTags: ['col'], directParentTags: ['table'] },
   datalist: { directIncludeTags: ['option', ...PHRASING_CONTENT_TAGS] },
   dl: { directIncludeTags: ['dt', 'dd', 'div', 'template'] },
   ol: { directIncludeTags: ['li'] },
-  optgroup: { directIncludeTags: ['option', 'template'] },
-  option: TEXT_ONLY_CONSTRAINTS,
+  optgroup: { directIncludeTags: ['option', 'template'], directParentTags: ['select'] },
+  option: { ...TEXT_ONLY_CONSTRAINTS, directParentTags: ['select', 'optgroup', 'datalist'] },
   picture: { directIncludeTags: ['source', 'img', 'template'] },
   select: { directIncludeTags: ['option', 'optgroup', 'hr', 'template'] },
   table: { directIncludeTags: ['caption', 'colgroup', 'tbody', 'tfoot', 'thead', 'tr'] },
-  tbody: { directIncludeTags: ['tr'] },
-  tfoot: { directIncludeTags: ['tr'] },
-  thead: { directIncludeTags: ['tr'] },
-  tr: { directIncludeTags: ['td', 'th'] },
+  tbody: { directIncludeTags: ['tr'], directParentTags: ['table'] },
+  tfoot: { directIncludeTags: ['tr'], directParentTags: ['table'] },
+  thead: { directIncludeTags: ['tr'], directParentTags: ['table'] },
+  tr: { directIncludeTags: ['td', 'th'], directParentTags: ['table', 'thead', 'tbody', 'tfoot'] },
   ul: { directIncludeTags: ['li'] },
+
+  /**
+   * 直接父元素结构约束（元素仅允许作为指定标签的直接子元素）
+   * 注：dt/dd 的 div 父级按规范仅在 dl 内合法，当前无祖先链校验，做宽松处理
+   */
+  col: { directParentTags: ['colgroup'] },
+  dd: { directParentTags: ['dl', 'div'] },
+  figcaption: { directParentTags: ['figure'] },
+  li: { directParentTags: ['ul', 'ol', 'menu'] },
+  source: { directParentTags: ['picture', 'audio', 'video'] },
+  td: { directParentTags: ['tr'] },
+  th: { directParentTags: ['tr'] },
 
   /** 后代元素结构约束 */
   a: { descendantExcludeTags: LINK_DESCENDANT_EXCLUDE_TAGS },
   address: { descendantExcludeTags: ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS },
-  caption: { descendantExcludeTags: ['table'] },
-  dt: { descendantExcludeTags: ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS },
+  caption: { descendantExcludeTags: ['table'], directParentTags: ['table'] },
+  dt: { descendantExcludeTags: ADDRESS_DT_DESCENDANT_EXCLUDE_TAGS, directParentTags: ['dl', 'div'] },
   footer: { descendantExcludeTags: HEADER_FOOTER_DESCENDANT_EXCLUDE_TAGS },
   form: { descendantExcludeTags: ['form'] },
   header: { descendantExcludeTags: HEADER_FOOTER_DESCENDANT_EXCLUDE_TAGS },
   hgroup: { descendantIncludeTags: [...HEADING_TAGS, 'p', TEXT_NODE_TAG] },
-  legend: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS] },
+  legend: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS], directParentTags: ['fieldset'] },
   meter: { descendantIncludeTags: PHRASING_CONTENT_TAGS, descendantExcludeTags: ['meter'] },
   progress: { descendantIncludeTags: PHRASING_CONTENT_TAGS, descendantExcludeTags: ['progress'] },
-  ruby: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, 'rt', 'rp'] },
+  ruby: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, 'rt', 'rp', 'rtc'] },
+  rtc: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, 'rt', 'rp'], directParentTags: ['ruby'] },
   span: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
-  summary: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS] },
+  summary: { descendantIncludeTags: [...PHRASING_CONTENT_TAGS, ...HEADING_TAGS], directParentTags: ['details'] },
 
   /** 仅允许 phrasing content 后代的行内标签 */
   abbr: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
@@ -327,8 +340,8 @@ export const TAG_CONSTRAINTS: Readonly<Record<string, TagConstraints>> = {
   mark: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
   output: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
   q: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
-  rp: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
-  rt: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
+  rp: { descendantIncludeTags: PHRASING_CONTENT_TAGS, directParentTags: ['ruby', 'rtc'] },
+  rt: { descendantIncludeTags: PHRASING_CONTENT_TAGS, directParentTags: ['ruby', 'rtc'] },
   s: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
   samp: { descendantIncludeTags: PHRASING_CONTENT_TAGS },
   small: { descendantIncludeTags: PHRASING_CONTENT_TAGS },

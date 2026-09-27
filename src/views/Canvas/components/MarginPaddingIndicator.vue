@@ -225,14 +225,21 @@ function stopLayoutWatch() {
 /** 画布根 DOM（onMounted 后从注册表获取，驱动事件监听的目标） */
 const canvasElRef = shallowRef<Element | null>(null);
 
-useEventListener(canvasElRef, 'mouseover', handleMouseOver as EventListener);
-useEventListener(canvasElRef, 'mouseleave', handleMouseLeave);
-useEventListener(canvasElRef, 'scroll', handleRecompute, true);
-useEventListener(window, 'resize', handleRecompute);
+/** 代码导入改写根元素 id 后画布 DOM 重建，待新节点完成注册表登记后重新绑定事件监听目标 */
+watch(() => root.value.id, () => {
+  nextTick(() => {
+    canvasElRef.value = getCanvasEl();
+  });
+});
 
 onMounted(() => {
   canvasElRef.value = getCanvasEl();
 });
+
+useEventListener(canvasElRef, 'mouseover', handleMouseOver as EventListener);
+useEventListener(canvasElRef, 'mouseleave', handleMouseLeave);
+useEventListener(canvasElRef, 'scroll', handleRecompute, true);
+useEventListener(window, 'resize', handleRecompute);
 
 onBeforeUnmount(() => {
   stopLayoutWatch();

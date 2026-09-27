@@ -123,9 +123,7 @@ onMounted(() => {
         width: 100%;
         height: 100%;
         overflow: auto;
-        position: relative;
-        background: #fff;
-        z-index: 0;
+        background-color: #fff;
       }
 
       .canvas-root:not(.is-preview), .canvas-root:not(.is-preview) [data-canvas-id] {

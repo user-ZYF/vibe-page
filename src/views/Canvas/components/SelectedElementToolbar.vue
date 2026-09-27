@@ -336,6 +336,13 @@ const canvasElRef = shallowRef<Element | null>(null);
 useEventListener(canvasElRef, 'scroll', handleRecompute, true);
 useEventListener(window, 'resize', handleRecompute);
 
+/** 代码导入改写根元素 id 后画布 DOM 重建，重新绑定事件监听目标 */
+watch(() => root.value.id, () => {
+  nextTick(() => {
+    canvasElRef.value = getCanvasEl();
+  });
+});
+
 onMounted(() => {
   canvasElRef.value = getCanvasEl();
   /** 初始化时如果已有选中元素，立即更新位置 */

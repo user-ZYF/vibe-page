@@ -268,6 +268,22 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
 function collectCssRules(styleRules: CanvasStyleRule[] = []): string {
   const rules: string[] = [];
 
+  // 画布根元素渲染为 body，浏览器 UA 默认 margin: 8px 与画布预览不一致，导出时清零保持所见即所得；
+  // 输出展开后的长手形式：与解析器经浏览器展开的结果一致，保证解析→生成往返文本稳定
+  // 已有 body 规则声明 margin 时跳过（该规则位于其后，仍会覆盖此复位）
+  const hasBodyMargin = styleRules.some(
+    (r) => r.selector.trim() === 'body' && Object.keys(r.style).some((p) => p === 'margin' || p.startsWith('margin-')),
+  );
+  if (!hasBodyMargin) {
+    rules.push('body {\n  margin-top: 0px;\n  margin-right: 0px;\n  margin-bottom: 0px;\n  margin-left: 0px;\n}');
+  }
+
+  // box-sizing: border-box 是画布元素正常渲染和编辑的默认前提；
+  const hasBoxSizing = styleRules.some((r) => r.selector.trim() === '*' && 'box-sizing' in r.style);
+  if (!hasBoxSizing) {
+    rules.push('* {\n  box-sizing: border-box;\n}');
+  }
+
   // 按 styleRules 原始顺序输出（style 为事实来源，面板修改已即时写回；at-rule 透传完整文本）
   for (const rule of styleRules) {
     const { selector, style, atRuleCssText } = rule;
@@ -289,12 +305,6 @@ function collectCssRules(styleRules: CanvasStyleRule[] = []): string {
       // （; 在选择器位置仅使规则失效，无注入风险）
       if (declarations && !/[{}</]/.test(selector)) rules.push(`${selector} {\n${declarations}\n}`);
     }
-  }
-
-  // box-sizing: border-box 是画布元素正常渲染和编辑的默认前提；
-  const hasBoxSizing = styleRules.some((r) => r.selector.trim() === '*' && 'box-sizing' in r.style);
-  if (!hasBoxSizing) {
-    rules.unshift('* {\n  box-sizing: border-box;\n}');
   }
 
   return rules.join('\n\n');

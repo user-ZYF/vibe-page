@@ -265,28 +265,45 @@ export const useCanvasStore = defineStore("canvas", {
           const textareaLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
           textareaLabel.text = '多行输入';
           textareaLabel.for = textarea.id;
-          /** 单选组标签 */
-          const radioLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
-          radioLabel.text = '单选';
-          /** 单选项一 */
+          /** 单选组标题（无绑定控件，用纯文本而非 label） */
+          const radioTitle = this.generateElement(CanvasElementTypeEnum.TEXT) as CanvasTextElement;
+          radioTitle.text = '单选';
+          /** 单选项一（组名拼接元素 id 保证唯一，避免与同表单内其他单选组串组） */
           const radio1 = this.generateElement(CanvasElementTypeEnum.RADIO) as CanvasRadioElement;
+          radio1.name = `radio-group-${radio1.id}`;
+          radio1.value = '选项一';
+          radio1.checked = true;
+          /** 单选项一文本标签（for 绑定对应选项，点击文本即可选中） */
+          const radio1Label = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          radio1Label.text = '选项一';
+          radio1Label.for = radio1.id;
           /** 单选项二 */
           const radio2 = this.generateElement(CanvasElementTypeEnum.RADIO) as CanvasRadioElement;
-          /** 单选组名拼接元素 id 保证唯一，避免与同表单内其他单选组串组 */
-          radio1.name = radio2.name = `radio-group-${radio1.id}`;
-          radio1.value = '选项一';
+          radio2.name = radio1.name;
           radio2.value = '选项二';
-          radio1.checked = true;
-          /** 多选组标签 */
-          const checkboxLabel = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
-          checkboxLabel.text = '多选';
-          /** 多选项一 */
+          /** 单选项二文本标签 */
+          const radio2Label = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          radio2Label.text = '选项二';
+          radio2Label.for = radio2.id;
+          /** 多选组标题（无绑定控件，用纯文本而非 label） */
+          const checkboxTitle = this.generateElement(CanvasElementTypeEnum.TEXT) as CanvasTextElement;
+          checkboxTitle.text = '多选';
+          /** 多选项一（组名拼接元素 id 保证唯一） */
           const checkbox1 = this.generateElement(CanvasElementTypeEnum.CHECKBOX) as CanvasCheckboxElement;
+          checkbox1.name = `checkbox-group-${checkbox1.id}`;
+          checkbox1.value = '选项一';
+          /** 多选项一文本标签（for 绑定对应选项，点击文本即可选中） */
+          const checkbox1Label = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          checkbox1Label.text = '选项一';
+          checkbox1Label.for = checkbox1.id;
           /** 多选项二 */
           const checkbox2 = this.generateElement(CanvasElementTypeEnum.CHECKBOX) as CanvasCheckboxElement;
-          checkbox1.name = checkbox2.name = `checkbox-group-${checkbox1.id}`;
-          checkbox1.value = '选项一';
+          checkbox2.name = checkbox1.name;
           checkbox2.value = '选项二';
+          /** 多选项二文本标签 */
+          const checkbox2Label = this.generateElement(CanvasElementTypeEnum.LABEL) as CanvasLabelElement;
+          checkbox2Label.text = '选项二';
+          checkbox2Label.for = checkbox2.id;
           /** 提交按钮 */
           const submit = this.generateElement(CanvasElementTypeEnum.BUTTON) as CanvasButtonElement;
           submit.text = '提交';
@@ -301,8 +318,8 @@ export const useCanvasStore = defineStore("canvas", {
             children: [
               group([inputLabel, input]),
               group([textareaLabel, textarea]),
-              group([radioLabel, radio1, radio2]),
-              group([checkboxLabel, checkbox1, checkbox2]),
+              group([radioTitle, radio1, radio1Label, radio2, radio2Label]),
+              group([checkboxTitle, checkbox1, checkbox1Label, checkbox2, checkbox2Label]),
               submit,
             ],
           } as CanvasFormElement;

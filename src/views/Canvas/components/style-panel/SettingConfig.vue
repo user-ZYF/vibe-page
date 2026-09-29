@@ -430,7 +430,7 @@ function handleSrcBlur() {
   /** 校验未通过时还原显示为旧地址 */
   if (src && !isSafeUrl(src)) {
     pendingSrc.value = el.src;
-    message.warning('资源地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    message.warning('资源地址协议不安全，仅支持 http、https、相对路径及图片/音频/视频/字体类 data: 地址');
     return;
   }
   el.src = src;

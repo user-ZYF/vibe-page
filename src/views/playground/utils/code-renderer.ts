@@ -6,9 +6,9 @@
 import type { ParsedElement } from '@/utils/html-parser';
 import { isVoidElement, resolveSafeTagName } from '@/utils/html-parser';
 import { BLOCKED_TAGS } from '@/constants/html';
-import { buildCssString } from '@/utils/css-parser';
+import { buildCssString, buildRuleString } from '@/utils/css-parser';
 import type { ParsedCssRule } from '@/views/Canvas/types';
-import { sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize';
+import { sanitizeCssUrl, sanitizeAttributeValue, isDangerousCssRuleText } from '@/utils/sanitize';
 
 /**
  * 渲染容器所需的最小结构化类型
@@ -108,8 +108,10 @@ export function renderToContainer(
 ) {
   // 清空容器
   container.innerHTML = '';
-  // 注入 CSS（url() 地址经协议校验，与画布管线行为一致）
-  styleEl.textContent = buildCssString(sanitizeRules(rules));
+  // 注入 CSS（url() 地址经协议校验，与画布管线行为一致；CSSOM 兜底复核后仍危险的规则丢弃）
+  styleEl.textContent = buildCssString(
+    sanitizeRules(rules).filter((rule) => !isDangerousCssRuleText(buildRuleString(rule)))
+  );
   // 挂载生成的 DOM 节点（ownerDocument 使用断言，因跨模块 DOM lib 类型可能不一致）
   const doc = container.ownerDocument as Document;
   renderElements(elements, doc).forEach((node) => {

@@ -1,3 +1,5 @@
+import postcss from 'postcss';
+import valueParser from 'postcss-value-parser';
 import {
   SAFE_DATA_MIME_PREFIXES,
   SAFE_URL_PROTOCOLS,
@@ -9,10 +11,7 @@ import {
   SVG_ANIMATION_VALUE_ATTRIBUTES,
   CSS_ESCAPE_REGEX,
   CSS_COMMENT_REGEX,
-  CSS_QUOTED_STRING_REGEX,
   CSS_URL_FUNCTION_REGEX,
-  CSS_URL_AT_RULE_REGEX,
-  CSS_URL_STRING_FUNCTION_REGEX,
   CSS_RE_ESCAPE_CODE_POINTS,
   EVENT_ATTR_NAME_REGEX,
   DANGEROUS_DATA_MIME_PREFIX,
@@ -109,50 +108,6 @@ function decodeCssEscapes(value: string): string {
 }
 
 /**
- * 剥离已闭合的 CSS 注释（字符串内的注释标记为字面内容，不剥离）
- * 按扫描顺序处理：先出现的结构生效，与浏览器分词规则一致——字符串先开始则注释标记为串内字面内容，注释先开始则其中的引号不构成字符串边界
- * 未闭合注释保留原文：浏览器本就视其到末尾均为注释（无执行风险），
- * 且可避免把无引号 url() 中字面的 /* 误当注释起点而截断合法地址
- * @example stripClosedComments('a/*x*\/b') → 'ab'
- * @example stripClosedComments('"a/*x*\/b"') → '"a/*x*\/b"'（串内注释标记为字面内容）
- * @example stripClosedComments('a/*x') → 'a/*x'（未闭合注释保留原文）
- */
-function stripClosedComments(value: string): string {
-  let result = '';
-  let i = 0;
-  while (i < value.length) {
-    const c = value[i];
-    if (c === '"' || c === "'") {
-      // 字符串字面量整体保留（串内 \\ 转义整体跳过，防止转义引号被误判为串结束）
-      const start = i++;
-      while (i < value.length) {
-        if (value[i] === '\\') {
-          i += 2;
-          continue;
-        }
-        if (value[i++] === c) break;
-      }
-      result += value.slice(start, i);
-    } else if (c === '/' && value[i + 1] === '*') {
-      const end = value.indexOf('*/', i + 2);
-      if (end === -1) {
-        result += value.slice(i);
-        break;
-      }
-      i = end + 2;
-    } else if (c === '\\' && i + 1 < value.length) {
-      // 字符串外的转义对（\'、\"、\\）整体保留：\' 是字面字符而非字符串边界，拆开会把转义引号误认作串起点
-      result += value.slice(i, i + 2);
-      i += 2;
-    } else {
-      result += c;
-      i++;
-    }
-  }
-  return result;
-}
-
-/**
  * 扫描字符串字面量与未闭合注释区间（注释优先于字符串，与浏览器分词规则一致）
  * 供 url()/at-rule/函数匹配时跳过字面量内的伪匹配
  * @example scanLiteralRanges('"url(x)" url(y)') → [[0, 9]]（字符串区间）
@@ -199,13 +154,102 @@ function extractCssUrl(url: string): string {
   return url.replace(CSS_COMMENT_REGEX, '').trim();
 }
 
+/** 以字符串参数承载 URL 的 CSS 函数（image-set/src/image 等，含 -webkit- 前缀变体） */
+const CSS_URL_STRING_FUNCTIONS = new Set(['image-set', '-webkit-image-set', 'image', 'src']);
+
+/** 承载字符串形式 URL 的 at-keyword（@import/@namespace 首个字符串参数为地址） */
+const CSS_URL_AT_KEYWORDS = /^@(import|namespace)$/i;
+
+/** 提取 url() 函数节点的地址文本：唯一子节点为字符串时取其值（引号形式），其余拼接子节点原文后剥离注释与首尾空白 */
+function extractUrlNodeAddress(node: valueParser.FunctionNode): string {
+  const only = node.nodes.length === 1 ? node.nodes[0] : undefined;
+  if (only?.type === 'string') return extractCssUrl(only.value);
+  // word 与 string 混杂等非法形态按裸地址整体校验：混杂内容无法构成安全 URL 时清空
+  return extractCssUrl(valueParser.stringify(node.nodes));
+}
+
+/** url() 地址不安全时清空参数并归一函数名（输出空 url()），安全则保留原节点不动 */
+function sanitizeUrlFunction(node: valueParser.FunctionNode) {
+  if (!isSafeUrl(extractUrlNodeAddress(node))) {
+    node.nodes = [];
+    node.value = 'url';
+  }
+}
+
+/**
+ * 递归净化值解析树中的 URL 引用（就地修改节点列表）
+ * - 注释节点在净化检查完成后统一剔除：检查阶段保留注释可区分「注释切断」与「真实空白分隔」
+ *   （u + 注释 + rl(x) 注释删除后还原为 url() 需校验，u rl(x) 在浏览器中本就是两个独立 token 不误改）；
+ *   无引号 url() 中字面的 /* 由解析器归入地址 word 节点，不受影响
+ * - url() 三种引号形式统一校验协议，不安全清空为 url()；函数名被注释切断的写法（word + function）
+ *   拼接后命中 url 同样按 url() 处理
+ * - @import/@namespace 的字符串参数、image-set()/src()/image() 的字符串参数按协议校验，不安全置空
+ * - 字符串字面量为原子节点（content:"url(x)" 为文本内容），天然不会被误改
+ */
+function sanitizeValueNodes(nodes: valueParser.Node[]) {
+  nodes.forEach((node, i) => {
+    if (node.type === 'function') {
+      const fnName = node.value.toLowerCase();
+      if (fnName === 'url') sanitizeUrlFunction(node);
+      else if (CSS_URL_STRING_FUNCTIONS.has(fnName)) {
+        node.nodes.forEach((child) => {
+          if (child.type === 'string' && !isSafeUrl(extractCssUrl(child.value))) {
+            child.value = '';
+            child.quote = '"';
+          }
+        });
+      }
+      sanitizeValueNodes(node.nodes);
+      return;
+    }
+    if (node.type !== 'word') return;
+
+    // at-keyword 字符串参数校验：下一个非空白/注释兄弟节点为字符串时按 URL 处理
+    if (CSS_URL_AT_KEYWORDS.test(node.value)) {
+      const nextIndex = nodes.findIndex(
+        (sibling, j) => j > i && sibling.type !== 'space' && sibling.type !== 'comment',
+      );
+      const next = nextIndex === -1 ? undefined : nodes[nextIndex];
+      if (next?.type === 'string' && !isSafeUrl(extractCssUrl(next.value))) {
+        next.value = '';
+        next.quote = '"';
+        // 间隔仅为注释时补一个空格：注释删除后 at-keyword 与字符串会粘连
+        if (nodes.slice(i + 1, nextIndex).every((sibling) => sibling.type === 'comment')) {
+          nodes.splice(nextIndex, 0, { type: 'space', value: ' ', sourceIndex: 0, sourceEndIndex: 0 });
+        }
+      }
+      return;
+    }
+
+    // url 函数名被注释切断（u + 注释 + rl(x)）或与括号间隔注释（url + 注释 + (x)）：
+    // 仅 word 与其后函数节点之间全是注释（无真实空白）时才拼接判定，命中 url 按 url() 参数净化
+    if (/^[a-zA-Z]+$/.test(node.value)) {
+      const next = nodes.slice(i + 1).find((sibling) => sibling.type !== 'comment');
+      if (next?.type === 'function' && (node.value + next.value).toLowerCase() === 'url') {
+        // 不安全时清空 word 与函数参数，函数名归一为 url：两个节点合并输出空 url()
+        if (!isSafeUrl(extractUrlNodeAddress(next))) {
+          node.value = '';
+          next.value = 'url';
+          next.nodes = [];
+        }
+      }
+    }
+  });
+  // 检查完成后剔除注释节点：注释是浏览器分词中的标识边界，删除不影响已完成的判定
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    if (nodes[i].type === 'comment') nodes.splice(i, 1);
+  }
+}
+
 /**
  * 从 CSS 值中净化所有 URL 引用
- * - 先做归一化（解码 CSS 转义、剥离已闭合注释），防止 u\72l(...)、url 与括号间插注释、javascript\3a x 等写法绕过检测
+ * - 先解码 CSS 转义做归一化，防止 u\72l(...)、javascript\3a x 等写法绕过检测；
+ *   解码后危险的 ", ', \, < 码点已回写为定长转义，不会在输出中重组
+ * - 分词与函数/字符串边界交给 postcss-value-parser（与浏览器分词规则一致），
+ *   不再依赖手写正则模拟分词，避免字符串/注释/转义优先级等边界写漏写错
  * - url(...) 三种引号形式逐个校验协议，不安全替换为空 url()
  * - @import/@namespace 的字符串形式 URL、image-set()/src()/image() 的字符串参数同样按协议校验
  *   （@import 规则整体已在 stripCssImports 中剔除，此处仅兜底防御脏数据）
- * - 匹配起点落在字符串字面量/未闭合注释内的为文本内容，跳过不改写
  * 返回处理后的 CSS 值
  * @example sanitizeCssUrl('url("a.png")') → 'url("a.png")'
  * @example sanitizeCssUrl('url("javascript:x")') → 'url()'
@@ -215,139 +259,108 @@ function extractCssUrl(url: string): string {
  */
 export function sanitizeCssUrl(cssValue: string): string {
   if (!cssValue) return cssValue;
-
-  let value = stripClosedComments(decodeCssEscapes(cssValue));
-
-  /** 匹配起点是否落在字面量区间（字符串/未闭合注释）内 */
-  const isLiteral = (ranges: [number, number][], offset: number) =>
-    ranges.some(([start, end]) => offset >= start && offset < end);
-
-  /** 匹配 url("...")、url('...')、url(...) 三种形式，大小写不敏感 */
-  let literalRanges = scanLiteralRanges(value);
-  value = value.replace(
-    CSS_URL_FUNCTION_REGEX,
-    (match, dq: string | undefined, sq: string | undefined, bare: string | undefined, offset: number) => {
-      if (isLiteral(literalRanges, offset)) return match;
-      const url = extractCssUrl(dq ?? sq ?? bare ?? '');
-      if (!url || !isSafeUrl(url)) return 'url()';
-      /** 重建净化后的 url() 表达式 */
-      if (dq !== undefined) return `url("${url}")`;
-      if (sq !== undefined) return `url('${url}')`;
-      return `url(${url})`;
-    },
-  );
-
-  /** @import/@namespace 字符串形式 URL 协议校验，不安全替换为空字符串参数（@import 已在 stripCssImports 剔除，此处兜底） */
-  literalRanges = scanLiteralRanges(value);
-  value = value.replace(
-    CSS_URL_AT_RULE_REGEX,
-    (match, atName: string, _quoted: string, dq: string | undefined, sq: string | undefined, offset: number) => {
-      if (isLiteral(literalRanges, offset)) return match;
-      const url = extractCssUrl(dq ?? sq ?? '');
-      return url && isSafeUrl(url) ? match : `@${atName} ""`;
-    },
-  );
-
-  /** image-set()/src()/image() 等函数内的字符串参数按 URL 校验，不安全替换为空字符串 */
-  literalRanges = scanLiteralRanges(value);
-  value = value.replace(
-    CSS_URL_STRING_FUNCTION_REGEX,
-    (match, prefix: string, fnName: string, args: string, offset: number) => {
-      // prefix 为正则消费的前置字符（或空串），函数名起点才是真实匹配位置
-      if (isLiteral(literalRanges, offset + prefix.length)) return match;
-      const safeArgs = args.replace(CSS_QUOTED_STRING_REGEX, (token: string, dq: string | undefined, sq: string | undefined) => {
-        const url = extractCssUrl(dq ?? sq ?? '');
-        return url && isSafeUrl(url) ? token : '""';
-      });
-      return `${prefix}${fnName}(${safeArgs})`;
-    },
-  );
-
-  return value;
+  const parsed = valueParser(decodeCssEscapes(cssValue));
+  sanitizeValueNodes(parsed.nodes);
+  return valueParser.stringify(parsed.nodes);
 }
 
 /**
  * 剔除 CSS 文本中的全部 @import 规则（整条丢弃，不进入 CSSOM 解析，从源头杜绝外部样式表请求）
  * - 先解码 CSS 转义，防止 @im\70 ort 等写法绕过关键词匹配
- * - 注释视作空白边界（@import + 注释 + url 仍命中），且注释会切断标识符：
- *   @im + 注释 + port 按浏览器分词规则为两个 ident，本就不构成 @import 规则，故不剔除
- * - 字符串字面量整体跳过（content:"@import x" 为文本内容不删）
- * - 规则体消费至顶层首个分号或文件尾；遇 { 停止且不消费（@import 语法不含块，非法块交给 CSSOM 丢弃）
+ * - 分词交给 postcss（与浏览器规则一致）：字符串内的 "@import" 为文本内容不命中，
+ *   @im + 注释 + port 解析为两个 ident，本就不构成 @import 规则，故不剔除；
+ *   注释切断的普通标识符保持原文（注释仍是合法空白边界）
+ * - 按解析节点的 source offset 从原文切片，其余文本原样保留（含注释与格式）
+ * - postcss 解析失败的极端输入回退为原文（交给 CSSOM 丢弃非法内容）
  * @example stripCssImports('@import "a.css"; .a{}') → ' .a{}'
  * @example stripCssImports('@im\\70 ort url(a.css)') → ''
- * @example stripCssImports('@im /*注释*∕ port "a.css"; .a{}') → '@im   port "a.css"; .a{}'（注释切断标识符，不构成 @import）
  * @example stripCssImports('content:"@import x"') → 'content:"@import x"'
  */
 export function stripCssImports(input: string): string {
   if (!input.includes('@')) return input;
   const value = decodeCssEscapes(input);
-  const n = value.length;
-  let result = '';
-  let i = 0;
-
-  /** 跳过字符串字面量，返回字面量结束后的下标（未闭合则到末尾） */
-  const skipString = (pos: number) => {
-    const quote = value[pos++];
-    while (pos < n) {
-      if (value[pos] === '\\') {
-        pos += 2;
-        continue;
-      }
-      if (value[pos++] === quote) break;
-    }
-    return pos;
-  };
-
-  while (i < n) {
-    const c = value[i];
-    if (c === '"' || c === "'") {
-      const end = skipString(i);
-      result += value.slice(i, end);
-      i = end;
-      continue;
-    }
-    if (c === '/' && value[i + 1] === '*') {
-      const end = value.indexOf('*/', i + 2);
-      // 注释替换为空白：保持其标识边界作用，未闭合注释则后续均为注释内容
-      result += ' ';
-      if (end === -1) break;
-      i = end + 2;
-      continue;
-    }
-    if (
-      c === '@' &&
-      value.slice(i + 1, i + 7).toLowerCase() === 'import' &&
-      (value[i + 7] === undefined || !/[a-zA-Z0-9_-]/.test(value[i + 7]))
-    ) {
-      i += 7;
-      while (i < n) {
-        const ch = value[i];
-        if (ch === '"' || ch === "'") {
-          i = skipString(i);
-          continue;
-        }
-        if (ch === '/' && value[i + 1] === '*') {
-          const end = value.indexOf('*/', i + 2);
-          if (end === -1) {
-            i = n;
-            break;
-          }
-          i = end + 2;
-          continue;
-        }
-        if (ch === ';') {
-          i++;
-          break;
-        }
-        if (ch === '{') break;
-        i++;
-      }
-      continue;
-    }
-    result += c;
-    i++;
+  let root: postcss.Root;
+  try {
+    root = postcss.parse(value);
+  } catch {
+    // 解析失败的极端输入原样返回（非法内容交给 CSSOM 丢弃）
+    return value;
   }
-  return result;
+
+  /** 待剔除的 @import 规则区间（含结尾分号）；嵌套于 at-rule 内的非法 @import 一并剔除 */
+  const ranges: [number, number][] = [];
+  root.walkAtRules(/^import$/i, (rule) => {
+    const start = rule.source?.start?.offset;
+    let end = rule.source?.end?.offset;
+    if (start === undefined || end === undefined) return;
+    // end 指向规则最后一个 token（无分号时为规则尾，有分号时分号本身）
+    if (value[end] === ';') end++;
+    ranges.push([start, end]);
+  });
+  if (!ranges.length) return value;
+
+  ranges.sort((a, b) => a[0] - b[0]);
+  let result = '';
+  let pos = 0;
+  for (const [start, end] of ranges) {
+    result += value.slice(pos, start);
+    pos = end;
+  }
+  return result + value.slice(pos);
+}
+
+/**
+ * 判断 CSSOM 序列化后的规则文本是否仍含危险协议 url()
+ * CSSOM 已完成转义解码与规范化，序列化输出中 url() 地址可直接提取校验；
+ * 字符串字面量内的 url( 为文本内容（如 content:"url(x)"），跳过不判
+ */
+function hasDangerousSerializedUrl(cssText: string): boolean {
+  const literalRanges = scanLiteralRanges(cssText);
+  let dangerous = false;
+  cssText.replace(
+    CSS_URL_FUNCTION_REGEX,
+    (match, dq: string | undefined, sq: string | undefined, bare: string | undefined, offset: number) => {
+      if (literalRanges.some(([start, end]) => offset >= start && offset < end)) return match;
+      const url = extractCssUrl(dq ?? sq ?? bare ?? '');
+      if (url && !isSafeUrl(url)) dangerous = true;
+      return match;
+    },
+  );
+  return dangerous;
+}
+
+/**
+ * CSSOM 兜底校验：整段 CSS 规则文本经浏览器解析序列化后，仍含危险协议 url() 或残留 @import 时返回 true
+ * 手写分词净化（sanitizeCssUrl/stripCssImports）的最终一致性检查：
+ * 浏览器按自身分词规则复核一遍，任何被手写实现漏过的写法都会以真实解析结果暴露；
+ * 命中即由调用方整条丢弃
+ * - 解析走 CSSStyleSheet.replaceSync：不挂载 DOM、规范禁止加载外部资源与 @import，校验无网络副作用
+ * - @import 判定不依赖解析器实现差异：规范实现由 replaceSync 抛错拦截，
+ *   另有实现会静默丢弃 @import（如测试环境），故先用 postcss 独立扫描保证一致拦截
+ * - replaceSync 抛错（非法语法）按危险处理
+ * @example isDangerousCssRuleText('.a{background:url(javascript:x)}') → true
+ * @example isDangerousCssRuleText('.a{color:red}') → false
+ */
+export function isDangerousCssRuleText(cssText: string): boolean {
+  if (typeof CSSStyleSheet === 'undefined' || !cssText.trim()) return false;
+  let hasImport = false;
+  try {
+    postcss.parse(cssText).walkAtRules(/^import$/i, () => {
+      hasImport = true;
+    });
+  } catch {
+    // postcss 解析失败的极端输入交给 replaceSync 复核
+  }
+  if (hasImport) return true;
+  const sheet = new CSSStyleSheet();
+  try {
+    sheet.replaceSync(cssText);
+  } catch {
+    return true;
+  }
+  return Array.from(sheet.cssRules).some(
+    (rule) => rule.type === CSSRule.IMPORT_RULE || hasDangerousSerializedUrl(rule.cssText),
+  );
 }
 
 /**
@@ -360,43 +373,25 @@ export function escapeCssLt(value: string): string {
 
 /**
  * 判断 CSS 声明值中是否含可逃逸声明上下文的字符
- * 字符串字面量与括号（含嵌套）内的 ; { } 视为值内容放行；顶层出现的 ; { } 可闭合当前声明/规则块注入任意规则
+ * 基于 postcss-value-parser 解析树判定：字符串字面量为原子节点天然放行；
+ * 顶层 word/div 节点中出现 ; { } 可闭合当前声明/规则块注入任意规则；
+ * 未闭合函数节点会把生成的 ; 与规则 } 吞进函数 token，破坏后续规则，同样拒绝
  * @example hasCssDeclarationInjection('url("a;b")') → false
  * @example hasCssDeclarationInjection('red;}*{display:none') → true
  * @example hasCssDeclarationInjection('"a;b"') → false
  */
 function hasCssDeclarationInjection(value: string): boolean {
-  let quote: string | null = null;
-  let depth = 0;
-  for (let i = 0; i < value.length; i++) {
-    const c = value[i];
-    if (quote !== null) {
-      // 串内反斜杠转义整体跳过，防止转义引号被误判为串结束
-      if (c === '\\') i++;
-      else if (c === quote) quote = null;
-      continue;
-    }
-    // 字符串外的转义对整体跳过：\' 是字面字符而非字符串边界，拆开会让转义引号误开字符串、隐藏其后真实的 ; { }
-    if (c === '\\') {
-      i++;
-      continue;
-    }
-    if (c === '"' || c === "'") {
-      quote = c;
-      continue;
-    }
-    if (c === '(') {
-      depth++;
-      continue;
-    }
-    if (c === ')') {
-      depth = Math.max(0, depth - 1);
-      continue;
-    }
-    if (depth === 0 && (c === ';' || c === '{' || c === '}')) return true;
-  }
-  // 未闭合括号会把生成的 ; 与规则 } 吞进函数 token，破坏后续规则，整条丢弃
-  return depth !== 0;
+  const checkNodes = (nodes: valueParser.Node[], topLevel: boolean): boolean =>
+    nodes.some((node) => {
+      if (node.type === 'function') {
+        return node.unclosed === true || checkNodes(node.nodes, false);
+      }
+      if (node.type === 'word' || node.type === 'div') {
+        return topLevel && /[;{}]/.test(node.value);
+      }
+      return false;
+    });
+  return checkNodes(valueParser(value).nodes, true);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSafeUrl, sanitizeUrl, sanitizeNavigationUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports } from '@/utils/sanitize';
+import { isSafeUrl, sanitizeUrl, sanitizeNavigationUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports, isDangerousCssRuleText } from '@/utils/sanitize';
 
 describe('isSafeUrl', () => {
   it('放行白名单协议 http/https/mailto/tel', () => {
@@ -150,8 +150,13 @@ describe('sanitizeCssUrl', () => {
   });
 
   it('url 函数名与括号之间的注释不再绕过', () => {
-    expect(sanitizeCssUrl('url/**/(javascript:alert(1))')).toBe('url())');
-    expect(sanitizeCssUrl('u/**/rl(javascript:alert(1))')).toBe('url())');
+    expect(sanitizeCssUrl('url/**/(javascript:alert(1))')).toBe('url()');
+    expect(sanitizeCssUrl('u/**/rl(javascript:alert(1))')).toBe('url()');
+  });
+
+  it('url 函数名与括号间为真实空白时不拼接净化', () => {
+    // u rl(...) 在浏览器中是两个独立 token，不是 url()，不误改
+    expect(sanitizeCssUrl('u rl(javascript:x)')).toBe('u rl(javascript:x)');
   });
 
   it('@import/@namespace 字符串形式 URL 按协议校验', () => {
@@ -382,8 +387,8 @@ describe('stripCssImports', () => {
     expect(stripCssImports('@im\\70 ort "a.css";')).toBe('');
   });
 
-  it('关键词内插注释则不构成 @import（CSS 注释是标识边界），注释归一为空白', () => {
-    expect(stripCssImports('@im/**/port "a.css";')).toBe('@im port "a.css";');
+  it('关键词内插注释则不构成 @import（CSS 注释是标识边界），注释原文保留', () => {
+    expect(stripCssImports('@im/**/port "a.css";')).toBe('@im/**/port "a.css";');
     expect(stripCssImports('@import/**/"a.css"; .a{}')).toBe(' .a{}');
   });
 
@@ -398,5 +403,102 @@ describe('stripCssImports', () => {
 
   it('@importx 等非 @import at-keyword 不误删', () => {
     expect(stripCssImports('@importx "a";')).toBe('@importx "a";');
+  });
+});
+
+/**
+ * 随机化测试：以固定种子的伪随机组合生成混淆输入，
+ * 断言「净化输出经 CSSOM 解析后不残留危险协议 url() / @import」——即浏览器视角的一致性校验。
+ * 用例不断言具体输出文本（属手写实现细节），只断言安全属性，避免锁定实现。
+ */
+describe('fuzz：净化输出经浏览器解析无危险残留', () => {
+  /** mulberry32 伪随机数发生器（固定种子，保证用例可复现） */
+  function createRng(seed: number) {
+    let s = seed;
+    return () => {
+      s |= 0;
+      s = (s + 0x6d2b79f5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** 从候选池中随机取一项 */
+  const pick = (rng: () => number, pool: string[]) => pool[Math.floor(rng() * pool.length)];
+
+  /** 可能造成混淆的片段池：CSS 转义、注释、引号、危险/安全协议地址 */
+  const OBFUSCATE_POOL = ['\\3a ', '\\72', '\\00006a', '\\5c ', '\\22 ', '/**/', '/*x*/', '"', "'", ' ', '\t'];
+  const URL_POOL = [
+    'javascript:alert(1)',
+    'java\\73cript:alert(1)',
+    'vbscript:x',
+    'data:text/html,<h1>x</h1>',
+    'data:image/svg+xml,<svg/>',
+    'https://a.com/x.png',
+    './rel.png',
+    'data:image/png;base64,AAAA',
+    '#frag',
+  ];
+
+  /** 从净化输出中提取所有字面 url(...) 内部地址（已归一化，危险字符被回写为 hex 转义不会组成协议名） */
+  function extractLiteralUrls(output: string): string[] {
+    const urls: string[] = [];
+    output.replace(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]*))\s*\)/gi, (_m, dq, sq, bare) => {
+      urls.push(dq ?? sq ?? bare ?? '');
+      return '';
+    });
+    return urls;
+  }
+
+  it('sanitizeCssUrl 输出中所有 url() 地址均为安全协议（200 组随机混淆）', () => {
+    const rng = createRng(20260929);
+    for (let i = 0; i < 200; i++) {
+      const inner = pick(rng, URL_POOL) + pick(rng, OBFUSCATE_POOL) + pick(rng, URL_POOL);
+      const fnName = pick(rng, ['url', 'URL', 'u\\72l', 'url/**/']);
+      const quote = pick(rng, ['"', "'", '']);
+      const input = `${fnName}(${quote}${inner}${quote})`;
+      const output = sanitizeCssUrl(input);
+      for (const url of extractLiteralUrls(output)) {
+        expect(isSafeUrl(url), `输入 ${JSON.stringify(input)} 净化后仍含危险地址 ${JSON.stringify(url)}`).toBe(true);
+      }
+    }
+  });
+
+  it('sanitizeCssDeclarationValue 非 null 输出包进规则后 CSSOM 校验不危险（200 组随机混淆）', () => {
+    const rng = createRng(20260930);
+    for (let i = 0; i < 200; i++) {
+      const parts = [
+        pick(rng, URL_POOL),
+        pick(rng, OBFUSCATE_POOL),
+        pick(rng, ['red', 'url(' + pick(rng, URL_POOL) + ')', 'calc(1px + 2px)', pick(rng, URL_POOL)]),
+      ];
+      const output = sanitizeCssDeclarationValue(parts.join(' '));
+      if (output === null) continue;
+      expect(
+        isDangerousCssRuleText(`.fuzz { background: ${output}; }`),
+        `声明值 ${JSON.stringify(output)} 经 CSSOM 解析仍危险`,
+      ).toBe(false);
+    }
+  });
+
+  it('stripCssImports 输出不含可解析的 @import 规则（100 组随机混淆）', () => {
+    const rng = createRng(20261001);
+    for (let i = 0; i < 100; i++) {
+      const keyword = pick(rng, ['@import', '@im\\70 ort', '@IMPORT', '@import/**/']);
+      const target = pick(rng, ['"x.css"', 'url(x.css)', '"javascript:x"']);
+      const input = `${keyword} ${target}; .a{color:red}`;
+      const output = stripCssImports(input);
+      // 输出整体再经 CSSOM 解析：不得存在 IMPORT_RULE
+      const el = document.createElement('style');
+      el.textContent = output;
+      document.head.appendChild(el);
+      const sheet = el.sheet;
+      document.head.removeChild(el);
+      const hasImport = sheet
+        ? Array.from(sheet.cssRules).some((rule) => rule.type === CSSRule.IMPORT_RULE)
+        : false;
+      expect(hasImport, `输入 ${JSON.stringify(input)} 剔除后仍含 @import：${JSON.stringify(output)}`).toBe(false);
+    }
   });
 });

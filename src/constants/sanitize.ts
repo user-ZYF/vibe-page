@@ -58,23 +58,10 @@ export const CSS_ESCAPE_REGEX = /\\([0-9a-fA-F]{1,6})(?:\r\n|[ \t\n\f\r])?|\\(\r
 export const CSS_COMMENT_REGEX = /\/\*[\s\S]*?\*\//g;
 
 /**
- * CSS 字符串字面量：捕获组1为双引号串内容，捕获组2为单引号串内容
- * 匹配示例："a.png"、'x.css'、""、''
- */
-export const CSS_QUOTED_STRING_REGEX = /"([^"]*)"|'([^']*)'/g;
-
-/**
  * url() 函数：捕获组1/2/3分别为双引号、单引号、无引号形式的地址
  * 匹配示例：url("a.png")、url('a.png')、url( https://a.com/x.png )、URL(./x)
  */
 export const CSS_URL_FUNCTION_REGEX = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]+))\s*\)/gi;
-
-/**
- * CSS 中以字符串形式承载 URL 的 at-rule（@import/@namespace 首个字符串参数为 URL 地址，at-keyword 与字符串间允许零空白；
- * @import 规则整体由 stripCssImports 剔除，此正则对 @import 的命中仅作兜底防御）
- * 匹配示例：@import "x.css"、@import"x.css"、@NAMESPACE 'x'
- */
-export const CSS_URL_AT_RULE_REGEX = /@(import|namespace)\s*("([^"]*)"|'([^']*)')/gi;
 
 /**
  * CSS 转义解码后不得字面输出、需回写为 6 位 hex 转义的码点（" ' \ <）
@@ -85,15 +72,6 @@ export const CSS_URL_AT_RULE_REGEX = /@(import|namespace)\s*("([^"]*)"|'([^']*)'
  * 6 位 hex 写满自带终止，浏览器解码后与原始转义语义等价，无需终止空格
  */
 export const CSS_RE_ESCAPE_CODE_POINTS = new Set([0x22, 0x27, 0x3c, 0x5c]);
-
-/**
- * CSS 中以字符串参数承载 URL 的函数（image-set/src/image 等）
- * 捕获组1为前置边界（^ 或非单词/连字符字符）：防止误匹配 -webkit-image-set 中的 image-set 子串、--src() 自定义函数等更长名字的后缀
- * 捕获组2为函数名：长名写在前仅为先尝更全候选的习惯（JS 正则有回溯，顺序不影响匹配结果）
- * 捕获组3为括号参数：普通字符或一层嵌套括号（如 type("image/png")），两层以上嵌套不匹配
- * 匹配示例：image-set("a.png" 1x)、-webkit-image-set('a.png' 1x type("image/png"))、src("a.png")、image("a.png" #fff)
- */
-export const CSS_URL_STRING_FUNCTION_REGEX = /(^|[^\w-])(-webkit-image-set|image-set|image|src)\(((?:[^()]|\([^()]*\))*)\)/gi;
 
 /** on* 事件属性名（匹配示例：onclick、onload、ONERROR；不带 g 标记，供 .test() 使用） */
 export const EVENT_ATTR_NAME_REGEX = /^on/i;

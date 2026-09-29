@@ -49,6 +49,12 @@ describe('isSafeUrl', () => {
     expect(isSafeUrl('Data:Text/Html,<h1>x</h1>')).toBe(false);
   });
 
+  it('协议名内插制表符的 data: 写法按规范化后语义放行', () => {
+    // 浏览器 URL 解析剥离 \t 后等价 data:image/png，规范化后 MIME 前缀命中白名单
+    expect(isSafeUrl('da\tta:image/png;base64,AAAA')).toBe(true);
+    expect(isSafeUrl('da\tta:text/html,<h1>x</h1>')).toBe(false);
+  });
+
   it('拒绝非媒体类 data: URL', () => {
     expect(isSafeUrl('data:text/html,<script>alert(1)</script>')).toBe(false);
     expect(isSafeUrl('data:text/javascript,alert(1)')).toBe(false);
@@ -96,6 +102,12 @@ describe('sanitizeNavigationUrl', () => {
     expect(sanitizeNavigationUrl('data:image/svg+xml,<svg onload=alert(1)>')).toBe('');
     expect(sanitizeNavigationUrl('data:image/png;base64,AAAA')).toBe('');
     expect(sanitizeNavigationUrl('data:text/html,<h1>x</h1>')).toBe('');
+  });
+
+  it('导航语境的 data: 拦截在规范化后的协议上判定（混淆写法不可绕过）', () => {
+    // da\tta: 经 new URL 解析后 protocol 为 data:，导航语境一律拦截
+    expect(sanitizeNavigationUrl('da\tta:image/png;base64,AAAA')).toBe('');
+    expect(sanitizeNavigationUrl('da\tta:image/svg+xml,<svg onload=alert(1)>')).toBe('');
   });
 });
 
@@ -298,6 +310,8 @@ describe('sanitizeAttributeValue', () => {
     expect(sanitizeAttributeValue('values', 'data:text/html;base64,PGgxPng=')).toBeNull();
     expect(sanitizeAttributeValue('values', 'data:image/svg+xml,<svg onload=alert(1)>')).toBeNull();
     expect(sanitizeAttributeValue('values', 'DATA:IMAGE/SVG+xml,<svg/>')).toBeNull();
+    /** 协议名内插 tab 的混淆 data: 写法，规范化后命中危险前缀，同样拦截 */
+    expect(sanitizeAttributeValue('values', 'da\tta:image/svg+xml,<svg onload=alert(1)>')).toBeNull();
     /** 安全协议、相对路径与资源类 data: 正常放行；普通动画取值不受影响 */
     expect(sanitizeAttributeValue('values', 'https://a.com/x.png; a.png')).toBe('https://a.com/x.png; a.png');
     expect(sanitizeAttributeValue('values', 'data:image/png;base64,AAAA')).toBe('data:image/png;base64,AAAA');

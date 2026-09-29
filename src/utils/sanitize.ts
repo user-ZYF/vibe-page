@@ -22,31 +22,42 @@ import { ATTR_NAME_REGEX } from '@/constants/html';
 import { parseSrcset, stringifySrcset } from 'srcset';
 
 /**
- * 判断 URL 是否使用安全协议（白名单制）
- * 仅放行 SAFE_URL_PROTOCOLS 中的协议、无协议的相对地址（按当前页面源解析后命中白名单）、
- * data: 媒体资源与 about:blank；其余协议（javascript:/vbscript:/file:/ftp: 等）一律拒绝
+ * 按浏览器地址解析规则解析 URL，解析失败返回 null
+ * new URL 与浏览器地址解析规则一致：自动剥离 \t\n\r 与首尾控制字符，防止 java\tscript: 等混淆绕过
  * 注意：依赖 location.origin 作为解析基准，要求页面运行在 http/https 源下
+ */
+function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url, location.origin);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 判断 URL 是否使用安全协议（白名单制）
+ * 先经 new URL 规范化再按 protocol 分派判定：仅放行 SAFE_URL_PROTOCOLS 中的协议、
+ * 无协议的相对地址（按当前页面源解析后命中白名单）、data: 媒体资源与 about:blank；
+ * 其余协议（javascript:/vbscript:/file:/ftp: 等）一律拒绝
  * @example isSafeUrl('https://a.com/x.png') → true
  * @example isSafeUrl('./a.png') → true
  * @example isSafeUrl('data:image/png;base64,AAAA') → true
  * @example isSafeUrl('javascript:alert(1)') → false
+ * @example isSafeUrl('java\tscript:alert(1)') → false（规范化后等价 javascript:）
  * @example isSafeUrl('data:text/html,<h1>x</h1>') → false
  */
 export function isSafeUrl(url: string): boolean {
   const trimmed = url.trim();
   if (!trimmed) return true;
-  const lower = trimmed.toLowerCase();
-  if (lower.startsWith('data:')) {
-    return SAFE_DATA_MIME_PREFIXES.some((prefix) => lower.startsWith(prefix));
+  const parsed = parseUrl(trimmed);
+  if (!parsed) return false;
+  // data: 地址仅放行 SAFE_DATA_MIME_PREFIXES 中的媒体资源 MIME 前缀（href 已规范化，混淆写法不可绕过）
+  if (parsed.protocol === 'data:') {
+    return SAFE_DATA_MIME_PREFIXES.some((prefix) => parsed.href.toLowerCase().startsWith(prefix));
   }
   // about:blank 为合法空白页
-  if (lower === 'about:blank') return true;
-  // new URL 与浏览器地址解析规则一致：自动剥离 \t\n\r 与首尾控制字符，防止 java\tscript: 等混淆绕过
-  try {
-    return SAFE_URL_PROTOCOLS.has(new URL(trimmed, location.origin).protocol);
-  } catch {
-    return false;
-  }
+  if (parsed.protocol === 'about:') return parsed.href.toLowerCase() === 'about:blank';
+  return SAFE_URL_PROTOCOLS.has(parsed.protocol);
 }
 
 /**
@@ -66,7 +77,8 @@ export function sanitizeUrl(url: string): string {
  */
 export function sanitizeNavigationUrl(url: string): string {
   const safe = sanitizeUrl(url);
-  return safe && !safe.toLowerCase().startsWith('data:') ? safe : '';
+  // data: 判定在规范化后的 protocol 上进行：da\tta: 等混淆写法经 new URL 解析后与字面 data: 等价
+  return safe && parseUrl(safe)?.protocol !== 'data:' ? safe : '';
 }
 
 /**
@@ -450,7 +462,13 @@ function sanitizeSpaceSeparatedUrls(value: string): string {
 function hasDangerousAnimationValue(value: string): boolean {
   return value.split(';').some((token) => {
     if (!isSafeUrl(token)) return true;
-    return token.trim().toLowerCase().startsWith(DANGEROUS_DATA_MIME_PREFIX);
+    // data:image/svg 判定在规范化后的地址上进行，防止 da\tta: 等混淆写法绕过
+    const parsed = parseUrl(token);
+    return (
+      parsed !== null &&
+      parsed.protocol === 'data:' &&
+      parsed.href.toLowerCase().startsWith(DANGEROUS_DATA_MIME_PREFIX)
+    );
   });
 }
 

@@ -253,6 +253,17 @@ describe('sanitizeAttributeValue', () => {
     expect(sanitizeAttributeValue('x=y', 'v')).toBeNull();
     expect(sanitizeAttributeValue('a"b', 'v')).toBeNull();
     expect(sanitizeAttributeValue('x onmouseover=alert(1)', 'v')).toBeNull();
+    // 白名单首字符约束：-/. /数字开头非法（. 开头经 v-bind 会被 Vue 当 DOM property 赋值）
+    expect(sanitizeAttributeValue('.innerHTML', 'x')).toBeNull();
+    expect(sanitizeAttributeValue('-foo', 'x')).toBeNull();
+    expect(sanitizeAttributeValue('0abc', 'x')).toBeNull();
+    // 白名单字符集之外的整体丢弃
+    expect(sanitizeAttributeValue('@click', 'x')).toBeNull();
+    expect(sanitizeAttributeValue("a'b", 'x')).toBeNull();
+    // 白名单内的合法属性名放行
+    expect(sanitizeAttributeValue('data-x', 'v')).toBe('v');
+    expect(sanitizeAttributeValue('xlink:href', 'https://a.com/')).toBe('https://a.com/');
+    expect(sanitizeAttributeValue('viewBox', '0 0 1 1')).toBe('0 0 1 1');
   });
 
   it('on* 事件属性整体丢弃', () => {

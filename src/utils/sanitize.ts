@@ -474,7 +474,7 @@ function hasDangerousAnimationValue(value: string): boolean {
 
 /**
  * 净化单个 HTML 属性值
- * - 属性名含非法字符（空白/引号/斜杠/等号/大于号等）：返回 null，防止名字本身破坏标签结构
+ * - 属性名不在白名单内（须为字母/_/: 开头，仅含字母、数字、-、_、.、:）：返回 null，防止名字本身破坏标签结构或被 Vue 当作 DOM property 注入
  * - on* 事件属性：返回 null，整个属性丢弃
  * - URL 类属性：协议白名单校验，不安全返回 null；其中导航类属性（href/action/formaction/xlink:href）不放行 data: URL
  * - srcset/imagesrcset：逐候选 URL 校验，全部不安全返回 null

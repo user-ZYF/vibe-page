@@ -54,8 +54,14 @@ export const GENERAL_FALLBACK_TAG_NAME = 'div';
 /** HTML 标签名合法性校验正则（须以字母开头，仅包含字母、数字和短横线） */
 export const TAG_NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9-]*$/;
 
-/** HTML 属性名合法性校验正则（不允许空白、引号、斜杠、等号、大于号与控制字符） */
-export const ATTR_NAME_REGEX = /^[^\s"'/>=\x00-\x1f]+$/;
+/**
+ * HTML 属性名合法性校验正则（白名单）
+ * 后续字符：字母、数字、-、_、.、:（覆盖 data-x/aria-x/xlink:href/viewBox 等常规属性）
+ * 首字符须为字母、_ 或 :（XML Name 产生式）：
+ * - -、.、数字开头不是合法 NameStartChar，setAttribute 会抛 InvalidCharacterError
+ * - . 开头的键经 v-bind 展开会被 Vue 当作 DOM property 赋值（.innerHTML 可注入 HTML）
+ */
+export const ATTR_NAME_REGEX = /^[a-zA-Z_:][a-zA-Z0-9\-_.:]*$/;
 
 /**
  * 画布托管属性
@@ -72,6 +78,8 @@ export const CANVAS_MANAGED_ATTRIBUTES = new Set([
   'contenteditable',
   'data-canvas-id',
   'ref',
+  'ref_for',
+  'ref_key',
   'key',
   'is',
   'innerhtml',

@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import tokenize from 'postcss/lib/tokenize';
 import valueParser from 'postcss-value-parser';
 import {
   SAFE_DATA_MIME_PREFIXES,
@@ -265,48 +265,88 @@ export function sanitizeCssUrl(cssValue: string): string {
 }
 
 /**
+ * 收集 CSS 文本中全部 @import 规则的原文区间（含结尾分号）
+ * 分词交给 postcss tokenize（与浏览器分词规则一致）：
+ * - 字符串/注释/brackets 为独立 token，"@import" 位于其中时不会命中 at-word
+ * - @im + 注释 + port 为两个独立 word/at-word，本就不构成 @import 规则，不剔除
+ * - at-keyword 名中的转义会被分词器切成多个相邻 word token（@im\70 ort → @im + \70 + ort），
+ *   偏移相邻的部分拼接后解码比对，@im\70 ort 等写法仍命中；注释/空白切断的不拼接（本就不构成规则）
+ * - 只对名字解码而非整段文本：原文分词保证 source offset 有效，且值内 \3b 等转义不会被误作边界
+ * - 规则体消费至首个分号或文件尾；遇 { 停止且不消费（@import 语法不含块，非法块交给 CSSOM 丢弃）
+ * - 嵌套在块内的非法 @import 一并收集（保守剔除）
+ * - space token 无 source offset，区间终点按逐 token +1 近似推进；即使低估，
+ *   残留的也只是 @import 规则尾部片段（非法文本，CSSOM 丢弃），不构成绕过
+ */
+function findImportRanges(value: string): [number, number][] {
+  const ranges: [number, number][] = [];
+  // 只需 { css } 最小输入；error 回调在未闭合字符串/括号等畸形语法时被调用，
+  // 抛错终止分词并返回已收集区间（未闭合字符串吞掉其后全部内容，不可能再构成 @import）
+  const tokenizer = tokenize({
+    css: value,
+    error: () => {
+      throw new Error('css tokenize error');
+    },
+  });
+  let pendingStart = -1;
+  try {
+    let token = tokenizer.nextToken();
+    while (token !== undefined) {
+      if (token[0] === 'at-word') {
+        let name = token[1].slice(1);
+        const start = token[2] ?? 0;
+        let nameEnd = token[3] ?? token[2] ?? 0;
+        // at-keyword 名中的转义会被分词器切成后续 word token（@im + \70 + ort）；
+        // 仅偏移相邻（无注释/空白间隔）时拼接：@im + 注释 + ort 本就不构成 @import
+        let next = tokenizer.nextToken();
+        while (next !== undefined && next[0] === 'word' && next[2] === nameEnd + 1) {
+          name += next[1];
+          nameEnd = next[3] ?? nameEnd;
+          next = tokenizer.nextToken();
+        }
+        token = next;
+        if (decodeCssEscapes(name).toLowerCase() !== 'import') continue;
+        pendingStart = start;
+        let end = nameEnd + 1;
+        // 消费规则体至分号或文件尾
+        while (token !== undefined) {
+          if (token[0] === '{') break;
+          end = (token[3] ?? token[2] ?? end) + 1;
+          if (token[0] === ';') break;
+          token = tokenizer.nextToken();
+        }
+        ranges.push([pendingStart, end]);
+        pendingStart = -1;
+        continue;
+      }
+      token = tokenizer.nextToken();
+    }
+  } catch {
+    // 分词中断：@import 已开始未收尾时保守剔除至文件尾（其后内容多为未闭合字符串的一部分）
+    if (pendingStart !== -1) ranges.push([pendingStart, value.length]);
+  }
+  return ranges;
+}
+
+/**
  * 剔除 CSS 文本中的全部 @import 规则（整条丢弃，不进入 CSSOM 解析，从源头杜绝外部样式表请求）
- * - 先解码 CSS 转义，防止 @im\70 ort 等写法绕过关键词匹配
- * - 分词交给 postcss（与浏览器规则一致）：字符串内的 "@import" 为文本内容不命中，
- *   @im + 注释 + port 解析为两个 ident，本就不构成 @import 规则，故不剔除；
- *   注释切断的普通标识符保持原文（注释仍是合法空白边界）
- * - 按解析节点的 source offset 从原文切片，其余文本原样保留（含注释与格式）
- * - postcss 解析失败的极端输入回退为原文（交给 CSSOM 丢弃非法内容）
+ * - at-word 名解码后比对，@im\70 ort 等转义写法仍被剔除
+ * - 按 at-word token 的 source offset 从原文切片，其余文本原样保留（含注释、转义形式与格式）
  * @example stripCssImports('@import "a.css"; .a{}') → ' .a{}'
  * @example stripCssImports('@im\\70 ort url(a.css)') → ''
  * @example stripCssImports('content:"@import x"') → 'content:"@import x"'
  */
 export function stripCssImports(input: string): string {
   if (!input.includes('@')) return input;
-  const value = decodeCssEscapes(input);
-  let root: postcss.Root;
-  try {
-    root = postcss.parse(value);
-  } catch {
-    // 解析失败的极端输入原样返回（非法内容交给 CSSOM 丢弃）
-    return value;
-  }
+  const ranges = findImportRanges(input);
+  if (!ranges.length) return input;
 
-  /** 待剔除的 @import 规则区间（含结尾分号）；嵌套于 at-rule 内的非法 @import 一并剔除 */
-  const ranges: [number, number][] = [];
-  root.walkAtRules(/^import$/i, (rule) => {
-    const start = rule.source?.start?.offset;
-    let end = rule.source?.end?.offset;
-    if (start === undefined || end === undefined) return;
-    // end 指向规则最后一个 token（无分号时为规则尾，有分号时分号本身）
-    if (value[end] === ';') end++;
-    ranges.push([start, end]);
-  });
-  if (!ranges.length) return value;
-
-  ranges.sort((a, b) => a[0] - b[0]);
   let result = '';
   let pos = 0;
   for (const [start, end] of ranges) {
-    result += value.slice(pos, start);
+    result += input.slice(pos, start);
     pos = end;
   }
-  return result + value.slice(pos);
+  return result + input.slice(pos);
 }
 
 /**
@@ -343,15 +383,9 @@ function hasDangerousSerializedUrl(cssText: string): boolean {
  */
 export function isDangerousCssRuleText(cssText: string): boolean {
   if (typeof CSSStyleSheet === 'undefined' || !cssText.trim()) return false;
-  let hasImport = false;
-  try {
-    postcss.parse(cssText).walkAtRules(/^import$/i, () => {
-      hasImport = true;
-    });
-  } catch {
-    // postcss 解析失败的极端输入交给 replaceSync 复核
-  }
-  if (hasImport) return true;
+  // @import 先用 tokenize 独立扫描：replaceSync 在规范实现中抛错，另有实现（如测试环境）静默丢弃；
+  // at-word 名在 findImportRanges 内部解码比对，@im\70 ort 等转义写法不可绕过
+  if (findImportRanges(cssText).length > 0) return true;
   const sheet = new CSSStyleSheet();
   try {
     sheet.replaceSync(cssText);

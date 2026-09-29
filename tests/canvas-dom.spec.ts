@@ -201,6 +201,8 @@ describe('链接 URL 清洗', () => {
     'JavaScript:alert(1)',
     'vbscript:msgbox(1)',
     'data:text/html,<script>alert(1)</script>',
+    'data:image/svg+xml,<svg onload=alert(1)>',
+    'data:image/png;base64,AAAA',
   ])('危险协议 %s 在预览模式下不渲染 href', async (href) => {
     const id = add(CanvasElementTypeEnum.LINK);
     (store.getElementById(id) as CanvasLinkElement).href = href;

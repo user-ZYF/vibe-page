@@ -27,7 +27,7 @@ import { CanvasElementTypeEnum, ELEMENT_TYPE_TAG_MAP, LinkTargetEnum, TABLE_SCOP
 import { StyleRuleTypeEnum } from '@/constants/style';
 
 import type { CanvasStyleRule } from '@/views/Canvas/types';
-import { sanitizeUrl, sanitizeAttributeValue, sanitizeCssDeclarationValue, escapeCssLt } from '@/utils/sanitize';
+import { sanitizeUrl, sanitizeNavigationUrl, sanitizeAttributeValue, sanitizeCssDeclarationValue, escapeCssLt } from '@/utils/sanitize';
 import { isVoidElement, resolveSafeTagName, resolveHeadingTag } from '@/utils/html-parser';
 
 /**
@@ -76,7 +76,7 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.LINK: {
       const link = element as CanvasLinkElement;
-      const safeHref = sanitizeUrl(link.href ?? '');
+      const safeHref = sanitizeNavigationUrl(link.href ?? '');
       if (safeHref) attrs.push(`href="${escapeHtml(safeHref)}"`);
       const TARGET_ATTR_MAP: Record<LinkTargetEnum, string> = {
         [LinkTargetEnum.SELF]: '_self',
@@ -154,7 +154,7 @@ function buildAttributes(element: CanvasElement): string {
     }
     case CanvasElementTypeEnum.FORM: {
       const form = element as CanvasFormElement;
-      const safeAction = sanitizeUrl(form.action ?? '');
+      const safeAction = sanitizeNavigationUrl(form.action ?? '');
       if (safeAction) attrs.push(`action="${escapeHtml(safeAction)}"`);
       if (form.method) attrs.push(`method="${escapeHtml(form.method)}"`);
       break;

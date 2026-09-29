@@ -250,7 +250,7 @@ import { MeCheckbox, MeInput, MeSelect } from '@zyf_dsb/me-ui';
 import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_ELEMENT_TYPES, FORM_METHOD_OPTIONS, HEADING_LEVEL_OPTIONS } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
-import { isSafeUrl } from '@/utils/sanitize';
+import { isSafeUrl, sanitizeNavigationUrl } from '@/utils/sanitize';
 import {
   type CanvasInnerElement,
   type CanvasButtonElement,
@@ -397,10 +397,10 @@ function handleHrefBlur() {
   const el = model.value as CanvasLinkElement;
   if (!el || el.type !== CanvasElementTypeEnum.LINK) return;
   const href = pendingHref.value.trim();
-  /** 校验未通过时还原显示为旧地址 */
-  if (href && !isSafeUrl(href)) {
+  /** 校验未通过时还原显示为旧地址（导航语境不放行 data:） */
+  if (href && !sanitizeNavigationUrl(href)) {
     pendingHref.value = el.href;
-    message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    message.warning('链接地址协议不安全，仅支持 http、https、mailto、tel 及相对路径，不支持 data: 地址');
     return;
   }
   el.href = href;
@@ -412,10 +412,10 @@ function handleActionBlur() {
   const el = model.value as CanvasFormElement;
   if (!el || el.type !== CanvasElementTypeEnum.FORM) return;
   const action = pendingAction.value.trim();
-  /** 校验未通过时还原显示为旧地址 */
-  if (action && !isSafeUrl(action)) {
+  /** 校验未通过时还原显示为旧地址（导航语境不放行 data:） */
+  if (action && !sanitizeNavigationUrl(action)) {
     pendingAction.value = el.action;
-    message.warning('提交地址协议不安全，仅支持 http、https、mailto、tel 及相对路径');
+    message.warning('提交地址协议不安全，仅支持 http、https、mailto、tel 及相对路径，不支持 data: 地址');
     return;
   }
   el.action = action;

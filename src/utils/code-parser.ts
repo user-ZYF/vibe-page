@@ -44,7 +44,7 @@ import {
 import { parseHtmlDocument, resolveSafeTagName, type ParsedElement } from '@/utils/html-parser'
 import { BLOCKED_TAGS, TAG_TO_TYPE, LINK_TARGET_ATTR_MAP, SCOPE_ATTR_MAP, CONSUMED_ATTRIBUTES, CANVAS_MANAGED_ATTRIBUTES } from '@/constants/html'
 import { parseCss } from '@/utils/css-parser'
-import { sanitizeUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize'
+import { sanitizeUrl, sanitizeNavigationUrl, sanitizeCssUrl, sanitizeAttributeValue } from '@/utils/sanitize'
 import { generateId } from '@/utils/id'
 import { styleConfigToCss, declarationWins, enumValue } from '@/utils/style-converter'
 import { isParentElement, normalizeChildren, type CanvasStyleRule, type ElementClass } from '@/views/Canvas/types'
@@ -253,7 +253,7 @@ function buildElement(
     case CanvasElementTypeEnum.LINK: {
       const el = {
         ...base,
-        href: sanitizeUrl(attrs.href ?? ''),
+        href: sanitizeNavigationUrl(attrs.href ?? ''),
         children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
       } as CanvasLinkElement
       const target = attrs.target ? LINK_TARGET_ATTR_MAP[attrs.target] : undefined
@@ -305,7 +305,7 @@ function buildElement(
       const method = enumValue(attrs.method, FormMethodEnum) ?? FormMethodEnum.GET;
       const el = {
         ...base,
-        action: sanitizeUrl(attrs.action ?? ''),
+        action: sanitizeNavigationUrl(attrs.action ?? ''),
         method,
         children: buildChildren(parsed.children, usedIds, styleRules, ruleMap)
       } as CanvasFormElement

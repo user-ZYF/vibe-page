@@ -28,7 +28,7 @@ import {
   defaultClassStyleConfig,
 } from '@/constants/style';
 import { sanitizeCssUrl, sanitizeUrl } from '@/utils/sanitize';
-import { CSS_URL_ADDRESS_FORBIDDEN_REGEX } from '@/constants/sanitize';
+import { CSS_URL_ADDRESS_FORBIDDEN_REGEX, GRADIENT_VALUE_REGEX, CSS_REQUESTING_FUNCTION_REGEX } from '@/constants/sanitize';
 import { cloneDeep } from 'lodash';
 
 /**
@@ -271,10 +271,15 @@ export function hasBackgroundContent(item: BackgroundItem): boolean {
  */
 function backgroundItemToCss(item: BackgroundItem): string {
   if (item.type === BackgroundTypeEnum.COLOR) {
-    return item.color || 'revert';
+    /** 纯色层原样输出，但夹带 url()/paint()/element() 等可发起请求或执行脚本的函数时丢弃整层（none 对 background-color 非法，用 revert 回退） */
+    const color = item.color || 'revert';
+    return CSS_REQUESTING_FUNCTION_REGEX.test(color) ? 'revert' : color;
   }
   if (item.type === BackgroundTypeEnum.GRADIENT) {
-    return sanitizeCssUrl(item.gradient || 'none');
+    /** 渐变层仅允许渐变函数/var()：url()、image-set()、paint()、element() 等写法可发起请求或执行脚本（输入层已拦截，此处为导入/脏数据兜底） */
+    const gradient = (item.gradient ?? '').trim();
+    if (!GRADIENT_VALUE_REGEX.test(gradient)) return 'none';
+    return sanitizeCssUrl(gradient);
   }
   if (item.type === BackgroundTypeEnum.IMAGE) {
     /** 含破坏 url("...") 字符串边界的字符时丢弃整层（输入层已拦截，此处为代码导入路径的兜底） */
@@ -383,7 +388,9 @@ export function styleConfigToCss(styleConfig: StyleConfig, kebabCase = false): R
       css['backgroundAttachment'] = imageBgs.map((b) => b.attachment ?? 'scroll').join(', ');
     }
     if (colorBgs.length > 0) {
-      css['backgroundColor'] = colorBgs[colorBgs.length - 1].color || 'revert';
+      /** 纯色层原样输出，但夹带 url()/paint()/element() 等可发起请求或执行脚本的函数时丢弃（none 对 background-color 非法，用 revert 回退） */
+      const color = colorBgs[colorBgs.length - 1].color || 'revert';
+      css['backgroundColor'] = CSS_REQUESTING_FUNCTION_REGEX.test(color) ? 'revert' : color;
     }
   }
   if (isNotEmpty(visual.borderWidth)) {

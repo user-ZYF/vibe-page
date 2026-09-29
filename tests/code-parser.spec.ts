@@ -201,6 +201,15 @@ describe('parseCodeToCanvas', () => {
     expect((children[1] as { href?: string }).href).toBe('https://a.com/p');
   });
 
+  it('导航类字段不放行 data: URL（data:image/svg 顶层导航可执行脚本）', () => {
+    const { children } = parseCodeToCanvas(
+      '<a href="data:image/svg+xml,<svg onload=alert(1)>">x</a><form action="data:image/png;base64,AA"></form>',
+      ''
+    );
+    expect((children[0] as { href?: string }).href).toBe('');
+    expect((children[1] as { action?: string }).action).toBe('');
+  });
+
   it('行内样式中的不安全 url() 导入时净化', () => {
     const { styleRules } = parseCodeToCanvas('<div id="d1" style="background-image: url(\'file:///x\')"></div>', '');
     expect(styleRules.find((r) => r.selector === '#d1')?.style['background-image']).toBe('url()');

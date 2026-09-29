@@ -15,6 +15,7 @@ export const URL_ATTRIBUTES = new Set([
   'background',
   'longdesc',
   'xlink:href',
+  'xml:base',
 ]);
 
 /** 导航类 URL 属性 */
@@ -25,6 +26,20 @@ export const MULTI_URL_ATTRIBUTES = new Set(['srcset', 'imagesrcset']);
 
 /** 空格分隔多 URL 属性 */
 export const SPACE_URL_ATTRIBUTES = new Set(['ping']);
+
+/** 取值为 CSS 值的表现属性（SVG 表现属性值可含 url()，按 style 属性同策略净化值内地址） */
+export const CSS_URL_VALUE_ATTRIBUTES = new Set([
+  'fill',
+  'stroke',
+  'filter',
+  'clip-path',
+  'mask',
+  'marker',
+  'marker-start',
+  'marker-mid',
+  'marker-end',
+  'cursor',
+]);
 
 /**
  * CSS 转义序列（decodeCssEscapes 解码用，两个分支匹配不同转义形式）
@@ -83,11 +98,21 @@ export const CSS_URL_STRING_FUNCTION_REGEX = /(^|[^\w-])(-webkit-image-set|image
 /** on* 事件属性名（匹配示例：onclick、onload、ONERROR；不带 g 标记，供 .test() 使用） */
 export const EVENT_ATTR_NAME_REGEX = /^on/i;
 
+/** 顶层导航时可执行脚本的 data: MIME 前缀（SVG 可内嵌 <script>，故单独拦截） */
+export const DANGEROUS_DATA_MIME_PREFIX = 'data:image/svg';
+
 /**
- * SVG 动画取值中的危险协议 token（属性值按分号拆分后逐项校验）
- * 匹配示例：javascript:、 vbscript:、data:text/html:；不带 g 标记，供 .test() 使用
+ * 渐变背景合法取值（仅允许渐变函数与 var() 引用）
+ * url()/image()/image-set()/cross-fade() 可加载外部资源，paint() 执行 Paint Worklet，
+ * element() 将指定 DOM 渲染为位图——渐变语义字段一律不放行这些写法
  */
-export const SVG_DANGEROUS_PROTOCOL_REGEX = /^\s*(javascript|vbscript|data:text\/html)\s*:/i;
+export const GRADIENT_VALUE_REGEX = /^(?:(?:-webkit-)?(?:repeating-)?(?:linear|radial|conic)-gradient|var)\s*\(/i;
+
+/**
+ * CSS <image> 取值中会发起请求或执行脚本的函数名
+ * 用于非 url() 语义的原始取值兜底校验（如纯色层防止夹带 paint()/element() 等函数）
+ */
+export const CSS_REQUESTING_FUNCTION_REGEX = /\b(?:url|image|image-set|cross-fade|element|paint)\s*\(/i;
 
 /** 空白分隔符（ping 等空格分隔多 URL 属性值的拆分） */
 export const SPACE_SEPARATOR_REGEX = /\s+/;

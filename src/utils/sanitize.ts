@@ -5,6 +5,7 @@ import {
   NAVIGATION_URL_ATTRIBUTES,
   MULTI_URL_ATTRIBUTES,
   SPACE_URL_ATTRIBUTES,
+  CSS_URL_VALUE_ATTRIBUTES,
   SVG_ANIMATION_VALUE_ATTRIBUTES,
   CSS_ESCAPE_REGEX,
   CSS_COMMENT_REGEX,
@@ -14,7 +15,7 @@ import {
   CSS_URL_STRING_FUNCTION_REGEX,
   CSS_RE_ESCAPE_CODE_POINTS,
   EVENT_ATTR_NAME_REGEX,
-  SVG_DANGEROUS_PROTOCOL_REGEX,
+  DANGEROUS_DATA_MIME_PREFIX,
   SPACE_SEPARATOR_REGEX,
 } from '@/constants/sanitize';
 import { ATTR_NAME_REGEX } from '@/constants/html';
@@ -55,6 +56,17 @@ export function isSafeUrl(url: string): boolean {
  */
 export function sanitizeUrl(url: string): string {
   return isSafeUrl(url) ? url.trim() : '';
+}
+
+/**
+ * 净化导航类 URL（href/action/formaction/xlink:href 等可触发顶层导航的取值）
+ * 在协议白名单基础上额外禁行 data:（data:image/svg+xml 顶层导航时可执行内嵌脚本）
+ * @example sanitizeNavigationUrl('https://a.com') → 'https://a.com'
+ * @example sanitizeNavigationUrl('data:image/png;base64,AA') → ''（导航语境 data: 一律不放行）
+ */
+export function sanitizeNavigationUrl(url: string): string {
+  const safe = sanitizeUrl(url);
+  return safe && !safe.toLowerCase().startsWith('data:') ? safe : '';
 }
 
 /**
@@ -424,12 +436,22 @@ function sanitizeSpaceSeparatedUrls(value: string): string {
 }
 
 /**
- * 判断 SVG 动画取值中是否夹带危险协议 token
+ * 判断 SVG 动画取值中是否夹带危险 URL token
+ * 动画目标由 attributeName 指定（独立属性，无法静态判定），可能为导航类 URL 属性，
+ * 故分号分隔的取值一律经 isSafeUrl 校验：其内部经浏览器 URL 解析归一化，
+ * java\tscript: 等混淆写法不可绕过；数字、颜色、transform 等无 scheme 的普通取值视作相对引用放行；
+ * 导航语境额外拦截 data:image/svg（顶层导航时 svg+xml 可执行内嵌脚本），其余安全 data: 类型放行
  * @example hasDangerousAnimationValue('0; 0.5; 1') → false
  * @example hasDangerousAnimationValue('a.png; javascript:x') → true
+ * @example hasDangerousAnimationValue('java\tscript:x') → true（归一化后等价 javascript:）
+ * @example hasDangerousAnimationValue('data:image/svg+xml,<svg/>') → true（导航可执行脚本）
+ * @example hasDangerousAnimationValue('data:image/png;base64,AA') → false（资源类 data: 放行）
  */
 function hasDangerousAnimationValue(value: string): boolean {
-  return value.split(';').some((token) => SVG_DANGEROUS_PROTOCOL_REGEX.test(token));
+  return value.split(';').some((token) => {
+    if (!isSafeUrl(token)) return true;
+    return token.trim().toLowerCase().startsWith(DANGEROUS_DATA_MIME_PREFIX);
+  });
 }
 
 /**
@@ -439,8 +461,8 @@ function hasDangerousAnimationValue(value: string): boolean {
  * - URL 类属性：协议白名单校验，不安全返回 null；其中导航类属性（href/action/formaction/xlink:href）不放行 data: URL
  * - srcset/imagesrcset：逐候选 URL 校验，全部不安全返回 null
  * - ping 等空格分隔多 URL 属性：逐个校验并剔除不安全地址，全部不安全返回 null
- * - style 属性：值内 url() 地址经协议校验（兜底防脏数据内联样式注入）
- * - SVG 动画取值属性：含危险协议 token 时返回 null
+ * - style 属性与 fill/stroke/filter 等 CSS 值表现属性：值内 url() 地址经协议校验（兜底防脏数据内联样式注入）
+ * - SVG 动画取值属性：分号取值按 URL 协议白名单校验，危险协议或 data:image/svg 时返回 null
  * @example sanitizeAttributeValue('href', 'javascript:x') → null
  * @example sanitizeAttributeValue('href', 'data:image/png;base64,AAAA') → null（导航类属性不放行 data:）
  * @example sanitizeAttributeValue('src', 'https://a.com/x.png') → 'https://a.com/x.png'
@@ -462,13 +484,13 @@ export function sanitizeAttributeValue(name: string, value: string): string | nu
     return sanitized || null;
   }
   if (URL_ATTRIBUTES.has(lowerName)) {
-    const safe = sanitizeUrl(value);
-    if (!safe) return null;
-    // 导航类属性不放行 data: URL（data:image/svg+xml 顶层导航时可执行内嵌脚本）
-    if (NAVIGATION_URL_ATTRIBUTES.has(lowerName) && safe.toLowerCase().startsWith('data:')) return null;
-    return safe;
+    const safe = NAVIGATION_URL_ATTRIBUTES.has(lowerName)
+      ? sanitizeNavigationUrl(value)
+      : sanitizeUrl(value);
+    return safe || null;
   }
   if (lowerName === 'style') return sanitizeCssUrl(value);
+  if (CSS_URL_VALUE_ATTRIBUTES.has(lowerName)) return sanitizeCssUrl(value);
   if (SVG_ANIMATION_VALUE_ATTRIBUTES.has(lowerName) && hasDangerousAnimationValue(value)) return null;
   return value;
 }

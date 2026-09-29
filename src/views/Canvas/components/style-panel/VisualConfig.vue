@@ -81,7 +81,12 @@
         <!-- Gradient 类型 -->
         <template v-else>
           <div class="style-config-label">Gradient</div>
-          <me-input v-model="bg.gradient" placeholder="linear-gradient(...)" @blur="handleBgGradientBlur(bg)" />
+          <me-input
+            :model-value="bgGradientValue(bg)"
+            placeholder="linear-gradient(...)"
+            @input="handleBgGradientInput(bg, $event)"
+            @blur="handleBgGradientBlur(bg)"
+          />
         </template>
       </div>
     </div>
@@ -282,7 +287,7 @@ import ColorPicker from './ColorPicker.vue';
 import type { VisualConfig, BoxShadowItem, BackgroundItem } from '@/views/Canvas/types';
 import { useUnitAutoFill, autoFillUnit } from '@/composables/useUnitAutoFill';
 import { isSafeUrl, sanitizeCssUrl } from '@/utils/sanitize';
-import { CSS_URL_ADDRESS_FORBIDDEN_REGEX } from '@/constants/sanitize';
+import { CSS_URL_ADDRESS_FORBIDDEN_REGEX, GRADIENT_VALUE_REGEX } from '@/constants/sanitize';
 import { message } from 'ant-design-vue';
 import { computed, ref } from 'vue';
 
@@ -369,15 +374,34 @@ function handleBgImageUrlBlur(bg: BackgroundItem) {
   bg.imageUrl = url;
 }
 
-/** 背景渐变失焦时校验 url() 注入 */
+/** 背景渐变编辑的临时值（blur 校验后才同步到 bg.gradient，避免每输入一个字符就改写样式） */
+const pendingBgGradients = ref(new Map<BackgroundItem, string>());
+
+/** 背景渐变输入框当前值（未编辑时显示 bg.gradient） */
+function bgGradientValue(bg: BackgroundItem) {
+  return pendingBgGradients.value.get(bg) ?? bg.gradient ?? '';
+}
+
+/** 背景渐变输入时暂存临时值 */
+function handleBgGradientInput(bg: BackgroundItem, value: string) {
+  pendingBgGradients.value.set(bg, value);
+}
+
+/** 背景渐变失焦时校验并同步到 bg.gradient */
 function handleBgGradientBlur(bg: BackgroundItem) {
-  const gradient = bg.gradient?.trim() ?? '';
-  if (!gradient) return;
-  const sanitized = sanitizeCssUrl(gradient);
-  if (sanitized !== gradient) {
-    bg.gradient = sanitized;
-    message.warning('渐变中包含不安全的 url()，已自动净化');
+  const gradient = bgGradientValue(bg).trim();
+  pendingBgGradients.value.delete(bg);
+  /**
+   * 校验规则（任一不通过即还原为旧值，不写入 model）：
+   * 1. 取值必须以渐变函数开头（linear/radial/conic-gradient 及 repeating-/-webkit- 变体）或 var() 引用，
+   *    url()、image-set()、paint()、element() 等可发起请求或执行脚本的写法直接拒绝
+   * 2. 渐变函数内部不得夹带 url()（如 linear-gradient(red, url(x))），经协议校验兜底
+   */
+  if (gradient && (!GRADIENT_VALUE_REGEX.test(gradient) || sanitizeCssUrl(gradient) !== gradient)) {
+    message.warning('渐变仅支持 linear-gradient、radial-gradient、conic-gradient 等渐变函数');
+    return;
   }
+  bg.gradient = gradient;
 }
 </script>
 

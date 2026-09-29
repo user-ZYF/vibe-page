@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { generateHtml, generateCss } from '@/utils/code-generator';
-import { ButtonTypeEnum, CanvasElementTypeEnum, HeadingLevelEnum, LinkTargetEnum } from '@/constants/home';
+import { ButtonTypeEnum, CanvasElementTypeEnum, FormMethodEnum, HeadingLevelEnum, LinkTargetEnum } from '@/constants/home';
 import { StyleRuleTypeEnum } from '@/constants/style';
 import type {
   CanvasButtonElement,
+  CanvasFormElement,
   CanvasGeneralElement,
   CanvasHeadingElement,
   CanvasImageElement,
@@ -110,6 +111,18 @@ describe('generateHtml', () => {
     // 非新窗口不输出 rel
     const selfHtml = generateHtml(mkRoot([mkLink('l2', LinkTargetEnum.SELF)]));
     expect(selfHtml).not.toContain('rel=');
+  });
+
+  it('链接 href / 表单 action 为 data: 或危险协议时不输出', () => {
+    const link = { ...mkLink('l1'), href: 'data:image/svg+xml,<svg onload=alert(1)>' };
+    expect(generateHtml(mkRoot([link]))).not.toContain('href=');
+    const link2 = { ...mkLink('l2'), href: 'javascript:alert(1)' };
+    expect(generateHtml(mkRoot([link2]))).not.toContain('href=');
+    const form: CanvasFormElement = {
+      id: 'f1', type: CanvasElementTypeEnum.FORM, classes: [],
+      action: 'data:image/png;base64,AA', method: FormMethodEnum.POST, children: [],
+    };
+    expect(generateHtml(mkRoot([form]))).not.toContain('action=');
   });
 
   it('标题 level 枚举范围外脏数据回退 h1', () => {

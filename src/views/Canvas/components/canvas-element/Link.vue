@@ -13,7 +13,7 @@ import { useElementClasses } from '@/composables/useElementClasses';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
 import { useDragConnector } from '../../drag/useDragConnector';
 import { useElementVisibility } from '@/composables/useElementVisibility';
-import { isSafeUrl } from '@/utils/sanitize';
+import { sanitizeNavigationUrl } from '@/utils/sanitize';
 import { LinkTargetEnum } from '@/constants/home';
 
 const data = defineModel<CanvasLinkElement>("data", {
@@ -23,12 +23,8 @@ const data = defineModel<CanvasLinkElement>("data", {
 /** 已启用的 class 名称列表 */
 const classes = useElementClasses(data);
 
-/** 安全的 href 值，不安全协议返回 undefined 避免渲染到 DOM */
-const safeHref = computed(() => {
-  const href = data.value.href;
-  if (!href) return undefined;
-  return isSafeUrl(href) ? href : undefined;
-});
+/** 安全的 href 值，不安全协议或 data: 返回 undefined 避免渲染到 DOM */
+const safeHref = computed(() => sanitizeNavigationUrl(data.value.href) || undefined);
 
 /** 超链接 DOM 引用 */
 const linkEl = ref<HTMLElement>();

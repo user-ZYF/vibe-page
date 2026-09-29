@@ -88,6 +88,38 @@ describe('styleConfigToCss', () => {
     const css = styleConfigToCss(config);
     expect(css.backgroundImage).toBe('none');
   });
+
+  it('渐变层仅允许渐变函数/var()，url()/image-set()/paint() 等写法输出 none', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'url("https://a.com/x.png")' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('none');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'image-set("https://a.com/x.png" 1x)' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('none');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'cross-fade(url("a.png"), linear-gradient(red, blue))' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('none');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'paint(foo)' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('none');
+  });
+
+  it('渐变函数与 var() 正常输出', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'linear-gradient(red, blue)' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('linear-gradient(red, blue)');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'repeating-conic-gradient(red 0% 25%, blue 0% 50%)' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('repeating-conic-gradient(red 0% 25%, blue 0% 50%)');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.GRADIENT, gradient: 'var(--my-grad)' }];
+    expect(styleConfigToCss(config).backgroundImage).toBe('var(--my-grad)');
+  });
+
+  it('纯色层夹带请求类函数时输出 revert，正常颜色不受影响', () => {
+    const config = emptyConfig();
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.COLOR, color: 'paint(foo)' }];
+    expect(styleConfigToCss(config).backgroundColor).toBe('revert');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.COLOR, color: 'element(#x)' }];
+    expect(styleConfigToCss(config).backgroundColor).toBe('revert');
+    config.visual.backgrounds = [{ type: BackgroundTypeEnum.COLOR, color: 'rgb(1, 2, 3)' }];
+    expect(styleConfigToCss(config).backgroundColor).toBe('rgb(1, 2, 3)');
+  });
 });
 
 describe('hasBackgroundContent', () => {

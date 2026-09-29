@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports } from '@/utils/sanitize';
+import { isSafeUrl, sanitizeUrl, sanitizeNavigationUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports } from '@/utils/sanitize';
 
 describe('isSafeUrl', () => {
   it('放行白名单协议 http/https/mailto/tel', () => {
@@ -74,6 +74,28 @@ describe('sanitizeUrl', () => {
   it('不安全 URL 返回空字符串', () => {
     expect(sanitizeUrl('javascript:alert(1)')).toBe('');
     expect(sanitizeUrl('data:text/html,<h1>x</h1>')).toBe('');
+  });
+});
+
+describe('sanitizeNavigationUrl', () => {
+  it('放行白名单协议与相对地址', () => {
+    expect(sanitizeNavigationUrl('https://a.com/x')).toBe('https://a.com/x');
+    expect(sanitizeNavigationUrl('mailto:a@b.com')).toBe('mailto:a@b.com');
+    expect(sanitizeNavigationUrl('/a/b.png')).toBe('/a/b.png');
+    expect(sanitizeNavigationUrl('about:blank')).toBe('about:blank');
+  });
+
+  it('拒绝危险协议（含混淆写法）', () => {
+    expect(sanitizeNavigationUrl('javascript:alert(1)')).toBe('');
+    expect(sanitizeNavigationUrl('java\tscript:alert(1)')).toBe('');
+    expect(sanitizeNavigationUrl('file:///etc/passwd')).toBe('');
+    expect(sanitizeNavigationUrl('vbscript:msgbox(1)')).toBe('');
+  });
+
+  it('导航语境不放行任何 data: URL（含资源类）', () => {
+    expect(sanitizeNavigationUrl('data:image/svg+xml,<svg onload=alert(1)>')).toBe('');
+    expect(sanitizeNavigationUrl('data:image/png;base64,AAAA')).toBe('');
+    expect(sanitizeNavigationUrl('data:text/html,<h1>x</h1>')).toBe('');
   });
 });
 
@@ -263,6 +285,27 @@ describe('sanitizeAttributeValue', () => {
     expect(sanitizeAttributeValue('values', '0; 0.5; 1')).toBe('0; 0.5; 1');
   });
 
+  it('SVG 动画取值归一化校验：混淆写法、危险协议与导航危险 data: 一律拦截', () => {
+    /** 协议名内插 tab/换行（浏览器 URL 解析会剔除，等价 javascript:） */
+    expect(sanitizeAttributeValue('values', 'java\tscript:alert(1)')).toBeNull();
+    expect(sanitizeAttributeValue('to', 'java\nscript:alert(1)')).toBeNull();
+    /** vbscript:/file:/自定义协议等非白名单协议 */
+    expect(sanitizeAttributeValue('values', 'vbscript:msgbox(1)')).toBeNull();
+    expect(sanitizeAttributeValue('values', 'file:///etc/passwd')).toBeNull();
+    expect(sanitizeAttributeValue('values', 'foo:bar')).toBeNull();
+    /** data:text/html 与可执行脚本的 data:image/svg（动画目标可能为导航属性） */
+    expect(sanitizeAttributeValue('values', 'data:text/html,<h1>x</h1>')).toBeNull();
+    expect(sanitizeAttributeValue('values', 'data:text/html;base64,PGgxPng=')).toBeNull();
+    expect(sanitizeAttributeValue('values', 'data:image/svg+xml,<svg onload=alert(1)>')).toBeNull();
+    expect(sanitizeAttributeValue('values', 'DATA:IMAGE/SVG+xml,<svg/>')).toBeNull();
+    /** 安全协议、相对路径与资源类 data: 正常放行；普通动画取值不受影响 */
+    expect(sanitizeAttributeValue('values', 'https://a.com/x.png; a.png')).toBe('https://a.com/x.png; a.png');
+    expect(sanitizeAttributeValue('values', 'data:image/png;base64,AAAA')).toBe('data:image/png;base64,AAAA');
+    expect(sanitizeAttributeValue('values', 'data:audio/mp3;base64,AAAA')).toBe('data:audio/mp3;base64,AAAA');
+    expect(sanitizeAttributeValue('values', '0; 0.5; 1')).toBe('0; 0.5; 1');
+    expect(sanitizeAttributeValue('to', 'translate(0 10)')).toBe('translate(0 10)');
+  });
+
   it('ping 属性空格分隔 URL 逐个校验，不安全地址剔除', () => {
     expect(sanitizeAttributeValue('ping', 'https://a.com/p javascript:alert(1) https://b.com/q')).toBe(
       'https://a.com/p https://b.com/q'
@@ -273,6 +316,21 @@ describe('sanitizeAttributeValue', () => {
   it('style 属性值内 url() 经协议净化', () => {
     expect(sanitizeAttributeValue('style', 'background:url(javascript:alert(1))')).toBe('background:url())');
     expect(sanitizeAttributeValue('style', 'color:red')).toBe('color:red');
+  });
+
+  it('CSS 值表现属性（fill/filter/cursor 等）值内 url() 经协议净化', () => {
+    expect(sanitizeAttributeValue('fill', 'url(javascript:alert(1))')).toBe('url())');
+    expect(sanitizeAttributeValue('filter', 'url(data:text/html,x)')).toBe('url()');
+    expect(sanitizeAttributeValue('cursor', 'url(javascript:x), auto')).toBe('url(), auto');
+    /** 安全取值不受影响 */
+    expect(sanitizeAttributeValue('fill', 'url(#gradient)')).toBe('url(#gradient)');
+    expect(sanitizeAttributeValue('fill', 'red')).toBe('red');
+    expect(sanitizeAttributeValue('stroke', 'url("a.png")')).toBe('url("a.png")');
+  });
+
+  it('xml:base 经协议白名单校验', () => {
+    expect(sanitizeAttributeValue('xml:base', 'javascript:x')).toBeNull();
+    expect(sanitizeAttributeValue('xml:base', 'https://a.com/')).toBe('https://a.com/');
   });
 
   it('普通属性原样返回', () => {

@@ -1,6 +1,9 @@
 /** 允许的 dataURL 的 MIME 前缀 */
 export const SAFE_DATA_MIME_PREFIXES = ['data:image/', 'data:audio/', 'data:video/', 'data:font/'];
 
+/** URL 协议白名单（dataURL单独处理，不在白名单范围中） */
+export const SAFE_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:']);
+
 /** URL 类属性（取值需经协议白名单校验） */
 export const URL_ATTRIBUTES = new Set([
   'href',

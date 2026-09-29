@@ -1,5 +1,6 @@
 import {
   SAFE_DATA_MIME_PREFIXES,
+  SAFE_URL_PROTOCOLS,
   URL_ATTRIBUTES,
   NAVIGATION_URL_ATTRIBUTES,
   MULTI_URL_ATTRIBUTES,
@@ -17,12 +18,15 @@ import {
   SPACE_SEPARATOR_REGEX,
 } from '@/constants/sanitize';
 import { ATTR_NAME_REGEX } from '@/constants/html';
-import { sanitizeUrl as sanitizeUrlString } from '@braintree/sanitize-url';
 import { parseSrcset, stringifySrcset } from 'srcset';
 
 /**
- * 判断 URL 是否使用安全协议
+ * 判断 URL 是否使用安全协议（白名单制）
+ * 仅放行 SAFE_URL_PROTOCOLS 中的协议、无协议的相对地址（按当前页面源解析后命中白名单）、
+ * data: 媒体资源与 about:blank；其余协议（javascript:/vbscript:/file:/ftp: 等）一律拒绝
+ * 注意：依赖 location.origin 作为解析基准，要求页面运行在 http/https 源下
  * @example isSafeUrl('https://a.com/x.png') → true
+ * @example isSafeUrl('./a.png') → true
  * @example isSafeUrl('data:image/png;base64,AAAA') → true
  * @example isSafeUrl('javascript:alert(1)') → false
  * @example isSafeUrl('data:text/html,<h1>x</h1>') → false
@@ -34,10 +38,14 @@ export function isSafeUrl(url: string): boolean {
   if (lower.startsWith('data:')) {
     return SAFE_DATA_MIME_PREFIXES.some((prefix) => lower.startsWith(prefix));
   }
-  if (lower.startsWith('file:')) return false;
   // about:blank 为合法空白页
   if (lower === 'about:blank') return true;
-  return sanitizeUrlString(trimmed) !== 'about:blank';
+  // new URL 与浏览器地址解析规则一致：自动剥离 \t\n\r 与首尾控制字符，防止 java\tscript: 等混淆绕过
+  try {
+    return SAFE_URL_PROTOCOLS.has(new URL(trimmed, location.origin).protocol);
+  } catch {
+    return false;
+  }
 }
 
 /**

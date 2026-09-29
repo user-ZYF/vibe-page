@@ -2,10 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { isSafeUrl, sanitizeUrl, sanitizeCssUrl, sanitizeCssDeclarationValue, sanitizeAttributeValue, stripCssImports } from '@/utils/sanitize';
 
 describe('isSafeUrl', () => {
-  it('放行 http/https/ftp/mailto/tel 协议', () => {
+  it('放行白名单协议 http/https/mailto/tel', () => {
     expect(isSafeUrl('https://example.com/a.png')).toBe(true);
     expect(isSafeUrl('http://example.com')).toBe(true);
-    expect(isSafeUrl('ftp://example.com/f.zip')).toBe(true);
     expect(isSafeUrl('mailto:a@b.com')).toBe(true);
     expect(isSafeUrl('tel:12345')).toBe(true);
   });
@@ -22,11 +21,19 @@ describe('isSafeUrl', () => {
     expect(isSafeUrl('   ')).toBe(true);
   });
 
-  it('拒绝 javascript:/vbscript:/file: 协议', () => {
+  it('拒绝白名单外的一切协议（javascript:/vbscript:/file:/ftp:/未知协议）', () => {
     expect(isSafeUrl('javascript:alert(1)')).toBe(false);
     expect(isSafeUrl('  javascript:alert(1)  ')).toBe(false);
     expect(isSafeUrl('vbscript:msgbox(1)')).toBe(false);
     expect(isSafeUrl('file:///etc/passwd')).toBe(false);
+    expect(isSafeUrl('ftp://example.com/f.zip')).toBe(false);
+    expect(isSafeUrl('foo:bar')).toBe(false);
+  });
+
+  it('协议名内插制表符/换行的混淆写法仍被拒绝', () => {
+    // 浏览器解析 URL 时会剥离 \t\n\r，java\tscript: 实际等价于 javascript:
+    expect(isSafeUrl('java\tscript:alert(1)')).toBe(false);
+    expect(isSafeUrl('java\nscript:alert(1)')).toBe(false);
   });
 
   it('放行媒体类 data: URL（base64 资源）', () => {

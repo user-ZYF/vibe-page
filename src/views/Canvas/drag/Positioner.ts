@@ -96,8 +96,8 @@ export class Positioner {
     dragType: CanvasInnerElementTypeEnum | null,
     dragElement: CanvasInnerElement | null
   ): DropIndicator | null {
-    /** 找到最近的 isCanvas 祖先 */
-    let parentId = this.getCanvasAncestor(dropTargetId, root, registry);
+    /** 找到最近的 isContainer 祖先 */
+    let parentId = this.getContainerAncestor(dropTargetId, root, registry);
 
     /** 获取 parentId 对应的 DOM 元素（注册表与元素树短暂不同步时兜底） */
     let parentEl = parentId ? registry.get(parentId)?.el : undefined;
@@ -159,19 +159,19 @@ export class Positioner {
     };
   }
 
-  /** 找最近的 isCanvas 祖先（包含自身） */
-  private getCanvasAncestor(
+  /** 找最近的 isContainer 祖先（包含自身） */
+  private getContainerAncestor(
     id: string,
     root: CanvasRootElement,
     registry: NodeRegistry
   ): string | null {
     const reg = registry.get(id);
     if (!reg) return null;
-    if (reg.isCanvas) return id;
+    if (reg.isContainer) return id;
 
     const parentId = this.findParentId(id, root);
     if (!parentId) return null;
-    return this.getCanvasAncestor(parentId, root, registry);
+    return this.getContainerAncestor(parentId, root, registry);
   }
 
   /** 在元素树中查找父节点 id */

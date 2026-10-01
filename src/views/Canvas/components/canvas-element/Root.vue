@@ -14,7 +14,7 @@ import { dragEngine } from '../../drag/DragEngine';
 import { nodeRegistry } from '../../drag/NodeRegistry';
 import { useElementVisibility } from '@/composables/useElementVisibility';
 import { useCanvasInteraction } from '@/composables/useCanvasInteraction';
-import { bindCanvasScroll } from '@/composables/canvas-scroll';
+import { bindCanvasScroll } from '@/composables/useCanvasScroll';
 
 const data = defineModel<CanvasRootElement>("data", {
   required: true

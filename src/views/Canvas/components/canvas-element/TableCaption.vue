@@ -27,5 +27,5 @@ const captionEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(captionEl, data.value.id, { isCanvas: true });
+useDragConnector(captionEl, data.value.id, { isContainer: true });
 </script>

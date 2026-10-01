@@ -92,7 +92,7 @@ interface DropPosition {
 interface NodeRegistration {
   id: string;
   el: HTMLElement;
-  isCanvas: boolean;  // 是否为可接收子元素的容器
+  isContainer: boolean;  // 是否为可接收子元素的容器
 }
 ```
 
@@ -113,7 +113,7 @@ interface NodeRegistration {
 class NodeRegistry {
   private map: Map<string, NodeRegistration>
 
-  register(id: string, el: HTMLElement, isCanvas: boolean)
+  register(id: string, el: HTMLElement, isContainer: boolean)
   unregister(id: string)
   get(id: string): NodeRegistration | undefined
   getAll(): NodeRegistration[]
@@ -121,8 +121,8 @@ class NodeRegistry {
   /** 根据 DOM 元素向上查找最近的注册节点 */
   getNodeFromElement(el: HTMLElement): NodeRegistration | undefined
 
-  /** 获取最近的 isCanvas 祖先节点 */
-  getCanvasAncestor(id: string, nodes: CanvasElement[]): string | null
+  /** 获取最近的 isContainer 祖先节点 */
+  getContainerAncestor(id: string, nodes: CanvasElement[]): string | null
 }
 
 /** 全局单例，通过 provide/inject 注入 */
@@ -150,7 +150,7 @@ class Positioner {
     dragElement: CanvasInnerElement | null
   ): DropIndicator | null
 
-  private getCanvasAncestor(id: string, root: CanvasRootElement, registry: NodeRegistry): string | null
+  private getContainerAncestor(id: string, root: CanvasRootElement, registry: NodeRegistry): string | null
 
   private isNearBorder(el: HTMLElement, x: number, y: number): boolean
 
@@ -243,15 +243,15 @@ function createShadow(e: DragEvent, el: HTMLElement): HTMLElement
 function useDragConnector(
   el: Ref<HTMLElement | undefined>,
   id: string,
-  options: { isCanvas?: boolean }
+  options: { isContainer?: boolean }
 ) {
   onMounted(() => {
     // 1. 注册 DOM 到 registry
-    nodeRegistry.register(id, el.value!, options.isCanvas ?? false)
+    nodeRegistry.register(id, el.value!, options.isContainer ?? false)
     // 2. 绑定可拖拽
     const unbindDrag = dragEngine.connectDraggable(el.value!, id)
     // 3. 若为容器，绑定可放置
-    const unbindDrop = options.isCanvas
+    const unbindDrop = options.isContainer
       ? dragEngine.connectDroppable(el.value!, id)
       : () => {}
 

@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue';
 import { useScroll } from '@vueuse/core';
+import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 
 /** 画布滚动位置 */
 export interface CanvasScrollPosition {
@@ -38,4 +39,20 @@ export function bindCanvasScroll(el: Ref<HTMLElement | undefined>): () => void {
     canvasScroll.left = ref(0);
     canvasScroll.top = ref(0);
   };
+}
+
+/**
+ * 将指定元素滚动到画布可视区域顶部（Layers 面板点击元素时调用）
+ * @param id 画布元素 id，对应 DOM 上的 data-canvas-id
+ * @param rootId 画布根元素 id（根元素 DOM 即滚动容器）
+ */
+export function scrollElementToCanvasTop(id: string, rootId: string) {
+  const reg = nodeRegistry.get(id);
+  const container = nodeRegistry.get(rootId)?.el;
+  if (!reg || !container) return;
+  const offsetTop =
+    reg.el.getBoundingClientRect().top -
+    container.getBoundingClientRect().top +
+    container.scrollTop;
+  container.scrollTo({ top: offsetTop, behavior: 'smooth' });
 }

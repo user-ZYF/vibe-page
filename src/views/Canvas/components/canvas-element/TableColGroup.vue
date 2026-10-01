@@ -27,5 +27,5 @@ const colgroupEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(colgroupEl, data.value.id, { isCanvas: true });
+useDragConnector(colgroupEl, data.value.id, { isContainer: true });
 </script>

@@ -54,7 +54,7 @@ export interface NodeRegistration {
   /** 对应的 DOM 元素 */
   el: HTMLElement;
   /** 是否为可接收子元素的容器 */
-  isCanvas: boolean;
+  isContainer: boolean;
 }
 
 /** 占位线 */

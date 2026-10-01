@@ -27,5 +27,5 @@ const footerEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(footerEl, data.value.id, { isCanvas: true });
+useDragConnector(footerEl, data.value.id, { isContainer: true });
 </script>

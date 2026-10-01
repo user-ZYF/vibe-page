@@ -32,5 +32,5 @@ const linkEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
-useDragConnector(linkEl, data.value.id, { isCanvas: true });
+useDragConnector(linkEl, data.value.id, { isContainer: true });
 </script>

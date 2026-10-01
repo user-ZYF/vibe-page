@@ -27,5 +27,5 @@ const headerEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(headerEl, data.value.id, { isCanvas: true });
+useDragConnector(headerEl, data.value.id, { isContainer: true });
 </script>

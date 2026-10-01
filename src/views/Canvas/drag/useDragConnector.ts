@@ -9,7 +9,7 @@ import { useCanvasInteraction } from "@/composables/useCanvasInteraction";
  */
 export interface DragConnectorOptions {
   /** 是否为可接收子元素的容器（注册为拖拽落点目标） */
-  isCanvas?: boolean;
+  isContainer?: boolean;
   /** 实际注册到 registry 的内层 DOM（缺省时注册 el；选中框/落点以其实际盒模型为准） */
   registerEl?: Ref<HTMLElement | undefined>;
 }
@@ -42,7 +42,7 @@ export function useDragConnector(
     if (!el.value) return;
 
     /** 1. 注册 DOM 到 registry（registerEl 存在时注册内层元素，选中框/落点以其实际盒模型为准） */
-    nodeRegistry.register(id, (options.registerEl?.value ?? el.value), options.isCanvas ?? false);
+    nodeRegistry.register(id, (options.registerEl?.value ?? el.value), options.isContainer ?? false);
 
     /** 2. 绑定可拖拽（预览模式下自动拦截） */
     bindDrag();
@@ -55,7 +55,7 @@ export function useDragConnector(
     unbindDragFn();
     nodeRegistry.unregister(id);
     if (newEl) {
-      nodeRegistry.register(id, (options.registerEl?.value ?? newEl), options.isCanvas ?? false);
+      nodeRegistry.register(id, (options.registerEl?.value ?? newEl), options.isContainer ?? false);
       bindDrag();
     }
   }, { flush: 'post' });

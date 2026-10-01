@@ -27,5 +27,5 @@ const trEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(trEl, data.value.id, { isCanvas: true });
+useDragConnector(trEl, data.value.id, { isContainer: true });
 </script>

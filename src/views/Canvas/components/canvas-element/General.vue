@@ -44,7 +44,7 @@ const attrs = computed(() => {
 const generalEl = ref<HTMLElement>();
 
 useElementVisibility(data.value.id);
-useDragConnector(generalEl, data.value.id, { isCanvas: true });
+useDragConnector(generalEl, data.value.id, { isContainer: true });
 
 /** 交互守卫：编辑模式下阻止激活类默认行为（details 开合、label 关联激活、嵌套表单提交等），预览模式下放行 */
 function guardInteraction(e: Event) {

@@ -652,7 +652,7 @@
 **目标**：消除拖拽 `dragover` 事件中 5 次以上的重复树遍历，大幅提升拖拽性能。
 
 **当前问题**：`src/views/Canvas/drag/Positioner.ts` 的 `compute` 方法在每次 `dragover` 事件中触发 4-5 次独立的树遍历：
-- `getCanvasAncestor` → 递归调用 `findParentId`（第 151-163 行）
+- `getContainerAncestor` → 递归调用 `findParentId`（第 151-163 行）
 - `isNearBorder` 判断后再次调用 `findParentId`（第 104 行）
 - `getDirectChildren` → 又一次树遍历（第 108 行 → 第 279-296 行）
 - `isDescendantOrSelf` → 两次树遍历（第 116 行 → 第 299-331 行）
@@ -727,16 +727,16 @@
 3. 配合 #25 的 `v-memo` 优化
 4. 验证层级面板拖拽和选中功能正常
 
-### 35. `NodeRegistry.getCanvasAncestor` 与 `Positioner.findParentId` 逻辑重复
+### 35. `NodeRegistry.getContainerAncestor` 与 `Positioner.findParentId` 逻辑重复
 
 **目标**：消除两处重复的树遍历逻辑，统一使用公共工具函数。
 
-**当前问题**：`src/views/Canvas/drag/NodeRegistry.ts:45-76` 的 `getCanvasAncestor` 内部定义了 `findParentId` 递归遍历函数，与 `src/views/Canvas/drag/Positioner.ts:166-179` 的 `findParentId` 完全相同的逻辑，两处独立维护。
+**当前问题**：`src/views/Canvas/drag/NodeRegistry.ts:45-76` 的 `getContainerAncestor` 内部定义了 `findParentId` 递归遍历函数，与 `src/views/Canvas/drag/Positioner.ts:166-179` 的 `findParentId` 完全相同的逻辑，两处独立维护。
 
 **步骤**：
 1. 统一使用 `src/views/Canvas/utils/treeTraversal.ts` 中的公共遍历函数
 2. 或配合 #22 的索引缓存，两者都改为从 `parentMap` 读取
-3. 删除 `NodeRegistry.getCanvasAncestor` 中的内联 `findParentId`
+3. 删除 `NodeRegistry.getContainerAncestor` 中的内联 `findParentId`
 4. 验证拖拽落点计算功能正常
 
 ### 36. `codeGenerator` 的 `buildAttributes` 和 `getElementContent` 配置表化

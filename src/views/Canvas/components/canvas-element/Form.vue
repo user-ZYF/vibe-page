@@ -31,7 +31,7 @@ const formEl = ref<HTMLFormElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect, isPreview } = useCanvasInteraction(data.value.id);
-useDragConnector(formEl, data.value.id, { isCanvas: true });
+useDragConnector(formEl, data.value.id, { isContainer: true });
 
 /** 表单提交处理：编辑模式下阻止提交，预览模式下允许提交 */
 function handleSubmit(e: SubmitEvent) {

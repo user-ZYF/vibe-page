@@ -9,8 +9,8 @@ export class NodeRegistry {
   private map: Map<string, NodeRegistration> = new Map();
 
   /** 注册一个 DOM 节点 */
-  register(id: string, el: HTMLElement, isCanvas: boolean) {
-    this.map.set(id, { id, el, isCanvas });
+  register(id: string, el: HTMLElement, isContainer: boolean) {
+    this.map.set(id, { id, el, isContainer });
   }
 
   /** 注销一个 DOM 节点 */
@@ -41,12 +41,12 @@ export class NodeRegistry {
     return undefined;
   }
 
-  /** 获取最近的 isCanvas 祖先节点 id（包括自身） */
-  getCanvasAncestor(id: string, elements: CanvasInnerElement[]): string | null {
+  /** 获取最近的 isContainer 祖先节点 id（包括自身） */
+  getContainerAncestor(id: string, elements: CanvasInnerElement[]): string | null {
     const reg = this.map.get(id);
     if (!reg) return null;
 
-    if (reg.isCanvas) return id;
+    if (reg.isContainer) return id;
 
     /** 在元素树中查找父节点 id */
     const findParentId = (list: CanvasInnerElement[], childId: string): string | null => {
@@ -68,7 +68,7 @@ export class NodeRegistry {
       const parentId = findParentId(elements, currentId);
       if (!parentId) return null;
       const parentReg = this.map.get(parentId);
-      if (parentReg?.isCanvas) return parentId;
+      if (parentReg?.isContainer) return parentId;
       currentId = parentId;
     }
 

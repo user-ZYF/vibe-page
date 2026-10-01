@@ -20,7 +20,7 @@ import { watch, onMounted, inject, ref, computed, nextTick } from "vue";
 import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
-import { canvasScroll, type CanvasScrollPosition } from "@/composables/canvas-scroll";
+import { canvasScroll, type CanvasScrollPosition } from "@/composables/useCanvasScroll";
 import { useDebounceFn } from "@vueuse/core";
 import { generateCss } from "@/utils/code-generator";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";

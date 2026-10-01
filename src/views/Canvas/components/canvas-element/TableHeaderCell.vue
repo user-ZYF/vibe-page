@@ -32,5 +32,5 @@ useElementVisibility(data.value.id);
 const scopeAttr = computed(() => data.value.scope ? TABLE_SCOPE_ATTR_MAP[data.value.scope] : '');
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(thEl, data.value.id, { isCanvas: true });
+useDragConnector(thEl, data.value.id, { isContainer: true });
 </script>

@@ -27,5 +27,5 @@ const tfootEl = ref<HTMLElement>();
 useElementVisibility(data.value.id);
 
 const { handleSelect } = useCanvasInteraction(data.value.id);
-useDragConnector(tfootEl, data.value.id, { isCanvas: true });
+useDragConnector(tfootEl, data.value.id, { isContainer: true });
 </script>

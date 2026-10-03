@@ -5,7 +5,7 @@
       <me-tree
         :data="treeData"
         node-key="id"
-        :props="treePropsConfig"
+        :field-map="treeFieldMap"
         :indent="16"
         draggable
         :allow-drag="allowDrag"
@@ -45,7 +45,7 @@ import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
 import { isParentElement, isSubtreeAllowed } from '@/views/Canvas/types';
-import type { CanvasElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement, LayerTreeNodeData } from '@/views/Canvas/types';
+import type { CanvasElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement } from '@/views/Canvas/types';
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from '../constants.ts';
 import { scrollElementToCanvasTop } from '@/composables/useCanvasScroll';
 import { DeleteOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
@@ -67,34 +67,18 @@ const hiddenKeys = inject(HIDDEN_KEYS)!;
 /** 切换元素显示/隐藏 */
 const toggleShow = inject(TOGGLE_SHOW_KEY)!;
 
-/** 将画布元素映射为层级树节点数据 */
-function toLayerTreeNode(el: CanvasElement): LayerTreeNodeData {
-  const isContainer = el.type === CanvasElementTypeEnum.ROOT || isParentElement(el as CanvasInnerElement);
-  const children = isContainer
-    ? (el as CanvasRootElement | CanvasParentElement).children.map(toLayerTreeNode)
-    : [];
-  return {
-    id: el.id,
-    element: el,
-    children,
-  };
-}
-
 /**
- * 树数据（以根元素为顶层节点）
- *
- * 问题：me-tree中的树数据是treeCopy，而非canvasStore中的treeData，treeCopy的修改是me-tree内部处理的，在drop事件中会同步处理treeData，但有个隐患，如果treeCopy中节点的移动和treeData不一致，会出现一致性问题
- * 建议：不要让me-tree直接修改tree数据，me-tree只抛出事件，移动动作外部处理；或者让me-tree直接使用treeData
+ * 树数据
  */
-const treeData = computed<LayerTreeNodeData[]>(() => [toLayerTreeNode(root.value)]);
+const treeData = computed<CanvasElement[]>(() => [root.value]);
 
 /** 树节点显示名称（标题元素按级别显示 h1~h6，通用元素显示原始标签名） */
 function getNodeLabel(data: TreeNodeData): string {
-  return getElementDisplayName((data as LayerTreeNodeData).element);
+  return getElementDisplayName(data as CanvasElement);
 }
 
-/** 树属性映射配置 */
-const treePropsConfig = {
+/** 树字段映射配置 */
+const treeFieldMap = {
   children: 'children',
   label: getNodeLabel,
 };
@@ -137,7 +121,7 @@ function deleteElement(id: string) {
 
 /** 允许拖拽判断（根元素不可拖拽） */
 const allowDrag: AllowDragFunction = (node: TreeNodeModel) => {
-  return node.data.id !== rootId.value;
+  return node.data?.id !== rootId.value;
 };
 
 /** 允许放置判断（基于元素嵌套规则 isSubtreeAllowed） */
@@ -146,8 +130,9 @@ const allowDrop: AllowDropFunction = (
   dropNode: TreeNodeModel,
   type: AllowDropType,
 ) => {
-  const draggedId = draggingNode.data.id as string;
-  const dropId = dropNode.data.id as string;
+  const draggedId = draggingNode.data?.id as string | undefined;
+  const dropId = dropNode.data?.id as string | undefined;
+  if (!draggedId || !dropId) return false;
   const draggedEl = canvasStore.getElementById(draggedId);
   if (!draggedEl || draggedEl.type === CanvasElementTypeEnum.ROOT) return false;
   const dragElement = draggedEl as CanvasInnerElement;
@@ -182,20 +167,24 @@ function handleNodeDrop(
   dropNode: TreeNodeModel,
   dropType: Exclude<NodeDropType, 'none'>,
 ) {
-  const id = draggingNode.data.id as string;
+  const id = draggingNode.data?.id as string | undefined;
+  if (!id) return;
   let targetParentId: string;
   let index: number;
 
   if (dropType === 'inner') {
     /** 放入容器内部：追加到末尾 */
-    targetParentId = dropNode.data.id as string;
+    const innerDropId = dropNode.data?.id as string | undefined;
+    if (!innerDropId) return;
+    targetParentId = innerDropId;
     const target = canvasStore.getElementById(targetParentId);
     if (!target) return;
     if (target.type !== CanvasElementTypeEnum.ROOT && !isParentElement(target as CanvasInnerElement)) return;
     index = (target as CanvasRootElement | CanvasParentElement).children.length;
   } else {
     /** before / after：插入到目标元素前/后 */
-    const dropId = dropNode.data.id as string;
+    const dropId = dropNode.data?.id as string | undefined;
+    if (!dropId) return;
     /** 根节点无父级，before/after 落在根节点上视为与根同级，拒绝处理 */
     if (dropId === rootId.value) return;
     targetParentId = canvasStore.getParentElementId(dropId) ?? rootId.value;

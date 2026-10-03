@@ -26,7 +26,7 @@
     "@element-plus/icons-vue": "^2.3.2",
     "@uiw/codemirror-theme-github": "^4.25.11",
     "@vueuse/core": "^14.4.0",
-    "@zyf_dsb/me-ui": "latest",
+    "@zyf_dsb/me-ui": "0.0.7",
     "ant-design-vue": "^4.2.6",
     "codemirror": "^6.0.2",
     "jsondiffpatch": "^0.7.6",

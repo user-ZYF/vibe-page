@@ -980,12 +980,4 @@ export interface CanvasStorageData {
   styleRules?: CanvasStyleRule[];
 }
 
-/** 层级树节点数据（LayersPanel 使用） */
-export interface LayerTreeNodeData {
-  /** 元素id */
-  id: string;
-  /** 源画布元素 */
-  element: CanvasElement;
-  /** 子节点 */
-  children: LayerTreeNodeData[];
-}
+

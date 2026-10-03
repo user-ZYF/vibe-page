@@ -42,8 +42,8 @@ importers:
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.43(typescript@6.0.3))
       '@zyf_dsb/me-ui':
-        specifier: latest
-        version: 0.0.6(@element-plus/icons-vue@2.3.2(vue@3.5.43(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.43(typescript@6.0.3)))(async-validator@4.2.5)(js-easing-functions@1.0.3)(lodash@4.18.1)(uuid@14.0.2)(vue@3.5.43(typescript@6.0.3))
+        specifier: 0.0.7
+        version: 0.0.7(@element-plus/icons-vue@2.3.2(vue@3.5.43(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.43(typescript@6.0.3)))(async-validator@4.2.5)(js-easing-functions@1.0.3)(lodash@4.18.1)(uuid@14.0.2)(vue@3.5.43(typescript@6.0.3))
       ant-design-vue:
         specifier: ^4.2.6
         version: 4.2.6(vue@3.5.43(typescript@6.0.3))
@@ -664,8 +664,8 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
-  '@zyf_dsb/me-ui@0.0.6':
-    resolution: {integrity: sha512-96TYqM544Ya4fjfDGwVw+QADeOekAt3gUXauu5B/iXa26W0S72PMQtzq4XD8RevGhp0OLsziscQAC8Gmdnf2oQ==}
+  '@zyf_dsb/me-ui@0.0.7':
+    resolution: {integrity: sha512-Y03/c3jAj5fMx94B0lQY2ZSNaISIR9SPaVKjr1GrGFWbDLyDWwaLYo8ZDnGmYL6/jnnSKh8s9fJ0tqgb/slikg==}
     peerDependencies:
       '@element-plus/icons-vue': ^2.3.2
       '@vueuse/core': ^14.4.0
@@ -2334,7 +2334,7 @@ snapshots:
     dependencies:
       vue: 3.5.43(typescript@6.0.3)
 
-  '@zyf_dsb/me-ui@0.0.6(@element-plus/icons-vue@2.3.2(vue@3.5.43(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.43(typescript@6.0.3)))(async-validator@4.2.5)(js-easing-functions@1.0.3)(lodash@4.18.1)(uuid@14.0.2)(vue@3.5.43(typescript@6.0.3))':
+  '@zyf_dsb/me-ui@0.0.7(@element-plus/icons-vue@2.3.2(vue@3.5.43(typescript@6.0.3)))(@vueuse/core@14.4.0(vue@3.5.43(typescript@6.0.3)))(async-validator@4.2.5)(js-easing-functions@1.0.3)(lodash@4.18.1)(uuid@14.0.2)(vue@3.5.43(typescript@6.0.3))':
     dependencies:
       '@element-plus/icons-vue': 2.3.2(vue@3.5.43(typescript@6.0.3))
       '@vueuse/core': 14.4.0(vue@3.5.43(typescript@6.0.3))

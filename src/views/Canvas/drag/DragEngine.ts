@@ -108,10 +108,21 @@ class DragEngine {
       dragStore.setIndicator(null);
     };
 
+    /**
+     * 边界瞬间的 not-allowed 闪烁修复：
+     * 浏览器判定「可放置」要求 dragenter 也被 preventDefault，
+     * 跨元素边界时 dragenter 先于 dragover 到达，未取消会闪一帧禁止光标
+     */
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    el.addEventListener("dragenter", handleDragEnter);
     el.addEventListener("dragover", handleDragOver);
     el.addEventListener("dragleave", handleDragLeave);
 
     return () => {
+      el.removeEventListener("dragenter", handleDragEnter);
       el.removeEventListener("dragover", handleDragOver);
       el.removeEventListener("dragleave", handleDragLeave);
     };

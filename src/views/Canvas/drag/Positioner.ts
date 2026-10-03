@@ -106,8 +106,12 @@ export class Positioner {
       return null;
     }
 
+    /** 命中目标位于被拖元素子树内（含自身）：整个区域均为非法落点，跳过边缘上升 */
+    const isOverDraggedSubtree =
+      draggingId !== null && this.isDescendantOrSelf(draggingId, dropTargetId, root);
+
     /** 如果鼠标接近元素的边框，则上升到父级 */
-    if (parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
+    if (!isOverDraggedSubtree && parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
       parentId = this.findParentId(parentId, root);
       parentEl = registry.get(parentId)?.el;
       if (!parentEl) return null;
@@ -124,8 +128,8 @@ export class Positioner {
     /** 错误信息 */
     let error = "";
 
-    /** 是否为非法落点（不能拖入自身或其后代） */
-    if(draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root)){
+    /** 是否为非法落点（不能拖入自身或其后代，命中被拖元素自身区域同样非法） */
+    if(isOverDraggedSubtree || (draggingId !== null && this.isDescendantOrSelf(draggingId, parentId, root))){
       error = "不允许插入到自身";
     }
 

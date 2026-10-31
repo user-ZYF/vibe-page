@@ -1,5 +1,17 @@
 /// <reference types="vite/client" />
 
+/** 环境变量类型声明 */
+interface ImportMetaEnv {
+  /** 接口请求前缀 */
+  readonly VITE_API_BASE_URL: string;
+  /** 开发环境接口代理目标 */
+  readonly VITE_API_PROXY_TARGET: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
   const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>

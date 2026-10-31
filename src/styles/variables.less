@@ -132,3 +132,38 @@
   --editor-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   --editor-shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
+
+/* ========== 浅色作用域 ========== */
+/* 暗色主题下的浅色页面（登录、列表等非编辑器页面），将编辑器变量拉回亮色值 */
+[data-theme="dark"] .app-light-scope,
+[data-theme="dark"] .app-light-modal {
+  --editor-bg: #ffffff;
+  --editor-bg-panel: #ffffff;
+  --editor-bg-input: #ffffff;
+  --editor-bg-item: #f0f0f0;
+  --editor-bg-item-hover: #e8e8e8;
+  --editor-border: rgba(0, 0, 0, 0.08);
+  --editor-border-strong: rgba(0, 0, 0, 0.15);
+  --editor-text: rgba(0, 0, 0, 0.88);
+  --editor-text-secondary: rgba(0, 0, 0, 0.65);
+  --editor-text-tertiary: rgba(0, 0, 0, 0.45);
+  --editor-text-disabled: rgba(0, 0, 0, 0.25);
+  --editor-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --editor-shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* me-ui 组件变量拉回亮色 */
+  --me-text-color-primary: #303133;
+  --me-text-color-regular: #606266;
+  --me-text-color-secondary: #909399;
+  --me-text-color-placeholder: #a8abb2;
+  --me-text-color-disabled: #c0c4cc;
+  --me-border-color: #dcdfe6;
+  --me-border-color-light: #e4e7ed;
+  --me-border-color-lighter: #ebeef5;
+  --me-border-color-extra-light: #f2f6fc;
+  --me-bg-color: #ffffff;
+  --me-fill-color-blank: #ffffff;
+}
+
+/* .app-light-modal：me-modal teleport 到 body，挂上同名 class 后可吃到上方的亮色变量覆盖 */
+

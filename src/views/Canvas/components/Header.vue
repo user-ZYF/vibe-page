@@ -3,6 +3,13 @@
   <div class="editor-header-wrapper">
     <a-layout-header class="editor-header" :class="{ 'is-preview': isPreview }">
       <a-space>
+        <me-tooltip content="返回列表" effect="light">
+          <me-button @click="emit('back')">
+            <ArrowLeftOutlined />
+          </me-button>
+        </me-tooltip>
+        <span class="editor-header-title">{{ title }}</span>
+        <a-divider type="vertical" />
         <me-tooltip content="效果预览" effect="light">
           <me-button @click="emit('toggle-preview')">
             <EyeOutlined />
@@ -32,6 +39,7 @@
         </me-tooltip>
       </a-space>
       <div class="editor-header-theme">
+        <me-button type="primary" :loading="isSaving" @click="emit('save')">保存</me-button>
         <me-tooltip :content="themeStore.isDark ? '切换到亮色主题' : '切换到暗色主题'" effect="light">
           <a-switch
             :checked="!themeStore.isDark"
@@ -59,6 +67,7 @@
 
 <script setup lang="ts">
 import {
+  ArrowLeftOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
   UndoOutlined,
@@ -78,6 +87,16 @@ defineOptions({
 const themeStore = useThemeStore();
 
 defineProps({
+  /** 画布标题 */
+  title: {
+    type: String,
+    default: '',
+  },
+  /** 是否保存中 */
+  isSaving: {
+    type: Boolean,
+    default: false,
+  },
   /** 是否处于预览模式 */
   isPreview: {
     type: Boolean,
@@ -96,6 +115,8 @@ defineProps({
 })
 
 const emit = defineEmits<{
+  (e: 'back'): void
+  (e: 'save'): void
   (e: 'toggle-preview'): void
   (e: 'undo'): void
   (e: 'redo'): void
@@ -124,6 +145,21 @@ const emit = defineEmits<{
   &.is-preview {
     opacity: 0;
     height: 0;
+  }
+
+  :deep(.ant-space) {
+    display: flex;
+    align-items: center;
+  }
+
+  :deep(.ant-space-item) {
+    display: flex;
+    align-items: center;
+  }
+
+  :deep(.me-tooltip__trigger) {
+    display: inline-flex;
+    align-items: center;
   }
 
   :deep(.me-button) {
@@ -155,9 +191,21 @@ const emit = defineEmits<{
   }
 }
 
+.editor-header-title {
+  line-height: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--editor-text);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .editor-header-theme {
   display: flex;
   align-items: center;
+  gap: 12px;
   margin-left: 16px;
 }
 

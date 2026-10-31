@@ -970,10 +970,8 @@ export interface ComponentGroup {
   components: CanvasInnerElementTypeEnum[];
 }
 
-/** LocalStorage 中持久化的画布数据结构 */
+/** 服务端持久化的画布数据结构 */
 export interface CanvasStorageData {
-  /** 数据结构版本号，与 CANVAS_DATA_VERSION 不匹配时数据作废 */
-  version?: number;
   /** 画布元素列表 */
   children: CanvasInnerElement[];
   /** 样式规则清单 */

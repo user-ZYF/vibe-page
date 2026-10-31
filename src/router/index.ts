@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -9,24 +10,40 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'Pages',
+      meta: { requiresAuth: true },
+      component: () => import('@/views/Pages/index.vue')
+    },
+    {
+      path: '/canvas/:id',
       name: 'Canvas',
+      meta: { requiresAuth: true },
       component: () => import('@/views/Canvas/index.vue')
     },
-    /** playground 仅开发环境注册；生产构建时该分支为死代码，路由与组件 chunk 一并被 tree-shake */
-    ...(import.meta.env.DEV
-      ? [
-          {
-            path: '/playground',
-            name: 'playground',
-            component: () => import('@/views/playground/index.vue')
-          }
-        ]
-      : [])
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('@/views/Login/index.vue')
+    },
+    {
+      path: '/:path(.*)*',
+      name: 'NotFound',
+      component: () => import('@/views/NotFound/index.vue')
+    }
   ]
 })
 
-router.beforeEach(() => {
+router.beforeEach((to) => {
   NProgress.start();
+  const authStore = useAuthStore();
+  /** 需要登录的页面未登录时跳转登录页 */
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    return { path: '/login', query: { redirect: to.fullPath } };
+  }
+  /** 已登录用户访问登录页时回首页 */
+  if (to.path === '/login' && authStore.isLoggedIn) {
+    return '/';
+  }
 });
 
 router.afterEach(() => {

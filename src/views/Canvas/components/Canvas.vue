@@ -21,7 +21,6 @@ import { useCanvasStore } from "@/store/canvas";
 import { storeToRefs } from "pinia";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
 import { canvasScroll, type CanvasScrollPosition } from "@/composables/useCanvasScroll";
-import { useDebounceFn } from "@vueuse/core";
 import { generateCss } from "@/utils/code-generator";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
@@ -36,7 +35,7 @@ const { root, styleRules, selectedElementId } = storeToRefs(canvasStore);
 const isPreview = inject(IS_PREVIEW_KEY, ref(false));
 
 /** 撤销/重做功能 */
-const { debouncedRecord } = useCanvasHistory({
+const { debouncedRecord, recordHistory } = useCanvasHistory({
   snapshot: () => ({
     root: root.value,
     styleRules: styleRules.value,
@@ -82,36 +81,23 @@ function restoreCanvasScrollPosition(position: CanvasScrollPosition) {
   });
 }
   
-/** 是否已完成初始加载（避免加载后立即触发冗余保存） */
-const isInitialized = ref(false);
-
-/** 防抖保存画布数据到 LocalStorage（500ms） */
-const debouncedSaveToStorage = useDebounceFn(() => {
-  if (!isInitialized.value) return;
-  canvasStore.saveCanvasToStorage();
-}, 500);
-
-/** 监听画布数据变化，自动记录历史快照并保存到 LocalStorage */
+/** 监听画布数据变化，自动记录历史快照 */
 watch(
   [root, styleRules],
   () => {
     debouncedRecord();
-    debouncedSaveToStorage();
   },
   { deep: true },
 );
 
-onMounted(() => {
-  /** 优先从 LocalStorage 恢复画布数据，无数据时加载默认内容 */
-  const loaded = canvasStore.loadCanvasFromStorage();
-  if (!loaded) {
-    canvasStore.loadDefaultContent();
-  }
+defineExpose({
+  /** Shadow DOM 宿主元素，供父页面截图生成缩略图 */
+  shadowHost: shadowHostRef,
+});
 
-  /** 延迟标记初始化完成，避免加载/默认内容引起的数据变化触发冗余保存 */
-  nextTick(() => {
-    isInitialized.value = true;
-  });
+onMounted(() => {
+  /** 画布数据已由父页面从服务端加载并注入 store，立即以此建立历史基线，否则首次编辑会被当成基线吞掉 */
+  recordHistory();
 
   if (shadowHostRef.value) {
     const shadow = shadowHostRef.value.attachShadow({ mode: 'open' });

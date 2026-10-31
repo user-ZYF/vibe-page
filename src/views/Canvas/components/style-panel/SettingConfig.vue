@@ -40,7 +40,10 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.IMAGE">
       <div class="style-config-section">
         <div class="style-config-label">图片地址</div>
-        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <div class="style-config-url">
+          <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+          <FileUpload accept="image/*" @success="handleUploadSuccess" />
+        </div>
       </div>
       <div class="style-config-section">
         <div class="style-config-label">图片标题</div>
@@ -146,7 +149,10 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.VIDEO">
       <div class="style-config-section">
         <div class="style-config-label">视频地址</div>
-        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <div class="style-config-url">
+          <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+          <FileUpload accept="video/*" @success="handleUploadSuccess" />
+        </div>
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasVideoElement).controls">显示控件</me-checkbox>
@@ -166,7 +172,10 @@
     <template v-else-if="model.type === CanvasElementTypeEnum.AUDIO">
       <div class="style-config-section">
         <div class="style-config-label">音频地址</div>
-        <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+        <div class="style-config-url">
+          <me-input v-model="pendingSrc" class="style-config-input" placeholder="https://" @blur="handleSrcBlur" />
+          <FileUpload accept="audio/*" @success="handleUploadSuccess" />
+        </div>
       </div>
       <div class="style-config-section">
         <me-checkbox v-model="(model as CanvasAudioElement).controls">显示控件</me-checkbox>
@@ -251,6 +260,7 @@ import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_E
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import { isSafeUrl, sanitizeNavigationUrl } from '@/utils/sanitize';
+import FileUpload from './FileUpload.vue';
 import {
   type CanvasInnerElement,
   type CanvasButtonElement,
@@ -437,6 +447,13 @@ function handleSrcBlur() {
   pendingSrc.value = src;
 }
 
+/** 文件上传成功后把 URL 写入元素 src */
+function handleUploadSuccess(url: string) {
+  const el = model.value as CanvasImageElement | CanvasVideoElement | CanvasAudioElement;
+  el.src = url;
+  pendingSrc.value = url;
+}
+
 /** 递归收集所有表单元素，生成下拉选项 */
 const formElementOptions = computed(() => {
   const options: { label: string; value: string }[] = [];
@@ -460,4 +477,14 @@ const formElementOptions = computed(() => {
 
 <style scoped lang="less">
 @import './style-config.less';
+
+.style-config-url {
+  display: flex;
+  align-items: flex-start;
+
+  :deep(.file-upload) {
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+}
 </style>

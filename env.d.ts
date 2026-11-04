@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string;
   /** 开发环境接口代理目标 */
   readonly VITE_API_PROXY_TARGET: string;
+  /** 协作 WebSocket 服务地址（缺省走当前站点 /ws） */
+  readonly VITE_WS_BASE_URL?: string;
 }
 
 interface ImportMeta {

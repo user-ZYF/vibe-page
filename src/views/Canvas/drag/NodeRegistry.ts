@@ -1,6 +1,6 @@
 import type { NodeRegistration } from "./types";
-import type { CanvasInnerElement, CanvasParentElement } from "@/views/Canvas/types";
-import { isParentElement } from "@/views/Canvas/types";
+import type { CanvasRootElement } from "@/views/Canvas/types";
+import { findParentIdInTree } from "@/utils/tree-traversal";
 
 /**
  * DOM 节点注册表，维护元素 id 与 DOM 节点的映射关系
@@ -42,30 +42,15 @@ export class NodeRegistry {
   }
 
   /** 获取最近的 isContainer 祖先节点 id（包括自身） */
-  getContainerAncestor(id: string, elements: CanvasInnerElement[]): string | null {
+  getContainerAncestor(id: string, root: CanvasRootElement): string | null {
     const reg = this.map.get(id);
     if (!reg) return null;
 
     if (reg.isContainer) return id;
 
-    /** 在元素树中查找父节点 id */
-    const findParentId = (list: CanvasInnerElement[], childId: string): string | null => {
-      for (const el of list) {
-        if (isParentElement(el)) {
-          const parent = el as CanvasParentElement;
-          if (parent.children.some((c) => c.id === childId)) {
-            return parent.id;
-          }
-          const found = findParentId(parent.children, childId);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
     let currentId: string | null = id;
     while (currentId) {
-      const parentId = findParentId(elements, currentId);
+      const parentId = findParentIdInTree(root, currentId);
       if (!parentId) return null;
       const parentReg = this.map.get(parentId);
       if (parentReg?.isContainer) return parentId;

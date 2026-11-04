@@ -1,29 +1,36 @@
 <!-- 画布卡片 -->
 <template>
   <div class="page-card" @click="emit('open', page.id)">
-    <div class="page-card-cover">
-      <img v-if="page.thumbnail" :src="page.thumbnail" class="page-card-cover-img" alt="" />
-      <FileOutlined v-else class="page-card-cover-icon" />
+    <div class="page-card-window">
+      <div class="page-card-window-bar">
+        <span class="page-card-window-dot page-card-window-dot--red"></span>
+        <span class="page-card-window-dot page-card-window-dot--yellow"></span>
+        <span class="page-card-window-dot page-card-window-dot--green"></span>
+      </div>
+      <div class="page-card-window-body">
+        <div class="page-card-title">{{ page.title }}</div>
+      </div>
     </div>
-    <div class="page-card-body">
-      <div class="page-card-title">{{ page.title }}</div>
+    <div class="page-card-footer">
       <div class="page-card-time">更新于 {{ formatTime(page.updatedAt) }}</div>
-    </div>
-    <div class="page-card-actions" @click.stop>
-      <me-tooltip content="重命名" effect="light">
-        <span class="page-card-action" @click="emit('rename', page)">
-          <EditOutlined />
-        </span>
-      </me-tooltip>
-      <span class="page-card-action page-card-action--danger" @click="emit('delete', page)">
-        <DeleteOutlined />
-      </span>
+      <div class="page-card-actions" @click.stop>
+        <me-tooltip content="重命名" effect="light">
+          <span class="page-card-action" @click="emit('rename', page)">
+            <EditOutlined />
+          </span>
+        </me-tooltip>
+        <me-tooltip content="删除" effect="light">
+          <span class="page-card-action page-card-action--danger" @click="emit('delete', page)">
+            <DeleteOutlined />
+          </span>
+        </me-tooltip>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { DeleteOutlined, EditOutlined, FileOutlined } from '@ant-design/icons-vue';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { MeTooltip } from '@zyf_dsb/me-ui';
 import type { PageListItem } from '@/api/model/page';
 
@@ -53,66 +60,81 @@ function formatTime(value: number) {
 
 <style lang="less" scoped>
 .page-card {
-  position: relative;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   border: 1px solid #e8e9eb;
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    border-color: #c9cdd4;
-    box-shadow: 0 4px 16px rgba(31, 35, 41, 0.08);
+    border-color: #d4d7dc;
+    box-shadow: 0 8px 24px rgba(31, 35, 41, 0.1);
+    transform: translateY(-2px);
 
     .page-card-actions {
       opacity: 1;
     }
   }
 
-  &-cover {
-    height: 120px;
+  /* mac 风格窗口 */
+  &-window {
+    border-bottom: 1px solid #f0f1f3;
+  }
+
+  &-window-bar {
+    height: 30px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f6f7;
+    border-bottom: 1px solid #eceef0;
+  }
+
+  &-window-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    &--red { background: #ff5f57; }
+    &--yellow { background: #febc2e; }
+    &--green { background: #28c840; }
+  }
+
+  &-window-body {
+    height: 110px;
+    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f2f3f5;
-  }
-
-  &-cover-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-  }
-
-  &-cover-icon {
-    font-size: 36px;
-    color: #c9cdd4;
-  }
-
-  &-body {
-    padding: 12px 16px;
   }
 
   &-title {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 600;
     color: #1f2329;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: 100%;
+  }
+
+  &-footer {
+    position: relative;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
   }
 
   &-time {
-    margin-top: 4px;
     font-size: 12px;
     color: #8f959e;
   }
 
   &-actions {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     display: flex;
     gap: 4px;
     opacity: 0;
@@ -120,18 +142,18 @@ function formatTime(value: number) {
   }
 
   &-action {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.9);
     color: #4e5969;
     font-size: 14px;
     cursor: pointer;
 
     &:hover {
+      background: #f2f3f5;
       color: #1677ff;
     }
   }

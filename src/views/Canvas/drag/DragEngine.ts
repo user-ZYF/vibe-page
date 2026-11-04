@@ -4,6 +4,7 @@ import { useDragStore } from "@/store/drag";
 import { useCanvasStore } from "@/store/canvas";
 import { CanvasInnerElementTypeEnum, type CanvasInnerElement } from "../types";
 import { CanvasElementTypeEnum, DropPositionEnum } from "@/constants/home";
+import { findElementInTree } from "@/utils/tree-traversal";
 
 
 /**
@@ -61,7 +62,7 @@ class DragEngine {
       let dragType: CanvasInnerElementTypeEnum | null = null;
       let dragElement: CanvasInnerElement | null = null;
       if (dragStore.draggingId) {
-        const draggedEl = canvasStore.getElementById(dragStore.draggingId);
+        const draggedEl = findElementInTree(canvasStore.root, dragStore.draggingId);
         if (draggedEl && draggedEl.type !== CanvasElementTypeEnum.ROOT) {
           dragType = draggedEl.type as CanvasInnerElementTypeEnum;
           dragElement = draggedEl as CanvasInnerElement;

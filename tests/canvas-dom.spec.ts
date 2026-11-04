@@ -8,6 +8,7 @@ import { registerDirectives } from '@/directives';
 import { CanvasElementTypeEnum } from '@/constants/home';
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { generateHtml } from '@/utils/code-generator';
+import { findElementInTree } from '@/utils/tree-traversal';
 import type {
   CanvasInnerElementTypeEnum,
   CanvasLinkElement,
@@ -66,7 +67,7 @@ async function $(id: string): Promise<HTMLElement> {
 function add(type: CanvasInnerElementTypeEnum, containerId?: string, index = 0): string {
   store.addElementToContainerAt(type, containerId ?? store.root.id, index);
   const container = containerId
-    ? (store.getElementById(containerId) as { children: { id: string }[] })
+    ? (findElementInTree(store.root, containerId) as { children: { id: string }[] })
     : store.root;
   return container.children[Math.min(index, container.children.length - 1)].id;
 }
@@ -151,7 +152,7 @@ describe('双击文本编辑', () => {
     mouse(el, 'dblclick');
     el.innerText = '修改后的文本';
     el.dispatchEvent(new FocusEvent('blur'));
-    expect((store.getElementById(pId) as CanvasParagraphElement).text).toBe('修改后的文本');
+    expect((findElementInTree(store.root, pId) as CanvasParagraphElement).text).toBe('修改后的文本');
   });
 
   it('保存包含特殊字符的文本时，生成 HTML 应转义', async () => {
@@ -172,7 +173,7 @@ describe('双击文本编辑', () => {
     mouse(el, 'dblclick');
     el.innerText = '   ';
     el.dispatchEvent(new FocusEvent('blur'));
-    expect(store.getElementById(tId)).toBeNull();
+    expect(findElementInTree(store.root, tId)).toBeNull();
   });
 
   it('Enter 应退出编辑（preventDefault + blur）', async () => {
@@ -205,7 +206,7 @@ describe('链接 URL 清洗', () => {
     'data:image/png;base64,AAAA',
   ])('危险协议 %s 在预览模式下不渲染 href', async (href) => {
     const id = add(CanvasElementTypeEnum.LINK);
-    (store.getElementById(id) as CanvasLinkElement).href = href;
+    (findElementInTree(store.root, id) as CanvasLinkElement).href = href;
     await flush();
     isPreview.value = true;
     await flush();
@@ -214,7 +215,7 @@ describe('链接 URL 清洗', () => {
 
   it('合法 URL 在预览模式下渲染 href，编辑模式下不渲染', async () => {
     const id = add(CanvasElementTypeEnum.LINK);
-    (store.getElementById(id) as CanvasLinkElement).href = 'https://example.com';
+    (findElementInTree(store.root, id) as CanvasLinkElement).href = 'https://example.com';
     await flush();
     /** 编辑模式：href 不应存在（防止误跳转） */
     expect((await $(id)).getAttribute('href')).toBeNull();
@@ -276,7 +277,7 @@ describe('class / ID 名称合法性（与面板输入一致的规则）', () =>
   it('renameElementId 应同步 #id 样式选择器与 label.for 引用', async () => {
     const inputId = add(CanvasElementTypeEnum.INPUT);
     const labelId = add(CanvasElementTypeEnum.LABEL);
-    const label = store.getElementById(labelId) as { for?: string };
+    const label = findElementInTree(store.root, labelId) as { for?: string };
     label.for = inputId;
     /** generateElement 已自动创建 #inputId 规则 */
     expect(store.styleRules.some((r) => r.selector === `#${inputId}`)).toBe(true);

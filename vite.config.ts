@@ -16,6 +16,12 @@ export default defineConfig(({ mode }) => {
         target: env.VITE_API_PROXY_TARGET,
         changeOrigin: true,
       },
+      /** 协作 WebSocket 代理 */
+      '/ws': {
+        target: env.VITE_API_PROXY_TARGET,
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   resolve: {

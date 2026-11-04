@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { defineStore } from 'pinia';
-import { useStorage } from '@vueuse/core';
+import { StorageSerializers, useStorage } from '@vueuse/core';
 import { loginApi, logoutApi, registerApi } from '@/api/auth';
 import type { LoginBody, RegisterBody, UserInfo } from '@/api/model/auth';
 
@@ -18,7 +18,9 @@ export const useAuthStore = defineStore('auth', () => {
   /** 刷新令牌 */
   const refreshToken = useStorage<string>(REFRESH_TOKEN_KEY, '');
   /** 用户信息 */
-  const userInfo = useStorage<UserInfo | null>(USER_INFO_KEY, null);
+  const userInfo = useStorage<UserInfo | null>(USER_INFO_KEY, null, localStorage, {
+    serializer: StorageSerializers.object,
+  });
 
   /** 是否已登录 */
   const isLoggedIn = computed(() => !!accessToken.value);

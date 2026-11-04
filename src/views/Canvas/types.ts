@@ -791,11 +791,14 @@ export interface TagConstraints {
   readonly directParentTags?: readonly string[];
 }
 
-/** 判断元素是否允许包含子元素 */
-export function isParentElement(el: CanvasInnerElement): el is CanvasParentElement {
+/** 可包含子元素的画布容器元素（含根元素） */
+export type CanvasContainerElement = CanvasParentElement | CanvasRootElement;
+
+/** 判断元素是否允许包含子元素（根元素恒为容器） */
+export function isParentElement(el: CanvasElement): el is CanvasContainerElement {
   /** 通用元素按标签判定：自闭合标签（br/hr 等）不可包含子元素 */
   if (el.type === CanvasElementTypeEnum.GENERAL) return !isVoidElement(el.tagName);
-  return el.type === CanvasElementTypeEnum.DIV || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN || el.type === CanvasElementTypeEnum.UNORDERED_LIST || el.type === CanvasElementTypeEnum.ORDERED_LIST || el.type === CanvasElementTypeEnum.LIST_ITEM || el.type === CanvasElementTypeEnum.TABLE || el.type === CanvasElementTypeEnum.TABLE_HEAD || el.type === CanvasElementTypeEnum.TABLE_BODY || el.type === CanvasElementTypeEnum.TABLE_FOOT || el.type === CanvasElementTypeEnum.TABLE_ROW || el.type === CanvasElementTypeEnum.TABLE_DATA || el.type === CanvasElementTypeEnum.TABLE_HEADER_CELL || el.type === CanvasElementTypeEnum.TABLE_CAPTION || el.type === CanvasElementTypeEnum.TABLE_COL_GROUP || el.type === CanvasElementTypeEnum.HEADER || el.type === CanvasElementTypeEnum.FOOTER || el.type === CanvasElementTypeEnum.ARTICLE || el.type === CanvasElementTypeEnum.SECTION || el.type === CanvasElementTypeEnum.ASIDE;
+  return el.type === CanvasElementTypeEnum.ROOT || el.type === CanvasElementTypeEnum.DIV || el.type === CanvasElementTypeEnum.LINK || el.type === CanvasElementTypeEnum.FORM || el.type === CanvasElementTypeEnum.SPAN || el.type === CanvasElementTypeEnum.UNORDERED_LIST || el.type === CanvasElementTypeEnum.ORDERED_LIST || el.type === CanvasElementTypeEnum.LIST_ITEM || el.type === CanvasElementTypeEnum.TABLE || el.type === CanvasElementTypeEnum.TABLE_HEAD || el.type === CanvasElementTypeEnum.TABLE_BODY || el.type === CanvasElementTypeEnum.TABLE_FOOT || el.type === CanvasElementTypeEnum.TABLE_ROW || el.type === CanvasElementTypeEnum.TABLE_DATA || el.type === CanvasElementTypeEnum.TABLE_HEADER_CELL || el.type === CanvasElementTypeEnum.TABLE_CAPTION || el.type === CanvasElementTypeEnum.TABLE_COL_GROUP || el.type === CanvasElementTypeEnum.HEADER || el.type === CanvasElementTypeEnum.FOOTER || el.type === CanvasElementTypeEnum.ARTICLE || el.type === CanvasElementTypeEnum.SECTION || el.type === CanvasElementTypeEnum.ASIDE;
 }
 
 /**
@@ -972,8 +975,8 @@ export interface ComponentGroup {
 
 /** 服务端持久化的画布数据结构 */
 export interface CanvasStorageData {
-  /** 画布元素列表 */
-  children: CanvasInnerElement[];
+  /** 根元素（含整棵子元素树，与普通元素一样参与协作同步） */
+  root: CanvasRootElement;
   /** 样式规则清单 */
   styleRules?: CanvasStyleRule[];
 }

@@ -103,6 +103,7 @@ import { computed, ref, watch } from 'vue';
 import { isEqual } from 'lodash';
 import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME, CSS_NAME_REGEX } from '@/constants/style';
 import { hasBackgroundContent } from '@/utils/style-converter';
+import { findElementInTree } from '@/utils/tree-traversal';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
 import type { CanvasInnerElement, StyleConfig } from '@/views/Canvas/types';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
@@ -133,7 +134,7 @@ const selectedElement = computed(() => {
   if (!selectedElementId.value) {
     return null;
   }
-  return canvasStore.getElementById(selectedElementId.value);
+  return findElementInTree(canvasStore.root, selectedElementId.value);
 });
 
 /** 当前选中的是否为根元素 */

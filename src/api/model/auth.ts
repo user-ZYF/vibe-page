@@ -14,10 +14,6 @@ export interface UserInfo {
    */
   nickname: string;
   /**
-   * 头像地址
-   */
-  avatar: string;
-  /**
    * 创建时间（毫秒时间戳）
    */
   createdAt: number;

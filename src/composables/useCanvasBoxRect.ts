@@ -45,13 +45,16 @@ function parsePx(value: string): number {
   return parseFloat(value) || 0;
 }
 
+/** 获取画布根节点 DOM（通过 NodeRegistry 注册表获取） */
+export function getCanvasEl(): Element | null {
+  return nodeRegistry.get(useCanvasStore().root.id)?.el ?? null;
+}
+
 /**
  * 画布元素盒模型定位 composable
  * 提供 box 数据、rootStyle 计算属性、updateBox 方法以及 scroll/resize 自动更新
  */
 export function useCanvasBoxRect() {
-  const canvasStore = useCanvasStore();
-
   /** 盒模型尺寸数据 */
   const elRect = ref<CanvasBoxRect>({
     marginTop: 0,
@@ -171,11 +174,6 @@ export function useCanvasBoxRect() {
       y: 0,
       canvasWidth: 0,
     };
-  }
-
-  /** 获取画布根节点 DOM（通过 NodeRegistry 注册表获取） */
-  function getCanvasEl(): Element | null {
-    return nodeRegistry.get(canvasStore.root.id)?.el ?? null;
   }
 
   return {

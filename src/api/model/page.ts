@@ -11,10 +11,6 @@ export interface PageListItem {
    */
   title: string;
   /**
-   * 画布缩略图（base64 PNG）
-   */
-  thumbnail: string;
-  /**
    * 创建时间（毫秒时间戳）
    */
   createdAt: number;
@@ -63,13 +59,13 @@ export interface PageCreateBody {
    */
   title: string;
   /**
-   * 画布内容 JSON，不传则为空画布
+   * 初始画布数据（JSON 字符串）
    */
-  content?: string;
+  content: string;
 }
 
 /**
- * 画布操作（详情/删除）参数
+ * 画布操作（删除/分享）参数
  */
 export interface PageDetailParams {
   /**
@@ -79,9 +75,9 @@ export interface PageDetailParams {
 }
 
 /**
- * 更新画布请求
+ * 重命名画布请求
  */
-export interface PageUpdateBody {
+export interface PageRenameBody {
   /**
    * 页面 ID
    */
@@ -89,13 +85,15 @@ export interface PageUpdateBody {
   /**
    * 页面标题
    */
-  title?: string;
+  title: string;
+}
+
+/**
+ * 画布分享状态/开启分享响应
+ */
+export interface PageShareInfo {
   /**
-   * 画布内容 JSON
+   * 分享令牌（未开启为空串）
    */
-  content?: string;
-  /**
-   * 画布缩略图（base64 PNG）
-   */
-  thumbnail?: string;
+  shareToken: string;
 }

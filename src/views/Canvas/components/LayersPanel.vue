@@ -45,6 +45,7 @@ import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/store/canvas';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
 import { isParentElement, isSubtreeAllowed } from '@/views/Canvas/types';
+import { findElementInTree } from '@/utils/tree-traversal';
 import type { CanvasElement, CanvasInnerElement, CanvasParentElement, CanvasRootElement } from '@/views/Canvas/types';
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY } from '../constants.ts';
 import { scrollElementToCanvasTop } from '@/composables/useCanvasScroll';
@@ -133,7 +134,7 @@ const allowDrop: AllowDropFunction = (
   const draggedId = draggingNode.data?.id as string | undefined;
   const dropId = dropNode.data?.id as string | undefined;
   if (!draggedId || !dropId) return false;
-  const draggedEl = canvasStore.getElementById(draggedId);
+  const draggedEl = findElementInTree(root.value, draggedId);
   if (!draggedEl || draggedEl.type === CanvasElementTypeEnum.ROOT) return false;
   const dragElement = draggedEl as CanvasInnerElement;
 
@@ -142,16 +143,16 @@ const allowDrop: AllowDropFunction = (
 
   if (type === 'inner') {
     /** 放入容器内部：检查目标容器是否允许接收该子树 */
-    const dropEl = canvasStore.getElementById(dropId);
+    const dropEl = findElementInTree(root.value, dropId);
     if (!dropEl) return false;
-    if (dropEl.type !== CanvasElementTypeEnum.ROOT && !isParentElement(dropEl as CanvasInnerElement)) return false;
+    if (!isParentElement(dropEl)) return false;
     return isSubtreeAllowed(dropEl, dragElement);
   }
 
   /** before / after：检查目标元素的父容器是否允许接收该子树 */
   const parentId = canvasStore.getParentElementId(dropId);
   if (!parentId) return false;
-  const parentEl = canvasStore.getElementById(parentId);
+  const parentEl = findElementInTree(root.value, parentId);
   if (!parentEl) return false;
   return isSubtreeAllowed(parentEl, dragElement);
 };
@@ -177,10 +178,10 @@ function handleNodeDrop(
     const innerDropId = dropNode.data?.id as string | undefined;
     if (!innerDropId) return;
     targetParentId = innerDropId;
-    const target = canvasStore.getElementById(targetParentId);
+    const target = findElementInTree(root.value, targetParentId);
     if (!target) return;
-    if (target.type !== CanvasElementTypeEnum.ROOT && !isParentElement(target as CanvasInnerElement)) return;
-    index = (target as CanvasRootElement | CanvasParentElement).children.length;
+    if (!isParentElement(target)) return;
+    index = target.children.length;
   } else {
     /** before / after：插入到目标元素前/后 */
     const dropId = dropNode.data?.id as string | undefined;
@@ -188,7 +189,7 @@ function handleNodeDrop(
     /** 根节点无父级，before/after 落在根节点上视为与根同级，拒绝处理 */
     if (dropId === rootId.value) return;
     targetParentId = canvasStore.getParentElementId(dropId) ?? rootId.value;
-    const parent = canvasStore.getElementById(targetParentId);
+    const parent = findElementInTree(root.value, targetParentId);
     if (!parent) return;
     const dropIndex = getElementIndex(dropId, parent as CanvasRootElement | CanvasParentElement);
     if (dropIndex < 0) return;

@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, shallowRef, computed, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useResizeObserver, useEventListener } from '@vueuse/core';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { MeTooltip } from '@zyf_dsb/me-ui';
@@ -44,7 +44,9 @@ import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
+import { useRafThrottle } from '@/composables/useRafThrottle';
 import { type CanvasInnerElement, isParentElement, type ResizeStartState } from '@/views/Canvas/types';
+import { findElementInTree } from '@/utils/tree-traversal';
 import { UnitEnum } from '@/constants/style';
 import { ResizeDirEnum } from '@/constants/style';
 import { RESIZE_DIR_CLASS_MAP, RESIZE_DIRS } from '../constants';
@@ -95,7 +97,7 @@ function isWestDir(dir: ResizeDirEnum): boolean {
 /** 选中元素数据 */
 const selectedElement = computed(() => {
   if (!selectedElementId.value) return null;
-  return canvasStore.getElementById(selectedElementId.value);
+  return findElementInTree(root.value, selectedElementId.value);
 });
 
 /** 选中元素是否可见（display 不为 none，直接读取 DOM 计算样式，反映真实 CSS 渲染状态） */
@@ -159,17 +161,8 @@ function getBorderBoxSize(): { width: number; height: number } {
   };
 }
 
-/** 工具栏位置更新的 rAF 句柄 */
-let posRafId: number | null = null;
-
 /** 帧节流更新工具栏位置 */
-function scheduleUpdatePos() {
-  if (posRafId !== null) return;
-  posRafId = requestAnimationFrame(() => {
-    posRafId = null;
-    updatePos();
-  });
-}
+const scheduleUpdatePos = useRafThrottle(updatePos);
 
 /** 开始调整尺寸 */
 function handleResizeStart(e: PointerEvent, dir: ResizeDirEnum) {
@@ -289,77 +282,51 @@ function updatePos() {
 watch(selectedElementId, (id) => {
   if (id) {
     updatePos();
-    startLayoutWatch();
   } else {
     selectedEl.value = null;
     resetElRect();
-    stopLayoutWatch();
   }
 });
 
-/** 画布数据深度监听的停止函数（仅选中期间订阅，避免无目标时的全树深度遍历开销） */
-let layoutWatchStop: (() => void) | null = null;
-
-/** 
+/**
  * 订阅画布元素树与样式规则变化：选中元素的尺寸、可见性可能被自身数据、兄弟元素或规则变更影响
- * 选择非顶层watch，是因为在无选中元素时，也会深度对比root和styleRules，造成性能损失
+ * 无选中元素时直接早退，不做测量
  */
-function startLayoutWatch() {
-  if (layoutWatchStop) return;
-  layoutWatchStop = watch(
-    [root, styleRules],
-    () => {
-      if (selectedElementId.value && !isResizing.value) {
-        nextTick(updatePos);
+watch(
+  [root, styleRules],
+  () => {
+    if (selectedElementId.value && !isResizing.value) {
+      nextTick(updatePos);
+    }
+  },
+  { deep: true },
+);
+
+/** 画布根 DOM（挂载后从注册表获取，驱动事件监听目标） */
+const canvasElRef = shallowRef<HTMLElement | null>(null);
+
+/** 滚动（子孙元素滚动不冒泡，需捕获阶段监听）与窗口尺寸变化 */
+useEventListener(canvasElRef, 'scroll', scheduleUpdatePos, true);
+useEventListener(window, 'resize', scheduleUpdatePos);
+
+/** 绑定画布根 DOM（immediate 时 nextTick 执行于挂载完成后，可测得最新位置；根元素 id 重建后重新绑定） */
+watch(
+  () => root.value.id,
+  () => {
+    nextTick(() => {
+      canvasElRef.value = getCanvasEl() as HTMLElement | null;
+      /** 已有选中元素时同步刷新位置 */
+      if (selectedElementId.value) {
+        updatePos();
       }
-    },
-    { deep: true },
-  );
-}
-
-/** 停止画布数据深度监听 */
-function stopLayoutWatch() {
-  layoutWatchStop?.();
-  layoutWatchStop = null;
-}
-
-/** 滚动或窗口尺寸变化时同步更新位置 */
-function handleRecompute() {
-  if (selectedElementId.value) {
-    updatePos();
-  }
-}
-
-/** 画布根 DOM（onMounted 后从注册表获取，驱动事件监听的目标） */
-const canvasElRef = shallowRef<Element | null>(null);
-
-useEventListener(canvasElRef, 'scroll', handleRecompute, true);
-useEventListener(window, 'resize', handleRecompute);
-
-/** 代码导入改写根元素 id 后画布 DOM 重建，重新绑定事件监听目标 */
-watch(() => root.value.id, () => {
-  nextTick(() => {
-    canvasElRef.value = getCanvasEl();
-  });
-});
-
-onMounted(() => {
-  canvasElRef.value = getCanvasEl();
-  /** 初始化时如果已有选中元素，立即更新位置 */
-  if (selectedElementId.value) {
-    updatePos();
-    startLayoutWatch();
-  }
-});
+    });
+  },
+  { immediate: true },
+);
 
 onBeforeUnmount(() => {
-  stopLayoutWatch();
   window.removeEventListener('pointermove', handleResizeMove);
   window.removeEventListener('pointerup', handleResizeEnd);
-  if (posRafId !== null) {
-    cancelAnimationFrame(posRafId);
-    posRafId = null;
-  }
 });
 </script>
 

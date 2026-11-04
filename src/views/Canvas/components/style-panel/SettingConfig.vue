@@ -260,6 +260,7 @@ import { CanvasElementTypeEnum, BUTTON_TYPE_OPTIONS, LINK_TARGET_OPTIONS, FORM_E
 import { CSS_NAME_REGEX } from '@/constants/style';
 import { useCanvasStore } from '@/store/canvas';
 import { isSafeUrl, sanitizeNavigationUrl } from '@/utils/sanitize';
+import { findElementInTree } from '@/utils/tree-traversal';
 import FileUpload from './FileUpload.vue';
 import {
   type CanvasInnerElement,
@@ -388,7 +389,7 @@ function handleIdBlur() {
     return;
   }
   /** 唯一性校验 */
-  if (canvasStore.getElementById(newId)) {
+  if (findElementInTree(canvasStore.root, newId)) {
     pendingId.value = oldId;
     message.warning('该 ID 已被其他元素使用');
     return;

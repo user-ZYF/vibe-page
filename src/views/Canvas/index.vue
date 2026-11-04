@@ -4,42 +4,43 @@
     <a-layout class="editor-left">
       <EditorHeader
         :title="pageTitle"
-        :is-saving="isSaving"
         :is-preview="isPreview"
+        :is-mine="isMine"
         :can-undo="canvasHistoryApi.canUndo.value"
         :can-redo="canvasHistoryApi.canRedo.value"
         @back="handleBack"
-        @save="handleSave"
         @toggle-preview="togglePreview"
         @undo="handleUndo"
         @redo="handleRedo"
         @code="handleCode"
         @clear="handleClear"
+        @share="shareModalVisible = true"
       />
       <CodeEditModal v-model:open="codeModalVisible" />
+      <ShareModal v-model:open="shareModalVisible" :page-id="pageId" />
       <a-layout-content class="editor-canvas">
-        <Canvas v-if="isPageReady" ref="canvasRef" />
+        <!-- 仅在协作已连接时渲染：init 前与断线重连期间不渲染画布，杜绝编辑 -->
+        <Canvas v-if="isCollabActive" />
       </a-layout-content>
     </a-layout>
-    <EditorSider :is-preview="isPreview" /> 
+    <EditorSider v-if="isCollabActive" :is-preview="isPreview" />
   </a-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, provide } from 'vue';
+import { ref, computed, onMounted, onUnmounted, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { message } from 'ant-design-vue';
-import { snapdom } from '@zumer/snapdom';
-import { getPageApi, updatePageApi } from '@/api/page';
-import type { CanvasStorageData } from './types';
 import { MeModal } from '@zyf_dsb/me-ui';
 import EditorHeader from './components/Header.vue';
 import EditorSider from './components/Sider.vue';
 import Canvas from './components/Canvas.vue';
 import CodeEditModal from './components/CodeEditModal.vue';
+import ShareModal from './components/ShareModal.vue';
 import { canvasHistoryApi } from '@/composables/useCanvasHistory';
 import { HIDDEN_KEYS, TOGGLE_SHOW_KEY, IS_PREVIEW_KEY } from './constants.ts';
 import { useCanvasStore } from '@/store/canvas.ts';
+import { useCollabStore } from '@/store/collab';
+import { useAuthStore } from '@/store/auth';
 import { storeToRefs } from 'pinia';
 
 defineOptions({
@@ -56,67 +57,21 @@ const codeModalVisible = ref(false);
 const hiddenKeys = ref<string[]>([]);
 
 const canvasStore = useCanvasStore();
+const collabStore = useCollabStore();
+const authStore = useAuthStore();
 const { selectedElementId } = storeToRefs(canvasStore);
+const { pageTitle, pageUserId, isActive: isCollabActive } = storeToRefs(collabStore);
 const route = useRoute();
 const router = useRouter();
 
 /** 当前画布 ID */
 const pageId = Number(route.params.id);
-/** 画布标题 */
-const pageTitle = ref('');
-/** 页面数据是否已就绪（就绪后再渲染 Canvas，避免画布先加载本地草稿） */
-const isPageReady = ref(false);
-/** 是否保存中 */
-const isSaving = ref(false);
-/** Canvas 组件引用（取 shadowHost 用于截图） */
-const canvasRef = ref<{ shadowHost?: HTMLElement }>();
-
-/** 截取画布缩略图，失败时返回 undefined 不阻塞保存 */
-async function captureThumbnail(): Promise<string | undefined> {
-  const host = canvasRef.value?.shadowHost;
-  if (!host) return undefined;
-  try {
-    const snap = await snapdom(host, { scale: 0.2 });
-    const img = await snap.toPng();
-    return img.src;
-  } catch (error) {
-    console.error('[VibePage] 生成画布缩略图失败:', error);
-    return undefined;
-  }
-}
-
-/** 从服务端加载画布数据 */
-async function loadPage() {
-  try {
-    const page = await getPageApi({ id: pageId });
-    pageTitle.value = page.title;
-    if (page.content) {
-      canvasStore.loadCanvasData(JSON.parse(page.content) as CanvasStorageData);
-    } else {
-      canvasStore.clearAllElements();
-    }
-  } catch {
-    router.push('/');
-    return;
-  }
-  isPageReady.value = true;
-}
-
-/** 保存画布到服务端 */
-async function handleSave() {
-  isSaving.value = true;
-  try {
-    const thumbnail = await captureThumbnail();
-    await updatePageApi({
-      id: pageId,
-      content: JSON.stringify(canvasStore.getCanvasData()),
-      thumbnail,
-    });
-    message.success('已保存');
-  } finally {
-    isSaving.value = false;
-  }
-}
+/** 协作分享令牌（通过分享链接进入时携带） */
+const shareToken = String(route.query.share ?? '');
+/** 是否画布所有者（决定分享入口与成员管理权限） */
+const isMine = computed(() => Number(pageUserId.value) === Number(authStore.userInfo?.id));
+/** 分享弹窗是否打开 */
+const shareModalVisible = ref(false);
 
 /** 返回画布列表 */
 function handleBack() {
@@ -233,11 +188,13 @@ provide(IS_PREVIEW_KEY, isPreview);
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown);
-  loadPage();
+  /** 加入协作房间：画布数据与页面元信息均由服务端 init 消息下发 */
+  collabStore.join(pageId, shareToken);
 });
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown);
+  collabStore.leave();
 });
 </script>
 

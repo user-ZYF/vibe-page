@@ -60,7 +60,8 @@ import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import { MeButton, MeInput, MeModal } from '@zyf_dsb/me-ui';
-import { createPageApi, deletePageApi, listPagesApi, updatePageApi } from '@/api/page';
+import { createPageApi, deletePageApi, listPagesApi, renamePageApi } from '@/api/page';
+import { createEmptyCanvasData } from '@/store/canvas';
 import type { PageListItem } from '@/api/model/page';
 import { useAuthStore } from '@/store/auth';
 import PageCard from './components/PageCard.vue';
@@ -127,11 +128,11 @@ async function handleModalSubmit() {
   isModalSubmitting.value = true;
   try {
     if (editingPageId.value === null) {
-      const page = await createPageApi({ title });
+      const page = await createPageApi({ title, content: JSON.stringify(createEmptyCanvasData()) });
       isModalOpen.value = false;
       router.push(`/canvas/${page.id}`);
     } else {
-      await updatePageApi({ id: editingPageId.value, title });
+      await renamePageApi({ id: editingPageId.value, title });
       isModalOpen.value = false;
       message.success('已重命名');
       await fetchPages();

@@ -6,7 +6,6 @@ import {
   CanvasRootElement,
   CanvasElement,
   isParentElement,
-  CanvasParentElement,
   CanvasInputElement,
   CanvasTextareaElement,
   CanvasRadioElement,
@@ -254,13 +253,12 @@ function elementToHtml(element: CanvasElement, indent: number = 0): string {
     return `${pad}<${tag}${attrs} />`;
   }
 
-  /** 容器元素或根元素：递归生成子元素 */
-  if (element.type === CanvasElementTypeEnum.ROOT || isParentElement(element)) {
-    const container = element as CanvasParentElement | CanvasRootElement;
-    if (container.children.length === 0) {
+  /** 容器元素（含根元素）：递归生成子元素 */
+  if (isParentElement(element)) {
+    if (element.children.length === 0) {
       return `${pad}<${tag}${attrs}></${tag}>`;
     }
-    const childrenHtml = container.children.map((child) => elementToHtml(child, indent + 1)).join('\n');
+    const childrenHtml = element.children.map((child) => elementToHtml(child, indent + 1)).join('\n');
     return `${pad}<${tag}${attrs}>\n${childrenHtml}\n${pad}</${tag}>`;
   }
 

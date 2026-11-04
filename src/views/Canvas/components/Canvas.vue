@@ -11,6 +11,8 @@
         </Teleport>
         <MarginPaddingIndicator v-if="!isPreview" />
         <SelectedElementToolbar v-if="!isPreview" />
+        <!-- 协作模式下其他成员选中元素的远程标记层 -->
+        <RemoteSelections v-if="!isPreview" />
     </div>
     <DropIndicatorOverlay v-if="!isPreview" />
 </template>
@@ -25,6 +27,7 @@ import { generateCss } from "@/utils/code-generator";
 import MarginPaddingIndicator from "./MarginPaddingIndicator.vue";
 import SelectedElementToolbar from "./SelectedElementToolbar.vue";
 import DropIndicatorOverlay from "./DropIndicatorOverlay.vue";
+import RemoteSelections from "./RemoteSelections.vue";
 import Root from './canvas-element/Root.vue';
 import { IS_PREVIEW_KEY } from '../constants.ts';
 

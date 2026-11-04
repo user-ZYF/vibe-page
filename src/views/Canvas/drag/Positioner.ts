@@ -1,7 +1,7 @@
-import type { CanvasInnerElement, CanvasRootElement, CanvasParentElement, CanvasInnerElementTypeEnum } from "@/views/Canvas/types";
+import type { CanvasInnerElement, CanvasRootElement, CanvasInnerElementTypeEnum } from "@/views/Canvas/types";
 import { DropPositionEnum } from "@/constants/home";
 import { isParentElement, isChildTypeAllowed, isSubtreeAllowed } from "@/views/Canvas/types";
-import { findElementInTree } from "@/utils/tree-traversal";
+import { findElementInTree, findParentIdInTree } from "@/utils/tree-traversal";
 import type { NodeInfo, DropIndicator, PlaceholderLine, DropPositionResult } from "./types";
 import type { NodeRegistry } from "./NodeRegistry";
 import { DisplayStyleEnum, FlexDirectionEnum, FloatStyleEnum, LayoutModeEnum, PositionStyleEnum } from "@/constants/style";
@@ -112,9 +112,9 @@ export class Positioner {
 
     /** 如果鼠标接近元素的边框，则上升到父级 */
     if (!isOverDraggedSubtree && parentId !== root.id && this.isNearBorder(parentEl, x, y)) {
-      parentId = this.findParentId(parentId, root);
-      parentEl = registry.get(parentId)?.el;
-      if (!parentEl) return null;
+      parentId = findParentIdInTree(root, parentId);
+      parentEl = parentId ? registry.get(parentId)?.el : undefined;
+      if (!parentId || !parentEl) return null;
     }
 
     /** 获取父级内所有直接子元素的维度（含各自布局模式） */
@@ -173,25 +173,9 @@ export class Positioner {
     if (!reg) return null;
     if (reg.isContainer) return id;
 
-    const parentId = this.findParentId(id, root);
+    const parentId = findParentIdInTree(root, id);
     if (!parentId) return null;
     return this.getContainerAncestor(parentId, root, registry);
-  }
-
-  /** 在元素树中查找父节点 id */
-  private findParentId(childId: string, root: CanvasRootElement): string {
-    const find = (list: CanvasInnerElement[], parentId: string): string | null => {
-      for (const el of list) {
-        if (el.id === childId) return parentId;
-        if (isParentElement(el)) {
-          const found = find(el.children, el.id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    return find(root.children, root.id)!;
   }
 
   /** 鼠标是否在元素边框附近 */
@@ -329,12 +313,8 @@ export class Positioner {
 
   /** 获取指定父级的直接子元素列表 */
   private getDirectChildren(parentId: string, root: CanvasRootElement): CanvasInnerElement[] {
-    if(parentId === root.id){
-      return root.children;
-    }
     const parent = findElementInTree(root, parentId);
-    if (!parent || !isParentElement(parent as CanvasInnerElement)) return [];
-    return (parent as CanvasParentElement).children;
+    return parent && isParentElement(parent) ? parent.children : [];
   }
 
   /** 判断 targetId 是否是 sourceId 的后代或本身 */
@@ -346,7 +326,7 @@ export class Positioner {
     if (sourceId === targetId) return true;
 
     const sourceEl = findElementInTree(root, sourceId);
-    if (!sourceEl || sourceId === root.id || !isParentElement(sourceEl as CanvasInnerElement)) return false;
+    if (!sourceEl || !isParentElement(sourceEl)) return false;
 
     const isInside = (list: CanvasInnerElement[], targetId: string): boolean => {
       for (const el of list) {
@@ -358,7 +338,7 @@ export class Positioner {
       return false;
     };
 
-    return isInside((sourceEl as CanvasParentElement).children, targetId);
+    return isInside(sourceEl.children, targetId);
   }
 
   /** 根据落点信息计算占位线的 rect（视口坐标），方向跟随锚点自身的布局模式与排列方向 */

@@ -42,14 +42,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, shallowRef, computed, watch, nextTick } from 'vue';
 import { useCanvasStore } from '@/store/canvas';
 import { storeToRefs } from 'pinia';
 import { CanvasElementLabelMap } from '@/constants/home';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
+import { useRafThrottle } from '@/composables/useRafThrottle';
 import { useResizeObserver, useEventListener } from '@vueuse/core';
 import { useDragStore } from '@/store/drag';
 import { nodeRegistry } from '../drag/NodeRegistry';
+import { findElementInTree } from '@/utils/tree-traversal';
 
 defineOptions({
   name: 'MarginPaddingIndicator',
@@ -116,7 +118,7 @@ const labelLeft = computed(() => {
 const elName = computed(() => {
   const id = currentTargetId.value;
   if (!id) return '';
-  const el = canvasStore.getElementById(id);
+  const el = findElementInTree(root.value, id);
   if(!el) return '';
   return el.alias || CanvasElementLabelMap[el.type];
 });
@@ -150,12 +152,12 @@ function refreshTargetBox(el: HTMLElement) {
   });
 }
 
-/** 窗口尺寸变化时同步更新元素尺寸 */
-function handleRecompute() {
+/** 滚动或窗口尺寸变化时帧节流同步更新元素尺寸 */
+const scheduleRecompute = useRafThrottle(() => {
   if (currentTarget.value) {
     updateBox(currentTarget.value);
   }
-}
+});
 
 /** 监听悬停元素尺寸变化（如图片/媒体加载完成、内容撑开等不改变响应式数据的场景），重新测量盒模型 */
 useResizeObserver(currentTarget, () => {
@@ -167,11 +169,9 @@ useResizeObserver(currentTarget, () => {
 watch(currentTarget, (el) => {
   if (el) {
     refreshTargetBox(el);
-    startLayoutWatch();
   } else {
     isTargetDisplayed.value = true;
     resetElRect();
-    stopLayoutWatch();
   }
 });
 
@@ -182,68 +182,56 @@ watch([isDragging, isResizing], () => {
   }
 });
 
-/** 画布数据深度监听的停止函数（仅悬停期间订阅，避免无目标时的全树深度遍历开销） */
-let layoutWatchStop: (() => void) | null = null;
+/**
+ * 订阅画布元素树与样式规则变化：悬停元素的盒模型、可见性可能改变，元素也可能已被删除
+ */
+watch(
+  [root, styleRules],
+  () => {
+    const el = currentTarget.value;
+    /** 拖拽/调整尺寸期间指示器不可见，跳过测量（结束时由对应 watch 统一刷新） */
+    if (!el || isDragging.value || isResizing.value) return;
+    /** 待 DOM 更新完成后重新校验并测量 */
+    nextTick(() => {
+      /** 期间鼠标可能已移出，以最新悬停目标为准 */
+      if (currentTarget.value !== el) return;
+      /** 悬停元素的 DOM 节点已被卸载重建（删除/合并/代码重写）时，隐藏指示器 */
+      if (!el.isConnected) {
+        currentTarget.value = null;
+        return;
+      }
+      const id = currentTargetId.value;
+      /** 画布元素已从元素树移除时隐藏指示器；无 data-canvas-id 的内部节点仅重新测量 */
+      if (id && !findElementInTree(root.value, id)) {
+        currentTarget.value = null;
+        return;
+      }
+      refreshTargetBox(el);
+    });
+  },
+  { deep: true },
+);
 
-/** 订阅画布元素数据与样式规则变化：悬停元素的盒模型、可见性可能改变，元素也可能已被删除 */
-function startLayoutWatch() {
-  if (layoutWatchStop) return;
-  layoutWatchStop = watch(
-    [root, styleRules],
-    () => {
-      const el = currentTarget.value;
-      /** 拖拽/调整尺寸期间指示器不可见，跳过测量（结束时由对应 watch 统一刷新） */
-      if (!el || isDragging.value || isResizing.value) return;
-      /** 待 DOM 更新完成后重新校验并测量 */
-      nextTick(() => {
-        /** 期间鼠标可能已移出，以最新悬停目标为准 */
-        if (currentTarget.value !== el) return;
-        /** 悬停元素的 DOM 节点已被卸载重建（删除/合并/代码重写）时，隐藏指示器 */
-        if (!el.isConnected) {
-          currentTarget.value = null;
-          return;
-        }
-        const id = currentTargetId.value;
-        /** 画布元素已从元素树移除时隐藏指示器；无 data-canvas-id 的内部节点仅重新测量 */
-        if (id && !canvasStore.getElementById(id)) {
-          currentTarget.value = null;
-          return;
-        }
-        refreshTargetBox(el);
-      });
-    },
-    { deep: true },
-  );
-}
+/** 画布根 DOM（挂载后从注册表获取，驱动事件监听目标） */
+const canvasElRef = shallowRef<HTMLElement | null>(null);
 
-/** 停止画布数据深度监听 */
-function stopLayoutWatch() {
-  layoutWatchStop?.();
-  layoutWatchStop = null;
-}
+/** 绑定画布根 DOM（immediate 时 nextTick 执行于挂载完成后；根元素 id 重建后重新绑定） */
+watch(
+  () => root.value.id,
+  () => {
+    nextTick(() => {
+      canvasElRef.value = getCanvasEl() as HTMLElement | null;
+    });
+  },
+  { immediate: true },
+);
 
-/** 画布根 DOM（onMounted 后从注册表获取，驱动事件监听的目标） */
-const canvasElRef = shallowRef<Element | null>(null);
-
-/** 代码导入改写根元素 id 后画布 DOM 重建，待新节点完成注册表登记后重新绑定事件监听目标 */
-watch(() => root.value.id, () => {
-  nextTick(() => {
-    canvasElRef.value = getCanvasEl();
-  });
-});
-
-onMounted(() => {
-  canvasElRef.value = getCanvasEl();
-});
-
+/** 悬停命中与离开画布 */
 useEventListener(canvasElRef, 'mouseover', handleMouseOver as EventListener);
 useEventListener(canvasElRef, 'mouseleave', handleMouseLeave);
-useEventListener(canvasElRef, 'scroll', handleRecompute, true);
-useEventListener(window, 'resize', handleRecompute);
-
-onBeforeUnmount(() => {
-  stopLayoutWatch();
-});
+/** 滚动（子孙元素滚动不冒泡，需捕获阶段监听）与窗口尺寸变化 */
+useEventListener(canvasElRef, 'scroll', scheduleRecompute, true);
+useEventListener(window, 'resize', scheduleRecompute);
 </script>
 
 <style scoped lang="less">

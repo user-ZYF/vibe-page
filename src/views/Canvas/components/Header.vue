@@ -39,7 +39,8 @@
         </me-tooltip>
       </a-space>
       <div class="editor-header-theme">
-        <me-button type="primary" :loading="isSaving" @click="emit('save')">保存</me-button>
+        <!-- 协作状态栏：在线成员 + 连接状态 + 分享入口 -->
+        <CollabBar :is-mine="isMine" @share="emit('share')" />
         <me-tooltip :content="themeStore.isDark ? '切换到亮色主题' : '切换到暗色主题'" effect="light">
           <a-switch
             :checked="!themeStore.isDark"
@@ -79,6 +80,7 @@ import {
 } from '@ant-design/icons-vue'
 import { MeButton, MeTooltip } from '@zyf_dsb/me-ui'
 import { useThemeStore } from '@/store/theme';
+import CollabBar from './CollabBar.vue';
 
 defineOptions({
   name: 'EditorHeader',
@@ -91,11 +93,6 @@ defineProps({
   title: {
     type: String,
     default: '',
-  },
-  /** 是否保存中 */
-  isSaving: {
-    type: Boolean,
-    default: false,
   },
   /** 是否处于预览模式 */
   isPreview: {
@@ -112,16 +109,21 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  /** 是否画布所有者（决定分享入口是否显示） */
+  isMine: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
   (e: 'back'): void
-  (e: 'save'): void
   (e: 'toggle-preview'): void
   (e: 'undo'): void
   (e: 'redo'): void
   (e: 'code'): void
   (e: 'clear'): void
+  (e: 'share'): void
 }>()
 </script>
 

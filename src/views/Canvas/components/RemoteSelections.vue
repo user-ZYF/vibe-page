@@ -10,7 +10,7 @@
         top: item.y + 'px',
         width: item.width + 'px',
         height: item.height + 'px',
-        borderColor: item.color,
+        outlineColor: item.color,
       }"
     >
       <span class="remote-selection-tag" :style="{ backgroundColor: item.color }">
@@ -129,24 +129,23 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 20;
 }
 
 .remote-selection {
   position: absolute;
-  border: 2px solid;
-  border-radius: 2px;
+  outline: 1px solid;
+  outline-offset: -1px;
   pointer-events: none;
 
   &-tag {
     position: absolute;
-    top: -20px;
-    left: -2px;
-    padding: 1px 6px;
+    top: -18px;
+    left: 0;
+    padding: 0 4px;
     font-size: 12px;
-    line-height: 16px;
+    font-family: monospace;
+    line-height: 1.5;
     color: #fff;
-    border-radius: 3px;
     white-space: nowrap;
   }
 }

@@ -9,10 +9,9 @@
           <!-- 以根元素 id 作为 key：代码编辑改写根元素 id 后强制重建，保证拖拽注册表/交互守卫等按 id 注册的逻辑同步刷新 -->
           <Root v-model:data="root" :key="root.id" />
         </Teleport>
+        <RemoteSelections v-if="!isPreview" />
         <MarginPaddingIndicator v-if="!isPreview" />
         <SelectedElementToolbar v-if="!isPreview" />
-        <!-- 协作模式下其他成员选中元素的远程标记层 -->
-        <RemoteSelections v-if="!isPreview" />
     </div>
     <DropIndicatorOverlay v-if="!isPreview" />
 </template>

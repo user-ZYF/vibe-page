@@ -481,11 +481,26 @@ const formElementOptions = computed(() => {
 
 .style-config-url {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+
+  :deep(.me-input) {
+    flex: 1;
+    min-width: 0;
+  }
 
   :deep(.file-upload) {
+    display: contents;
+  }
+
+  :deep(.file-upload-btn) {
     flex-shrink: 0;
     margin-left: 8px;
+  }
+
+  :deep(.file-upload-progress) {
+    flex-basis: 100%;
+    margin-top: 8px;
   }
 }
 </style>

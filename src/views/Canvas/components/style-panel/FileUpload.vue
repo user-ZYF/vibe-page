@@ -1,7 +1,7 @@
 <!-- ? 本地文件上传按钮 -->
 <template>
   <div class="file-upload">
-    <me-button size="small" :loading="isUploading" @click="handleFilePick">
+    <me-button :loading="isUploading" @click="handleFilePick">
       <UploadOutlined />
       上传文件
     </me-button>

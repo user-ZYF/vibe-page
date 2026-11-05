@@ -3,18 +3,9 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CreateAxiosDefau
 import { message } from 'ant-design-vue';
 import { useAuthStore } from '@/store/auth';
 import { refreshTokenApi } from '@/api/auth';
+import type { Result } from '@/api/model/common';
 import { ResultCodeEnum } from '@/constants/result-code';
 import router from '@/router';
-
-/** 接口统一响应结构 */
-interface Result<T = unknown> {
-  /** 状态码，0 表示成功 */
-  code: number;
-  /** 提示信息（失败时返回） */
-  message?: string;
-  /** 响应数据（成功时返回） */
-  data?: T;
-}
 
 /** Axios 封装：对外方法返回值为响应拦截器解包后的 Result.data */
 class Request {
@@ -136,7 +127,9 @@ service.interceptors.response.use(
     if (body.code === ResultCodeEnum.UNAUTHORIZED && !retriedConfigs.has(config) && !isAuthApi(config.url)) {
       retriedConfigs.add(config);
       try {
+        // 刷新Access Token
         await refreshAccessToken();
+        // 重试原请求
         return await service(config);
       } catch {
         handleAuthExpired();

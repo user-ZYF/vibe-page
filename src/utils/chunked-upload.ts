@@ -157,28 +157,30 @@ export function uploadFile(file: UploadFile, onProgress?: (percent: number) => v
         let finalUrl = '';
 
         // 有限并发上传：多个并发任务从队列取分片，全部发完后返回合并结果
-        await Promise.all(
-          Array.from({ length: Math.min(CONCURRENCY, total) }, async () => {
-            let index = queue.shift();
-            while (index !== undefined) {
-              const result = await uploadChunk(
-                {
-                  fileHash,
-                  fileName: file.name,
-                  chunkIndex: index,
-                  chunkHash: chunks[index].hash,
-                  totalChunks,
-                },
-                file.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE),
-                controller.signal,
-              );
-              finished++;
-              onProgress?.(Math.round((finished / total) * 100));
-              if (result.url) finalUrl = result.url;
-              index = queue.shift();
-            }
-          }),
-        );
+        async function worker() {
+          while (queue.length > 0) {
+            const index = queue.shift()!;
+            const result = await uploadChunk(
+              {
+                fileHash,
+                fileName: file.name,
+                chunkIndex: index,
+                chunkHash: chunks[index].hash,
+                totalChunks,
+              },
+              file.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE),
+              controller.signal,
+            );
+            finished++;
+            onProgress?.(Math.round((finished / total) * 100));
+            if (result.url) finalUrl = result.url;
+          }
+        }
+        const workers = [];
+        for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
+          workers.push(worker());
+        }
+        await Promise.all(workers);
         if (finalUrl) return finalUrl;
         throw new Error('文件合并失败，请重试');
       })

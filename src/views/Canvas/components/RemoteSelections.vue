@@ -29,30 +29,12 @@ import { useCanvasStore } from '@/store/canvas';
 import { getCanvasEl } from '@/composables/useCanvasBoxRect';
 import { useRafThrottle } from '@/composables/useRafThrottle';
 import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
-import type { CollabMember } from '@/api/model/collab';
+import type { RemoteSelectionRect } from '@/views/Canvas/types';
 import { memberColor } from '@/utils/member-color';
 
 defineOptions({
   name: 'RemoteSelections',
 });
-
-/** 单个远程选中的展示矩形 */
-interface RemoteSelectionRect {
-  /** 元素 ID */
-  elementId: string;
-  /** 距离画布容器左侧 */
-  x: number;
-  /** 距离画布容器顶部 */
-  y: number;
-  /** 宽度 */
-  width: number;
-  /** 高度 */
-  height: number;
-  /** 标记颜色 */
-  color: string;
-  /** 选中该元素的成员（昵称顿号拼接展示） */
-  members: CollabMember[];
-}
 
 const collabStore = useCollabStore();
 const canvasStore = useCanvasStore();

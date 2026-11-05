@@ -30,6 +30,7 @@ import type {
   ResizeDirEnum,
   StyleRuleTypeEnum,
 } from '@/constants/style';
+import type { CollabMember } from '@/api/model/collab';
 
 /**
  * 文本阴影单项
@@ -979,6 +980,24 @@ export interface CanvasStorageData {
   root: CanvasRootElement;
   /** 样式规则清单 */
   styleRules?: CanvasStyleRule[];
+}
+
+/** 单个远程选中的展示矩形 */
+export interface RemoteSelectionRect {
+  /** 元素 ID */
+  elementId: string;
+  /** 距离画布容器左侧 */
+  x: number;
+  /** 距离画布容器顶部 */
+  y: number;
+  /** 宽度 */
+  width: number;
+  /** 高度 */
+  height: number;
+  /** 标记颜色 */
+  color: string;
+  /** 选中该元素的成员（昵称顿号拼接展示） */
+  members: CollabMember[];
 }
 
 

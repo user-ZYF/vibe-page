@@ -212,6 +212,14 @@ export const useCollabStore = defineStore('collab', () => {
           router.push('/');
           return;
         }
+        // 会话失效（被其他设备顶替或已登出）：清理登录态并跳登录页
+        if (event.code === CollabCloseCodeEnum.FORCE_OFFLINE) {
+          status.value = CollabStatusEnum.DENIED;
+          message.error('账号已在其他设备登录，请重新登录');
+          useAuthStore().clearAuth();
+          router.push('/login');
+          return;
+        }
         // 初始连接失败（鉴权被拒或网络异常）：不重试，退回列表页
         if (!isReady.value) {
           status.value = CollabStatusEnum.DENIED;

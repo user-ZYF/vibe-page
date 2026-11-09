@@ -54,6 +54,7 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 提交消息 */
   function commit(payload: CollabClientMsg): void {
+    // ws只允许传输字符串或二进制数据
     socket?.send(JSON.stringify(payload));
   }
 

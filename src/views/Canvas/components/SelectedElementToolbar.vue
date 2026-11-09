@@ -41,7 +41,6 @@ import { useResizeObserver, useEventListener } from '@vueuse/core';
 import { ArrowUpOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import { MeTooltip } from '@zyf_dsb/me-ui';
 import { useCanvasStore } from '@/store/canvas';
-import { useCollabStore } from '@/store/collab';
 import { storeToRefs } from 'pinia';
 import { nodeRegistry } from '@/views/Canvas/drag/NodeRegistry';
 import { useCanvasBoxRect } from '@/composables/useCanvasBoxRect';
@@ -59,7 +58,6 @@ defineOptions({
 });
 
 const canvasStore = useCanvasStore();
-const collabStore = useCollabStore();
 const { selectedElementId, isResizing, root, styleRules } = storeToRefs(canvasStore);
 
 const dragStore = useDragStore();
@@ -280,9 +278,8 @@ function updatePos() {
   }
 }
 
-/** 监听选中元素变化；协作时广播选中标记，供其他端展示彩色方框 */
-watch(selectedElementId, (id, prev) => {
-  collabStore.syncSelection(id, prev);
+/** 监听选中元素变化，更新工具栏位置 */
+watch(selectedElementId, (id) => {
   if (id) {
     updatePos();
   } else {

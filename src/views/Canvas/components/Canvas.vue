@@ -95,6 +95,11 @@ watch(
   { deep: true },
 );
 
+/** 监听选中元素变化：协作时广播选中标记，供其他端展示彩色方框 */
+watch(selectedElementId, (id, prev) => {
+  collabStore.syncSelection(id, prev);
+});
+
 defineExpose({
   /** Shadow DOM 宿主元素，供父页面截图生成缩略图 */
   shadowHost: shadowHostRef,

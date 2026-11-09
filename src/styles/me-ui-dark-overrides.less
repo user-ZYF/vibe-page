@@ -251,6 +251,18 @@
       color: #fff;
     }
   }
+
+  &--danger {
+    background-color: var(--app-color-error);
+    border-color: var(--app-color-error);
+    color: #fff;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--app-color-error) 85%, #fff);
+      border-color: color-mix(in srgb, var(--app-color-error) 85%, #fff);
+      color: #fff;
+    }
+  }
 }
 
 /* Modal 弹窗 */

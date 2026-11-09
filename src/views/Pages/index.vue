@@ -44,11 +44,16 @@
     <me-modal
       v-model:open="isDeleteModalOpen"
       modal-class-name="app-light-modal"
-      title="删除画布"
       confirm-text="删除"
       confirm-type="danger"
       :confirm-loading="isDeleting"
       @confirm="confirmDelete">
+      <template #title>
+        <span class="me-modal__title">
+          <ExclamationCircleFilled class="pages-delete-icon" />
+          删除画布
+        </span>
+      </template>
       确认删除「{{ deletingPage?.title }}」？删除后不可恢复。
     </me-modal>
   </div>
@@ -58,7 +63,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { ExclamationCircleFilled, PlusOutlined } from '@ant-design/icons-vue';
 import { MeButton, MeInput, MeModal } from '@zyf_dsb/me-ui';
 import { createPageApi, deletePageApi, listPagesApi, renamePageApi } from '@/api/page';
 import { createEmptyCanvasData } from '@/store/canvas';
@@ -240,6 +245,13 @@ onMounted(fetchPages);
     font-size: 20px;
     font-weight: 600;
     color: #1f2329;
+  }
+
+  &-delete-icon {
+    margin-right: 8px;
+    font-size: 18px;
+    color: var(--app-color-error);
+    vertical-align: -3px;
   }
 
   &-grid {

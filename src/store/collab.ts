@@ -239,11 +239,12 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 选中变化即广播选中标记，供其他端展示彩色方框 */
   function syncSelection(id: string | null, prev: string | null): void {
+    if (!baseData) return;
     if (prev) {
-      commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev });
+      commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev, baseData });
     }
     if (id) {
-      commit({ type: CollabMsgTypeEnum.SELECT, elementId: id });
+      commit({ type: CollabMsgTypeEnum.SELECT, elementId: id, baseData });
     }
   }
 

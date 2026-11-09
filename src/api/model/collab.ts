@@ -107,6 +107,8 @@ export interface CollabSelectionMsg {
   type: CollabMsgTypeEnum.SELECT | CollabMsgTypeEnum.DESELECT;
   /** 元素 ID */
   elementId: string;
+  /** 客户端基准画布数据 */
+  baseData: CanvasStorageData;
 }
 
 /** 客户端发往服务端的消息联合 */

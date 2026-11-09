@@ -50,7 +50,7 @@
       @confirm="confirmDelete">
       <template #title>
         <span class="me-modal__title">
-          <ExclamationCircleFilled class="pages-delete-icon" />
+          <WarningFilled class="pages-delete-icon" />
           删除画布
         </span>
       </template>
@@ -63,7 +63,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
-import { ExclamationCircleFilled, PlusOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, WarningFilled } from '@ant-design/icons-vue';
 import { MeButton, MeInput, MeModal } from '@zyf_dsb/me-ui';
 import { createPageApi, deletePageApi, listPagesApi, renamePageApi } from '@/api/page';
 import { createEmptyCanvasData } from '@/store/canvas';
@@ -250,7 +250,7 @@ onMounted(fetchPages);
   &-delete-icon {
     margin-right: 8px;
     font-size: 18px;
-    color: var(--app-color-error);
+    color: var(--app-color-warning);
     vertical-align: -3px;
   }
 

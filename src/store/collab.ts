@@ -101,6 +101,7 @@ export const useCollabStore = defineStore('collab', () => {
   /** 处理协作者操作 */
   function handleRemoteOp(msg: CollabOpBcastMsg): void {
     if (!baseData) return;
+    // 得到最新一刻的本地操作列表
     const localOps = deriveOps(baseData, localCanvasData()) ?? [];
 
     // 本地未确认操作对远程 op 做 transform：冲突部分被裁剪（远程后到者优先）

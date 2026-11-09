@@ -20,10 +20,10 @@
       <ShareModal v-model:open="shareModalVisible" :page-id="pageId" />
       <a-layout-content class="editor-canvas">
         <!-- 仅在协作已连接时渲染：init 前与断线重连期间不渲染画布，杜绝编辑 -->
-        <Canvas v-if="isCollabActive" />
+        <Canvas v-if="isConnected" />
       </a-layout-content>
     </a-layout>
-    <EditorSider v-if="isCollabActive" :is-preview="isPreview" />
+    <EditorSider v-if="isConnected" :is-preview="isPreview" />
   </a-layout>
 </template>
 
@@ -60,7 +60,7 @@ const canvasStore = useCanvasStore();
 const collabStore = useCollabStore();
 const authStore = useAuthStore();
 const { selectedElementId } = storeToRefs(canvasStore);
-const { pageTitle, pageUserId, isActive: isCollabActive } = storeToRefs(collabStore);
+const { pageTitle, pageUserId, isConnected } = storeToRefs(collabStore);
 const route = useRoute();
 const router = useRouter();
 

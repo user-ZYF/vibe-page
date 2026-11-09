@@ -46,7 +46,7 @@ export const useCollabStore = defineStore('collab', () => {
   let socket: ReturnType<typeof useWebSocket> | null = null;
 
   /** 是否已加入协作房间 */
-  const isActive = computed(() => status.value === CollabStatusEnum.CONNECTED);
+  const isConnected = computed(() => status.value === CollabStatusEnum.CONNECTED);
   /** 除自己外的在线成员 */
   const otherMembers = computed(() => members.value.filter((m) => m.userId !== selfUserId.value));
   /** 是否有其他协作者在线 */
@@ -59,7 +59,7 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 发送本地操作 */
   function sendLocalOps(): void {
-    if (!baseData || !allLocalOps || pendingLocalOps || !isActive.value) return;
+    if (!baseData || !allLocalOps || pendingLocalOps || !isConnected.value) return;
     pendingLocalOps = allLocalOps;
     commit({ type: CollabMsgTypeEnum.OP, baseData, canvasData: localCanvasData(), ops: allLocalOps });
   }
@@ -275,7 +275,7 @@ export const useCollabStore = defineStore('collab', () => {
     pageTitle,
     pageUserId,
     isReady,
-    isActive,
+    isConnected,
     otherMembers,
     hasOthers,
     join,

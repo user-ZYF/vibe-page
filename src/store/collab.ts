@@ -1,5 +1,5 @@
-import { computed, ref, watch, type WatchStopHandle } from 'vue';
-import { defineStore, storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
 import { cloneDeep } from 'lodash';
 import { useWebSocket } from '@vueuse/core';
 import { message } from 'ant-design-vue';
@@ -44,8 +44,6 @@ export const useCollabStore = defineStore('collab', () => {
   let pendingLocalOps: CollabOp[] | null = null;
   /** WebSocket 实例 */
   let socket: ReturnType<typeof useWebSocket> | null = null;
-  /** 画布数据监听与选中监听的停止函数 */
-  let stopWatchers: WatchStopHandle[] = [];
 
   /** 是否已加入协作房间 */
   const isActive = computed(() => status.value === CollabStatusEnum.CONNECTED);
@@ -175,9 +173,7 @@ export const useCollabStore = defineStore('collab', () => {
    * @param shareToken 分享令牌（通过协作链接进入时携带）
    */
   function join(pageId: number, shareToken = ''): void {
-    const canvasStore = useCanvasStore();
     const authStore = useAuthStore();
-    const { root, styleRules, selectedElementId } = storeToRefs(canvasStore);
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const wsBase = import.meta.env.VITE_WS_BASE_URL || `${proto}://${location.host}`;
@@ -231,30 +227,27 @@ export const useCollabStore = defineStore('collab', () => {
         status.value = CollabStatusEnum.CONNECTING;
       },
     });
-
-    stopWatchers.push(
-      // 画布变化 -> 重算未确认操作并发送
-      watch([root, styleRules], () => {
-        if (!baseData) return;
-        allLocalOps = deriveOps(baseData, localCanvasData());
-        sendLocalOps();
-      }, { deep: true }),
-      // 选中变化即广播选中标记，供其他端展示彩色方框
-      watch(selectedElementId, (id, prev) => {
-        if (prev) {
-          commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev });
-        }
-        if (id) {
-          commit({ type: CollabMsgTypeEnum.SELECT, elementId: id });
-        }
-      }),
-    );
   }
 
-  /** 离开协作房间：断开连接、停止监听、重置状态 */
+  /** 画布变化 -> 重算未确认操作并发送 */
+  function syncLocalOps(): void {
+    if (!baseData) return;
+    allLocalOps = deriveOps(baseData, localCanvasData());
+    sendLocalOps();
+  }
+
+  /** 选中变化即广播选中标记，供其他端展示彩色方框 */
+  function syncSelection(id: string | null, prev: string | null): void {
+    if (prev) {
+      commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev });
+    }
+    if (id) {
+      commit({ type: CollabMsgTypeEnum.SELECT, elementId: id });
+    }
+  }
+
+  /** 离开协作房间：断开连接、重置状态 */
   function leave(): void {
-    stopWatchers.forEach((stop) => stop());
-    stopWatchers = [];
     socket?.close();
     socket = null;
     baseData = null;
@@ -288,5 +281,7 @@ export const useCollabStore = defineStore('collab', () => {
     join,
     leave,
     reset,
+    syncLocalOps,
+    syncSelection,
   };
 });

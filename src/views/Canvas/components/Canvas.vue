@@ -19,6 +19,7 @@
 <script lang="ts" setup>
 import { watch, onMounted, inject, ref, computed, nextTick } from "vue";
 import { useCanvasStore } from "@/store/canvas";
+import { useCollabStore } from "@/store/collab";
 import { storeToRefs } from "pinia";
 import { useCanvasHistory } from "@/composables/useCanvasHistory";
 import { canvasScroll, type CanvasScrollPosition } from "@/composables/useCanvasScroll";
@@ -31,6 +32,7 @@ import Root from './canvas-element/Root.vue';
 import { IS_PREVIEW_KEY } from '../constants.ts';
 
 const canvasStore = useCanvasStore();
+const collabStore = useCollabStore();
 const { root, styleRules, selectedElementId } = storeToRefs(canvasStore);
 
 /** 是否处于预览模式 */
@@ -83,11 +85,12 @@ function restoreCanvasScrollPosition(position: CanvasScrollPosition) {
   });
 }
   
-/** 监听画布数据变化，自动记录历史快照 */
+/** 监听画布数据变化，自动记录历史快照；协作时重算未确认操作并发送 */
 watch(
   [root, styleRules],
   () => {
     debouncedRecord();
+    collabStore.syncLocalOps();
   },
   { deep: true },
 );

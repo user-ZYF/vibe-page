@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual } from 'lodash'
-import type { CanvasStorageData, CanvasElement, CanvasInnerElement, CanvasStyleRule } from '@/views/Canvas/types'
+import type { CanvasStorageData, CanvasElement, CanvasInnerElement, CanvasStyleRule, ElementPosition } from '@/views/Canvas/types'
 import { isParentElement } from '@/views/Canvas/types'
 import { findElementInList, findElementInTree, forEachElementInList } from '@/utils/tree-traversal'
 import { StyleRuleTypeEnum } from '@/constants/style'
@@ -18,14 +18,6 @@ function styleRemoveKey(op: CollabStyleRemoveOp): string {
   return op.ruleType === StyleRuleTypeEnum.AT_RULE
     ? `${op.ruleType}|${op.atRuleCssText ?? ''}`
     : `${op.ruleType}|${op.selector}`
-}
-
-/** 元素在树中的位置信息 */
-interface ElementPosition {
-  /** 元素本体 */
-  el: CanvasElement
-  /** 父元素 id（根元素为 ''） */
-  parentId: string
 }
 
 /** 收集元素树（含根元素）中所有元素的位置映射，根元素的 parentId 为 '' */
@@ -270,7 +262,7 @@ export interface FilterLocalOpsResult {
 }
 
 /**
- * 本地待发操作对远程操作做 transform
+ * 本地操作对远程操作做 transform
  * @param localOps 本地未确认操作
  * @param remoteOps 远程操作
  * @param baseData 本地基准数据（用于解析远程删除元素的子孙 id）

@@ -795,6 +795,14 @@ export interface TagConstraints {
 /** 可包含子元素的画布容器元素（含根元素） */
 export type CanvasContainerElement = CanvasParentElement | CanvasRootElement;
 
+/** 元素在树中的位置信息 */
+export interface ElementPosition {
+  /** 元素本体 */
+  el: CanvasElement
+  /** 父元素 id（根元素为 ''） */
+  parentId: string
+}
+
 /** 判断元素是否允许包含子元素（根元素恒为容器） */
 export function isParentElement(el: CanvasElement): el is CanvasContainerElement {
   /** 通用元素按标签判定：自闭合标签（br/hr 等）不可包含子元素 */

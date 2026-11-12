@@ -4,6 +4,7 @@ import type { CanvasInnerElement, CanvasStorageData } from '@/views/Canvas/types
 import { CanvasElementTypeEnum } from '@/constants/home';
 import { deriveOps, applyOps, filterLocalOps } from '@/utils/collab-ops';
 import { CollabOpTypeEnum as OpType } from '@/constants/collab';
+import { StyleRuleTypeEnum } from '@/constants/style';
 import type { CollabOp } from '@/api/model/collab';
 
 /** 构造测试元素 */
@@ -59,6 +60,17 @@ describe('deriveOps', () => {
     const ops = deriveOps(base, next)!;
     expect(ops.some((o) => o.type === OpType.MOVE && (o as { id: string }).id === 'b')).toBe(true);
   });
+
+  it('根元素 id 变更按 删除+新增 语义产生 add/remove 操作', () => {
+    const base = makeCanvasData([el('a')]);
+    const next = makeCanvasData([el('a')]);
+    next.root.id = 'root-new';
+    const ops = deriveOps(base, next)!;
+    expect(ops).toEqual([
+      { type: OpType.ADD, parentId: '', beforeId: null, element: next.root },
+      { type: OpType.REMOVE, id: 'root' },
+    ]);
+  });
 });
 
 describe('applyOps', () => {
@@ -74,7 +86,7 @@ describe('applyOps', () => {
     const ops: CollabOp[] = [
       { type: OpType.REMOVE, id: 'ghost' },
       { type: OpType.UPDATE, id: 'ghost', props: { text: 'x' } },
-      { type: OpType.MOVE, id: 'ghost', parentId: '', beforeId: null },
+      { type: OpType.MOVE, id: 'ghost', parentId: 'root', beforeId: null },
     ];
     expect(applyOps(base, ops)).toEqual(base);
   });
@@ -83,6 +95,22 @@ describe('applyOps', () => {
     const base = makeCanvasData([el('a')]);
     applyOps(base, [{ type: OpType.REMOVE, id: 'a' }]);
     expect(base.root.children).toHaveLength(1);
+  });
+
+  it('parentId 为空的 add 操作替换根元素', () => {
+    const base = makeCanvasData([el('a')]);
+    const next = makeCanvasData([el('a')]);
+    next.root.id = 'root-new';
+    const result = applyOps(base, deriveOps(base, next)!);
+    expect(result).toEqual(next);
+  });
+
+  it('update 操作不可修改结构字段（含元素 id）', () => {
+    const base = makeCanvasData([el('a', { text: 'x' })]);
+    const result = applyOps(base, [
+      { type: OpType.UPDATE, id: 'a', props: { id: 'b', type: 2, text: 'y' } },
+    ]);
+    expect(result.root.children[0]).toMatchObject({ id: 'a', type: 1, text: 'y' });
   });
 });
 
@@ -122,11 +150,110 @@ describe('filterLocalOps', () => {
 
   it('同元素移动冲突：本地 move 丢弃', () => {
     const base = makeCanvasData([el('a'), el('b')]);
-    const localOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: '', beforeId: null }];
-    const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: '', beforeId: 'b' }];
+    const localOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: 'root', beforeId: null }];
+    const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: 'root', beforeId: 'b' }];
     const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
     expect(ops).toHaveLength(0);
     expect(dropped).toBe(true);
+  });
+
+  it('样式修改产生带属性补丁的 style-set 操作', () => {
+    const rule = (style: Record<string, string>) => [
+      { type: 0, selector: '.a', style },
+    ] as CanvasStorageData['styleRules'];
+    const base = makeCanvasData([]);
+    base.styleRules = rule({ color: 'red', margin: '0' });
+    const next = makeCanvasData([]);
+    next.styleRules = rule({ color: 'blue', padding: '4px' });
+    const ops = deriveOps(base, next)!;
+    expect(ops).toHaveLength(1);
+    expect(ops[0]).toMatchObject({
+      type: OpType.STYLE_SET,
+      selector: '.a',
+      style: { color: 'blue', margin: null, padding: '4px' },
+    });
+  });
+
+  it('style-set 补丁按属性合并，不覆盖未修改属性', () => {
+    const base = makeCanvasData([]);
+    base.styleRules = [
+      { type: 0, selector: '.a', style: { color: 'red', margin: '0' } },
+    ] as CanvasStorageData['styleRules'];
+    const next = cloneDeep(base);
+    next.styleRules![0].style.color = 'blue';
+    const result = applyOps(base, deriveOps(base, next)!);
+    expect(result.styleRules![0].style).toEqual({ color: 'blue', margin: '0' });
+  });
+
+  it('同一样式规则不同属性无冲突：本地补丁保留', () => {
+    const base = makeCanvasData([]);
+    base.styleRules = [
+      { type: 0, selector: '.a', style: { color: 'red', margin: '0' } },
+    ] as CanvasStorageData['styleRules'];
+    const localOps: CollabOp[] = [
+      { type: OpType.STYLE_SET, selector: '.a', ruleType: StyleRuleTypeEnum.UNDEFINED, style: { color: 'blue' } },
+    ];
+    const remoteOps: CollabOp[] = [
+      { type: OpType.STYLE_SET, selector: '.a', ruleType: StyleRuleTypeEnum.UNDEFINED, style: { margin: '4px' } },
+    ];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    expect(ops).toHaveLength(1);
+    expect(dropped).toBe(false);
+    // 本地补丁合并到远程规则上：color 用本地值，margin 保留远程值
+    const merged = applyOps(applyOps(base, remoteOps), ops);
+    expect(merged.styleRules![0].style).toEqual({ color: 'blue', margin: '4px' });
+  });
+
+  it('同一样式规则同名属性冲突：本地该属性被剔除', () => {
+    const base = makeCanvasData([]);
+    base.styleRules = [
+      { type: 0, selector: '.a', style: { color: 'red' } },
+    ] as CanvasStorageData['styleRules'];
+    const localOps: CollabOp[] = [
+      {
+        type: OpType.STYLE_SET,
+        selector: '.a',
+        ruleType: StyleRuleTypeEnum.UNDEFINED,
+        style: { color: 'blue', margin: '2px' },
+      },
+    ];
+    const remoteOps: CollabOp[] = [
+      { type: OpType.STYLE_SET, selector: '.a', ruleType: StyleRuleTypeEnum.UNDEFINED, style: { color: 'green' } },
+    ];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    expect(ops).toHaveLength(1);
+    expect((ops[0] as { style: Record<string, unknown> }).style).toEqual({ margin: '2px' });
+    expect(dropped).toBe(true);
+  });
+
+  it('同名多条规则按级联合并比对：前序规则修改也能产生补丁', () => {
+    const base = makeCanvasData([]);
+    base.styleRules = [
+      { type: 0, selector: '.a', style: { color: 'red' } },
+      { type: 0, selector: '.a', style: { margin: '0' } },
+    ] as CanvasStorageData['styleRules'];
+    const next = cloneDeep(base);
+    next.styleRules![0].style.color = 'blue';
+    const ops = deriveOps(base, next)!;
+    expect(ops).toHaveLength(1);
+    expect(ops[0]).toMatchObject({ type: OpType.STYLE_SET, selector: '.a', style: { color: 'blue' } });
+    const result = applyOps(base, ops);
+    // 补丁写回含该属性的规则，其余同名规则不受影响
+    expect(result.styleRules).toEqual(next.styleRules);
+  });
+
+  it('删除规则时整条同名规则集一并移除', () => {
+    const base = makeCanvasData([]);
+    base.styleRules = [
+      { type: 0, selector: '.a', style: { color: 'red' } },
+      { type: 0, selector: '.a', style: { margin: '0' } },
+      { type: 0, selector: '.b', style: { padding: '4px' } },
+    ] as CanvasStorageData['styleRules'];
+    const next = makeCanvasData([]);
+    next.styleRules = [base.styleRules![2]];
+    const ops = deriveOps(base, next)!;
+    const result = applyOps(base, ops);
+    expect(result.styleRules).toEqual(next.styleRules);
   });
 
   it('多条 AT_RULE 规则互不干扰（按 atRuleCssText 区分）', () => {

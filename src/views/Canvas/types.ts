@@ -349,6 +349,18 @@ export interface CanvasStyleRule extends ParsedCssRule {
   type: StyleRuleTypeEnum;
 }
 
+/** 同名规则集的聚合视图：key 组成字段 + 级联合并后的声明 */
+export interface MergedStyleRule {
+  /** 规则类型 */
+  type: StyleRuleTypeEnum;
+  /** 选择器 */
+  selector: string;
+  /** 完整 at-rule 文本（AT_RULE 时使用） */
+  atRuleCssText?: string;
+  /** 同名规则按级联合并后的声明（后面的规则覆盖前面同名属性） */
+  merged: Record<string, string>;
+}
+
 /** 元素 class 项 */
 export interface ElementClass {
   /** class 名称 */

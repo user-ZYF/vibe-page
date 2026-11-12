@@ -263,6 +263,7 @@ import { isSafeUrl, sanitizeNavigationUrl } from '@/utils/sanitize';
 import { findElementInTree } from '@/utils/tree-traversal';
 import FileUpload from './FileUpload.vue';
 import {
+  type CanvasElement,
   type CanvasInnerElement,
   type CanvasButtonElement,
   type CanvasParagraphElement,
@@ -286,7 +287,7 @@ defineOptions({
 });
 
 /** 元素数据 */
-const model = defineModel<CanvasInnerElement>({ required: true });
+const model = defineModel<CanvasElement>({ required: true });
 
 const canvasStore = useCanvasStore();
 

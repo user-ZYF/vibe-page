@@ -4,7 +4,7 @@
     <div class="style-panel-empty" v-if="!selectedElementId">请选择一个元素</div>
     <template v-else>
       <!-- class 管理栏 -->
-      <div class="style-panel-classes" v-if="!isRootElement && !isTextElement">
+      <div class="style-panel-classes" v-if="!isTextElement">
         <div class="style-panel-classes-title">Classes</div>
         <div class="style-panel-classes-bar">
           <me-tag
@@ -42,7 +42,7 @@
       </div>
 
       <!-- 选中态指示 -->
-      <div class="style-panel-target" v-if="!isRootElement && !isTextElement">
+      <div class="style-panel-target" v-if="!isTextElement">
         <template v-if="activeClassName">
           <me-tag class="style-panel-target-badge is-class">Class</me-tag>
           <span class="style-panel-target-text">.{{ activeClassName }}</span>
@@ -60,37 +60,37 @@
           <CaretRightOutlined :rotate="isActive ? 90 : 0" />
         </template>
         <!-- 元素设置配置 -->
-        <a-collapse-panel v-if="!isRootElement && !activeClassName" :key="StyleConfigTypeEnum.SETTING" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SETTING]">
-          <SettingConfig v-model="(selectedElement as CanvasInnerElement)" />
+        <a-collapse-panel v-if="!activeClassName" :key="StyleConfigTypeEnum.SETTING" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SETTING]">
+          <SettingConfig v-model="(selectedElement as CanvasElement)" />
         </a-collapse-panel>
 
         <!-- 额外属性配置 -->
-        <a-collapse-panel v-if="!isRootElement && !isTextElement && !activeClassName && hasExtraConfig" :key="StyleConfigTypeEnum.EXTRA" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.EXTRA]">
+        <a-collapse-panel v-if="!isTextElement && !activeClassName && hasExtraConfig" :key="StyleConfigTypeEnum.EXTRA" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.EXTRA]">
           <ExtraConfig v-model:element="(selectedElement as CanvasInnerElement)" v-model:style-config="activeStyleConfig!" />
         </a-collapse-panel>
 
         <!-- 常规配置 -->
-        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
+        <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.GENERAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.GENERAL]">
           <GeneralConfig v-model="activeStyleConfig!.general" :element-type="selectedElement!.type" />
         </a-collapse-panel>
 
         <!-- 尺寸配置 -->
-        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
+        <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.SIZE" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.SIZE]">
           <SizeConfig v-model="activeStyleConfig!.size" />
         </a-collapse-panel>
 
         <!-- 字体配置 -->
-        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
+        <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.FONT" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FONT]">
           <FontConfig v-model="activeStyleConfig!.font" />
         </a-collapse-panel>
 
         <!-- 视觉配置 -->
         <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.VISUAL" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.VISUAL]">
-          <VisualConfig v-model="activeStyleConfig!.visual" :only-background="isRootElement" />
+          <VisualConfig v-model="activeStyleConfig!.visual" />
         </a-collapse-panel>
 
         <!-- 弹性盒配置 -->
-        <a-collapse-panel v-if="!isRootElement && !isTextElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
+        <a-collapse-panel v-if="!isTextElement" :key="StyleConfigTypeEnum.FLEX" :header="STYLE_CONFIG_TYPE_NAME[StyleConfigTypeEnum.FLEX]">
           <FlexConfig v-model="activeStyleConfig!.flex" />
         </a-collapse-panel>
       </a-collapse>
@@ -105,7 +105,7 @@ import { StyleConfigTypeEnum, STYLE_CONFIG_TYPE_NAME, CSS_NAME_REGEX } from '@/c
 import { hasBackgroundContent } from '@/utils/style-converter';
 import { findElementInTree } from '@/utils/tree-traversal';
 import { CanvasElementTypeEnum, getElementDisplayName } from '@/constants/home';
-import type { CanvasInnerElement, StyleConfig } from '@/views/Canvas/types';
+import type { CanvasElement, CanvasInnerElement, StyleConfig } from '@/views/Canvas/types';
 import GeneralConfig from './style-panel/GeneralConfig.vue';
 import SizeConfig from './style-panel/SizeConfig.vue';
 import FontConfig from './style-panel/FontConfig.vue';
@@ -136,9 +136,6 @@ const selectedElement = computed(() => {
   }
   return findElementInTree(canvasStore.root, selectedElementId.value);
 });
-
-/** 当前选中的是否为根元素 */
-const isRootElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.ROOT);
 
 /** 当前选中的是否为纯文本元素 */
 const isTextElement = computed(() => selectedElement.value?.type === CanvasElementTypeEnum.TEXT);

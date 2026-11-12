@@ -36,10 +36,8 @@ export enum CollabOpTypeEnum {
   MOVE = 3,
   /** 更新元素属性 */
   UPDATE = 4,
-  /** 写入/覆盖样式规则 */
+  /** 样式规则设置 */
   STYLE_SET = 5,
-  /** 删除样式规则 */
-  STYLE_REMOVE = 6,
 }
 
 /** 协作 WebSocket 关闭码（自定义 4000+，与服务端约定） */

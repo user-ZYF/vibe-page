@@ -5,7 +5,7 @@ import { CanvasElementTypeEnum } from '@/constants/home';
 import { deriveOps, applyOps, filterLocalOps } from '@/utils/collab-ops';
 import { CollabOpTypeEnum as OpType } from '@/constants/collab';
 import { StyleRuleTypeEnum } from '@/constants/style';
-import type { CollabOp } from '@/api/model/collab';
+import type { CollabAddOp, CollabOp } from '@/api/model/collab';
 
 /** 构造测试元素 */
 function el(id: string, props: Record<string, unknown> = {}) {
@@ -119,7 +119,7 @@ describe('filterLocalOps', () => {
     const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
     const localOps: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'local' } }];
     const remoteOps: CollabOp[] = [{ type: OpType.UPDATE, id: 'b', props: { text: 'remote' } }];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toEqual(localOps);
     expect(dropped).toBe(false);
   });
@@ -131,7 +131,7 @@ describe('filterLocalOps', () => {
       { type: OpType.REMOVE, id: 'p' },
     ];
     const remoteOps: CollabOp[] = [{ type: OpType.REMOVE, id: 'p' }];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toHaveLength(0);
     expect(dropped).toBe(true);
   });
@@ -142,7 +142,7 @@ describe('filterLocalOps', () => {
       { type: OpType.UPDATE, id: 'a', props: { text: 'local', alias: 'mine' } },
     ];
     const remoteOps: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'remote' } }];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toHaveLength(1);
     expect((ops[0] as { props: Record<string, unknown> }).props).toEqual({ alias: 'mine' });
     expect(dropped).toBe(true);
@@ -152,9 +152,60 @@ describe('filterLocalOps', () => {
     const base = makeCanvasData([el('a'), el('b')]);
     const localOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: 'root', beforeId: null }];
     const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'a', parentId: 'root', beforeId: 'b' }];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toHaveLength(0);
     expect(dropped).toBe(true);
+  });
+
+  it('远程将目标父级移入被移元素的深层子树：本地 move 丢弃（防循环引用）', () => {
+    const base = makeCanvasData([el('x', { children: [el('a', { children: [el('c')] })] }), el('p'), el('b')]);
+    const localOps: CollabOp[] = [{ type: OpType.MOVE, id: 'x', parentId: 'p', beforeId: null }];
+    const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'p', parentId: 'c', beforeId: null }];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
+    expect(ops).toHaveLength(0);
+    expect(dropped).toBe(true);
+  });
+
+  it('远程将目标父级移入新增元素包裹的已有元素下：本地 add 丢弃（防循环嵌套）', () => {
+    const base = makeCanvasData([el('e'), el('p')]);
+    const localOps: CollabOp[] = [
+      {
+        type: OpType.ADD,
+        parentId: 'p',
+        beforeId: null,
+        element: el('w', { children: [el('e')] }) as unknown as CollabAddOp['element'],
+      },
+    ];
+    const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'p', parentId: 'e', beforeId: null }];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
+    expect(ops).toHaveLength(0);
+    expect(dropped).toBe(true);
+  });
+
+  it('前序 op 已置 dropped 时，id 不冲突的本地 add 仍保留', () => {
+    const base = makeCanvasData([el('a'), el('b')]);
+    const localOps: CollabOp[] = [
+      { type: OpType.REMOVE, id: 'a' },
+      {
+        type: OpType.ADD,
+        parentId: 'b',
+        beforeId: null,
+        element: el('n') as unknown as CollabAddOp['element'],
+      },
+    ];
+    const remoteOps: CollabOp[] = [{ type: OpType.REMOVE, id: 'a' }];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
+    expect(ops).toEqual([localOps[1]]);
+    expect(dropped).toBe(true);
+  });
+
+  it('远程移动目标父级到无关位置：本地 move 保留', () => {
+    const base = makeCanvasData([el('x', { children: [el('a')] }), el('p'), el('b')]);
+    const localOps: CollabOp[] = [{ type: OpType.MOVE, id: 'x', parentId: 'p', beforeId: null }];
+    const remoteOps: CollabOp[] = [{ type: OpType.MOVE, id: 'p', parentId: 'b', beforeId: null }];
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
+    expect(ops).toEqual(localOps);
+    expect(dropped).toBe(false);
   });
 
   it('样式修改产生带属性补丁的 style-set 操作', () => {
@@ -196,7 +247,7 @@ describe('filterLocalOps', () => {
     const remoteOps: CollabOp[] = [
       { type: OpType.STYLE_SET, selector: '.a', ruleType: StyleRuleTypeEnum.UNDEFINED, style: { margin: '4px' } },
     ];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toHaveLength(1);
     expect(dropped).toBe(false);
     // 本地补丁合并到远程规则上：color 用本地值，margin 保留远程值
@@ -220,7 +271,7 @@ describe('filterLocalOps', () => {
     const remoteOps: CollabOp[] = [
       { type: OpType.STYLE_SET, selector: '.a', ruleType: StyleRuleTypeEnum.UNDEFINED, style: { color: 'green' } },
     ];
-    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base);
+    const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toHaveLength(1);
     expect((ops[0] as { style: Record<string, unknown> }).style).toEqual({ margin: '2px' });
     expect(dropped).toBe(true);
@@ -275,7 +326,7 @@ describe('filterLocalOps', () => {
     const base = makeCanvasData([el('a', { text: 'x' }), el('b')]);
     const localOps = deriveOps(base, makeCanvasData([el('a', { text: 'local' }), el('b')]))!;
     const remoteOps: CollabOp[] = [{ type: OpType.REMOVE, id: 'a' }];
-    const { ops } = filterLocalOps(localOps, remoteOps, base);
+    const { ops } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     const remoteBase = applyOps(base, remoteOps);
     const newLocal = ops.length ? applyOps(remoteBase, ops) : remoteBase;
     expect(ids(newLocal)).toEqual(['b']);

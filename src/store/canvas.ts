@@ -174,8 +174,8 @@ export const useCanvasStore = defineStore("canvas", {
         }
       });
     },
-    /** 获取指定id元素的父元素id */
-    getParentElementId(id: string): string | null {
+    /** 获取指定id元素的父元素id（未找到或根元素返回 ''） */
+    getParentElementId(id: string): string {
       return findParentIdInTree(this.root, id);
     },
     /** 生成一个元素（同时在 styleRules 中创建对应的 #id 规则） */

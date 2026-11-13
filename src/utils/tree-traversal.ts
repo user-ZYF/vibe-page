@@ -28,12 +28,12 @@ export function findElementInTree(root: CanvasRootElement, id: string): CanvasEl
 }
 
 /**
- * 在元素列表（含子孙）中查找指定 id 元素的父元素 id
+ * 在元素列表（含子孙）中查找指定 id 元素的父元素 id（未找到返回 ''）
  * @param list 元素列表
  * @param id 目标元素 id
  * @param parentId 当前列表所属的父元素 id
  */
-export function findParentIdInList(list: CanvasInnerElement[], id: string, parentId: string): string | null {
+export function findParentIdInList(list: CanvasInnerElement[], id: string, parentId: string): string {
   for (const el of list) {
     if (el.id === id) return parentId;
     if (isParentElement(el)) {
@@ -41,16 +41,16 @@ export function findParentIdInList(list: CanvasInnerElement[], id: string, paren
       if (found) return found;
     }
   }
-  return null;
+  return '';
 }
 
 /**
- * 在元素树中查找指定 id 元素的父元素 id（根元素的直接子元素返回根元素 id，根元素自身返回 null）
+ * 在元素树中查找指定 id 元素的父元素 id（根元素的直接子元素返回根元素 id，根元素自身或未找到返回 ''）
  * @param root 根元素
  * @param id 目标元素 id
  */
-export function findParentIdInTree(root: CanvasRootElement, id: string): string | null {
-  if (id === root.id) return null;
+export function findParentIdInTree(root: CanvasRootElement, id: string): string {
+  if (id === root.id) return '';
   return findParentIdInList(root.children, id, root.id);
 }
 

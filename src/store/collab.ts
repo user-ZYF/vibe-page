@@ -105,7 +105,7 @@ export const useCollabStore = defineStore('collab', () => {
     const localOps = deriveOps(baseData, localCanvasData()) ?? [];
 
     // 本地未确认操作对远程 op 做 transform：冲突部分被裁剪（远程后到者优先）
-    const { ops: survivingOps, dropped } = filterLocalOps(localOps, msg.ops, baseData);
+    const { ops: survivingOps, dropped } = filterLocalOps(localOps, msg.ops, baseData, msg.canvasData);
     if (dropped) {
       message.warning('你的部分修改与协作者冲突，已同步为最新版本');
     }

@@ -103,7 +103,7 @@ function detachElement(data: CanvasStorageData, id: string): CanvasInnerElement 
 }
 
 /** 收集元素及其子孙的全部 id */
-function collectSubtreeIds(el: CanvasInnerElement, ids = new Set<string>()): Set<string> {
+function collectSubtreeIds(el: CanvasElement, ids = new Set<string>()): Set<string> {
   ids.add(el.id)
   if (isParentElement(el)) forEachElementInList(el.children, (child) => ids.add(child.id))
   return ids
@@ -312,12 +312,14 @@ export function applyOps(canvasData: CanvasStorageData, ops: CollabOp[]): Canvas
  * @param localOps 本地未确认操作
  * @param remoteOps 远程操作
  * @param baseData 本地基准数据（用于解析远程删除元素的子孙 id）
+ * @param remoteBaseData 远程操作应用后的画布数据（用于校验本地 move/add 的目标父级位置）
  * @returns 裁剪后的本地操作与是否有操作被丢弃
  */
 export function filterLocalOps(
   localOps: CollabOp[],
   remoteOps: CollabOp[],
-  baseData: CanvasStorageData
+  baseData: CanvasStorageData,
+  remoteBaseData: CanvasStorageData
 ): FilterLocalOpsResult {
   const removedIds = new Set<string>()
   const remoteMoveIds = new Set<string>()
@@ -360,6 +362,9 @@ export function filterLocalOps(
     }
   }
 
+  /** 远程后画布全部元素 id */
+  const remoteBaseIds = collectSubtreeIds(remoteBaseData.root)
+
   // 是否有本地操作被丢弃
   let dropped = false
   const ops = localOps
@@ -370,6 +375,21 @@ export function filterLocalOps(
           if (removedIds.has(op.parentId)) {
             dropped = true
             return null
+          }
+          // 新增元素中不允许出现与画布重复id的元素（parentId 为空为整根替换，无需校验）
+          if (op.parentId !== '') {
+            const subTreeIds = collectSubtreeIds(op.element)
+            let hasDuplicate = false
+            for (const id of subTreeIds) {
+              if (remoteBaseIds.has(id)) {
+                hasDuplicate = true
+                break
+              }
+            }
+            if (hasDuplicate) {
+              dropped = true
+              return null
+            }
           }
           // 插入锚点已被远程删除：锚点失效，退化为追加到末尾
           if (op.beforeId && removedIds.has(op.beforeId)) {
@@ -388,6 +408,12 @@ export function filterLocalOps(
         case OpType.MOVE: {
           // 目标/目标父级已被远程删除，或同一元素都被移动：本地 move 丢弃
           if (removedIds.has(op.id) || removedIds.has(op.parentId) || remoteMoveIds.has(op.id)) {
+            dropped = true
+            return null
+          }
+          // 远程未移动该元素、但把目标父级挪进了它的子树（或父级即自身）：移动会形成循环嵌套，丢弃
+          const movedEl = findElementInTree(remoteBaseData.root, op.id)
+          if (op.parentId === op.id || (movedEl && isParentElement(movedEl) && findElementInList(movedEl.children, op.parentId))) {
             dropped = true
             return null
           }

@@ -188,7 +188,7 @@ function handleNodeDrop(
     if (!dropId) return;
     /** 根节点无父级，before/after 落在根节点上视为与根同级，拒绝处理 */
     if (dropId === rootId.value) return;
-    targetParentId = canvasStore.getParentElementId(dropId) ?? rootId.value;
+    targetParentId = canvasStore.getParentElementId(dropId) || rootId.value;
     const parent = findElementInTree(root.value, targetParentId);
     if (!parent) return;
     const dropIndex = getElementIndex(dropId, parent as CanvasRootElement | CanvasParentElement);

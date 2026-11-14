@@ -94,7 +94,7 @@ export const useCollabStore = defineStore('collab', () => {
     const prevBaseData = baseData ? cloneDeep(baseData) : null;
     const selected = prevBaseData ? canvasStore.selectedElementId : null;
     const rebased = prevBaseData
-      ? rebaseLocalOps(prevBaseData, localCanvasData(), msg.canvasData)
+      ? rebaseLocalOps(prevBaseData, localCanvasData(), msg.canvasData, pendingLocalOps)
       : null;
 
     pendingLocalOps = null;

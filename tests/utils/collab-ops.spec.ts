@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cloneDeep } from 'lodash';
 import type { CanvasInnerElement, CanvasStorageData } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum } from '@/constants/home';
-import { deriveOps, applyOps, filterLocalOps, rebaseLocalOps } from '@/utils/collab-ops';
+import { deriveOps, applyOps, filterLocalOps, rebaseLocalOps, excludeSentOps } from '@/utils/collab-ops';
 import { CollabOpTypeEnum as OpType } from '@/constants/collab';
 import { StyleRuleTypeEnum } from '@/constants/style';
 import type { CollabAddOp, CollabOp } from '@/api/model/collab';
@@ -185,7 +185,7 @@ describe('filterLocalOps', () => {
   it('前序 op 已置 dropped 时，id 不冲突的本地 add 仍保留', () => {
     const base = makeCanvasData([el('a'), el('b')]);
     const localOps: CollabOp[] = [
-      { type: OpType.REMOVE, id: 'a' },
+      { type: OpType.UPDATE, id: 'a', props: { text: 'local' } },
       {
         type: OpType.ADD,
         parentId: 'b',
@@ -193,7 +193,7 @@ describe('filterLocalOps', () => {
         element: el('n') as unknown as CollabAddOp['element'],
       },
     ];
-    const remoteOps: CollabOp[] = [{ type: OpType.REMOVE, id: 'a' }];
+    const remoteOps: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'remote' } }];
     const { ops, dropped } = filterLocalOps(localOps, remoteOps, base, applyOps(base, remoteOps));
     expect(ops).toEqual([localOps[1]]);
     expect(dropped).toBe(true);
@@ -333,6 +333,31 @@ describe('filterLocalOps', () => {
   });
 });
 
+describe('excludeSentOps', () => {
+  it('剔除与已发送操作完全一致的项', () => {
+    const ops: CollabOp[] = [
+      { type: OpType.UPDATE, id: 'a', props: { text: 'x' } },
+      { type: OpType.REMOVE, id: 'b' },
+    ];
+    const sent: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'x' } }];
+
+    expect(excludeSentOps(ops, sent)).toEqual([{ type: OpType.REMOVE, id: 'b' }]);
+  });
+
+  it('每条已发送操作至多消费一次匹配', () => {
+    const op: CollabOp = { type: OpType.UPDATE, id: 'a', props: { text: 'x' } };
+
+    expect(excludeSentOps([op, { ...op }], [op])).toEqual([op]);
+  });
+
+  it('值不同的操作不会被误剔除', () => {
+    const ops: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'remote' } }];
+    const sent: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'local' } }];
+
+    expect(excludeSentOps(ops, sent)).toEqual(ops);
+  });
+});
+
 describe('rebaseLocalOps', () => {
   it('本地非冲突修改重放到远程最新画布后仍需提交', () => {
     const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
@@ -348,17 +373,32 @@ describe('rebaseLocalOps', () => {
     expect(result.dropped).toBe(false);
   });
 
-  it('本地修改已包含在远程基准中时直接收敛且不重复提交', () => {
+  it('已发送未确认的操作被服务端应用后去重收敛，不误报冲突', () => {
     const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
     const local = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'y' })]);
     const remote = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'remote' })]);
+    const sent: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'local' } }];
 
-    const result = rebaseLocalOps(base, local, remote);
+    const result = rebaseLocalOps(base, local, remote, sent);
 
     expect(result.canvasData).toEqual(remote);
     expect(result.ops).toBeNull();
-    // 服务端已应用但 ACK 丢失的本地操作会被视为同字段冲突，状态结果仍正确
-    expect(result.dropped).toBe(true);
+    expect(result.dropped).toBe(false);
+  });
+
+  it('已发送未确认的操作未被服务端应用时仍会重发', () => {
+    const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
+    const local = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'y' })]);
+    const remote = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'remote' })]);
+    const sent: CollabOp[] = [{ type: OpType.UPDATE, id: 'a', props: { text: 'local' } }];
+
+    const result = rebaseLocalOps(base, local, remote, sent);
+
+    expect(result.canvasData).toEqual(
+      makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'remote' })]),
+    );
+    expect(result.ops).toEqual(sent);
+    expect(result.dropped).toBe(false);
   });
 
   it('同字段冲突时保留远程结果并标记本地修改被裁剪', () => {

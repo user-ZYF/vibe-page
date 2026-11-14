@@ -311,14 +311,14 @@ export function applyOps(canvasData: CanvasStorageData, ops: CollabOp[]): Canvas
  * 本地操作对远程操作做 transform
  * @param localOps 本地未确认操作
  * @param remoteOps 远程操作
- * @param baseData 本地基准数据（用于解析远程删除元素的子孙 id）
+ * @param localBaseData 本地基准数据（用于解析远程删除元素的子孙 id）
  * @param remoteBaseData 远程操作应用后的画布数据（用于校验本地 move/add 的目标父级位置）
  * @returns 裁剪后的本地操作与是否有操作被丢弃
  */
 export function filterLocalOps(
   localOps: CollabOp[],
   remoteOps: CollabOp[],
-  baseData: CanvasStorageData,
+  localBaseData: CanvasStorageData,
   remoteBaseData: CanvasStorageData
 ): FilterLocalOpsResult {
   const removedIds = new Set<string>()
@@ -330,8 +330,8 @@ export function filterLocalOps(
   for (const op of remoteOps) {
     switch (op.type) {
       case OpType.REMOVE: {
-        // 收集所有
-        const el = findElementInList(baseData.root.children, op.id)
+        // 收集被删元素的整棵子树 id（含根元素本身）
+        const el = findElementInTree(localBaseData.root, op.id)
         if (el) collectSubtreeIds(el, removedIds)
         removedIds.add(op.id)
         break
@@ -477,19 +477,41 @@ export function filterLocalOps(
 }
 
 /**
+ * 从操作列表中剔除与已发送操作相同的项（每条已发送操作至多消费一次匹配）
+ * @param ops 待去重的操作列表
+ * @param sentOps 已发送的操作列表
+ * @returns 剔除后的操作列表
+ */
+export function excludeSentOps(
+  ops: CollabOp[],
+  sentOps: CollabOp[]
+): CollabOp[] {
+  const sent = [...sentOps]
+  return ops.filter((op) => {
+    const index = sent.findIndex((item) => isEqual(item, op))
+    if (index < 0) return true
+    sent.splice(index, 1)
+    return false
+  })
+}
+
+/**
  * 将本地画布相对旧基准的修改重放到新的远程基准上
  * @param localBaseData 本地断线前的服务端确认基准
  * @param localCanvasData 当前本地画布数据
  * @param remoteBaseData 重连后服务端下发的最新画布数据
+ * @param sentLocalOps 断线前已发送但未确认的操作（可能已被服务端应用，仅从远程增量中去重）
  * @returns 合并后的画布、仍需提交的操作及是否有本地修改被裁剪
  */
 export function rebaseLocalOps(
   localBaseData: CanvasStorageData,
   localCanvasData: CanvasStorageData,
-  remoteBaseData: CanvasStorageData
+  remoteBaseData: CanvasStorageData,
+  sentLocalOps: CollabOp[] | null = null
 ): RebaseLocalOpsResult {
   const localOps = deriveOps(localBaseData, localCanvasData) ?? []
-  const remoteOps = deriveOps(localBaseData, remoteBaseData) ?? []
+  // 已发送未确认的操作可能已被服务端应用（ACK 因断线丢失）：从远程增量中去重，避免误判为远程冲突
+  const remoteOps = excludeSentOps(deriveOps(localBaseData, remoteBaseData) ?? [], sentLocalOps ?? [])
   const { ops, dropped } = filterLocalOps(localOps, remoteOps, localBaseData, remoteBaseData)
   const canvasData = ops.length ? applyOps(remoteBaseData, ops) : cloneDeep(remoteBaseData)
   return { canvasData, ops: deriveOps(remoteBaseData, canvasData), dropped }

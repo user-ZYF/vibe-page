@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cloneDeep } from 'lodash';
 import type { CanvasInnerElement, CanvasStorageData } from '@/views/Canvas/types';
 import { CanvasElementTypeEnum } from '@/constants/home';
-import { deriveOps, applyOps, filterLocalOps } from '@/utils/collab-ops';
+import { deriveOps, applyOps, filterLocalOps, rebaseLocalOps } from '@/utils/collab-ops';
 import { CollabOpTypeEnum as OpType } from '@/constants/collab';
 import { StyleRuleTypeEnum } from '@/constants/style';
 import type { CollabAddOp, CollabOp } from '@/api/model/collab';
@@ -330,5 +330,59 @@ describe('filterLocalOps', () => {
     const remoteBase = applyOps(base, remoteOps);
     const newLocal = ops.length ? applyOps(remoteBase, ops) : remoteBase;
     expect(ids(newLocal)).toEqual(['b']);
+  });
+});
+
+describe('rebaseLocalOps', () => {
+  it('本地非冲突修改重放到远程最新画布后仍需提交', () => {
+    const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
+    const local = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'y' })]);
+    const remote = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'remote' })]);
+
+    const result = rebaseLocalOps(base, local, remote);
+
+    expect(result.canvasData).toEqual(
+      makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'remote' })]),
+    );
+    expect(result.ops).toEqual([{ type: OpType.UPDATE, id: 'a', props: { text: 'local' } }]);
+    expect(result.dropped).toBe(false);
+  });
+
+  it('本地修改已包含在远程基准中时直接收敛且不重复提交', () => {
+    const base = makeCanvasData([el('a', { text: 'x' }), el('b', { text: 'y' })]);
+    const local = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'y' })]);
+    const remote = makeCanvasData([el('a', { text: 'local' }), el('b', { text: 'remote' })]);
+
+    const result = rebaseLocalOps(base, local, remote);
+
+    expect(result.canvasData).toEqual(remote);
+    expect(result.ops).toBeNull();
+    // 服务端已应用但 ACK 丢失的本地操作会被视为同字段冲突，状态结果仍正确
+    expect(result.dropped).toBe(true);
+  });
+
+  it('同字段冲突时保留远程结果并标记本地修改被裁剪', () => {
+    const base = makeCanvasData([el('a', { text: 'x' })]);
+    const local = makeCanvasData([el('a', { text: 'local' })]);
+    const remote = makeCanvasData([el('a', { text: 'remote' })]);
+
+    const result = rebaseLocalOps(base, local, remote);
+
+    expect(result.canvasData).toEqual(remote);
+    expect(result.ops).toBeNull();
+    expect(result.dropped).toBe(true);
+  });
+
+  it('离线新增元素在父级未被远程删除时保留', () => {
+    const base = makeCanvasData([el('a')]);
+    const local = makeCanvasData([el('a'), el('n', { text: 'new' })]);
+    const remote = makeCanvasData([el('a', { text: 'remote' })]);
+
+    const result = rebaseLocalOps(base, local, remote);
+
+    expect(ids(result.canvasData)).toEqual(['a', 'n']);
+    expect(result.canvasData.root.children[0]).toMatchObject({ text: 'remote' });
+    expect(result.ops).toHaveLength(1);
+    expect(result.dropped).toBe(false);
   });
 });

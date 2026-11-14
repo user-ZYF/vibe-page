@@ -74,6 +74,16 @@ export interface FilterLocalOpsResult {
   dropped: boolean;
 }
 
+/** 本地修改重放到远程基准后的结果 */
+export interface RebaseLocalOpsResult {
+  /** 合并远程基准后的本地画布数据 */
+  canvasData: CanvasStorageData;
+  /** 相对远程基准仍需提交的本地操作 */
+  ops: CollabOp[] | null;
+  /** 是否有本地操作（或其中部分字段）因冲突被丢弃 */
+  dropped: boolean;
+}
+
 /** 房间成员信息 */
 export interface CollabMember {
   /** 用户 ID */

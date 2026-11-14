@@ -8,7 +8,7 @@ import { useCanvasStore } from '@/store/canvas';
 import { useAuthStore } from '@/store/auth';
 import { CollabCloseCodeEnum, CollabMsgTypeEnum, CollabStatusEnum } from '@/constants/collab';
 import type { CanvasStorageData } from '@/views/Canvas/types';
-import { deriveOps, applyOps, filterLocalOps } from '@/utils/collab-ops';
+import { deriveOps, applyOps, filterLocalOps, rebaseLocalOps } from '@/utils/collab-ops';
 import { findElementInTree } from '@/utils/tree-traversal';
 import type {
   CollabInitMsg,
@@ -36,6 +36,8 @@ export const useCollabStore = defineStore('collab', () => {
   /** 是否已收到 init */
   const isReady = ref(false);
 
+  const canvasStore = useCanvasStore();
+
   /** 服务器确认过的画布数据（同步基准：画布 = baseData + allLocalOps） */
   let baseData: CanvasStorageData | null = null;
   /** 所有的本地修改 */
@@ -47,6 +49,10 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 是否已加入协作房间 */
   const isConnected = computed(() => status.value === CollabStatusEnum.CONNECTED);
+  /** 是否允许编辑画布（收到 init 后断线重连期间仍保留离线编辑能力） */
+  const canEdit = computed(
+    () => isReady.value && status.value !== CollabStatusEnum.DENIED && status.value !== CollabStatusEnum.UNDEFINED,
+  );
   /** 除自己外的在线成员 */
   const otherMembers = computed(() => members.value.filter((m) => m.userId !== selfUserId.value));
   /** 是否有其他协作者在线 */
@@ -67,13 +73,13 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 本地画布快照 */
   function localCanvasData(): CanvasStorageData {
-    return useCanvasStore().getCanvasData();
+    return canvasStore.getCanvasData();
   }
 
   /** 远程同步触发的画布加载 */
   function remoteLoad(canvasData: CanvasStorageData, base: CanvasStorageData): void {
     baseData = cloneDeep(base);
-    useCanvasStore().loadCanvasData(canvasData);
+    canvasStore.loadCanvasData(canvasData);
   }
 
   /** 重发本地修改请求 */
@@ -83,19 +89,31 @@ export const useCollabStore = defineStore('collab', () => {
     sendLocalOps();
   }
 
-  /** 处理服务端 init：全量重置同步状态并渲染服务端最新画布数据 */
+  /** 处理服务端 init：首次直接加载；重连时把本地未确认修改重放到最新服务端基准 */
   function handleInit(msg: CollabInitMsg): void {
-    baseData = cloneDeep(msg.canvasData);
-    allLocalOps = null;
+    const prevBaseData = baseData ? cloneDeep(baseData) : null;
+    const selected = prevBaseData ? canvasStore.selectedElementId : null;
+    const rebased = prevBaseData
+      ? rebaseLocalOps(prevBaseData, localCanvasData(), msg.canvasData)
+      : null;
+
     pendingLocalOps = null;
+    allLocalOps = rebased?.ops ?? null;
     selfUserId.value = useAuthStore().userInfo?.id ?? null;
     pageTitle.value = msg.title;
     pageUserId.value = msg.userId;
     members.value = msg.members;
     selections.value = new Map(msg.selections.map((s) => [s.elementId, s.members]));
-    remoteLoad(cloneDeep(msg.canvasData), msg.canvasData);
+    remoteLoad(cloneDeep(rebased?.canvasData ?? msg.canvasData), msg.canvasData);
     status.value = CollabStatusEnum.CONNECTED;
     isReady.value = true;
+    if (rebased?.dropped) {
+      message.warning('你的部分离线修改与协作者冲突，已同步为最新版本');
+    }
+    if (selected && findElementInTree(canvasStore.root, selected)) {
+      canvasStore.selectElement(selected);
+    }
+    sendLocalOps();
   }
 
   /** 处理协作者操作 */
@@ -116,7 +134,6 @@ export const useCollabStore = defineStore('collab', () => {
     allLocalOps = survivingOps.length ? survivingOps : null;
 
     // 恢复选中：loadCanvasData 会清空选中，元素还在则重新选中（选中标记会随监听重发）
-    const canvasStore = useCanvasStore();
     const selected = canvasStore.selectedElementId;
     remoteLoad(cloneDeep(newLocal), newBase);
     if (selected && findElementInTree(canvasStore.root, selected)) {
@@ -240,7 +257,7 @@ export const useCollabStore = defineStore('collab', () => {
 
   /** 选中变化即广播选中标记，供其他端展示彩色方框 */
   function syncSelection(id: string | null, prev: string | null): void {
-    if (!baseData) return;
+    if (!baseData || !isConnected.value) return;
     if (prev) {
       commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev, baseData });
     }
@@ -279,6 +296,7 @@ export const useCollabStore = defineStore('collab', () => {
     pageUserId,
     isReady,
     isConnected,
+    canEdit,
     otherMembers,
     hasOthers,
     join,

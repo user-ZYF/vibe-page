@@ -3,7 +3,7 @@ import type { CanvasStorageData, CanvasElement, CanvasInnerElement, CanvasRootEl
 import { isParentElement } from '@/views/Canvas/types'
 import { findElementInList, findElementInTree, forEachElementInList } from '@/utils/tree-traversal'
 import { StyleRuleTypeEnum } from '@/constants/style'
-import type { CollabOp, FilterLocalOpsResult } from '@/api/model/collab'
+import type { CollabOp, FilterLocalOpsResult, RebaseLocalOpsResult } from '@/api/model/collab'
 import { CollabOpTypeEnum as OpType } from '@/constants/collab'
 
 /** 样式规则定位键（AT_RULE 无独立选择器，以规则文本区分） */
@@ -474,4 +474,23 @@ export function filterLocalOps(
     .filter((op): op is CollabOp => op !== null)
 
   return { ops, dropped }
+}
+
+/**
+ * 将本地画布相对旧基准的修改重放到新的远程基准上
+ * @param localBaseData 本地断线前的服务端确认基准
+ * @param localCanvasData 当前本地画布数据
+ * @param remoteBaseData 重连后服务端下发的最新画布数据
+ * @returns 合并后的画布、仍需提交的操作及是否有本地修改被裁剪
+ */
+export function rebaseLocalOps(
+  localBaseData: CanvasStorageData,
+  localCanvasData: CanvasStorageData,
+  remoteBaseData: CanvasStorageData
+): RebaseLocalOpsResult {
+  const localOps = deriveOps(localBaseData, localCanvasData) ?? []
+  const remoteOps = deriveOps(localBaseData, remoteBaseData) ?? []
+  const { ops, dropped } = filterLocalOps(localOps, remoteOps, localBaseData, remoteBaseData)
+  const canvasData = ops.length ? applyOps(remoteBaseData, ops) : cloneDeep(remoteBaseData)
+  return { canvasData, ops: deriveOps(remoteBaseData, canvasData), dropped }
 }

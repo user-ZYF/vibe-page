@@ -19,11 +19,11 @@
       <CodeEditModal v-model:open="codeModalVisible" />
       <ShareModal v-model:open="shareModalVisible" :page-id="pageId" />
       <a-layout-content class="editor-canvas">
-        <!-- 仅在协作已连接时渲染：init 前与断线重连期间不渲染画布，杜绝编辑 -->
-        <Canvas v-if="isConnected" />
+        <!-- 首次 init 前不渲染画布；断线重连期间保留画布，支持离线编辑 -->
+        <Canvas v-if="canEdit" />
       </a-layout-content>
     </a-layout>
-    <EditorSider v-if="isConnected" :is-preview="isPreview" />
+    <EditorSider v-if="canEdit" :is-preview="isPreview" />
   </a-layout>
 </template>
 
@@ -60,7 +60,7 @@ const canvasStore = useCanvasStore();
 const collabStore = useCollabStore();
 const authStore = useAuthStore();
 const { selectedElementId } = storeToRefs(canvasStore);
-const { pageTitle, pageUserId, isConnected } = storeToRefs(collabStore);
+const { pageTitle, pageUserId, canEdit } = storeToRefs(collabStore);
 const route = useRoute();
 const router = useRouter();
 

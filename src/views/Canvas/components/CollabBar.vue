@@ -57,7 +57,7 @@ const emit = defineEmits<{
 }>();
 
 const collabStore = useCollabStore();
-const { members, status } = storeToRefs(collabStore);
+const { members, status, isReady } = storeToRefs(collabStore);
 
 /** 连接状态文案 */
 const statusText = computed(() => {
@@ -65,7 +65,7 @@ const statusText = computed(() => {
     case CollabStatusEnum.CONNECTED:
       return '协作已连接';
     case CollabStatusEnum.CONNECTING:
-      return '协作连接中';
+      return isReady.value ? '协作重连中，修改将在重连后同步' : '协作连接中';
     case CollabStatusEnum.DENIED:
       return '无法加入协作';
     default:

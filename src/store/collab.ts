@@ -82,11 +82,17 @@ export const useCollabStore = defineStore('collab', () => {
     canvasStore.loadCanvasData(canvasData);
   }
 
-  /** 重发本地修改请求 */
+  /** 重发本地修改请求和选中消息 */
   function resend(): void {
+    // 补发修改
     pendingLocalOps = null;
     allLocalOps = baseData ? deriveOps(baseData, localCanvasData()) : null;
     sendLocalOps();
+    // 补发选中
+    const cur = canvasStore.selectedElementId;
+    if (cur && baseData && isConnected.value) {
+      commit({ type: CollabMsgTypeEnum.SELECTION, prev: null, cur, baseData });
+    }
   }
 
   /** 处理服务端 init：首次直接加载；重连时把本地未确认修改重放到最新服务端基准 */
@@ -114,6 +120,11 @@ export const useCollabStore = defineStore('collab', () => {
       canvasStore.selectElement(selected);
     }
     sendLocalOps();
+    // 重连后服务端的选中标记已随旧连接释放，补发当前选中
+    const cur = canvasStore.selectedElementId;
+    if (cur && baseData) {
+      commit({ type: CollabMsgTypeEnum.SELECTION, prev: null, cur, baseData });
+    }
   }
 
   /** 处理协作者操作 */
@@ -258,12 +269,7 @@ export const useCollabStore = defineStore('collab', () => {
   /** 选中变化即广播选中标记，供其他端展示彩色方框 */
   function syncSelection(id: string | null, prev: string | null): void {
     if (!baseData || !isConnected.value) return;
-    if (prev) {
-      commit({ type: CollabMsgTypeEnum.DESELECT, elementId: prev, baseData });
-    }
-    if (id) {
-      commit({ type: CollabMsgTypeEnum.SELECT, elementId: id, baseData });
-    }
+    commit({ type: CollabMsgTypeEnum.SELECTION, prev, cur: id, baseData });
   }
 
   /** 离开协作房间：断开连接、重置状态 */

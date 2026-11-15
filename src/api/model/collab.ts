@@ -112,12 +112,14 @@ export interface CollabOpMsg {
   ops: CollabOp[];
 }
 
-/** 客户端上报/取消元素选中标记 */
+/** 客户端上报元素选中变化 */
 export interface CollabSelectionMsg {
   /** 消息类型 */
-  type: CollabMsgTypeEnum.SELECT | CollabMsgTypeEnum.DESELECT;
-  /** 元素 ID */
-  elementId: string;
+  type: CollabMsgTypeEnum.SELECTION;
+  /** 之前选中的元素 ID */
+  prev: string | null;
+  /** 当前选中的元素 ID */
+  cur: string | null;
   /** 客户端基准画布数据 */
   baseData: CanvasStorageData;
 }

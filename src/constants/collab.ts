@@ -6,10 +6,8 @@ export enum CollabMsgTypeEnum {
   UNDEFINED = 0,
   /** 客户端提交画布修改 */
   OP = 1,
-  /** 客户端上报选中元素 */
-  SELECT = 2,
-  /** 客户端取消选中元素 */
-  DESELECT = 3,
+  /** 客户端上报选中变化 */
+  SELECTION = 2,
   /** 服务端下发初始数据 */
   INIT = 10,
   /** 服务端确认修改已被接受 */

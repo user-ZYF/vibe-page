@@ -29,6 +29,7 @@ import { CopyOutlined } from '@ant-design/icons-vue';
 import { useClipboard } from '@vueuse/core';
 import { MeButton, MeModal } from '@zyf_dsb/me-ui';
 import { disableShareApi, enableShareApi, getShareStatusApi } from '@/api/page';
+import { useCollabStore } from '@/store/collab';
 
 defineOptions({
   name: 'ShareModal',
@@ -71,8 +72,29 @@ watch(open, async (visible) => {
   }
 });
 
-/** 开关分享 */
-async function handleToggle(checked: boolean) {
+const collabStore = useCollabStore();
+
+/** 开关分享：房间内有其他协作者在线时先确认（切换会使旧链接失效并断开其连接） */
+function handleToggle(checked: boolean) {
+  if (!collabStore.hasOthers) {
+    toggleShare(checked);
+    return;
+  }
+  MeModal.confirm({
+    title: checked ? '确认重新开启分享？' : '确认关闭分享？',
+    content: checked
+      ? `重新开启将生成新链接，当前 ${collabStore.otherMembers.length} 位在线协作者会被断开连接。`
+      : `关闭分享后，当前 ${collabStore.otherMembers.length} 位在线协作者会被断开连接。`,
+    confirmText: '确认',
+    cancelText: '取消',
+    onConfirm() {
+      toggleShare(checked);
+    },
+  });
+}
+
+/** 执行分享开关切换 */
+async function toggleShare(checked: boolean) {
   loading.value = true;
   try {
     if (checked) {

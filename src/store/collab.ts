@@ -238,6 +238,13 @@ export const useCollabStore = defineStore('collab', () => {
           router.push('/');
           return;
         }
+        // 分享已关闭或令牌已重置
+        if (event.code === CollabCloseCodeEnum.SHARE_DISABLED) {
+          status.value = CollabStatusEnum.DENIED;
+          message.warning('分享已关闭，协作已结束');
+          router.push('/');
+          return;
+        }
         // 会话失效（被其他设备顶替或已登出）：清理登录态并跳登录页
         if (event.code === CollabCloseCodeEnum.FORCE_OFFLINE) {
           status.value = CollabStatusEnum.DENIED;

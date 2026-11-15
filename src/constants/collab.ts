@@ -48,6 +48,8 @@ export enum CollabCloseCodeEnum {
   DUPLICATE_USER = 4002,
   /** 会话失效（账号在其他设备登录或已登出） */
   FORCE_OFFLINE = 4003,
+  /** 分享已关闭或令牌已重置 */
+  SHARE_DISABLED = 4004,
 }
 
 /** 协作连接状态 */

@@ -58,7 +58,8 @@ const shareUrl = computed(() =>
   shareToken.value ? `${location.origin}/canvas/${props.pageId}?share=${shareToken.value}` : '',
 );
 
-const { copy } = useClipboard();
+/** 剪贴板（legacy 开启 execCommand 降级，兼容 HTTP 非安全上下文） */
+const { copy, copied } = useClipboard({ legacy: true });
 
 /** 打开弹窗时拉取当前分享状态 */
 watch(open, async (visible) => {
@@ -114,7 +115,11 @@ async function toggleShare(checked: boolean) {
 /** 复制链接到剪贴板 */
 async function handleCopy() {
   await copy(shareUrl.value);
-  message.success('链接已复制');
+  if (copied.value) {
+    message.success('链接已复制');
+  } else {
+    message.error('复制失败，请手动复制');
+  }
 }
 </script>
 

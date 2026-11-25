@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
+import { useClipboard } from '@vueuse/core'
 import { CopyOutlined, DownloadOutlined, SyncOutlined } from '@ant-design/icons-vue'
 import { MeButton, MeModal } from '@zyf_dsb/me-ui'
 import CodeBlock from '@/components/CodeBlock.vue'
@@ -89,10 +90,13 @@ watch(open, (visible) => {
   }
 })
 
+/** 剪贴板（legacy 开启 execCommand 降级，兼容 HTTP 非安全上下文） */
+const { copy } = useClipboard({ legacy: true })
+
 /** 复制代码到剪贴板 */
 async function handleCopy(code: string) {
   try {
-    await navigator.clipboard.writeText(code)
+    await copy(code)
     message.success('复制成功')
   } catch {
     message.error('复制失败')
